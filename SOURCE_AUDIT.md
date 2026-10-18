@@ -44,3 +44,14 @@ Core synastry tables preserve the source's pair-key entries exactly. Some source
 ## Required for exact continuation
 
 Recover the v2.3.2 source archive and representative iPhone screens, then reconcile the ledger against that build. Run shared fixed-date/profile vectors through the actual Swift app and this web build, including the complete post-processing pipeline. Until then, the current web application is runnable and deployment-ready as a clearly labeled partial port.
+
+## Updated parity ledger — 2026-10-18 09:44 UTC (supersedes older rows above)
+
+- **Asteroid source restoration:** all 56 *original* MX Eye `LiveAsteroidCatalog.definitions` names, official MPC integers, Swiss body IDs, source categories and short ephemeris file paths have been copied to the web source and tested. **Actual additional asteroid coordinates remain unavailable**: the deployed swisseph-wasm 0.1.0 package preloads the six built-in minor bodies but not these 56 numbered-asteroid files. The new UI is transparently a catalogue.
+- **New/Full Moon and eclipse screening:** real geocentric Sun–Moon angular root searches over a 90-day window, using actual Moon ecliptic latitude and an explicit 2-degree near-node screening threshold. **Not a genuine global/local eclipse detector, not a prediction of visibility, magnitude, peak, type or contacts.** Dedicated Swiss eclipse functions are not exposed by this wrapper.
+- **Precision inspector:** opt-in Swiss-resampled transit-to-fixed-natal-body exact-root search within ±21 days (retrograde returns supported); no invented timing outside this interval. The native complete SignalTimingRefiner remains unmatched.
+- **Decision audit:** separate opposing-weight comparison displays mixed evidence explicitly and retains the source's eight symbolic categories. No predictive statistics.
+- **Time Machine:** 30-day visual heatmap, selecting any one core category or the aggregate, sampled at successive 24-hour instants; real date selection.
+- **Qwen3:** system prompt now uses supplied supporting/challenging factors and calibrated uncertainty; still hosted server-side, not on-device/native.
+- **Relationship history:** local observation journal tied to saved person IDs, classification and prose protected against HTML injection, included in separately encrypted or plaintext backups. Comparisons are descriptive self-selected samples, **not** validation of astrology. localStorage itself is not encrypted.
+- **Remaining:** complete 56-asteroid ephemeris assets plus WASM mounting/verification, real eclipse geometry/visibility API, original MX Orbit v2.3.2 source/UI parity, secure persistent Web Push delivery and opt-in subscriptions, native Watch/WidgetKit/iOS signing, and at-rest encrypted cross-device sync.
