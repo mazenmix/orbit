@@ -16,6 +16,7 @@ export async function onRequestGet({request}:{request:Request}):Promise<Response
   if(size>2_000_000)return json('Ephemeris file exceeds safe download limit',502);
   const data=await response.arrayBuffer();
   if(data.byteLength<1000||data.byteLength>2_000_000)return json('Invalid ephemeris file size',502);
+  if(url.searchParams.get('probe')==='1')return new Response(JSON.stringify({available:true,body:number,bytes:data.byteLength,path}),{headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
   return new Response(data,{status:200,headers:{'Content-Type':'application/octet-stream','Content-Disposition':'inline; filename="'+path.split('/').pop()+'"','Cache-Control':'public, max-age=86400','X-Content-Type-Options':'nosniff','X-Ephemeris-Body':String(number)}});
  }catch{return json('Ephemeris upstream unreachable',502)}
 }
