@@ -9,7 +9,7 @@ export function calendarEvent(event:CalendarEvent,alarmMinutes=15){
  if(!Number.isFinite(+event.start)||!Number.isFinite(+event.end)||+event.start>=+event.end)throw Error('Invalid calendar range');
  if(!Number.isSafeInteger(alarmMinutes)||alarmMinutes<0||alarmMinutes>1440)throw Error('Invalid reminder');
  const escapedId=event.id.replace(/[^A-Za-z0-9._-]/g,'').slice(0,90);
- const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//MazenmiX//MX Orbit//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+ const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//MazenmiX//MX Astro//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
   'UID:'+escapedId+'@mxastro.pages.dev','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(event.start),'DTEND:'+stamp(event.end),
   'SUMMARY:'+safe(event.title),'DESCRIPTION:'+safe(event.description),'BEGIN:VALARM','ACTION:DISPLAY',
   'DESCRIPTION:'+safe(event.title),'TRIGGER:-PT'+alarmMinutes+'M','END:VALARM','END:VEVENT','END:VCALENDAR'];

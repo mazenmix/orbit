@@ -230,3 +230,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .annual-level{position:absolute;top:17px;inset-inline-end:15px;color:#c0dcca;font-size:22px;font-variant-numeric:tabular-nums;font-weight:800}
 @media(max-width:1000px){.annual-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:570px){.annual-cards{grid-template-columns:1fr}.annual-card{min-height:0}}
+
+/* Clear, data-derived per-person communication and date-planning windows. */
+.relationship-calendar{margin-top:22px}
+.relationship-calendar>h3{margin:24px 0 13px;color:#e8deff}
+.relation-window-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.relation-window{border-radius:15px;padding:16px;background:#191f32;border:1px solid #343951;border-inline-start:3px solid #b4a6db}
+.relation-window.strong{border-inline-start-color:#59e7a3}.relation-window.steady{border-inline-start-color:#addc7e}.relation-window.caution{border-inline-start-color:#efad66}.relation-window.low{border-inline-start-color:#f78276}
+.relation-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums}
+.relation-heading b{color:#e9e3ff;font-size:14px}.relation-heading strong{font-size:25px;color:#afdbbe}
+.relation-window.caution .relation-heading strong{color:#f4b77b}.relation-window.low .relation-heading strong{color:#ee8c88}
+.relation-window p{min-height:50px;font-size:12px;line-height:1.7}
+.relation-window .button-row{gap:7px;display:flex;flex-wrap:wrap}
+.relation-window .secondary,.relation-window .text-button{font-size:11px;min-height:36px;padding:8px 10px}
+@media(max-width:1150px){.relation-window-grid{grid-template-columns:1fr}}
