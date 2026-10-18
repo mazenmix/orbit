@@ -259,3 +259,15 @@ test('selected calendar day stays compact, precise and readable on iPhone',async
  expect(style.rect).toBeLessThanOrEqual(390);
  await expect(page.locator('.astro-day-open-time')).toBeVisible({timeout:75000});
 });
+
+test('intraday calendar uses verified three-checkpoint score and exposes range',async({page})=>{
+ await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
+ const button=page.locator('.astro-cal-day:not(.astro-pending):not(.astro-unavailable)').first();
+ await button.waitFor({state:'visible',timeout:90000});
+ await expect(page.locator('.astro-day-kicker')).toContainText(/3 أوقات|3 checkpoints/,{timeout:90000});
+ await expect(page.locator('.astro-day-compact-footer')).toContainText(/04 \/ 12 \/ 20/);
+ const attrs=await button.getAttribute('aria-label');
+ expect(attrs).toMatch(/day range|المدى اليومي/);
+ const marker=await button.locator('.astro-cal-index').textContent();
+ expect(marker).toMatch(/^\d+$/);
+});

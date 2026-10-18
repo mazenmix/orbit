@@ -106,7 +106,9 @@ test('live sky wheel is directly tappable and launches an expanded SVG modal',()
  assert.ok(main.includes("on('expand-sky-wheel',expandSky)"));
 });
 test('fortune calendar color must come from genuine aspect weights and show transparent proof',()=>{
- assert.ok(main.includes('colorizeAstroDay(r.evidence)'));
+ assert.ok(main.includes('calendarDaySynthesis(samples)'));
+ assert.ok(main.includes('calendarMomentEvidence(current,r.natal,sampledAt,active.known)'));
+ assert.ok(main.includes("CALENDAR_SAMPLE_HOURS.map(hour=>"));
  assert.ok(!main.includes('colorizeAstroDay(r.scores)'));
  assert.ok(main.includes('snap.strongestSupport'));
  assert.ok(main.includes('snap.strongestChallenge'));
@@ -156,4 +158,17 @@ test('calendar focused-day card is compact, with core evidence but no verbose br
  assert.ok(!detail.includes('شلون تحدد لون الحظ'));
  const styles=readFileSync('src/astroCalendar.css','utf8');
  assert.match(styles, /#live-view-body \.astro-calendar-detail\{\s*padding:14px 18px!important;/);
+});
+
+test('precision calendar samples 3 separately calculated local chart times',()=>{
+ const source=readFileSync('src/astroCalendar.ts','utf8');
+ assert.ok(source.includes('CALENDAR_SAMPLE_HOURS=[4,12,20]'));
+ assert.ok(source.includes('for(const id of primaryBodies)'));
+ assert.ok(source.includes('aspects([transit.get(id)!],fixed,at)'));
+ assert.ok(source.includes('nextOrb+1e-10<contact.orb'));
+ assert.ok(main.includes('rating.minimum'));
+ assert.ok(main.includes('rating.maximum'));
+ assert.ok(main.includes('snap.minimum'));
+ assert.ok(main.includes('snap.maximum'));
+ assert.ok(!main.includes('colorizeAstroDay(r.evidence)'));
 });
