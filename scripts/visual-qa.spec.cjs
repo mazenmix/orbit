@@ -2,7 +2,7 @@ const {test,expect}=require('/tmp/astro-qa/node_modules/@playwright/test');
 const fs=require('node:fs');
 fs.mkdirSync('artifacts/ui-qa',{recursive:true});
 for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
- test(device+' Soul DNA actual interaction',async({browser})=>{
+ test(device+' Soul DNA actual interaction',async({browser},testInfo)=>{
   const ctx=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,isMobile:device==='iphone',hasTouch:device==='iphone'});
   const page=await ctx.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
@@ -26,22 +26,22 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await page.locator('.soul-result-link').first().click();
   await expect(page.locator('.soul-topic-header h3')).toBeVisible();
   await page.locator('#soul-search').fill('');
-  await page.screenshot({path:'artifacts/ui-qa/soul-'+device+'.png',fullPage:true});
+  await page.screenshot({path:'artifacts/ui-qa/soul-'+testInfo.project.name+'-'+device+'.png',fullPage:true});
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   expect(overflow,'horizontal overflow').toBeLessThan(8);
   expect(errors).toEqual([]);
   await ctx.close();
  });
 }
-test('Moon, eclipse and MX Intelligence premium cards',async({page})=>{
+test('Moon, eclipse and MX Intelligence premium cards',async({page},testInfo)=>{
  await page.goto('/#lunar',{waitUntil:'domcontentloaded'});
  await page.locator('.premium-time-tile').first().waitFor({timeout:75000});
  await expect(page.locator('.premium-time-tile')).toHaveCount(4);
- await page.screenshot({path:'artifacts/ui-qa/moon.png',fullPage:true});
+ await page.screenshot({path:'artifacts/ui-qa/moon-'+testInfo.project.name+'.png',fullPage:true});
  await page.goto('/#eclipses',{waitUntil:'domcontentloaded'});
  await page.locator('.eclipse-premium').first().waitFor({timeout:75000});
- await page.screenshot({path:'artifacts/ui-qa/eclipses.png',fullPage:true});
+ await page.screenshot({path:'artifacts/ui-qa/eclipses-'+testInfo.project.name+'.png',fullPage:true});
  await page.goto('/#intel',{waitUntil:'domcontentloaded'});
  await page.locator('.metric-card').first().waitFor({timeout:75000});
- await page.screenshot({path:'artifacts/ui-qa/intelligence.png',fullPage:true});
+ await page.screenshot({path:'artifacts/ui-qa/intelligence-'+testInfo.project.name+'.png',fullPage:true});
 });

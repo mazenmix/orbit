@@ -30,10 +30,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Install isolated Playwright Chromium
+      - name: Install isolated Playwright Chromium and WebKit
+
         run: |
           npm install --prefix /tmp/astro-qa --no-save @playwright/test@1.58.2
-          /tmp/astro-qa/node_modules/.bin/playwright install --with-deps chromium
+          /tmp/astro-qa/node_modules/.bin/playwright install --with-deps chromium webkit
       - name: Test desktop and iPhone-size UI
         run: |
           pnpm exec vite preview --host 127.0.0.1 --port 4173 > /tmp/astro-preview.log 2>&1 &

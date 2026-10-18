@@ -5,6 +5,7 @@ module.exports={
  expect:{timeout:70000},
  reporter:'list',
  workers:1,
+ projects:[{name:'chromium',use:{browserName:'chromium'}},{name:'webkit',use:{browserName:'webkit'}}],
  use:{baseURL:'http://127.0.0.1:4173',headless:true,trace:'retain-on-failure',screenshot:'only-on-failure'},
  outputDir:'../artifacts/ui-qa/raw'
 };
