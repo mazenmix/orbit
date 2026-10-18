@@ -107,7 +107,7 @@ test('live sky wheel is directly tappable and launches an expanded SVG modal',()
 });
 test('fortune calendar color must come from genuine aspect weights and show transparent proof',()=>{
  assert.ok(main.includes('calendarDaySynthesis(samples)'));
- assert.ok(main.includes('calendarMomentEvidence(current,r.natal,sampledAt,active.known)'));
+ assert.ok(main.includes('calendarMomentEvidence(current,natal,sampledAt,active.known)'));
  assert.ok(main.includes("CALENDAR_SAMPLE_HOURS.map(hour=>"));
  assert.ok(!main.includes('colorizeAstroDay(r.scores)'));
  assert.ok(main.includes('snap.strongestSupport'));
