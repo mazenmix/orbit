@@ -152,7 +152,7 @@ test('Qwen3 automatically displays only one read-only text panel',async({page})=
 
 test('twelve-month calendar is accessible and progress fills individual days',async({page})=>{
  await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
- await expect(page.locator('.astro-cal-hero')).toBeVisible({timeout:75000});
+ await expect(page.locator('.astro-cal-toolbar')).toBeVisible({timeout:75000});
  const dates=await page.locator('[data-calendar-date]').count();
  expect(dates).toBeGreaterThanOrEqual(365);expect(dates).toBeLessThanOrEqual(366);
  await expect(page.locator('.astro-cal-month')).toHaveCount(13);
@@ -208,7 +208,7 @@ test('calendar fortune evidence exposes actual planetary angle weights',async({p
  await expect(page.locator('.astro-cal-day.astro-pending').first()).toHaveCount(0,{timeout:90000}).catch(()=>{});
  const n=await page.locator('[data-calendar-date]').count();
  expect(n).toBeGreaterThanOrEqual(365);
- await expect(page.locator('.astro-cal-day.astro-green, .astro-cal-day.astro-yellow, .astro-cal-day.astro-orange, .astro-cal-day.astro-red').first()).toBeVisible({timeout:75000});
+ await expect(page.locator('.astro-cal-day.astro-green, .astro-cal-day.astro-yellow, .astro-cal-day.astro-red').first()).toBeVisible({timeout:75000});
  await expect(page.locator('.astro-fortune-proof')).toBeVisible({timeout:75000});
  await expect(page.locator('#astro-calendar-progress')).toContainText(/verified|محسوب فعلياً/);
 });
@@ -232,4 +232,17 @@ test('all major text areas request Tahoma with readable mobile labels',async({pa
  for(const font of Object.values(fonts))expect(font.family.toLowerCase()).toContain('tahoma');
  expect(fonts.metric.size).toBeGreaterThanOrEqual(12);
  expect(fonts.navigation.size).toBeGreaterThanOrEqual(11);
+});
+
+test('calendar uses strict red-yellow-green bands and hides methodology',async({page})=>{
+ await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.astro-cal-toolbar')).toBeVisible({timeout:75000});
+ await expect(page.locator('.astro-legend-item')).toHaveCount(3);
+ await expect(page.locator('.astro-legend-item').first()).toContainText('71');
+ await expect(page.getByText('شلون تحدد لون الحظ؟')).toHaveCount(0);
+ await expect(page.locator('.astro-cal-day.astro-orange')).toHaveCount(0);
+ const computed=page.locator('.astro-cal-day.astro-green, .astro-cal-day.astro-yellow, .astro-cal-day.astro-red');
+ await expect(computed.first()).toBeVisible({timeout:75000});
+ const grades=await computed.evaluateAll(nodes=>nodes.map(el=>({score:Number(el.querySelector('.astro-cal-index')?.textContent),color:el.classList.contains('astro-green')?'green':el.classList.contains('astro-yellow')?'yellow':'red'})));
+ for(const day of grades)expect(day.color).toBe(day.score<=30?'red':day.score<=70?'yellow':'green');
 });

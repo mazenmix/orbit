@@ -133,3 +133,12 @@ test('Tahoma style covers all application surfaces after prior feature styles',(
  assert.ok(font.includes('svg text'));
  assert.ok(font.includes('.mobile-nav'));
 });
+
+test('calendar shows only three numeric color bands and no methodology expander',()=>{
+ const calendar=readFileSync('src/astroCalendar.ts','utf8');
+ assert.ok(calendar.includes("value<=30?'red':value<=70?'yellow':'green'"));
+ assert.ok(main.includes("(['green','yellow','red'] as const).map(legend)"));
+ assert.ok(!main.includes('شلون تحدد لون الحظ؟'));
+ assert.ok(!main.includes('How is the fortune color determined?'));
+ assert.ok(!calendar.includes("'orange'"));
+});

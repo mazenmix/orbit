@@ -1,5 +1,5 @@
 import type {Evidence} from './math.ts';
-export type CalendarColor='green'|'yellow'|'orange'|'red';
+export type CalendarColor='green'|'yellow'|'red';
 export type AstroCalendarDay={iso:string;year:number;month:number;day:number;weekday:number;monthKey:string};
 export type AstroCalendarRating={
  value:number;color:CalendarColor;favorableWeight:number;challengingWeight:number;considered:number;
@@ -34,6 +34,13 @@ export function fortuneContactWeight(e:Evidence):number{
   ['Venus','Jupiter'].includes(e.natal.id)?1.08:1;
  return e.weight*(.45+.55*proximity)*(e.applying?1.08:1)*relevance;
 }
+/** Consistent, monotonic user-selected thresholds. Values are integers:
+ * 1–30 red; 31–70 yellow; 71–99 green. 30 and 70 are inclusive below.
+ */
+export function calendarColorForScore(value:number):CalendarColor{
+ if(!Number.isInteger(value)||value<1||value>99)throw Error('Invalid astrological index');
+ return value<=30?'red':value<=70?'yellow':'green';
+}
 export function colorizeAstroDay(evidence:readonly Evidence[]):AstroCalendarRating{
  let favorableWeight=0,challengingWeight=0,strongestSupport:Evidence|null=null,strongestChallenge:Evidence|null=null;
  let highestSupport=0,highestChallenge=0,considered=0;
@@ -50,7 +57,7 @@ export function colorizeAstroDay(evidence:readonly Evidence[]):AstroCalendarRati
  const balance=(favorableWeight-challengingWeight)/(favorableWeight+challengingWeight+1.1);
  const value=Math.max(1,Math.min(99,Math.round(50+44*balance)));
  return {
-  value,color:value>=66?'green':value>=54?'yellow':value>=41?'orange':'red',
+  value,color:calendarColorForScore(value),
   favorableWeight:Number(favorableWeight.toFixed(3)),
   challengingWeight:Number(challengingWeight.toFixed(3)),considered,
   strongestSupport,strongestChallenge

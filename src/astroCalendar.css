@@ -10,7 +10,7 @@
 .astro-legend{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0 17px}
 .astro-legend-item{display:inline-flex;align-items:center;gap:8px;border:1px solid #6d58774d;border-radius:12px;background:#0d122476;padding:9px 13px;color:#e0d9e9;font-size:11px}
 .astro-legend-dot{width:11px;height:11px;border-radius:4px;flex:none}
-.astro-legend-dot.astro-green{background:#3ddb9c}.astro-legend-dot.astro-yellow{background:#f7d666}.astro-legend-dot.astro-orange{background:#e99458}.astro-legend-dot.astro-red{background:#ef6575}
+.astro-legend-dot.astro-green{background:#3ddb9c}.astro-legend-dot.astro-yellow{background:#f7d666}.astro-legend-dot.astro-red{background:#ef6575}
 .astro-cal-meta{display:flex;gap:16px;flex-wrap:wrap;color:#d6d7e6;font-size:11px;font-weight:670}
 .astro-cal-months{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:22px 0}
 .astro-cal-month{padding:17px!important;min-width:0;box-shadow:0 14px 36px #01020b3a}
@@ -27,7 +27,6 @@
 .astro-cal-day:focus-visible{outline:2px solid #ffe5af;outline-offset:2px;z-index:2}
 .astro-cal-day.astro-green{background:linear-gradient(150deg,#23855f,#16523d);box-shadow:inset 0 1px 0 #a8ffbd24}
 .astro-cal-day.astro-yellow{background:linear-gradient(150deg,#bc962b,#796018);color:#fff8e7}
-.astro-cal-day.astro-orange{background:linear-gradient(150deg,#9d562f,#73341d)}
 .astro-cal-day.astro-red{background:linear-gradient(150deg,#983545,#681e32)}
 .astro-cal-day.astro-pending{background:#27304b;border:1px dashed #4b5370;color:#8d98b1}
 .astro-cal-day.is-today:before{content:'';position:absolute;inset:-3px;border:1px solid #efd5a0;border-radius:12px;pointer-events:none}
@@ -41,7 +40,7 @@
 .astro-day-main-score{flex:none;display:flex;align-items:center;flex-direction:column;gap:4px;min-width:98px;padding:16px;border:1px solid #ffffff24;border-radius:18px;background:#213a3b}
 .astro-day-main-score b{font:800 37px/1 Manrope,system-ui,sans-serif;color:#fff}
 .astro-day-main-score span{font-size:9px;text-align:center;color:#f9f4ff}
-.astro-day-main-score.astro-green{background:#17674d}.astro-day-main-score.astro-yellow{background:#9a7825}.astro-day-main-score.astro-orange{background:#99532a}.astro-day-main-score.astro-red{background:#853148}
+.astro-day-main-score.astro-green{background:#17674d}.astro-day-main-score.astro-yellow{background:#9a7825}.astro-day-main-score.astro-red{background:#853148}
 .astro-day-factors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}
 .astro-day-factor{display:flex;flex-direction:column;gap:6px;border:1px solid #675875;border-radius:12px;background:#11152679;padding:14px}
 .astro-day-factor small{color:#e2c594;font-size:10px}
