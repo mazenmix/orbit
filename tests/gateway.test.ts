@@ -58,3 +58,14 @@ test('only challenging evidence never manufactures a supporting factor',async()=
  assert.equal('weight' in payload.evidence[0],false);
  assert.equal('weight' in payload.strongestChallenging,false);
 });
+
+test('time comparison is allowlisted and does not leak arbitrary fields',async()=>{
+ let sent:any;
+ const env={AI:{run:async(_model:string,input:any)=>{sent=JSON.parse(input.messages[1].content.split('\n/no_think')[0]);return {response:'Reading'};}}};
+ const response=await onRequestPost({request:req({...valid,calculatedAt:'2026-10-18T08:00:00Z',comparison:{hour:{entered:['Moon:Sun:90','PRIVATE NAME'],exited:[],changed:[{contact:'Sun:Moon:90',orbBefore:.5,orbNow:.4,applying:true,secret:'PRIVATE NAME'}],stable:true},day:{entered:[],exited:[],changed:[]}}}),env});
+ assert.equal(response.status,200);
+ assert.equal(sent.calculatedAt,'2026-10-18T08:00:00.000Z');
+ assert.equal(sent.comparison.hour.stable,false);
+ assert.equal(sent.comparison.day.stable,true);
+ assert.ok(!JSON.stringify(sent).includes('PRIVATE NAME'));
+});
