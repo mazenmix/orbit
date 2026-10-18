@@ -47,3 +47,163 @@ small,.eyebrow,.subtle,.tag,.nav-caption,.page-heading p,.location,.signal-meta,
  .astro-cal-weekdays span{font-size:12px!important}
 }
 @media(max-width:390px){.mobile-nav .nav-item{flex-basis:64px!important;min-width:64px!important}}
+
+
+/* 2026-10 UX density pass — readable text, less unused vertical space. */
+.mx-today-compact{gap:15px!important;align-items:start}
+.mx-today-compact .main-column>.panel,
+.mx-today-compact .right-column>.panel{padding:16px 18px!important;border-radius:15px}
+.mx-today-compact .main-column>.hero{
+ min-height:0!important;padding:18px 22px!important;margin-bottom:15px!important
+}
+.mx-today-compact .hero-copy{margin-top:12px!important;max-width:min(75%,640px)}
+.mx-today-compact .hero-copy h2{font-size:clamp(19px,1.8vw,25px)!important;line-height:1.5;margin:5px 0}
+.mx-today-compact .hero-copy p{font-size:13px!important;line-height:1.7!important;margin:5px 0 10px;max-width:62ch}
+.mx-today-compact .hero-bottom{gap:8px}
+.mx-today-compact .hero-bottom button{min-height:34px!important;padding:7px 11px!important;font-size:12px!important}
+.mx-today-compact .hero-orbit{transform:scale(.75);transform-origin:85% 50%;opacity:.55}
+.mx-today-compact .scores-grid,
+#live-view-body:has(.mx-time-compact) .scores-grid{gap:9px!important;margin:0 0 16px!important}
+.mx-today-compact .score-card,
+#live-view-body:has(.mx-time-compact) .score-card{
+ min-height:83px!important;padding:10px 12px!important;border-radius:12px!important;
+ gap:5px!important;box-shadow:none
+}
+.mx-today-compact .score-card .score-number,
+#live-view-body:has(.mx-time-compact) .score-card .score-number{font-size:25px!important;line-height:1.15!important}
+.mx-today-compact .score-card .score-symbol,
+#live-view-body:has(.mx-time-compact) .score-card .score-symbol{font-size:19px!important}
+.mx-today-compact .section-title{margin:13px 0 10px}
+.mx-today-compact .section-title h2{font-size:17px!important}
+.mx-today-compact .signal-list,
+#live-view-body:has(.mx-time-compact) .signal-list{gap:8px!important;margin-bottom:12px!important}
+.mx-today-compact .signal-card,
+#live-view-body:has(.mx-time-compact) .signal-card{
+ padding:13px 15px!important;border-radius:12px!important;gap:10px!important
+}
+.mx-today-compact .signal-card h3,
+#live-view-body:has(.mx-time-compact) .signal-card h3{
+ font-size:15px!important;line-height:1.6!important;margin-bottom:5px
+}
+.mx-today-compact .signal-card p,
+#live-view-body:has(.mx-time-compact) .signal-card p{
+ font-size:13px!important;line-height:1.72!important;margin-top:5px
+}
+.mx-today-compact .right-column{gap:12px}
+.mx-today-compact .sky-card{padding:15px!important}
+.mx-today-compact .sky-summary{gap:5px!important;margin:5px 0}
+.mx-today-compact .sky-summary>div{font-size:12px!important;gap:6px}
+.mx-today-compact .lunar-card{min-height:0!important;padding:15px 16px!important}
+.mx-today-compact .lunar-card h3{font-size:19px!important;margin:5px 0}
+.mx-today-compact .lunar-card p{font-size:12px!important;line-height:1.7!important;margin:4px 0 9px}
+.mx-today-compact .time-shortcut{min-height:0;padding:11px 14px!important;gap:10px!important}
+.mx-today-compact .time-shortcut p{font-size:12px!important;line-height:1.5!important;margin:2px 0}
+.mx-today-compact .rhythm{padding:15px 18px!important}
+#live-view-body:has(.mx-time-compact) .time-controls{
+ padding:14px 19px!important;margin-bottom:14px!important;
+ display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 18px;
+ align-items:center;border-radius:15px
+}
+.mx-time-compact>div:first-child{min-width:0}
+.mx-time-compact h2{font-size:19px!important;margin:3px 0 2px;line-height:1.5}
+.mx-time-compact p{font-size:12px!important;line-height:1.6!important;margin:2px 0}
+.mx-time-compact form{margin:0!important;gap:8px!important;align-items:center!important}
+.mx-time-compact form label{font-size:12px!important;gap:4px}
+.mx-time-compact form input{min-height:36px!important;padding:7px 9px!important;font-size:13px!important}
+.mx-time-compact form .primary{min-height:36px!important;padding:7px 12px!important}
+.mx-time-compact .quick-times{grid-column:1/-1;margin:4px 0 0!important;gap:6px}
+.mx-time-compact .quick-times button{min-height:30px!important;padding:4px 10px!important;border-radius:8px}
+#live-view-body:has(.mx-time-compact) .chart-layout{gap:12px!important}
+#live-view-body:has(.mx-time-compact) .chart-layout>.panel{padding:14px!important;border-radius:15px}
+#live-view-body:has(.mx-time-compact) .large-wheel p{font-size:12px!important;margin:5px 0}
+#live-view-body:has(.mx-time-compact) .chart-layout .signal-list{margin-top:10px}
+#live-view-body:has(.mx-time-compact) .rhythm{padding:15px!important}
+
+/* Moon-timing icon system: elegant, consistent strokes instead of arrow glyphs. */
+.lunar-premium-grid{gap:12px!important}
+.lunar-premium-grid .lunar-premium-card{
+ padding:17px 19px!important;border-radius:16px!important;
+ display:flex;flex-direction:column;min-height:0
+}
+.lunar-premium-grid .lunar-card-heading{gap:11px;min-height:0}
+.lunar-premium-grid .lunar-card-heading h2{font-size:18px!important;line-height:1.4;margin:3px 0 0}
+.lunar-premium-grid .lunar-card-heading small{font-size:12px!important;letter-spacing:.35px}
+.lunar-premium-grid .lunar-emblem{
+ width:47px;height:47px;flex:none;border-radius:13px;
+ background:linear-gradient(135deg,#34283f,#171d35);
+ box-shadow:inset 0 1px 0 #ffffff16,0 5px 16px #08081036;
+ color:#f7d296;border-color:#866a79
+}
+.lunar-premium-grid .lunar-emblem.violet{
+ color:#cab9ff;background:linear-gradient(135deg,#302a4a,#151b30);border-color:#776091
+}
+.mx-lunar-icon{display:block;width:24px;height:24px;flex:none}
+.lunar-emblem .mx-lunar-icon{width:26px;height:26px}
+.lunar-premium-grid .lunar-state{font-size:12px!important;padding:4px 9px;line-height:1.4}
+.lunar-premium-grid .mx-moon-sign-reading{gap:5px;margin:12px 0!important}
+.lunar-premium-grid .mx-moon-sign-line{font-size:13px!important;line-height:1.65!important;gap:8px}
+.lunar-premium-grid .mx-moon-personal{padding:8px 10px}
+.lunar-premium-grid .mx-voc-status>p{font-size:12px!important;line-height:1.75;margin:10px 0!important;min-height:0}
+.lunar-premium-grid .mx-lunar-live-row{margin:7px 0 2px}
+.lunar-premium-grid .premium-time-pair{
+ grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+ margin-top:auto!important;padding-top:13px
+}
+.lunar-premium-grid .premium-time-tile{
+ padding:10px 11px!important;gap:6px;justify-content:start;
+ border-radius:11px;min-height:105px;box-shadow:inset 0 1px 0 #ffffff0d
+}
+.lunar-premium-grid .time-tile-top{gap:8px;min-width:0}
+.lunar-premium-grid .mx-lunar-tile-icon{
+ display:grid;place-items:center;flex:none;width:27px;height:27px;
+ border:1px solid currentColor;border-radius:8px;color:#b6a6f0;background:#ac88ff10
+}
+.lunar-premium-grid .mx-lunar-tile-icon .mx-lunar-icon{width:16px;height:16px}
+.lunar-premium-grid .lunar-teal .mx-lunar-tile-icon{color:#83d7c7}
+.lunar-premium-grid .lunar-gold .mx-lunar-tile-icon{color:#f0c985}
+.lunar-premium-grid .lunar-violet .mx-lunar-tile-icon{color:#c5a4ee}
+.lunar-premium-grid .lunar-muted .mx-lunar-tile-icon{color:#b6abd5}
+.lunar-premium-grid .time-tile-top small{font-size:12px!important;line-height:1.45}
+.lunar-premium-grid .premium-time-tile time{
+ font-size:13px!important;line-height:1.5!important;font-weight:740;overflow-wrap:anywhere
+}
+.lunar-premium-grid .time-tile-zone{font-size:11px!important;line-height:1.2;margin-top:auto}
+.lunar-advice-card{padding:16px 19px!important;margin:12px 0!important;border-radius:15px}
+.lunar-advice-card .lunar-advice-head h2{font-size:19px!important}
+.lunar-advice-card .mx-lunar-explained{padding:11px 13px!important;font-size:13px!important;line-height:1.85!important;margin:9px 0!important}
+.lunar-advice-card .lunar-last-aspect{padding:10px 12px;margin:10px 0!important;gap:8px}
+.lunar-timeline{padding:17px 19px!important}
+.lunar-timeline .premium-timeline{gap:9px}
+.lunar-timeline .timeline-entry{padding:11px 12px!important}
+@media(max-width:1020px){
+ #live-view-body:has(.mx-time-compact) .time-controls{grid-template-columns:1fr}
+ .mx-time-compact .quick-times{grid-column:auto}
+}
+@media(max-width:760px){
+ .mx-today-compact{gap:12px!important}
+ .mx-today-compact .hero-copy{max-width:100%}
+ .mx-today-compact .hero-orbit{display:none}
+ .mx-today-compact .main-column>.hero{padding:15px 16px!important}
+ .mx-today-compact .hero-copy h2{font-size:19px!important}
+ .mx-today-compact .scores-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .mx-today-compact .score-card,
+ #live-view-body:has(.mx-time-compact) .score-card{min-height:80px!important;padding:9px!important}
+ .mx-today-compact .signal-card,
+ #live-view-body:has(.mx-time-compact) .signal-card{padding:12px!important}
+ .mx-today-compact .main-column>.panel,
+ .mx-today-compact .right-column>.panel{padding:13px 14px!important}
+ #live-view-body:has(.mx-time-compact) .time-controls{padding:12px 14px!important}
+ .mx-time-compact form{justify-content:flex-start}
+ .mx-time-compact .quick-times{gap:5px}
+ .lunar-premium-grid .lunar-premium-card{padding:14px!important}
+ .lunar-premium-grid .lunar-premium-card .premium-time-pair{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .lunar-premium-grid .premium-time-tile{padding:9px!important;min-height:101px}
+ .lunar-premium-grid .time-tile-top small{font-size:11px!important}
+ .lunar-advice-card{padding:14px!important}
+}
+@media(max-width:390px){
+ .lunar-premium-grid .lunar-premium-card .premium-time-pair{grid-template-columns:1fr}
+ .lunar-premium-grid .premium-time-tile{min-height:79px}
+ .lunar-premium-grid .lunar-card-heading{flex-wrap:wrap}
+ .lunar-premium-grid .lunar-state{margin-inline-start:auto}
+}
