@@ -82,10 +82,16 @@ References: [Cloudflare Pages AI bindings](https://developers.cloudflare.com/pag
 
 ## Verification
 
-61 automated tests as of the 2026-10-18 MX Eye foreground update: direct Swift mathematical vectors, historical timezones, source score/synastry cases, three independent official native Swiss Ephemeris reference snapshots, Time Machine, unknown-time exclusions, polar-house handling and gateway privacy/input checks. The native/WASM reference tolerance is 0.000001° across all 16 bodies' longitude/speed, 12 cusps, ASC and MC at three dates. Native fixture provenance is in `tests/fixtures/native-swiss.json`.
+79 automated tests following the 2026-10-18 precision, lunar-screening, asteroid-catalog and journal update: direct Swift mathematical vectors, historical timezones, source score/synastry cases, three independent official native Swiss Ephemeris reference snapshots, Time Machine, unknown-time exclusions, polar-house handling and gateway privacy/input checks. The native/WASM reference tolerance is 0.000001° across all 16 bodies' longitude/speed, 12 cusps, ASC and MC at three dates. Native fixture provenance is in `tests/fixtures/native-swiss.json`.
 
 This does **not** establish complete Swift-app or v2.3.2 score equivalence: post-processing and advanced source layers remain pending. See the audit and verification notes.
 
 ## Third-party notices
 
 Swiss Ephemeris/WASM distribution includes the wrapper's license in `public/vendor/swiss/LICENSE`. The wrapper is GPL-3.0-or-later; Swiss Ephemeris has its own upstream licensing terms. Source links and font notices are in [THIRD_PARTY.md](THIRD_PARTY.md). No proprietary deployment license is asserted by this build.
+
+## 2026-10-18 further implementation
+
+Shipped: bounded exact natal-transit root refinement, 30-day selectable time heatmap, explicit contradictory-evidence audit, geocentric 90-day new/full Moon and near-node *screening* (not confirmed eclipses), private observation journal included in backups, source-matched names/numbers for 56 additional asteroids, and a grounded Qwen3 WHY NOW prompt. The native six main minor bodies remain distinct from the new 56-item source catalogue.
+
+**Not included:** actual 56 named asteroid positions, since the current WASM package has no extra numbered-asteroid `.se1` files; dedicated certified eclipse geometry/timing; persistent backend Web Push; Watch/WidgetKit; exact native v2.3.2 parity and encrypted-at-rest sync. See SOURCE_AUDIT.md and VERIFICATION.md.
