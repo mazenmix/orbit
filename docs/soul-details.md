@@ -30,7 +30,9 @@ geometry, supplies topic-specific editorial context, and rejects repeated
 passages even when wrapped in a longer paragraph. Output guards check supported
 planet/sign/house attributions and recognized aspect phrasings; these checks do
 not constitute a proof of semantic or psychological validity. Rejected natal
-claims produce a visibly labeled editorial fallback.
+claims or copied passages produce a visibly labeled editorial fallback. The UI
+keeps the original reading available and shows the fallback notice without
+duplicating its summary, example and action in a second set of cards.
 
 Regression coverage includes all 200 authored prompts, unknown time, polar
 availability, aspect wraparound and limits, mixed evidence, numeric Arabic house

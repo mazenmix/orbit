@@ -44,4 +44,8 @@ test('summary appears once and calculation provenance remains visible in the evi
  assert.ok(html.includes('Etc/UTC')&&html.includes('2000-01-01T12:00:00.000Z'));
  assert.ok(html.includes('Placidus')&&html.includes('Swiss Ephemeris'));
  assert.match(html,/class="soul-detail-box deep"><h4>.*?<\/h4><p>[\s\S]*?<\/p><p>/);
+ const fallback=soulRender({profile:defaultProfile,chart,categoryId:9,topicId:67,query:'',ai:{summary:'REJECTED MODEL SUMMARY',detailedAnalysis:'REJECTED MODEL DETAIL',strengths:['REPEATED RESOURCE'],challenges:['REPEATED CHALLENGE'],practicalInsights:['REPEATED ACTION'],reflectionQuestions:['REPEATED QUESTION'],quality:'verified-editorial-fallback'}});
+ assert.ok(fallback.includes('soul-ai-grounding-note'));
+ assert.ok(!fallback.includes('REJECTED MODEL')&&!fallback.includes('REPEATED ACTION'));
+ assert.equal(fallback.split(encoded).length-1,1);
 });

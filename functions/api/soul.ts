@@ -32,6 +32,14 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
  const selected=soulTopics[input.topicId-1],theme=getSoulTheme(selected.id),depth=soulDeepFor(selected.id),rule=soulRule(selected.id),ar=input.language==='ar';
  const system='Act as an astrology interpretation editor in '+(ar?'natural Iraqi Arabic':'clear English')+'. Use ONLY provided validated natal placements and aspects. Zodiac positions are supplied from client Swiss Ephemeris: NEVER invent a new planet, aspect, sign, degree, house or person. The goal is thoughtful symbolic self-reflection, not a clinical psychological diagnosis, validated personality fact, secret desire, future certainty or statistical probability. Return ONLY valid JSON containing summary (string), detailedAnalysis (string), strengths (array of 2 strings), challenges (array of 2 strings), practicalInsights (array of 2 strings), reflectionQuestions (array of 1 string). Write about the UNIQUE topic-specific editorial angle and concrete real-life counterexample provided. Do not repeat the same sentence or advice across summary, detailed analysis, strengths, challenges and practical insights. Avoid generic horoscope filler such as everyone wants love, trust and growth. Avoid mathematical degree tables in reader-facing prose; computed evidence stays separate. If any placement does not appear in the computedNatalEvidence, DO NOT mention that planet, sign or house at all. Do not invent a precise degree. Specific to the topic. No markdown or think tags. /no_think';
  const message=JSON.stringify({topic:ar?selected.ar:selected.en,uniqueEditorialAngle:ar?theme.focusAr:theme.focusEn,illustrativeExample:ar?depth.ar:depth.en,potentialResource:rule.resource[ar?'ar':'en'],patternToExamine:rule.risk[ar?'ar':'en'],nonRepeatedPracticalAction:ar?theme.actionAr:theme.actionEn,computedNatalEvidence:basis,computedAspects:aspects})+'\n/no_think';
+ const editorialFallback=(reason:'repetition'|'natal-evidence')=>respond({
+  topicId:selected.id,summary:ar?theme.focusAr:theme.focusEn,
+  detailedAnalysis:(ar?depth.ar:depth.en)+(ar?' المؤشرات المتاحة: ':' Available indicators: ')+safeBasisSummary(basis,ar)+'.',
+  strengths:[rule.resource[ar?'ar':'en']],challenges:[rule.risk[ar?'ar':'en']],
+  practicalInsights:[ar?theme.actionAr:theme.actionEn],
+  reflectionQuestions:[ar?'أي تجربة تدعم هذه القراءة وأي تجربة تخالفها؟':'Which experience supports this reading and which challenges it?'],
+  astrologicalEvidence:basis,provider:'qwen3',quality:'verified-editorial-fallback',fallbackReason:reason
+ });
  try{
   const result=await env.AI.run('@cf/qwen/qwen3-30b-a3b-fp8',{
    messages:[{role:'system',content:system},{role:'user',content:message}],
@@ -50,27 +58,10 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
   const validList=(v:unknown)=>Array.isArray(v)&&v.length>=1&&v.length<=3&&v.every(x=>validText(x,3,250));
   if(!validText(parsed.summary,8,400)||!validText(parsed.detailedAnalysis,20,950)||!validList(parsed.strengths)||!validList(parsed.challenges)||!validList(parsed.practicalInsights)||!validList(parsed.reflectionQuestions))return respond({error:'Incomplete Qwen3 interpretation'},502);
   const all=[parsed.summary,parsed.detailedAnalysis,...parsed.strengths,...parsed.challenges,...parsed.practicalInsights,...parsed.reflectionQuestions];
-  if(repeatedSoulPassage(all))return respond({error:'Qwen3 repeated the same passage'},502);
+  if(repeatedSoulPassage(all))return editorialFallback('repetition');
   const sections=[parsed.summary,parsed.detailedAnalysis,...parsed.strengths,...parsed.challenges,...parsed.practicalInsights,...parsed.reflectionQuestions];
   const errors=detectInventedNatalText(sections,basis);
-  if(errors.length){
-   const prepared=ar?{
-    summary:theme.focusAr,
-    detailedAnalysis:depth.ar+' فلكياً عندنا فقط '+safeBasisSummary(basis,true)+'. هاي مو حقائق عن شخصية الشخص، وأي دلالة تحتاج تحقق من السلوك الحقيقي.',
-    strengths:[rule.resource.ar],
-    challenges:[rule.risk.ar],
-    practicalInsights:[theme.actionAr,'اختبر الفكرة بموقف صغير قابل للمراجعة قبل اتخاذ قرار كبير'],
-    reflectionQuestions:['شنو موقف حقيقي يدعم أو يخالف هذا التفسير؟']
-   }:{
-    summary:theme.focusEn,
-    detailedAnalysis:depth.en+' Only these natal indicators were provided: '+safeBasisSummary(basis,false)+'. These symbols are not proven psychological facts.',
-    strengths:[rule.resource.en],
-    challenges:[rule.risk.en],
-    practicalInsights:[theme.actionEn,'Test the idea with a small reversible step before any major decision'],
-    reflectionQuestions:['What actual experience supports or challenges this interpretation?']
-   };
-   return respond({topicId:selected.id,...prepared,astrologicalEvidence:basis,provider:'qwen3',quality:'verified-editorial-fallback'});
-  }
+  if(errors.length)return editorialFallback('natal-evidence');
   return respond({topicId:selected.id,summary:parsed.summary,detailedAnalysis:parsed.detailedAnalysis,strengths:parsed.strengths,challenges:parsed.challenges,practicalInsights:parsed.practicalInsights,reflectionQuestions:parsed.reflectionQuestions,astrologicalEvidence:basis,provider:'qwen3',quality:'source-grounded-model'});
  }catch{return respond({error:'Qwen3 service currently unavailable'},503)}
 }

@@ -26,11 +26,16 @@ test('Invalid model response cannot override locally calculated Soul DNA interpr
  assert.equal((await onRequestPost({request:req(v),env})).status,502);
 });
 
-test('Qwen3 repeated clauses are rejected rather than displayed as a premium explanation',async()=>{
+test('Qwen3 repeated clauses are replaced by a labeled editorial fallback',async()=>{
  const duplicate='نفس الكلام ينكتب في الخلاصة والتحليل العميق ويصير تكرار مزعج';
  const response={summary:duplicate,detailedAnalysis:duplicate,strengths:['فرصة للاختبار العملي'],challenges:['تجنب القفز للاستنتاجات'],practicalInsights:['اسأل الطرف المعني مباشرة'],reflectionQuestions:['شنو السلوك اللي تأكدت منه؟']};
  const env={AI:{run:async()=>({response:JSON.stringify(response)})}};
- assert.equal((await onRequestPost({request:req(v),env})).status,502);
+ const result=await onRequestPost({request:req(v),env});
+ assert.equal(result.status,200);
+ const body=await result.json();
+ assert.equal(body.quality,'verified-editorial-fallback');
+ assert.equal(body.fallbackReason,'repetition');
+ assert.ok(!JSON.stringify(body).includes(duplicate));
 });
 
 test('nested personal fields are stripped and aspect geometry is checked before inference',async()=>{
@@ -46,9 +51,11 @@ test('nested personal fields are stripped and aspect geometry is checked before 
  assert.equal(packet,'');
 });
 
-test('a summary copied inside a longer analysis is rejected as repeated content',async()=>{
+test('a summary copied inside a longer analysis is excluded as repeated content',async()=>{
  const summary='نراجع أسلوب اتخاذ القرار من خلال مواقف متكررة تشمل معلومات واضحة وخيارات مختلفة';
  const response={summary,detailedAnalysis:'تفسير إضافي: '+summary+' قبل تعميم أي استنتاج.',strengths:['تحديد الأولوية'],challenges:['تأجيل الحسم'],practicalInsights:['دوّن تجربة حديثة'],reflectionQuestions:['ما المعلومة التي غيرت قرارك؟']};
  const env={AI:{run:async()=>({response:JSON.stringify(response)})}};
- assert.equal((await onRequestPost({request:req(v),env})).status,502);
+ const result=await onRequestPost({request:req(v),env});
+ assert.equal(result.status,200);
+ assert.equal((await result.json()).fallbackReason,'repetition');
 });
