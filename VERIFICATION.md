@@ -49,3 +49,5 @@ The public repository's anonymous demo configuration passed all 20 automated tes
 - An actual live POST using synthetic, nonpersonal evidence returned HTTP 200 and a generated Arabic explanation with the Qwen3 model identifier. No API key, model weights or project checkout were stored on the user's computer.
 - Six added gateway/Workers AI tests cover binding status, actual invocation shape using a mock binding, allowlisting, quota/error behavior, malformed JSON and hidden-reasoning exclusion; total automated test count is 26.
 - This validates the deployed server-side Qwen3 path, not native on-device llama.cpp parity or quality guarantees for every interpretation.
+
+- Follow-up: supporting/challenging classifications and strongest-factor selection are now supplied deterministically by the calculation layer. Qwen3 is instructed to preserve them, and an all-challenging packet is covered by a regression test. Total automated tests: 27.

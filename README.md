@@ -77,7 +77,7 @@ References: [Cloudflare Pages AI bindings](https://developers.cloudflare.com/pag
 
 ## Verification
 
-26 automated tests: direct Swift mathematical vectors, historical timezones, source score/synastry cases, three independent official native Swiss Ephemeris reference snapshots, Time Machine, unknown-time exclusions, polar-house handling and gateway privacy/input checks. The native/WASM reference tolerance is 0.000001° across all 16 bodies' longitude/speed, 12 cusps, ASC and MC at three dates. Native fixture provenance is in `tests/fixtures/native-swiss.json`.
+27 automated tests: direct Swift mathematical vectors, historical timezones, source score/synastry cases, three independent official native Swiss Ephemeris reference snapshots, Time Machine, unknown-time exclusions, polar-house handling and gateway privacy/input checks. The native/WASM reference tolerance is 0.000001° across all 16 bodies' longitude/speed, 12 cusps, ASC and MC at three dates. Native fixture provenance is in `tests/fixtures/native-swiss.json`.
 
 This does **not** establish complete Swift-app or v2.3.2 score equivalence: post-processing and advanced source layers remain pending. See the audit and verification notes.
 
