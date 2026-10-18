@@ -4,8 +4,27 @@ async function files(root){const out=[];for(const e of await fs.readdir(root,{wi
 const paths=(await files('dist')).filter(p=>!p.endsWith('/_headers')&&!p.endsWith('/sw.js'));
 const version=crypto.createHash('sha256');for(const p of paths)version.update(await fs.readFile(p));
 const urls=['/',...paths.map(p=>'/'+p.slice(5))];
-await fs.writeFile('dist/sw.js',`const CACHE='mx-orbit-${version.digest('hex').slice(0,12)}';const FILES=${JSON.stringify(urls)};
+await fs.writeFile('dist/sw.js',`const CACHE='mx-astro-${version.digest('hex').slice(0,12)}';const FILES=${JSON.stringify(urls)};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('mx-orbit-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin||u.pathname.startsWith('/api/'))return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).catch(()=>caches.match('/')));return}e.respondWith(caches.match(e.request).then(cached=>cached||fetch(e.request)));});`);
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>(k.startsWith('mx-orbit-')||k.startsWith('mx-astro-'))&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin||u.pathname.startsWith('/api/'))return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).catch(()=>caches.match('/')));return}e.respondWith(caches.match(e.request).then(cached=>cached||fetch(e.request)));});
+/* Background push display is supported. Actual delivery requires a separate,
+ * authenticated VAPID subscription service, storage and scheduler.
+ * Do not claim that the foreground MX Eye switch enables closed-app delivery.
+ */
+self.addEventListener('push',e=>{
+ let payload={};try{payload=e.data&&e.data.json()||{}}catch{}
+ const body=typeof payload.body==='string'?payload.body.slice(0,240):'A new MX Astro update is available.';
+ const id=typeof payload.id==='string'&&/^[a-zA-Z0-9:_-]{1,100}$/.test(payload.id)?payload.id:'mx-astro-update';
+ const page=typeof payload.page==='string'&&/^#(today|signals|time|people|eclipses|advanced)$/.test(payload.page)?payload.page:'#today';
+ e.waitUntil(self.registration.showNotification('MX Astro',{body,tag:id,icon:'/original-brand.png',data:{page},requireInteraction:false}));
+});
+self.addEventListener('notificationclick',e=>{
+ e.notification.close();
+ const page=e.notification.data&&e.notification.data.page||'#today';
+ e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async clients=>{
+  for(const c of clients){if(new URL(c.url).origin===self.location.origin){await c.focus();if('navigate' in c)await c.navigate('/'+page);return}}
+  if(self.clients.openWindow)await self.clients.openWindow('/'+page);
+ }));
+});`);
 console.log('Offline shell includes',urls.length,'same-origin assets.');
