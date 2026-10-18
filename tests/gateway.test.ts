@@ -55,4 +55,6 @@ test('only challenging evidence never manufactures a supporting factor',async()=
  assert.equal(r.status,200);assert.equal(payload.strongestSupporting,null);
  assert.equal(payload.strongestChallenging.transit,'Sun');
  assert.equal(payload.evidence[0].direction,'challenging');
+ assert.equal('weight' in payload.evidence[0],false);
+ assert.equal('weight' in payload.strongestChallenging,false);
 });
