@@ -252,8 +252,8 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
 function on(id:string,action:()=>void){const e=root.querySelector<HTMLElement>('#'+id);if(e)e.onclick=action}
 function bindProfileForm(scope:ParentNode){
  const form=scope.querySelector<HTMLFormElement>('#profile-form');if(!form)return;
- const input=form.querySelector<HTMLInputElement>('#place-search')!,options=form.querySelector<HTMLDivElement>('#place-results')!;
- const chosen=form.querySelector<HTMLDivElement>('#chosen-place')!,zone=form.querySelector<HTMLSelectElement>('[name=zone]')!;
+ const input=form!.querySelector<HTMLInputElement>('#place-search')!,options=form!.querySelector<HTMLDivElement>('#place-results')!;
+ const chosen=form!.querySelector<HTMLDivElement>('#chosen-place')!,zone=form!.querySelector<HTMLSelectElement>('[name=zone]')!;
  let token=0,searchDelay=0;
  async function findPlaces(){
   const query=input.value.trim(),request=++token;
@@ -269,26 +269,26 @@ function bindProfileForm(scope:ParentNode){
    for(const city of matches){
     const item=document.createElement('button');item.type='button';item.className='place-option';item.textContent=city.label+' · '+city.zone;item.setAttribute('role','option');
     item.onclick=()=>{
-     form.querySelector<HTMLInputElement>('[name=city]')!.value=city.label;
-     form.querySelector<HTMLInputElement>('[name=lat]')!.value=String(city.lat);
-     form.querySelector<HTMLInputElement>('[name=lon]')!.value=String(city.lon);
+     form!.querySelector<HTMLInputElement>('[name=city]')!.value=city.label;
+     form!.querySelector<HTMLInputElement>('[name=lat]')!.value=String(city.lat);
+     form!.querySelector<HTMLInputElement>('[name=lon]')!.value=String(city.lon);
      if(![...zone.options].some(o=>o.value===city.zone)){const o=new Option(city.zone,city.zone);zone.add(o)}
-     zone.value=city.zone;form.dataset.placeSelected='yes';input.value=city.label;chosen.textContent=city.label+' · '+city.zone;
-     options.innerHTML='';form.querySelector('.form-error')!.textContent='';
+     zone.value=city.zone;form!.dataset.placeSelected='yes';input.value=city.label;chosen.textContent=city.label+' · '+city.zone;
+     options.innerHTML='';form!.querySelector('.form-error')!.textContent='';
     };options.appendChild(item);
    }
   }catch(e){if(request===token)options.textContent=String(e)}
  }
- input.addEventListener('input',()=>{form.dataset.placeSelected='no';chosen.textContent=t('اختار مكان من نتائج البحث','Choose a result to confirm the location');window.clearTimeout(searchDelay);searchDelay=window.setTimeout(findPlaces,350)});
+ input.addEventListener('input',()=>{form!.dataset.placeSelected='no';chosen.textContent=t('اختار مكان من نتائج البحث','Choose a result to confirm the location');window.clearTimeout(searchDelay);searchDelay=window.setTimeout(findPlaces,350)});
  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();window.clearTimeout(searchDelay);void findPlaces()}});
  form.onsubmit=e=>{e.preventDefault();try{
-  if(form.dataset.placeSelected!=='yes')throw Error(t('اختار المدينة من النتائج حتى تنحط الإحداثيات تلقائياً.','Choose a city from search results so coordinates are set automatically.'));
+  if(form!.dataset.placeSelected!=='yes')throw Error(t('اختار المدينة من النتائج حتى تنحط الإحداثيات تلقائياً.','Choose a city from search results so coordinates are set automatically.'));
   const f=new FormData(form);const p=validateProfile({id:String(f.get('id')),name:String(f.get('name')).trim(),date:String(f.get('date')),time:String(f.get('time')),zone:String(f.get('zone')).trim(),lat:Number(f.get('lat')),lon:Number(f.get('lon')),city:String(f.get('city')).trim(),known:f.get('known')==='on',kind:String(f.get('kind')) as Profile['kind']});
   const next=profiles.some(i=>i.id===p.id)?profiles.map(i=>i.id===p.id?p:i):[...profiles,p];
   if(!next.some(p=>p.kind==='self'))throw Error(t('لازم يبقى ملف شخصي واحد على الأقل.','Keep at least one My profile.'));
   saveProfiles(next);profiles=next;if(active.id===p.id)active=p.kind==='self'?p:profiles.find(p=>p.kind==='self')!;
   cache.clear();closeDialog();recalculate();render();toast(t('انحفظ الملف والمنطقة الزمنية والموقع','Profile, location and timezone saved'));
- }catch(err){form.querySelector('.form-error')!.textContent=String(err)}};
+ }catch(err){form!.querySelector('.form-error')!.textContent=String(err)}};
 }
 function showDialog(html:string){const d=root.querySelector<HTMLDialogElement>('#detail')!;d.querySelector('#dialog-content')!.innerHTML=`<button id="close-dialog" class="icon-button close" aria-label="${t('إغلاق','Close')}">×</button>${html}`;d.querySelector<HTMLButtonElement>('#close-dialog')!.onclick=closeDialog;d.showModal()}
 function closeDialog(){root.querySelector<HTMLDialogElement>('#detail')?.close()}
