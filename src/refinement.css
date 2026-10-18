@@ -218,3 +218,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .chart-expanded .wheel-guide{font-size:14px;gap:18px;margin:16px auto;color:#d5e4f8}
 .chart-expanded .chart-side-reading{background:#151d31;border:1px solid #3b4664}
 @media(max-width:670px){.chart-expanded .large-wheel>h2{font-size:15px}.chart-expanded .large-wheel{padding:15px 7px}}
+
+/* Twelve-month practical forecast, calculated anew for each monthly sample. */
+.annual-panel{margin:24px 0}.annual-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0}
+.annual-card{position:relative;min-width:0;text-align:start;border:1px solid #394257;border-inline-start:4px solid #8c87ac;background:linear-gradient(135deg,#1b2335,#141a2a);border-radius:15px;padding:18px;min-height:166px;display:flex;flex-direction:column;gap:9px}
+.annual-card:hover{background:linear-gradient(135deg,#273250,#1b2339);border-color:#a59fd5}
+.annual-card.strong{border-inline-start-color:#5ae3a3}.annual-card.steady{border-inline-start-color:#add587}.annual-card.caution{border-inline-start-color:#f2a85a}.annual-card.low{border-inline-start-color:#f37a76}
+.annual-card h3{font-size:17px;color:#e9e5ff;line-height:1.55;padding-inline-end:45px}
+.annual-card p{font-size:12px;line-height:1.85;margin:0;color:#c7d5e7}
+.annual-card small{margin-top:auto;font-size:11px}
+.annual-level{position:absolute;top:17px;inset-inline-end:15px;color:#c0dcca;font-size:22px;font-variant-numeric:tabular-nums;font-weight:800}
+@media(max-width:1000px){.annual-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:570px){.annual-cards{grid-template-columns:1fr}.annual-card{min-height:0}}
