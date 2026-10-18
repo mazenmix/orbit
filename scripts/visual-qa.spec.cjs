@@ -93,10 +93,12 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   });
   await page.reload({waitUntil:'domcontentloaded'});
   await expect(page.locator('#soul-person-select option')).toHaveCount(3);
+  await expect(page.locator('#active-profile option')).toHaveCount(3);
   await expect(page.locator('.mx-chart-meta-card')).toHaveCount(5);
   await expect(page.locator('.professional-wheel')).toBeVisible();
   const initial=await page.locator('.professional-wheel .wheel-planet[data-planet="Sun"] title').textContent();
-  await page.locator('#soul-person-select').selectOption('qa-person');
+  await page.locator('#active-profile').selectOption('qa-person');
+  await expect(page.locator('#soul-person-select')).toHaveValue('qa-person');
   await expect(page.locator('.mx-chart-owner-title h2')).toHaveText('Test Person');
   await expect(page.locator('.mx-meta-place b')).toHaveText('Manila');
   await expect(page.locator('.mx-meta-time b')).toHaveText('08:30');
@@ -111,6 +113,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
    await expect(page.locator('.mx-chart-owner-title h2')).toHaveText('Test Person');
   }
   await page.locator('#soul-person-select').selectOption('qa-unknown');
+  await expect(page.locator('#active-profile')).toHaveValue('qa-unknown');
   await expect(page.locator('.mx-meta-time b')).toContainText(/غير معروف|Unknown/);
   await expect(page.locator('.chart-expanded .professional-wheel')).toBeVisible();
   await expect(page.locator('.professional-wheel')).not.toContainText('ASC');
