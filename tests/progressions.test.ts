@@ -15,7 +15,7 @@ test('solar arc direction wraps the zodiac without altering the natal record',()
 });
 test('solar return root follows Sun crossing natal solar longitude',()=>{
  const start=Date.parse('2026-03-29T00:00:00Z');
- const read=at=>[{id:'Sun',longitude:10+(+at-start)/86400000}];
+ const read=(at:Date)=>[{id:'Sun',longitude:10+(+at-start)/86400000}];
  const when=solarReturnNear(new Date(start),12,read);
  assert.ok(when);
  assert.ok(Math.abs(+when!-(start+2*86400000))<60000);
