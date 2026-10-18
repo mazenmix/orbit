@@ -10,6 +10,7 @@ const point=(id:string,longitude:number)=>({id,longitude,speed:1,symbol:'●'});
 const chart:Chart={date:new Date('2000-01-01T12:00:00Z'),points:[point('Sun',0),point('Moon',90),point('Venus',0),point('Saturn',120),point('Mercury',30),point('Mars',60)],asc:190,mc:95,cusps:Array.from({length:12},(_,i)=>(190+i*30)%360),missing:[]};
 
 test('attachment pace uses Venus, Moon and Saturn; communication uses Mercury rather than topic-slot rotation',()=>{
+ assert.deepEqual(soulBasis(chart,soulTopics[0]).map(p=>p.planet),['Sun','Moon','Ascendant']);
  assert.deepEqual(soulBasis(chart,soulTopics[66]).map(p=>p.planet),['Venus','Moon','Saturn']);
  assert.equal(soulBasis(chart,soulTopics[28])[0].planet,'Mercury');
  assert.equal(soulBasis(chart,soulTopics[137])[0].planet,'Mercury');

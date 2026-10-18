@@ -4,7 +4,7 @@ import {soulTopics} from './soulData.ts';
  * Resources/challenges are reflection prompts, not measured personality traits. */
 const groups:readonly (readonly (readonly [string,string,string,string,string])[])[]=[
  [
-  ['Sun Saturn Ascendant','تمييز القناعة التي تختارها عن الدور الذي تؤديه لإرضاء غيرك','Distinguishing chosen convictions from a role performed for approval','اختزال هويتك في صفة واحدة وإهمال اختلافك بين المواقف','Reducing identity to one label and overlooking changes across situations'],
+  ['Sun Moon Ascendant','ملاحظة اتساق اختياراتك مع قيمك عند تغير الجمهور والظروف','Noticing how choices align with values across audiences and circumstances','اختزال هويتك في صفة واحدة وإهمال اختلافك بين المواقف','Reducing identity to one label and overlooking changes across situations'],
   ['Ascendant Sun Saturn','تقديم نفسك بطريقة تناسب المكان وتحافظ على قيمك','Presenting yourself appropriately without abandoning your values','الانشغال بالصورة العامة حتى يصعب التعبير عن رأي مخالف','Managing appearances until disagreement becomes difficult'],
   ['Ascendant Venus Mercury','ترك مساحة للتعارف قبل الحكم على الانطباع الأول','Allowing familiarity to develop before judging an introduction','اعتبار ارتباك اللقاء الأول وصفاً دائماً لشخصيتك','Treating first-meeting awkwardness as a permanent personal trait'],
   ['Sun Uranus Ascendant','تحويل اختلافك إلى اختيار ملموس له قيمة في حياتك','Turning individuality into a concrete and useful choice','معارضة المألوف لمجرد إثبات أنك مختلف','Rejecting convention simply to appear different'],
