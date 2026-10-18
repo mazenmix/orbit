@@ -36,7 +36,7 @@ Vendored Swiss module loading is separated from Vite transformation so its WASM/
 | Charts | Natal/transit/overlay SVG wheels, positions, speeds and cusps | v2.3.2 chart interaction design unknown |
 | Time Machine | Requested moment recalculation and 24-hour symbolic-index chart | Advanced convergence, secondary progressions, solar arcs, solar returns, profection narrative and heatmaps not ported |
 | Astrology extensions | Six minor bodies supported | 56 live/named asteroid augmentation, VOC root search, eclipse/event catalogue and notification schedules not ported |
-| Qwen3 | Inspectable minimal evidence packet; copy/download; optional Pages gateway, off by default | Inspected source uses optional GPT gateway models rather than Qwen3. Original v2.3.2 Qwen3 templates/runtime unavailable; hosted gateway end-to-end unverified without a configured endpoint |
+| Qwen3 | Actual Cloudflare-hosted Qwen3 through the AI binding, connection status, evidence-packet copy and optional custom gateway; live HTTP 200 Arabic explanation verified | Original v2.3.2 prompt templates and native llama.cpp runtime remain unavailable; hosted inference is not native on-device parity |
 | PWA | Install manifest and same-origin offline shell/assets | Browser/OS push notifications and native widget/watch integrations are not implemented |
 
 Core synastry tables preserve the source's pair-key entries exactly. Some source keys are not in the sorted pair-key order used by its lookup; no silent model corrections were introduced. Source score matching therefore must be distinguished from changing the scoring model.

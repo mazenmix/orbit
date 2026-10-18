@@ -40,3 +40,12 @@ See `SOURCE_AUDIT.md` for feature-level coverage.
 ## GitHub cloud validation
 
 The public repository's anonymous demo configuration passed all 20 automated tests and the production build on GitHub Actions. The `mx-orbit-web-build` artifact was uploaded successfully: https://github.com/mazenmix/orbit/actions/runs/39109236441 . Personal default birth data and the personal natal fixture were excluded from this public source. Development setup is provided for GitHub Codespaces; no local checkout is required.
+
+## Live Qwen3 integration — 2026-10-18
+
+- Qwen3 runs on Cloudflare Workers AI using `@cf/qwen/qwen3-30b-a3b-fp8` through the server-side `AI` binding.
+- The GitHub tests and production build passed for commit `b1a280396c489c96214b45c0134a42d8e088e4ca`; Cloudflare Pages deployed it successfully to the mxastro project.
+- `GET https://mxastro.pages.dev/api/explain` returned HTTP 200 with `configured: true` and `provider: cloudflare`.
+- An actual live POST using synthetic, nonpersonal evidence returned HTTP 200 and a generated Arabic explanation with the Qwen3 model identifier. No API key, model weights or project checkout were stored on the user's computer.
+- Six added gateway/Workers AI tests cover binding status, actual invocation shape using a mock binding, allowlisting, quota/error behavior, malformed JSON and hidden-reasoning exclusion; total automated test count is 26.
+- This validates the deployed server-side Qwen3 path, not native on-device llama.cpp parity or quality guarantees for every interpretation.
