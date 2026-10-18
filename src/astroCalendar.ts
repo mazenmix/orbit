@@ -1,14 +1,60 @@
-import type {Category} from './math.ts';
+import type {Evidence} from './math.ts';
 export type CalendarColor='green'|'yellow'|'orange'|'red';
 export type AstroCalendarDay={iso:string;year:number;month:number;day:number;weekday:number;monthKey:string};
-export type AstroCalendarRating={value:number;color:CalendarColor};
-/** Astrological visualization only. Four grades describe a *symbolic* mid-day
- * score, never an actual risk warning or empirical prediction of good/bad luck.
+export type AstroCalendarRating={
+ value:number;color:CalendarColor;favorableWeight:number;challengingWeight:number;considered:number;
+ strongestSupport:Evidence|null;strongestChallenge:Evidence|null;
+};
+/** User-facing fortune palette is a transparent *astrological* interpretation of
+ * precisely calculated natal-transit aspects, not a measurement of real luck.
+ * We do not invent contacts or label a day dangerous/unsafe.
+ *
+ * Trines and sextiles contribute favorable symbolism. Squares and oppositions
+ * contribute challenging symbolism. Conjunctions are favorable when Venus/
+ * Jupiter is transiting, challenging for Mars/Saturn/Pluto/Uranus; other
+ * conjunctions are neutral. Applying contacts have a small salience boost.
+ * A contact's score already incorporates planet relevance and proximity; we
+ * also expose the actual angular orb and the summed weights in the day detail.
  */
-export function colorizeAstroDay(scores:Record<Category,number>):AstroCalendarRating{
- const domain=(k:Category)=>{const n=scores[k];if(!Number.isFinite(n)||n<1||n>99)throw Error('Invalid day score');return n};
- const value=Math.round((2*domain('overview')+2*domain('timing')+domain('love')+domain('career')+domain('communication')+domain('energy')+domain('emotions')+domain('recovery'))/10);
- return {value,color:value>=68?'green':value>=56?'yellow':value>=44?'orange':'red'};
+export function fortuneContactTone(e:Evidence): -1|0|1{
+ if(e.angle===60||e.angle===120)return 1;
+ if(e.angle===90||e.angle===180)return -1;
+ if(e.angle===0){
+  if(e.transit.id==='Venus'||e.transit.id==='Jupiter')return 1;
+  if(['Mars','Saturn','Pluto','Uranus'].includes(e.transit.id))return -1;
+ }
+ return 0;
+}
+export function fortuneContactWeight(e:Evidence):number{
+ if(!Number.isFinite(e.orb)||!Number.isFinite(e.maximumOrb)||!Number.isFinite(e.weight)||
+    e.maximumOrb<=0||e.orb<0||e.orb>e.maximumOrb||e.weight<0||e.weight>1)
+  throw Error('Invalid calculated aspect');
+ const proximity=Math.max(0,1-e.orb/e.maximumOrb);
+ const relevance=['Sun','Moon','Ascendant'].includes(e.natal.id)?1.13:
+  ['Venus','Jupiter'].includes(e.natal.id)?1.08:1;
+ return e.weight*(.45+.55*proximity)*(e.applying?1.08:1)*relevance;
+}
+export function colorizeAstroDay(evidence:readonly Evidence[]):AstroCalendarRating{
+ let favorableWeight=0,challengingWeight=0,strongestSupport:Evidence|null=null,strongestChallenge:Evidence|null=null;
+ let highestSupport=0,highestChallenge=0,considered=0;
+ for(const e of evidence){
+  const tone=fortuneContactTone(e);
+  if(tone===0)continue;
+  const weight=fortuneContactWeight(e);
+  considered++;
+  if(tone===1){favorableWeight+=weight;if(weight>highestSupport){strongestSupport=e;highestSupport=weight}}
+  else {challengingWeight+=weight;if(weight>highestChallenge){strongestChallenge=e;highestChallenge=weight}}
+ }
+ // Neutral (50) if no active aspects. Shrink extreme scores when evidence is
+ // sparse so that a single weak contact never looks like certain good/bad luck.
+ const balance=(favorableWeight-challengingWeight)/(favorableWeight+challengingWeight+1.1);
+ const value=Math.max(1,Math.min(99,Math.round(50+44*balance)));
+ return {
+  value,color:value>=66?'green':value>=54?'yellow':value>=41?'orange':'red',
+  favorableWeight:Number(favorableWeight.toFixed(3)),
+  challengingWeight:Number(challengingWeight.toFixed(3)),considered,
+  strongestSupport,strongestChallenge
+ };
 }
 /** Exactly twelve calendar months from the visitor's today (exclusive of the
  * same date next year). Leap years and month lengths are handled in UTC. */
