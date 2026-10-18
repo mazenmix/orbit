@@ -207,3 +207,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .trend-item small{flex-basis:100%;font-size:12px}
 @media(max-width:1100px){.chart-expanded{grid-template-columns:1fr}.chart-stories{grid-template-columns:1fr}.owner-meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:570px){.owner-meta{grid-template-columns:1fr}.chart-expanded .large-wheel{padding:14px 7px}.chart-expanded .chart-wheel{width:100%;max-width:100%}.mini-trends{grid-template-columns:1fr}.chart-story{padding:15px}}
+
+/* Sharpen wheel hierarchy without making astronomical data less legible. */
+.chart-expanded .large-wheel{background:radial-gradient(circle at 50% 35%,#1d2742,#111725 70%);border:1px solid #414e72}
+.chart-expanded .large-wheel>h2{font-size:19px;color:#f3e6ff;letter-spacing:-.2px}
+.chart-expanded .chart-wheel{width:min(100%,720px);max-width:720px;display:block;filter:drop-shadow(0 9px 22px #07091380)}
+.chart-expanded .chart-wheel text{stroke:#0a1022;stroke-width:1.55px;stroke-linejoin:round;paint-order:stroke fill}
+.chart-expanded .chart-wheel text[font-size="29"]{stroke-width:1px}
+.chart-expanded .chart-wheel text[font-size="13"]{stroke-width:.8px}
+.chart-expanded .wheel-guide{font-size:14px;gap:18px;margin:16px auto;color:#d5e4f8}
+.chart-expanded .chart-side-reading{background:#151d31;border:1px solid #3b4664}
+@media(max-width:670px){.chart-expanded .large-wheel>h2{font-size:15px}.chart-expanded .large-wheel{padding:15px 7px}}
