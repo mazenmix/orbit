@@ -124,3 +124,19 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await context.close();
  });
 }
+
+
+test('six primary links and accessible feature tabs preserve deep links',async({page})=>{
+ await page.goto('/#today',{waitUntil:'domcontentloaded'});
+ await page.locator('.sidebar .nav-item').first().waitFor({timeout:75000});
+ await expect(page.locator('.sidebar .nav-item')).toHaveCount(6);
+ await page.locator('.sidebar [data-go="time"]').click();
+ await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toBeVisible();
+ await page.locator('.mx-section-tabs [data-go="lunar"]').click();
+ await expect(page.locator('.sidebar [data-go="time"]')).toHaveAttribute('aria-current','page');
+ await expect(page.locator('.mx-section-tabs .is-current')).toHaveAttribute('data-go','lunar');
+ await page.locator('.sidebar [data-go="chart"]').click();
+ await expect(page.locator('.mx-section-tabs [data-go="asteroids"]')).toBeVisible();
+ await page.goto('/#evidence',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.sidebar [data-go="intel"]')).toHaveAttribute('aria-current','page');
+});

@@ -19,3 +19,21 @@ test('Asteroid readings and evidence UI are narrative-first and confidential bir
  assert.ok(main.includes('asteroidReading(a,near'));assert.ok(main.includes('function evidencePage(){'));
  assert.ok(!main.includes('1985-03-29'));assert.ok(!main.includes('19:20'));
 });
+
+
+test('main navigation exposes six primary destinations without redundant sections',()=>{
+ assert.match(main,/const primaryRoutes=\['today','chart','people','time','intel','settings'\]/);
+ assert.match(main,/nav\(primaryRoutes\)/);
+ assert.match(main,/nav\(primaryRoutes,true\)/);
+ assert.ok(!main.includes("nav(['today','signals','people','chart'])"));
+ assert.ok(!main.includes("nav(['time','lunar','eclipses','asteroids','advanced','intel','evidence','ai','settings'])"));
+});
+test('grouped feature tabs preserve old deep links and keep evidence contextual',()=>{
+ for(const route of ["signals","asteroids","lunar","eclipses","advanced","ai","evidence"]){
+  assert.ok(main.includes("case '"+route+"'"),route+' deep link remains');
+ }
+ assert.match(main,/sectionTabs\(\)\+inner/);
+ assert.match(main,/data-go="evidence"/);
+ assert.match(main,/data-go="ai"/);
+ assert.ok(!main.includes('function annualOutlookUI()'));
+});
