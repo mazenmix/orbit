@@ -28,3 +28,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 
 .direct-advice p{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;margin:10px 0!important;padding:10px 0;border-top:1px solid #ffffff0a;max-width:75ch!important}.direct-advice b{font-size:12px;align-self:start;color:#c9b8ee}.direct-advice .good b{color:#8dd5b8}.direct-advice .careful b{color:#e4c28e}.direct-advice .do{color:#eee9fa}.optional-evidence{margin:24px 0;padding:16px;border:1px solid #34364b;border-radius:14px}.optional-evidence>summary{cursor:pointer;color:#c7b7e8}.optional-evidence .change-summary{border:0;padding:12px 0;margin:0}.signal-card small{font-size:12px}.signal-card{grid-template-columns:auto minmax(0,1fr)}
 @media(max-width:760px){.direct-advice p{grid-template-columns:1fr;gap:3px;font-size:14px!important;line-height:1.9!important}.direct-advice b{font-size:12px}.signal-card h3,.wide .signal-card h3{font-size:19px}.signal-card,.wide .signal-card{padding:22px 18px}.signal-icon{display:none}.signal-card{display:block}}
+
+/* Distinguish the anonymous sample from the visitor's natal chart. */
+.demo-notice{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 24px;border:1px solid #7c6aab77;background:#17172b;border-radius:15px;padding:18px 20px}
+.demo-notice strong{font-size:15px;color:#ecddff}.demo-notice p{font-size:13px;line-height:1.8;color:#b8b8cf;margin:6px 0 0}.demo-notice .secondary{flex-shrink:0}
+@media(max-width:760px){.demo-notice{display:block;padding:17px}.demo-notice p{font-size:13px}.demo-notice .secondary{margin-top:12px;width:100%}}
