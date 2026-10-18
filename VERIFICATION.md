@@ -36,3 +36,7 @@ Tested through the supported in-app browser:
 - Cloudflare deployment, DNS, custom-domain attachment and production TLS. No domain was selected and no publishing action occurred.
 
 See `SOURCE_AUDIT.md` for feature-level coverage.
+
+## GitHub cloud validation
+
+The public repository's anonymous demo configuration passed all 20 automated tests and the production build on GitHub Actions. The `mx-orbit-web-build` artifact was uploaded successfully: https://github.com/mazenmix/orbit/actions/runs/39109236441 . Personal default birth data and the personal natal fixture were excluded from this public source. Development setup is provided for GitHub Codespaces; no local checkout is required.
