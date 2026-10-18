@@ -1,0 +1,13 @@
+name = "mx-astro-eye"
+main = "workers/eye-worker.ts"
+compatibility_date = "2026-10-18"
+[triggers]
+crons = ["*/15 * * * *"]
+
+# Before deploying, bind your own D1 database as MX_SYNC_DB using wrangler CLI
+# or Cloudflare dashboard, and set the secrets:
+#   MX_VAPID_PRIVATE_JWK   (EC P-256 private JWK, JSON)
+#   MX_VAPID_PUBLIC_KEY    (base64url P-256 uncompressed public point)
+# Also add MX_PUSH_READY=true to the MX Astro Pages environment only AFTER
+# the scheduled worker is running and you have tested delivery on a real device.
+# Never put VAPID private keys or Cloudflare API tokens in this repository.
