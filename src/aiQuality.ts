@@ -3,7 +3,7 @@
  */
 import {bodies} from './math.ts';
 export type AIContact={transit:string;natal:string;angle:number;orb:number;applying:boolean};
-export type AIAdviceContext={language:'ar'|'en';support:AIContact|null;challenge:AIContact|null;events:readonly {kind:string;type:string;maximum:string}[];evidence?:readonly AIContact[];supplemental?:readonly AIContact[];strict?:boolean};
+export type AIAdviceContext={language:'ar'|'en';support:AIContact|null;challenge:AIContact|null;events:readonly {kind:string;type:string;maximum:string}[];evidence?:readonly AIContact[];supplemental?:readonly AIContact[];strict?:boolean;comparisonAvailable?:boolean};
 const normalized=(s:string)=>s.normalize('NFKC').toLocaleLowerCase().replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/[٠-٩]/g,v=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(v))).replace(/[۰-۹]/g,v=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(v)));
 const aliases:Record<string,string[]>={...Object.fromEntries(bodies.map(b=>[b[1],[b[1],b[2]]])),Ascendant:['Ascendant','الطالع'],MC:['MC','Midheaven','وسط السماء']};
 const escaped=(s:string)=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -37,6 +37,22 @@ export function unsafeAIGuesses(message:string,ctx:AIAdviceContext):string[]{
  if(/\b(?:in|enters?|entering)\s+(?:the\s+sign\s+of\s+)?(?:aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b|(?:في|ب)\s*(?:برج\s+)(?:الحمل|الثور|الجوزاء|السرطان|الاسد|العذراء|الميزان|العقرب|القوس|الجدي|الدلو|الحوت)|\b(?:house)\s+(?:\d|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth)|البيت\s+(?:\d|الاول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|الحادي|الثاني عشر)/u.test(message))problems.push('unsupplied-placement');
  if(ctx.evidence){
   const contacts=[...ctx.evidence,...(ctx.supplemental??[])];
+  if(ctx.strict&&!/symbolic|symbolism|رمزي|رمزية/u.test(message))problems.push('missing-symbolic-framing');
+  if(ctx.strict&&/تاثير مطبق|تاثيرات مطبقة|مدار\s+\d|يدور باتجاه (?:الدعم|التحدي)/u.test(message))problems.push('misleading-motion-terminology');
+  if(ctx.strict&&!ctx.comparisonAvailable&&/no (?:major |meaningful |material )?new (?:shifts?|changes?)|no (?:major |meaningful |material )?changes?|contacts (?:are |remain )?stable|مقارنة (?:يومية|اليومية|الساعة)|لا توجد تغييرات|ماكو تغييرات/u.test(message))problems.push('unsupplied-comparison');
+  for(const clause of message.split(/(?:[.!?](?!\d)|\n|;|؛|\bwhile\b|بينما|لكن)/u)){
+   const matching=contacts.filter(e=>mentions(clause,e.transit)&&mentions(clause,e.natal));
+   const pairKeys=new Set(matching.map(e=>e.transit+':'+e.natal));
+   // Bind a clear motion/orb claim to its own pair, rather than accepting an
+   // orb or phase merely because it belongs to another supplied contact.
+   if(pairKeys.size!==1)continue;
+   const applying=/\bapplying\b|يقترب|تقترب|باتجاه الدقة|في طور الاقتراب/u.test(clause);
+   const separating=/\bseparating\b|يبتعد|تبتعد|لا يقترب|لا تقترب|\bnot (?:currently )?applying\b/u.test(clause);
+   if((applying||separating)&&matching.every(e=>e.applying!==!separating))problems.push('wrong-contact-motion');
+   for(const m of clause.matchAll(/(?:orb|بفارق|بمسافة|فارق(?: زاوي)?|اورب)\s*(\d+(?:[.٫]\d+)?)/gu)){
+    if(matching.every(e=>Math.abs(e.orb-Number(m[1].replace('٫','.')))>.011))problems.push('wrong-contact-orb');
+   }
+  }
   const allowed=new Set(contacts.flatMap(e=>[e.transit,e.natal]));
   for(const id of Object.keys(aliases))if(!allowed.has(id)&&mentions(message,id))problems.push('invented-body:'+id);
   const terms:readonly (readonly [number,string])[]=[[0,'conjunct(?:ion)?|اقتران'],[60,'sextile|تسديس'],[90,'square|تربيع'],[120,'trine|تثليث'],[180,'oppos(?:ition|ite)|مقابلة']];

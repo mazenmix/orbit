@@ -5,7 +5,7 @@ const valid={language:'ar',evidence:[{transit:'Sun',natal:'Moon',angle:90,orb:.4
 test('AI is off without an explicitly configured gateway',async()=>{const r=await onRequestPost({request:req(valid),env:{}});assert.equal(r.status,503)});
 test('AI rejects requests from another origin',async()=>{const r=await onRequestPost({request:req(valid,'https://other.example'),env:{}});assert.equal(r.status,403)});
 test('AI rejects invalid numeric evidence before any network call',async()=>{const r=await onRequestPost({request:req({...valid,evidence:[{...valid.evidence[0],orb:-1}]}),env:{QWEN_GATEWAY_URL:'https://gateway.example/chat/completions'}});assert.equal(r.status,400)});
-test('gateway allowlist excludes profile data, uses server-selected model, strips reasoning',async()=>{const previous=globalThis.fetch;let sent:any;globalThis.fetch=async(_input,init)=>{sent=JSON.parse(String(init?.body));assert.equal((init?.headers as any).Authorization,'Bearer server-only-secret');return new Response(JSON.stringify({choices:[{message:{content:'<think>private reasoning</think>شرح اتصال الشمس تربيع القمر'}}]}),{headers:{'content-type':'application/json'}})};try{const r=await onRequestPost({request:req({...valid,name:'PRIVATE NAME',birthDate:'2000-01-01',coordinates:[33,44],model:'other-model',evidence:[{...valid.evidence[0],name:'PRIVATE NAME'}]}),env:{QWEN_GATEWAY_URL:'https://gateway.example/chat/completions',QWEN_GATEWAY_TOKEN:'server-only-secret',QWEN_MODEL:'qwen3:test'}});assert.equal(r.status,200);assert.equal(sent.model,'qwen3:test');assert.ok(!JSON.stringify(sent).includes('PRIVATE NAME'));assert.ok(!JSON.stringify(sent).includes('2000-01-01'));assert.equal((await r.json()).explanation,'شرح اتصال الشمس تربيع القمر')}finally{globalThis.fetch=previous}});
+test('gateway allowlist excludes profile data, uses server-selected model, strips reasoning',async()=>{const previous=globalThis.fetch;let sent:any;globalThis.fetch=async(_input,init)=>{sent=JSON.parse(String(init?.body));assert.equal((init?.headers as any).Authorization,'Bearer server-only-secret');return new Response(JSON.stringify({choices:[{message:{content:'<think>private reasoning</think>قراءة رمزية لاتصال الشمس تربيع القمر'}}]}),{headers:{'content-type':'application/json'}})};try{const r=await onRequestPost({request:req({...valid,name:'PRIVATE NAME',birthDate:'2000-01-01',coordinates:[33,44],model:'other-model',evidence:[{...valid.evidence[0],name:'PRIVATE NAME'}]}),env:{QWEN_GATEWAY_URL:'https://gateway.example/chat/completions',QWEN_GATEWAY_TOKEN:'server-only-secret',QWEN_MODEL:'qwen3:test'}});assert.equal(r.status,200);assert.equal(sent.model,'qwen3:test');assert.ok(!JSON.stringify(sent).includes('PRIVATE NAME'));assert.ok(!JSON.stringify(sent).includes('2000-01-01'));assert.equal((await r.json()).explanation,'قراءة رمزية لاتصال الشمس تربيع القمر')}finally{globalThis.fetch=previous}});
 
 test('status endpoint reports Cloudflare binding without exposing credentials',async()=>{
  const env={AI:{run:async()=>({})}};
@@ -26,9 +26,9 @@ test('Cloudflare Qwen3 runs with allowlisted evidence and symbolic indices only'
  const body=await r.json();assert.equal(body.provider,'cloudflare');assert.equal(body.explanation,'الشمس تربيع القمر؛ تفسير رمزي محسوب.');
 });
 test('Cloudflare legacy response shape is supported',async()=>{
- const env={AI:{run:async()=>({response:'الشمس تربيع القمر؛ الاتصال محسوب.'})}};
+ const env={AI:{run:async()=>({response:'الشمس تربيع القمر؛ قراءة رمزية محسوبة.'})}};
  const r=await onRequestPost({request:req(valid),env});
- assert.equal((await r.json()).explanation,'الشمس تربيع القمر؛ الاتصال محسوب.');
+ assert.equal((await r.json()).explanation,'الشمس تربيع القمر؛ قراءة رمزية محسوبة.');
 });
 test('model and quota failures return actionable errors without upstream secrets',async()=>{
  const env={AI:{run:async()=>{throw Error('sensitive provider diagnostic')}}};

@@ -24,6 +24,21 @@ test('Arabic aspect descriptions use normalized Arabic letters and diacritics',(
  const text='الزُهرة تثليث الشمس، لكن زحل تربيع القمر؛ الدلالات متعاكسة ضمن القراءة الرمزية.';
  assert.deepEqual(unsafeAIGuesses(text,ctx),[]);
 });
+test('real model failure: a separating contact cannot be described as applying, and another pair cannot authorize its orb',()=>{
+ const context={...ctx,support:{...support,applying:false},evidence:[{...support,applying:false},challenge]};
+ for(const text of ['Venus trine Sun is applying with orb 0.23°. However Saturn square Moon is separating with orb 0.80°. This is a symbolic reading.','Venus trine Sun is separating with orb 0.80°. This is a symbolic reading. However Saturn square Moon is separating with orb 0.80°. This is a symbolic reading.']){
+  assert.equal(reviewGeneratedAdvice(text,context).fallback,true,text);
+ }
+ const safe='Venus trine Sun is separating with orb 0.23°. However Saturn square Moon is separating with orb 0.80°. This is a symbolic reading.';
+ assert.deepEqual(unsafeAIGuesses(safe,context),[]);
+});
+test('real model failure: misleading Arabic translations and unsupported time-comparison claims are rejected',()=>{
+ for(const text of ['الزهرة تثليث الشمس، مع مدار 0.23 درجة وتاثير مطبق، لكن زحل تربيع القمر.','Venus trine Sun and Saturn square Moon give mixed symbolic themes. No major new shifts are indicated.']){
+  assert.equal(reviewGeneratedAdvice(text,ctx).fallback,true,text);
+ }
+ const text='Venus trine Sun and Saturn square Moon give mixed symbolic themes. No major new shifts are indicated.';
+ assert.equal(reviewGeneratedAdvice(text,{...ctx,comparisonAvailable:true}).fallback,false);
+});
 const req=(evidence:unknown[])=>new Request('https://orbit.example/api/explain',{method:'POST',headers:{origin:'https://orbit.example','content-type':'application/json'},body:JSON.stringify({language:'en',evidence})});
 test('AI endpoint rejects duplicated aspects, impossible per-body orbs and invented transiting angles before inference',async()=>{
  let calls=0;const env={AI:{run:async()=>{calls++;return {response:'unused'}}}};
