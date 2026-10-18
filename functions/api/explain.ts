@@ -1,3 +1,4 @@
+import {namedAsteroids} from '../../src/asteroids.ts';
 type Message={role:'system'|'user';content:string};
 type AIInput={messages:Message[];temperature:number;max_tokens:number;stream:false};
 type Env={AI?:{run:(model:string,input:AIInput)=>Promise<unknown>};QWEN_GATEWAY_URL?:string;QWEN_GATEWAY_TOKEN?:string;QWEN_MODEL?:string};
@@ -7,6 +8,7 @@ const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,
 const connection=(env:Env)=>env.QWEN_GATEWAY_URL?{configured:true,provider:'gateway',model:env.QWEN_MODEL??'qwen3'}:env.AI?{configured:true,provider:'cloudflare',model:CF_MODEL}:{configured:false,provider:'none',model:CF_MODEL};
 const bodies=new Set(['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Chiron','Ceres','Pallas','Juno','Vesta','Pholus','Ascendant','MC']);
 const categories=['overview','career','love','communication','energy','emotions','recovery','timing'];
+const originalAsteroids=new Map(namedAsteroids.map(x=>[x.name,x]));
 export const onRequestGet=({env}:Context)=>json(connection(env));
 export async function onRequestPost({request,env}:Context){
  const url=new URL(request.url);if(request.headers.get('origin')!==url.origin)return json({error:'Same-origin requests only.'},403);
@@ -27,6 +29,15 @@ export async function onRequestPost({request,env}:Context){
   const direction=[60,120].includes(e.angle)||(e.angle===0&&['Venus','Jupiter'].includes(e.transit))?'supportive':[90,180].includes(e.angle)||(e.angle===0&&['Saturn','Mars','Pluto','Uranus'].includes(e.transit))?'challenging':'neutral';
   evidence.push({transit:e.transit,natal:e.natal,angle:e.angle,orb:e.orb,applying:e.applying,weight:e.weight,direction});
  }
+ const extendedEvidence:{transit:string;natal:string;angle:number;orb:number;applying:boolean;areas:readonly string[]}[]=[];
+ if(input.extendedEvidence!==undefined){
+  if(!Array.isArray(input.extendedEvidence)||input.extendedEvidence.length>8)return json({error:'Invalid extended evidence.'},400);
+  for(const e of input.extendedEvidence){
+   const asteroid=originalAsteroids.get(e?.transit);
+   if(!asteroid||!bodies.has(e?.natal)||![0,60,90,120,180].includes(e.angle)||typeof e.orb!=='number'||!Number.isFinite(e.orb)||e.orb<0||e.orb>6||typeof e.applying!=='boolean')return json({error:'Invalid named asteroid evidence.'},400);
+   extendedEvidence.push({transit:asteroid.name,natal:e.natal,angle:e.angle,orb:Number(e.orb.toFixed(3)),applying:e.applying,areas:asteroid.areas});
+  }
+ }
  const indices:Record<string,number>={};
  for(const c of categories){const v=input.indices?.[c];if(typeof v==='number'&&Number.isFinite(v)&&v>=1&&v<=99)indices[c]=v}
  const strongestSupporting=evidence.filter(e=>e.direction==='supportive').sort((a,b)=>b.weight-a.weight)[0]??null;
@@ -44,10 +55,10 @@ export async function onRequestPost({request,env}:Context){
   const changed=Array.isArray(raw.changed)?raw.changed.filter((v:any)=>safeKey(v?.contact)&&[v.orbBefore,v.orbNow].every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=6)&&typeof v.applying==='boolean').slice(0,12).map((v:any)=>({contact:v.contact,labels:contactLabel(v.contact),orbBefore:v.orbBefore,orbNow:v.orbNow,applying:v.applying})):[];
   return [period,{entered,exited,changed,stable:!entered.length&&!exited.length&&!changed.length}];
  }));
- const system=`You are a cautious astrology interpretation assistant writing in ${input.language==='ar'?'natural Iraqi Arabic':'natural English'}. The application supplies computed symbolic transits, not scientific predictions, event probabilities, or a way to know another person's feelings. Respond with TWO short paragraphs, about 80-130 words total, in clear natural language. First paragraph: explain WHY NOW using the strongestSupporting and strongestChallenging contacts exactly as supplied; cite only those actual transit/natal labels, major angle, current orb and applying/separating state. If either factor is null, explicitly say its side of evidence is absent, never invent one. If both positive and challenging factors exist, explicitly call the reading mixed rather than claiming a guaranteed favorable or unfavorable outcome. If the comparison is stable, state that no meaningful new change was observed in the leading contacts; otherwise describe the provided changes without inventing signs, house positions, extra people or exact future peak dates. Second paragraph: provide one small realistic, reversible action fitting the actual context (love/relationships, communication, work decisions, rest/energy or timing), explain what observation would let the user evaluate it, and do not assume anyone's thoughts, desire or intentions. Never invent celestial data or claim 70%, 90%, 100% accuracy; do not confuse scores with calibrated probabilities. Avoid generic praise, mysticism presented as fact, illness diagnoses, financial predictions, manipulation, coercion or fear. Do not expose chain-of-thought or think tags. /no_think`;
+ const system=`You are a cautious astrology interpretation assistant writing in ${input.language==='ar'?'natural Iraqi Arabic':'natural English'}. The application supplies computed symbolic transits, not scientific predictions, event probabilities, or a way to know another person's feelings. Respond with TWO short paragraphs, about 80-130 words total, in clear natural language. First paragraph: explain WHY NOW using the strongestSupporting and strongestChallenging contacts exactly as supplied; cite only those actual transit/natal labels, major angle, current orb and applying/separating state. If either factor is null, explicitly say its side of evidence is absent, never invent one. If both positive and challenging factors exist, explicitly call the reading mixed rather than claiming a guaranteed favorable or unfavorable outcome. If the comparison is stable, state that no meaningful new change was observed in the leading contacts; otherwise describe the provided changes without inventing signs, house positions, extra people or exact future peak dates. Second paragraph: provide one small realistic, reversible action fitting the actual context (love/relationships, communication, work decisions, rest/energy or timing), explain what observation would let the user evaluate it, and do not assume anyone's thoughts, desire or intentions. Never invent celestial data or claim 70%, 90%, 100% accuracy; do not confuse scores with calibrated probabilities. Avoid generic praise, mysticism presented as fact, illness diagnoses, financial predictions, manipulation, coercion or fear. If supplemental named-asteroid contacts are supplied, they are verified calculations but only SECONDARY symbolic overlays. Mention at most two by name as non-predictive context. Never make unsupported claims from missing extended data. Do not expose chain-of-thought or think tags. /no_think`;
  const describe=(e:Factor|null)=>e?{transit:e.transit,natal:e.natal,transitLabel:label(e.transit),natalLabel:label(e.natal),angle:e.angle,orb:Number(e.orb.toFixed(3)),applying:e.applying,direction:e.direction}:null;
  const symbolicIndices=Object.fromEntries(Object.entries(indices).map(([k,v])=>[k,String(v)+'/100 (symbolic index, not a probability)']));
- const messages:Message[]=[{role:'system',content:system},{role:'user',content:JSON.stringify({calculatedAt,comparison,indices:symbolicIndices,strongestSupporting:describe(strongestSupporting),strongestChallenging:describe(strongestChallenging),evidence:evidence.map(describe)})+'\n/no_think'}];
+ const messages:Message[]=[{role:'system',content:system},{role:'user',content:JSON.stringify({calculatedAt,comparison,indices:symbolicIndices,strongestSupporting:describe(strongestSupporting),strongestChallenging:describe(strongestChallenging),evidence:evidence.map(describe),supplementalNamedAsteroids:extendedEvidence})+'\n/no_think'}];
  try{
   let result:any;
   if(status.provider==='gateway'){
