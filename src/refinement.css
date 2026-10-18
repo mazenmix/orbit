@@ -92,3 +92,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .journal-form>button{justify-self:start}.journal-stat{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;padding:14px;background:#171b2d;border-radius:12px}.journal-calibration{font-size:13px;border-inline-start:3px solid #9381b8;padding-inline-start:12px}
 .journal-calibration small{display:block}.journal-rows{display:grid;gap:10px;margin:16px 0}.journal-entry{display:flex;justify-content:space-between;gap:12px;padding:15px;border-radius:12px;border:1px solid #31374d}.journal-entry b{font-size:13px}.journal-entry small{display:block;margin-top:5px}.journal-entry p{margin:8px 0;font-size:14px;overflow-wrap:anywhere}
 @media(max-width:760px){.journal-form{grid-template-columns:1fr}.journal-stat{display:grid;gap:6px}}
+
+.asteroids-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}
+.asteroid-item{border:1px solid #353950;background:#171a2d;border-radius:12px;padding:15px;min-width:0;display:grid;gap:5px}
+.asteroid-item b{font-size:17px;color:#f3edff}.asteroid-item span{font-size:11px;color:#d0c7e8}.asteroid-item small{font-size:12px;color:#a3a8c5}.asteroid-item code{font-size:11px;overflow-wrap:anywhere;color:#a3dfdb}
+@media(max-width:900px){.asteroids-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:550px){.asteroids-grid{grid-template-columns:1fr}}
