@@ -1,0 +1,82 @@
+/* MX Astro premium Moon/Eclipse/Intelligence — native DOM; actual ephemeris dates. */
+.lunar-premium-grid,.eclipse-premium-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.lunar-premium-card,.eclipse-premium,.lunar-advice-card,.lunar-timeline{background:linear-gradient(148deg,#192033,#121727 76%);border:1px solid #343b57;border-radius:18px;box-shadow:0 12px 26px #03061122}
+.lunar-premium-card{position:relative;overflow:hidden;border-top:2px solid #7457b6;padding:24px}
+.lunar-premium-card:first-child{border-top-color:#dbb478}
+.lunar-premium-card::before{content:"";position:absolute;width:230px;height:230px;border-radius:50%;inset:auto -125px -140px auto;background:radial-gradient(circle,#7b53d823,transparent 70%);pointer-events:none}
+.lunar-card-heading{display:flex;align-items:center;gap:15px;min-height:64px}
+.lunar-card-heading>div{flex:1;min-width:0}
+.lunar-card-heading small{display:block;font-size:11px;letter-spacing:1.2px;color:#b7a1dc}
+.lunar-card-heading h2{font-size:20px;font-weight:750;color:#f6e6ff;line-height:1.45}
+.lunar-emblem{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;font-size:43px;color:#f5ca8a;background:linear-gradient(130deg,#3a2942,#1c1c30);border:1px solid #694c66;box-shadow:0 0 17px #e6a74a25}
+.lunar-emblem.violet{color:#c9a8f7;background:linear-gradient(130deg,#33234f,#1c1b37);border-color:#674691}
+.lunar-state{padding:5px 11px;font-size:11px;border-radius:40px;background:#264337;color:#a8e5c3;border:1px solid #3b6356;white-space:nowrap}
+.lunar-premium-card.is-voc .lunar-state{background:#573e35;color:#f2c290;border-color:#866048}
+.lunar-premium-card>p{font-size:13px;margin:16px 0;color:#bec4d9;min-height:70px}
+.premium-time-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:19px}
+.premium-time-tile{min-width:0;border:1px solid #4a425d;border-radius:12px;padding:16px 13px;background:linear-gradient(140deg,#24243a,#151a2e);display:flex;flex-direction:column;gap:8px;justify-content:space-between}
+.premium-time-tile.lunar-violet{border-color:#6b4b9e;background:linear-gradient(140deg,#2d2147,#18172f)}
+.premium-time-tile.lunar-gold{border-color:#796344;background:linear-gradient(140deg,#2c2631,#171b29)}
+.premium-time-tile.lunar-teal{border-color:#386d70;background:linear-gradient(140deg,#1f373b,#161f2d)}
+.time-tile-top{display:flex;gap:8px;align-items:center}.time-tile-top span{font-size:19px;line-height:1;color:#dcc5ff}.lunar-gold .time-tile-top span{color:#f6d28b}.lunar-teal .time-tile-top span{color:#8bdcc9}
+.time-tile-top small{font-size:11px;color:#c9c0d8;line-height:1.55}
+.premium-time-tile time{display:block;direction:ltr;unicode-bidi:plaintext;text-align:start;font-variant-numeric:tabular-nums;font-size:14px;line-height:1.6;font-weight:800;color:#f3e5ff}
+.premium-time-tile.lunar-gold time{color:#f6d19a}.premium-time-tile.lunar-teal time{color:#a3ead8}
+.time-tile-zone{font-size:10px;color:#8b9bb7;letter-spacing:.15px}
+.lunar-advice-card{margin:17px 0;padding:25px;border-inline-start:3px solid #b399e7}
+.lunar-advice-head{display:flex;justify-content:space-between;align-items:center;gap:14px}.lunar-advice-head h2{font-size:21px}.lunar-advice-badge{font-size:11px;border-radius:50px;color:#d2b7f8;padding:6px 12px;background:#352a50}
+.lunar-advice-card>p{font-size:14px}
+.lunar-last-aspect{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin:15px 0 18px;padding:15px;border:1px solid #383d60;background:#111729;border-radius:12px}
+.lunar-last-aspect small{font-size:11px;color:#acaec9}.lunar-last-aspect strong{font-size:14px;color:#e8d4ff}.lunar-last-aspect time{margin-inline-start:auto;color:#f6cb8d;font-size:12px;font-variant-numeric:tabular-nums}
+.lunar-timeline{margin-top:16px}
+.premium-timeline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:10px 0 20px}
+.timeline-entry{border:1px solid #38425e;border-radius:11px;background:#171d30;padding:15px;display:flex;gap:12px;align-items:center}
+.timeline-dot{width:10px;height:10px;border-radius:50%;background:#ae8cff;box-shadow:0 0 12px #aa72fb;flex:none}
+.timeline-entry div{display:grid;gap:5px}.timeline-entry b{font-size:13px;color:#e6d8ff}.timeline-entry time{font-size:12px;color:#b8cce0;font-variant-numeric:tabular-nums}
+.lunar-timeline details summary{color:#ac9fc3;font-size:12px;cursor:pointer}
+.eclipse-overview{display:flex;justify-content:space-between;gap:18px;align-items:center;background:radial-gradient(circle at 8% 14%,#795fbb1a,transparent 45%),linear-gradient(135deg,#1b2138,#111626);border-color:#414466;margin-bottom:18px}
+.eclipse-overview-main{display:flex;align-items:center;gap:19px}
+.eclipse-overview h2{font-size:19px;color:#f0e5ff}.eclipse-overview p{font-size:13px;margin:8px 0 0}
+.eclipse-eye-mark{display:grid;place-items:center;flex:none;width:69px;height:69px;font-size:40px;border-radius:18px;background:#372744;border:1px solid #72569c;color:#edc182;text-shadow:0 0 15px #f6bb5c}
+.eclipse-overview button{flex:none;font-size:12px}
+.eclipse-premium{padding:23px;position:relative;overflow:hidden}
+.eclipse-premium.eclipse-solar{border-top:3px solid #e7b46f}.eclipse-premium.eclipse-lunar{border-top:3px solid #ab92f8}
+.eclipse-premium:before{content:"";position:absolute;inset:-40px -70px auto auto;height:200px;width:200px;border-radius:50%;background:radial-gradient(circle,#a874eb1a,transparent 70%);pointer-events:none}
+.eclipse-premium-head{display:flex;align-items:center;gap:13px;min-height:70px}
+.eclipse-premium-head>div:nth-child(2){flex:1}
+.eclipse-premium-head .eyebrow{font-size:10px;color:#b5a2d6;letter-spacing:1.1px}
+.eclipse-premium-head h2{font-size:21px;color:#f0e9ff}
+.eclipse-icon-art{height:64px;width:64px;display:grid;place-items:center;border-radius:15px;background:#24213a;border:1px solid #554568}
+.eclipse-icon-art svg{width:61px;height:61px}
+.eclipse-icon-art.sun{box-shadow:inset 0 0 15px #f1ad641e}.eclipse-icon-art.moon{box-shadow:inset 0 0 15px #9779ff24}
+.eclipse-type{font-size:12px;color:#f3ce9d;background:#4e3a35;border-radius:30px;padding:5px 12px;border:1px solid #715444}
+.eclipse-lunar .eclipse-type{background:#342c58;border-color:#5c4a8a;color:#d7c3ff}
+.eclipse-maximum{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:18px;margin:16px 0;background:linear-gradient(120deg,#121d31,#1a1a31);border:1px solid #45415c;border-radius:13px}
+.eclipse-maximum>span{font-size:11px;letter-spacing:.7px;color:#bcb4dc}
+.eclipse-maximum time{font-size:19px;color:#f5d394;font-weight:850;direction:ltr;unicode-bidi:plaintext;font-variant-numeric:tabular-nums;text-align:start;line-height:1.4}
+.eclipse-lunar .eclipse-maximum time{color:#d2bcff}
+.eclipse-maximum small{font-size:11px;color:#a7a0be}
+.eclipse-narrative{font-size:12px;line-height:1.85;min-height:55px}
+.eclipse-steps{padding:12px 15px;margin:12px 0;border:1px solid #3e4160;border-radius:12px;background:#141b2d}
+.eclipse-steps summary,.eclipse-position summary{font-size:12px;color:#d6c5f6;cursor:pointer}
+.eclipse-phase-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:13px 0}
+.eclipse-stage{display:flex;flex-direction:column;gap:5px;border:1px solid #3b415d;border-radius:9px;padding:12px;background:#1c2437}
+.eclipse-stage small{color:#b3b2cb;font-size:11px}.eclipse-stage time,.eclipse-stage>span{direction:ltr;unicode-bidi:plaintext;font-weight:750;color:#e0d7ef;font-size:12px;font-variant-numeric:tabular-nums}
+.eclipse-stage.not-available{opacity:.55}
+.eclipse-position{margin:10px 0}.eclipse-position span{display:block;color:#aabdd9;font-size:11px;padding:9px}
+.eclipse-open-time{margin-top:10px;font-size:12px}
+.eclipse-secondary{margin-top:20px}.eclipse-secondary summary{font-size:13px;color:#c4b5de}
+.metrics-grid .metric-card,.go-grid .go-card{position:relative;--mx-gauge:#ab99ec;--mx-gauge-border:#5c537e;--mx-gauge-wash:#644ca414;transition:background .2s ease,border-color .2s ease}
+.metrics-grid .metric-card.strong,.go-grid .go-card.strong{--mx-gauge:#61e5a9;--mx-gauge-border:#3c8c71;--mx-gauge-wash:#2ca77120}
+.metrics-grid .metric-card.steady,.go-grid .go-card.steady{--mx-gauge:#b0dc8a;--mx-gauge-border:#778d58;--mx-gauge-wash:#709a5120}
+.metrics-grid .metric-card.caution,.go-grid .go-card.caution{--mx-gauge:#edab67;--mx-gauge-border:#aa764c;--mx-gauge-wash:#be7c3524}
+.metrics-grid .metric-card.low,.go-grid .go-card.low{--mx-gauge:#ef7970;--mx-gauge-border:#9d4b52;--mx-gauge-wash:#ba404528}
+.metrics-grid .metric-card{border:1px solid var(--mx-gauge-border);background:linear-gradient(148deg,var(--mx-gauge-wash),#121b2c);box-shadow:inset 0 0 13px var(--mx-gauge-wash)}
+.metrics-grid .metric-card b{font-size:23px;color:var(--mx-gauge);text-shadow:0 0 14px color-mix(in srgb,var(--mx-gauge),transparent 78%)}
+.metrics-grid .metric-card .meter{background:#30384a;height:6px;border-radius:5px;overflow:hidden}
+.metrics-grid .metric-card .meter i{background:var(--mx-gauge);box-shadow:0 0 12px var(--mx-gauge);height:100%}
+.go-grid .go-card{border:1px solid var(--mx-gauge-border);background:linear-gradient(150deg,var(--mx-gauge-wash),#161c2d)}
+.go-grid .go-card strong{color:var(--mx-gauge)!important;text-shadow:0 0 18px color-mix(in srgb,var(--mx-gauge),transparent 70%);font-variant-numeric:tabular-nums}
+.go-grid .go-card .go-decision{font-size:12px;border-top:1px solid #3c405b;padding-top:10px;line-height:1.75}
+@media(max-width:900px){.lunar-premium-grid,.eclipse-premium-grid{grid-template-columns:1fr}.eclipse-overview{flex-direction:column;align-items:stretch}.eclipse-overview button{align-self:flex-start}}
+@media(max-width:600px){.lunar-premium-card,.eclipse-premium{padding:17px}.premium-time-pair,.premium-timeline,.eclipse-phase-grid{grid-template-columns:1fr}.lunar-card-heading h2{font-size:17px}.lunar-advice-head{align-items:flex-start;flex-direction:column}.eclipse-overview-main{align-items:flex-start}.eclipse-eye-mark{width:52px;height:52px}.eclipse-maximum time{font-size:16px}}
