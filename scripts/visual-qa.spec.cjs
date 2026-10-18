@@ -126,15 +126,14 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
 }
 
 
-test('six primary links and accessible feature tabs preserve deep links',async({page})=>{
+test('primary links and accessible feature tabs preserve deep links',async({page})=>{
  await page.goto('/#today',{waitUntil:'domcontentloaded'});
  await page.locator('.sidebar .nav-item').first().waitFor({timeout:75000});
- await expect(page.locator('.sidebar .nav-item')).toHaveCount(7);
+ await expect(page.locator('.sidebar .nav-item')).toHaveCount(8);
  await page.locator('.sidebar [data-go="time"]').click();
- await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toBeVisible();
- await page.locator('.mx-section-tabs [data-go="lunar"]').click();
- await expect(page.locator('.sidebar [data-go="time"]')).toHaveAttribute('aria-current','page');
- await expect(page.locator('.mx-section-tabs .is-current')).toHaveAttribute('data-go','lunar');
+ await expect(page.locator('.mx-section-tabs [data-go="advanced"]')).toBeVisible();
+ await page.locator('.sidebar [data-go="lunar"]').click();
+ await expect(page.locator('.sidebar [data-go="lunar"]')).toHaveAttribute('aria-current','page');
  await page.locator('.sidebar [data-go="chart"]').click();
  await expect(page.locator('.mx-section-tabs [data-go="asteroids"]')).toBeVisible();
  await page.goto('/#evidence',{waitUntil:'domcontentloaded'});
@@ -149,4 +148,24 @@ test('Qwen3 automatically displays only one read-only text panel',async({page})=
  await expect(page.locator('#copy-prompt')).toHaveCount(0);
  await expect(page.locator('.ai-intro')).toHaveCount(0);
  await expect(page.locator('.sidebar [data-go="intel"]')).toHaveAttribute('aria-current','page');
+});
+
+test('twelve-month calendar is accessible and progress fills individual days',async({page})=>{
+ await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.astro-cal-hero')).toBeVisible({timeout:75000});
+ const dates=await page.locator('[data-calendar-date]').count();
+ expect(dates).toBeGreaterThanOrEqual(365);expect(dates).toBeLessThanOrEqual(366);
+ await expect(page.locator('.astro-cal-month')).toHaveCount(13);
+ await expect(page.locator('.astro-cal-day:not(.astro-pending)').first()).toBeVisible({timeout:75000});
+ await page.locator('[data-calendar-date]').nth(1).click();
+ await expect(page.locator('#astro-calendar-detail')).toBeVisible();
+ await expect(page.locator('.astro-cal-day.is-selected')).toHaveCount(1);
+});
+test('MX Ai has new indicators and useful moon explanations',async({page})=>{
+ await page.goto('/#intel',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.metric-card')).toHaveCount(29,{timeout:75000});
+ await page.goto('/#lunar',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.mx-lunar-explained')).toBeVisible({timeout:75000});
+ const count=await page.locator('.timeline-entry').count();
+ if(count)await expect(page.locator('.mx-lunar-aspect-story')).toHaveCount(count);
 });

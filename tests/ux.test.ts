@@ -56,3 +56,15 @@ test('automatic Qwen reading resets promptly when active profile or language swi
 });
 
 test('calendar is a dedicated route and MX Ai has 29 indices',()=>{assert.ok(main.includes("case 'calendar':inner=astroCalendarPage()"));assert.ok(main.includes("t('MX Ai','MX Ai')"));assert.ok(main.includes("مصفوفة المؤشرات الـ29"));});
+
+test('lunar explanations are anchored to actual aspect events, not raw angles alone',()=>{
+ assert.ok(main.includes('function moonMomentNarrative('));
+ assert.ok(main.includes('function moonAspectNarrative('));
+ assert.ok(main.includes('mx-lunar-aspect-story'));
+});
+test('Go-mode uses unique domain-specific recommendations rather than repetitive filler',()=>{
+ assert.ok(main.includes('function mxGoNarrative('));
+ assert.ok(!main.includes("t('اسأل عن التفاصيل قبل القرار'"));
+ assert.ok(!main.includes('تظهر زاوية رمزية داعمة؛ استثمرها بخطوة محدودة'));
+ assert.ok(main.includes('mxGoNarrative(d.domain,state,memo)'));
+});

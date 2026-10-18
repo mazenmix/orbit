@@ -91,3 +91,11 @@ input:focus,select:focus,textarea:focus{outline:1px solid #bc97ff;border-color:#
 .mx-qwen-live-copy .mx-qwen-paragraph:last-child{margin-bottom:0}
 .mx-qwen-live-copy .mx-qwen-placeholder{color:#c6bad8;font-size:14px;line-height:1.9;min-height:75px;margin:0}
 @media(max-width:760px){.mx-qwen-live{min-height:180px;margin-top:4px;padding:22px 18px!important}.mx-qwen-live-copy{font-size:15px;line-height:2}}
+
+.mx-lunar-explained{font-size:14px!important;line-height:2!important;color:#e8e1f0!important;padding:16px 19px;border-inline-start:3px solid #ebc98f;background:linear-gradient(90deg,#a38b4220,transparent);border-radius:11px}
+.mx-lunar-timeline-lead{line-height:1.8;color:#cec3da;font-size:12px;margin-bottom:18px}
+.mx-lunar-aspect-story{margin-top:9px!important;font-size:12px!important;line-height:1.85!important;color:#e4d9ed!important;max-width:73ch}
+.mx-aspect-phase{display:inline-block;font-size:10px;border:1px solid #635173;border-radius:7px;padding:3px 7px;margin-inline:7px;color:#d7c2f0}
+.mx-aspect-upcoming .mx-aspect-phase{color:#a7edda;border-color:#3e937e}
+.mx-aspect-past{opacity:.84}
+.go-card .go-decision{font-size:12px;line-height:1.8;margin:12px 0 0;color:#ece3f7}
