@@ -40,3 +40,21 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .lunar-stat p{font-size:14px;line-height:1.9;color:#bfc3dc}.lunar-stat b{color:#efeffa}
 .lunar-events{display:grid;gap:10px;margin:20px 0}.lunar-events>div{display:flex;justify-content:space-between;gap:12px;padding:13px 12px;border-radius:12px;background:#171a2b;color:#e9e4f4}.lunar-events span{color:#b4b9d1}
 @media(max-width:760px){.lunar-grid{grid-template-columns:1fr}.lunar-events>div{display:grid;gap:5px}.lunar-stat h2{font-size:21px}}
+
+/* MX Intelligence — derived metrics, never probabilities */
+.go-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:20px}
+.go-card{border:1px solid #41465f;border-radius:14px;background:#171a2b;padding:17px;min-width:0}
+.go-card.go{border-color:#538f7b}.go-card.check{border-color:#948063}.go-card.hold{border-color:#8c626e}
+.go-card small{font-size:10px;color:#c7b8e5}.go-card h3{font-size:17px;margin:12px 0 6px}
+.go-card strong{font-size:34px;color:#f2edff;font-variant-numeric:tabular-nums}.go-card em,.metric-card em{font-size:11px;color:#9b9fbb;font-style:normal}
+.go-card p{font-size:13px;line-height:1.7;color:#cfcce2}.go-card span{font-size:10px;color:#989eb9}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.intel-evidence{border:1px solid #383b52;border-radius:12px;padding:17px;background:#15192b}
+.intel-evidence b{font-size:14px}.intel-evidence p{font-size:13px;line-height:1.9;color:#deddf0}.intel-evidence small{font-size:11px;color:#aaa9c9}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:18px 0}
+.metric-card{border-radius:13px;border:1px solid #343850;background:#16192b;padding:16px;min-width:0}
+.metric-card>b{font-size:25px;display:block;margin:7px 0}.metric-card small{font-size:12px;color:#d3cee7}
+.metric-card details{font-size:11px;color:#959bc4;margin-top:10px}.metric-card summary{cursor:pointer}
+.metric-card code{font-size:10px;overflow-wrap:anywhere}
+@media(max-width:1100px){.go-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.go-grid,.why-grid{grid-template-columns:1fr}.metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metric-card{padding:12px}.metric-card>b{font-size:23px}}
