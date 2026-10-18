@@ -34,7 +34,7 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
   const validList=(v:unknown)=>Array.isArray(v)&&v.length>=1&&v.length<=3&&v.every(x=>validText(x,3,250));
   if(!validText(parsed.summary,8,400)||!validText(parsed.detailedAnalysis,20,950)||!validList(parsed.strengths)||!validList(parsed.challenges)||!validList(parsed.practicalInsights)||!validList(parsed.reflectionQuestions))return respond({error:'Incomplete Qwen3 interpretation'},502);
   const all=[parsed.summary,parsed.detailedAnalysis,...parsed.strengths,...parsed.challenges,...parsed.practicalInsights,...parsed.reflectionQuestions];
-  const normalize=(x:string)=>x.normalize('NFKC').toLocaleLowerCase().replace(/[\\p{P}\\p{S}\\s]+/gu,'');
+  const normalize=(x:string)=>x.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
   if(new Set(all.map(normalize)).size!==all.length)return respond({error:'Qwen3 repeated the same passage'},502);
   return respond({topicId:selected.id,summary:parsed.summary,detailedAnalysis:parsed.detailedAnalysis,strengths:parsed.strengths,challenges:parsed.challenges,practicalInsights:parsed.practicalInsights,reflectionQuestions:parsed.reflectionQuestions,astrologicalEvidence:basis,provider:'qwen3'});
  }catch{return respond({error:'Qwen3 service currently unavailable'},503)}
