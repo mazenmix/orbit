@@ -1,0 +1,52 @@
+/* MX Astro — professional selected-person natal dossier and detailed zodiac wheel. */
+.mx-chart-owner{position:relative;overflow:hidden;margin-bottom:20px;padding:22px!important;background:radial-gradient(ellipse at 12% 0%,#6f459826,transparent 58%),linear-gradient(130deg,#171c32,#101727 80%)!important;border:1px solid #594777!important;border-radius:19px!important;box-shadow:0 14px 32px #02051233,inset 0 1px 0 #e4c2ff18!important}
+.mx-chart-owner:before{position:absolute;content:"";height:2px;left:5%;right:5%;top:0;background:linear-gradient(90deg,transparent,#b17cff,#f3ce91,#87e4d4,transparent);opacity:.85}
+.mx-chart-owner-top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+.mx-chart-owner-title{display:flex;align-items:center;gap:13px;min-width:0}
+.mx-chart-owner-title>div{min-width:0}
+.mx-chart-owner-title h2{font-size:23px;font-weight:830;margin:2px 0;color:#f2eaff;overflow-wrap:anywhere}
+.mx-chart-owner-title small{font-size:11px;color:#a8b0d1}
+.mx-profile-avatar{flex:none;height:54px;width:54px;border-radius:16px;background:linear-gradient(135deg,#7559c5,#382a68);display:grid;place-items:center;font-size:25px;font-weight:850;color:#f4d8ff;border:1px solid #ac89e8;box-shadow:0 0 22px #8854e849}
+.mx-chart-person-picker{display:grid;gap:5px;min-width:min(100%,280px);max-width:100%;color:#d3c5ee}
+.mx-chart-person-picker>span{font-size:10px;font-weight:800;letter-spacing:1px;color:#c1a1f0}
+.mx-chart-person-picker select{max-width:100%;min-width:245px;min-height:43px;background:#14182e;border:1px solid #74599e;border-radius:11px;padding:8px 12px;font-size:13px;color:#f3edff;box-shadow:0 0 12px #7759a518}
+.mx-chart-person-picker small{font-size:10px;color:#999abf}
+.mx-chart-meta-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.mx-chart-meta-card{--meta:#b98cff;--metaBg:#38224f;background:linear-gradient(148deg,color-mix(in srgb,var(--metaBg),#1c253a 36%),#121a2e);border:1px solid color-mix(in srgb,var(--meta),#34384c 58%);border-radius:13px;padding:13px 12px;min-width:0;min-height:91px;display:flex;align-items:center;gap:10px;box-shadow:inset 0 1px 0 #ffffff11,0 6px 13px #0002;transition:border-color .2s,transform .2s}
+.mx-chart-meta-card:hover{transform:translateY(-2px);border-color:var(--meta)}
+.mx-meta-profile{--meta:#bc91fb;--metaBg:#392650}
+.mx-meta-gender{--meta:#f0adcf;--metaBg:#442a49}
+.mx-meta-birth{--meta:#f3c98b;--metaBg:#42352d}
+.mx-meta-time{--meta:#88d7e6;--metaBg:#224252}
+.mx-meta-place{--meta:#8ee4c3;--metaBg:#20433c}
+.mx-meta-icon{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:23px;font-weight:750;line-height:1;color:var(--meta);background:color-mix(in srgb,var(--meta),transparent 90%);text-shadow:0 0 10px color-mix(in srgb,var(--meta),transparent 45%);border:1px solid color-mix(in srgb,var(--meta),transparent 75%)}
+.mx-meta-copy{min-width:0;display:flex;flex-direction:column;gap:3px}
+.mx-meta-label{font-size:10px!important;font-weight:800;letter-spacing:.4px;color:#b7bad3!important;line-height:1.3}
+.mx-meta-copy b{font-size:13px!important;color:#f6f0ff!important;line-height:1.4;overflow-wrap:anywhere;font-weight:780}
+.mx-meta-copy small{font-size:10px;color:#9eabc5;line-height:1.3;overflow-wrap:anywhere}
+.chart-expanded{grid-template-columns:minmax(0,1.4fr) minmax(290px,.65fr);gap:16px}
+.chart-expanded .large-wheel{padding:23px 15px!important;background:radial-gradient(circle at 50% 40%,#26223d,#131a2b 67%,#0e1423)!important;border:1px solid #5c4b80!important}
+.chart-expanded .chart-wheel{display:block;width:100%;max-width:810px;margin:15px auto 8px;overflow:visible;filter:drop-shadow(0 6px 19px #0304118c)}
+.chart-expanded .chart-wheel text{paint-order:stroke fill;stroke:#0e1626;stroke-width:1.25px;stroke-linejoin:round}
+.chart-expanded .chart-wheel g.wheel-planet text{stroke-width:1.7px}
+.chart-expanded .large-wheel>p{font-size:12px;text-align:center;color:#a9acc9;margin:11px 0}
+.mx-aspect-legend{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 14px;margin:13px auto;color:#bec4d9;font-size:11px}
+.mx-aspect-legend span{white-space:nowrap}.mx-aspect-legend span:before{content:"";display:inline-block;vertical-align:middle;border-radius:3px;width:17px;height:3px;background:#afa6c8;margin-inline-end:5px}
+.mx-aspect-legend .harmonious:before{background:linear-gradient(90deg,#7ad7e5,#83ddb3)}
+.mx-aspect-legend .challenging:before{background:linear-gradient(90deg,#ed9a81,#f18ba5)}
+.mx-aspect-legend .conjunction:before{background:#d7b1ff}
+.mx-wheel-index{border:1px solid #4e4769;border-radius:13px;margin:14px 0 4px;padding:12px 14px;background:#15192c}
+.mx-wheel-index summary{font-size:13px;color:#ddd1f5;font-weight:740;cursor:pointer;line-height:1.6}
+.mx-wheel-index summary:focus-visible{outline:2px solid #d3b3ff}
+.mx-wheel-planets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:13px 0 2px}
+.mx-wheel-planet-key{display:flex;align-items:center;gap:9px;padding:9px;background:#1c2237;border:1px solid #303e59;border-radius:9px;min-width:0}
+.mx-wheel-planet-key.transit{background:#12313b;border-color:#38666a}
+.mx-wheel-key-glyph{flex:none;font-size:23px;width:30px;text-align:center}
+.mx-wheel-planet-key span:last-child{display:grid;gap:3px;min-width:0}
+.mx-wheel-planet-key b{font-size:11px;color:#f2efff;line-height:1.3}
+.mx-wheel-planet-key small{font-size:10px;color:#a4c6cf;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;line-height:1.45}
+.chart-view-tabs .segmented{display:flex;flex-wrap:wrap}
+@media(max-width:1320px){.mx-chart-meta-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.chart-expanded{grid-template-columns:1fr}.chart-expanded .chart-wheel{max-width:760px}.mx-wheel-planets{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:760px){.mx-chart-owner{padding:15px!important}.mx-chart-owner-top{align-items:stretch;gap:15px}.mx-chart-person-picker{width:100%}.mx-chart-person-picker select{width:100%;min-width:0}.mx-chart-meta-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.mx-chart-meta-card{min-height:86px;padding:10px 9px;gap:8px}.mx-meta-icon{height:30px;width:30px;font-size:20px}.mx-meta-copy b{font-size:12px!important}.mx-meta-copy small{font-size:9px}.chart-expanded .large-wheel{padding:12px 5px!important}.chart-expanded .chart-wheel{width:100%;margin:5px auto}.chart-expanded .chart-wheel g.wheel-planet text{stroke-width:2px}.mx-wheel-planets{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-chart-owner-title h2{font-size:20px}.mx-aspect-legend{gap:8px}}
+@media(max-width:390px){.mx-chart-meta-grid{grid-template-columns:1fr 1fr}.mx-chart-meta-card{gap:6px}.mx-meta-icon{width:24px;height:27px;font-size:17px}.mx-chart-meta-card:nth-child(5){grid-column:1/-1}.mx-wheel-planets{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.mx-chart-meta-card{transition:none}.mx-chart-meta-card:hover{transform:none}}
