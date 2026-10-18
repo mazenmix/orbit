@@ -97,3 +97,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .asteroid-item{border:1px solid #353950;background:#171a2d;border-radius:12px;padding:15px;min-width:0;display:grid;gap:5px}
 .asteroid-item b{font-size:17px;color:#f3edff}.asteroid-item span{font-size:11px;color:#d0c7e8}.asteroid-item small{font-size:12px;color:#a3a8c5}.asteroid-item code{font-size:11px;overflow-wrap:anywhere;color:#a3dfdb}
 @media(max-width:900px){.asteroids-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:550px){.asteroids-grid{grid-template-columns:1fr}}
+
+.confirmed-eclipses{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:18px 0}
+.eclipse-event{display:flex;flex-direction:column;gap:10px}.eclipse-event h2{font-size:21px;color:#e8deff}.eclipse-event .secondary{align-self:start}
+.eclipse-contacts{display:grid;gap:10px;margin:15px 0}.eclipse-contacts span{display:grid;gap:3px;border-bottom:1px solid #33394d;padding-bottom:8px;font-size:13px;color:#b5bace}.eclipse-contacts b{color:#f0eef9}
+.eclipse-local-row{padding:14px 0;border-bottom:1px solid #373a50}.eclipse-local-row b{font-size:13px}
+@media(max-width:850px){.confirmed-eclipses{grid-template-columns:1fr}}
