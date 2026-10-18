@@ -80,3 +80,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .precision-tool{margin:20px 0;border-top:1px solid #34364b;padding-top:16px}.precision-tool p{margin:10px 0}
 @media(max-width:990px){.heatmap-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
 @media(max-width:550px){.heatmap-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.heatmap-cell{min-height:61px;padding:7px 2px}.heatmap-cell b{font-size:18px}.heatmap-cell small{font-size:9px}}
+
+.lunation-events{display:grid;gap:12px;margin:20px 0}.lunation-item{display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:13px;background:#181b2e;border:1px solid #363950;padding:18px}
+.lunation-item b{font-size:16px}.lunation-item p{font-size:14px;color:#e1dcee;margin:6px 0}.lunation-item small{font-size:12px;line-height:1.8}
+@media(max-width:760px){.lunation-item{align-items:stretch;flex-direction:column}.lunation-item button{width:100%}}
