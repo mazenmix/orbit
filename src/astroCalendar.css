@@ -71,3 +71,54 @@
 .astro-fortune-proof summary{cursor:pointer;color:#e5c49c;padding:5px 0}
 .astro-fortune-proof p{font-size:11px;line-height:1.85}
 .astro-cal-day.astro-unavailable{background:#292b37!important;border:1px dashed #c27689;color:#eebfc9}
+
+/* Condensed calendar-day summary: the 1–30 / 31–70 / 71–99 bands stay unchanged. */
+#live-view-body .astro-calendar-detail{
+ padding:14px 18px!important;
+ margin:12px 0 0!important;
+ border-radius:15px!important;
+ background:linear-gradient(125deg,#231f32,#151b2b 82%)!important;
+}
+.astro-day-compact-head{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0}
+.astro-day-compact-title{min-width:0;display:flex;flex-direction:column;gap:3px}
+.astro-day-compact-title .astro-day-kicker{font-size:12px;line-height:1.5;font-weight:750;color:#edcfa3}
+#live-view-body .astro-day-compact-title h3{
+ font-size:17px!important;line-height:1.35;margin:0;color:#f8efff;
+ text-align:start;direction:ltr;unicode-bidi:isolate;font-weight:750;
+}
+.astro-day-compact-title>small{color:#c4bcdb;font-size:12px!important;line-height:1.5}
+.astro-calendar-detail .astro-day-main-score{
+ min-width:84px;min-height:0;padding:9px 12px;gap:2px;border-radius:12px
+}
+.astro-calendar-detail .astro-day-main-score b{font-size:26px;line-height:1.12}
+.astro-calendar-detail .astro-day-main-score b small{font-size:11px!important;opacity:.83;font-weight:650}
+.astro-calendar-detail .astro-day-main-score>span{font-size:12px!important;font-weight:700;line-height:1.3}
+.astro-day-compact-aspects{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:10px 0}
+.astro-compact-aspect{
+ display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;
+ padding:5px 9px;border:1px solid #6b5977;border-radius:8px;
+ background:#111629bf;font-size:12px;line-height:1.4;max-width:100%
+}
+.astro-compact-aspect>span{font-size:12px;color:#d2bfef}
+.astro-compact-aspect.good{border-color:#3a8876}.astro-compact-aspect.good>span{color:#a8e6c9}
+.astro-compact-aspect.check{border-color:#936e5a}.astro-compact-aspect.check>span{color:#efd1a0}
+.astro-compact-aspect b{font-size:12px;font-weight:720;color:#eee8f7}
+.astro-compact-aspect small{font-size:12px!important;color:#cbc2dd;white-space:nowrap}
+.astro-compact-no-aspect{font-size:12px;color:#bab0ce}
+.astro-day-compact-footer{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}
+.astro-day-compact-footer>small{font-size:12px!important;color:#aca8be;line-height:1.5}
+#live-view-body .astro-day-compact-footer .astro-day-open-time{
+ margin:0;min-height:32px;padding:5px 11px!important;font-size:12px!important;
+ line-height:1.4;border-radius:8px;white-space:nowrap
+}
+.astro-day-compact-empty{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:#ccc1de;min-height:46px}
+@media(max-width:750px){
+ #live-view-body .astro-calendar-detail{padding:12px!important;margin:10px 0 0!important}
+ .astro-day-compact-head{gap:8px;align-items:center}
+ #live-view-body .astro-day-compact-title h3{font-size:15px!important}
+ .astro-calendar-detail .astro-day-main-score{padding:8px;min-width:72px;border-radius:10px}
+ .astro-calendar-detail .astro-day-main-score b{font-size:22px}
+ .astro-day-compact-aspects{margin:8px 0;gap:5px}
+ .astro-compact-aspect{gap:5px;padding:5px 7px}
+ .astro-day-compact-footer{gap:6px}
+}

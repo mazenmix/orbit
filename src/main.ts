@@ -339,18 +339,17 @@ function initializeAstroCalendar(){
 }
 function astroCalendarDetail(iso:string){
  const snap=calendarSnapshots.get(iso);
- if(!snap)return '<h3>'+esc(iso)+'</h3><p>'+t('جاري حساب المواضع الفلكية لهذا اليوم…','Calculating this day’s sky positions…')+'</p>';
+ if(!snap)return '<div class="astro-day-compact-empty"><b>'+esc(iso)+'</b><span>'+t('دا تنحسب مواضع هذا اليوم…','Calculating this day…')+'</span></div>';
  const {data:r,value,color,at}=snap;
- const label=calendarColorLabel(color);
- const strongestPositive=snap.strongestSupport,strongestDifficult=snap.strongestChallenge;
- const fact=(e:typeof strongestPositive,kind:'good'|'check')=>e?
-  '<div class="astro-day-factor"><small>'+(kind==='good'?t('أقوى زاوية داعمة للّون','Strongest favorable factor'):t('أقوى زاوية متحدية للّون','Strongest challenging factor'))+'</small><b>'+esc(planet(e.transit.id))+' · '+aspect(e.angle)+' · '+esc(planet(e.natal.id))+'</b><span>'+t('الفارق الزاوي','Orb')+' '+e.orb.toFixed(2)+'° / '+e.maximumOrb.toFixed(2)+'° · '+(e.applying?t('يقترب','Applying'):t('يبتعد','Separating'))+'</span></div>':'';
+ const date=new Intl.DateTimeFormat('en-US',{timeZone:active.zone,weekday:'short',day:'numeric',month:'short',year:'numeric',numberingSystem:'latn'}).format(at);
+ const grade=color==='green'?t('مرتفع','High'):color==='yellow'?t('متوسط','Moderate'):t('منخفض','Low');
  const ranked=Object.entries(r.scores).sort((a,b)=>b[1]-a[1]);
- return '<div class="astro-day-detail-head"><div><span class="astro-eyebrow">'+t('تقييم حظ اليوم · 12:00 بتوقيت الملف','Astrological fortune · profile-local noon')+'</span><h3>'+dateText(at,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</h3><p>'+t('لون اليوم مبني على اتصالات العبور المحسوبة مع مواضع ميلادك. هذا تقييم حظ تنجيمي رمزي، مو نسبة نجاح علمية ولا مؤشر خطر حقيقي.','This color derives from computed natal-transit aspects: a symbolic astrological fortune index, not measured luck or an actual safety warning.')+'</p></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'</b><span>'+label+'</span></div></div>'+
- '<div class="astro-day-factors">'+fact(strongestPositive,'good')+fact(strongestDifficult,'check')+'</div>'+
- '<div class="astro-fortune-proof"><span>'+t('وزن الدعم','Favorable weight')+': <b>'+snap.favorableWeight.toFixed(3)+'</b></span><span>'+t('وزن التحدّي','Challenging weight')+': <b>'+snap.challengingWeight.toFixed(3)+'</b></span><span>'+t('زوايا محسوبة مؤثرة','Classified aspects')+': <b>'+snap.considered+'</b></span></div>'+
-  '<p class="astro-day-summary">'+(strongestPositive&&strongestDifficult?t('بيوم واحد أكو زوايا داعمة ومتحدية؛ النتيجة مو محسومة من الخارطة، فخلّ قرارك مبني على الظروف الواقعية.','Both supportive and challenging contacts occur; the chart alone cannot settle a real decision.'):strongestPositive?t('أبرز الزوايا المحسوبة داعمة رمزياً؛ هذا مو ضمان لنتيجة فعلية.','The leading calculated contact is symbolically supportive, not a promise of a real outcome.'):strongestDifficult?t('أبرز زاوية محسوبة متوترة رمزياً؛ هذا مو تحذير من خطر فعلي.','The leading calculated aspect is symbolically challenging, not a real-world hazard warning.'):t('الاتصالات المحسوبة ما ترجّح معنى واحد قوي لهذا اليوم.','The calculated aspects do not show a single strong symbolic emphasis.'))+'</p>'+
- '<div class="astro-day-domain"><span>'+t('المجال الأعلى','Highest area')+': <b>'+cat(ranked[0][0] as Category)+' '+ranked[0][1]+'</b></span><span>'+t('المجال الأقل','Lowest area')+': <b>'+cat(ranked[ranked.length-1][0] as Category)+' '+ranked[ranked.length-1][1]+'</b></span></div><button class="secondary astro-day-open-time" data-calendar-open="'+(+at)+'">'+t('افتح تفاصيل هذا اليوم بآلة الزمن','Explore this moment in Time Machine')+' ↗</button>';
+ const factor=(e:typeof snap.strongestSupport,kind:'good'|'check')=>e?
+  '<span class="astro-compact-aspect '+kind+'"><span>'+(kind==='good'?t('✦ داعمة','✦ Favorable'):t('◇ متحدية','◇ Challenging'))+'</span><b>'+esc(planet(e.transit.id))+' '+aspect(e.angle)+' '+esc(planet(e.natal.id))+'</b><small dir="ltr">'+e.orb.toFixed(2)+'°</small></span>':'';
+ const contacts=factor(snap.strongestSupport,'good')+factor(snap.strongestChallenge,'check');
+ return '<div class="astro-day-compact-head"><div class="astro-day-compact-title"><span class="astro-day-kicker">'+t('حظ اليوم · 12:00','Daily fortune · 12:00')+'</span><h3 dir="ltr">'+esc(date)+'</h3><small>'+t('الأعلى: ','Top: ')+cat(ranked[0][0] as Category)+' '+ranked[0][1]+' · '+t('الأقل: ','Lowest: ')+cat(ranked[ranked.length-1][0] as Category)+' '+ranked[ranked.length-1][1]+'</small></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'<small>/100</small></b><span>'+grade+'</span></div></div>'+
+  '<div class="astro-day-compact-aspects">'+(contacts||'<span class="astro-compact-no-aspect">'+t('ماكو زاوية قريبة مهيمنة بهذا الوقت.','No dominant close aspect at this time.')+'</span>')+'</div>'+
+  '<div class="astro-day-compact-footer"><small>'+t('تصنيف تنجيمي رمزي، مو ضمان لنتيجة فعلية.','Symbolic astrological index, not a guaranteed outcome.')+'</small><button type="button" class="secondary astro-day-open-time" data-calendar-open="'+(+at)+'">'+t('تفاصيل بآلة الزمن','Time Machine details')+' ↗</button></div>';
 }
 function calendarColorLabel(color:AstroCalendarRating['color']){
  return color==='green'?t('مرتفع · 71–99','High · 71–99'):color==='yellow'?t('متوسط · 31–70','Moderate · 31–70'):t('منخفض · 1–30','Low · 1–30');

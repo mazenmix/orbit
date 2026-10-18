@@ -209,7 +209,7 @@ test('calendar fortune evidence exposes actual planetary angle weights',async({p
  const n=await page.locator('[data-calendar-date]').count();
  expect(n).toBeGreaterThanOrEqual(365);
  await expect(page.locator('.astro-cal-day.astro-green, .astro-cal-day.astro-yellow, .astro-cal-day.astro-red').first()).toBeVisible({timeout:75000});
- await expect(page.locator('.astro-fortune-proof')).toBeVisible({timeout:75000});
+ await expect(page.locator('.astro-day-compact-head')).toBeVisible({timeout:75000});
  await expect(page.locator('#astro-calendar-progress')).toContainText(/verified|محسوب فعلياً/);
 });
 
@@ -245,4 +245,17 @@ test('calendar uses strict red-yellow-green bands and hides methodology',async({
  await expect(computed.first()).toBeVisible({timeout:75000});
  const grades=await computed.evaluateAll(nodes=>nodes.map(el=>({score:Number(el.querySelector('.astro-cal-index')?.textContent),color:el.classList.contains('astro-green')?'green':el.classList.contains('astro-yellow')?'yellow':'red'})));
  for(const day of grades)expect(day.color).toBe(day.score<=30?'red':day.score<=70?'yellow':'green');
+});
+
+test('selected calendar day stays compact, precise and readable on iPhone',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.astro-day-compact-head')).toBeVisible({timeout:75000});
+ await expect(page.locator('.astro-day-compact-title')).toBeVisible();
+ await expect(page.locator('.astro-fortune-proof')).toHaveCount(0);
+ await expect(page.locator('.astro-day-summary')).toHaveCount(0);
+ const style=await page.locator('#astro-calendar-detail').evaluate(el=>({padding:getComputedStyle(el).paddingTop,rect:el.getBoundingClientRect().width}));
+ expect(parseFloat(style.padding)).toBeLessThanOrEqual(14);
+ expect(style.rect).toBeLessThanOrEqual(390);
+ await expect(page.locator('.astro-day-open-time')).toBeVisible({timeout:75000});
 });

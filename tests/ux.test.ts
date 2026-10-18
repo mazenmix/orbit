@@ -142,3 +142,18 @@ test('calendar shows only three numeric color bands and no methodology expander'
  assert.ok(!main.includes('How is the fortune color determined?'));
  assert.ok(!calendar.includes("'orange'"));
 });
+
+test('calendar focused-day card is compact, with core evidence but no verbose breakdown',()=>{
+ const begin=main.indexOf('function astroCalendarDetail(iso:string){'),end=main.indexOf('function calendarColorLabel(',begin);
+ const detail=main.slice(begin,end);
+ assert.ok(detail.includes('astro-day-compact-head'));
+ assert.ok(detail.includes('astro-day-compact-aspects'));
+ assert.ok(detail.includes('astro-day-compact-footer'));
+ assert.ok(detail.includes('snap.strongestSupport')&&detail.includes('snap.strongestChallenge'));
+ assert.ok(detail.includes('data-calendar-open'));
+ assert.ok(!detail.includes('astro-fortune-proof'));
+ assert.ok(!detail.includes('astro-day-summary'));
+ assert.ok(!detail.includes('شلون تحدد لون الحظ'));
+ const styles=readFileSync('src/astroCalendar.css','utf8');
+ assert.ok(styles.includes('#live-view-body .astro-calendar-detail{\\n padding:14px 18px!important;'));
+});
