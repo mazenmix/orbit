@@ -2,6 +2,7 @@ import type {Chart,Profile} from './engine.ts';
 import {distance,houseNumber,type Point} from './math.ts';
 import {soulCategories,soulTopics,type SoulTopic} from './soulData.ts';
 import {getSoulTheme} from './soulThemes.ts';
+import {soulDeepFor} from './soulDeep.ts';
 export type NatalBasis={planet:string;longitude:number;sign:number;house:number|null;retrograde:boolean;angle:{planet:string;type:number;orb:number;conflict:boolean}|null};
 export type SoulReading={topic:SoulTopic;basis:NatalBasis[];summary:{ar:string;en:string};deep:{ar:string;en:string};strengths:{ar:string[];en:string[]};weaknesses:{ar:string[];en:string[]};example:{ar:string;en:string};advice:{ar:string;en:string};question:{ar:string;en:string};limitations:{ar:string;en:string};contradictory:boolean};
 const arSigns=['الحمل','الثور','الجوزاء','السرطان','الأسد','العذراء','الميزان','العقرب','القوس','الجدي','الدلو','الحوت'];
@@ -108,7 +109,7 @@ const dom=(c:number,array:readonly string[])=>array[c-1]??'';
 const capitalize=(s:string)=>s.length?s[0].toUpperCase()+s.slice(1):s;
 export function soulReading(chart:Chart,topic:SoulTopic):SoulReading{
  if(!soulTopics.some(t=>t.id===topic.id&&t.categoryId===topic.categoryId))throw Error('Unknown analysis topic');
- const theme=getSoulTheme(topic.id),basis=soulBasis(chart,topic),a=basis[0],b=basis[1];
+ const theme=getSoulTheme(topic.id),specific=soulDeepFor(topic.id),basis=soulBasis(chart,topic),a=basis[0],b=basis[1];
  const category=topic.categoryId, hasTwo=!!a&&!!b;
  const keyA=a?styleAr[a.sign]:'بيانات غير كافية',keyB=b?styleAr[b.sign]:'بيانات غير كافية';
  const keyEnA=a?styleEn[a.sign]:'missing chart data',keyEnB=b?styleEn[b.sign]:'missing chart data';
@@ -124,8 +125,8 @@ export function soulReading(chart:Chart,topic:SoulTopic):SoulReading{
  const openingEn=theme.focusEn+'. For “'+topic.en+'”, '+(a?spot(a,false)+' suggests considering '+(roleEn[a.planet]??'symbolic meaning')+' through '+keyEnA+'.':'there are insufficient reliable natal positions for this theme.');
  const alternateAr=hasTwo?'بنفس الوقت، '+spot(b,true)+' يوجّه الانتباه إلى '+keyB+'؛ وهنا تگدر تفحص الشد أو التعاون بين الاحتياجين من خلال تجاربك.':'ما عدنا كوكب ثاني محسوب بهذا الاختيار حتى نقارن الاتجاهين.';
  const alternateEn=hasTwo?'Meanwhile, '+spot(b,false)+' brings '+keyEnB+' into the picture; real experiences can show how these needs interact.':'A second reliable placement is unavailable for comparison.';
- const deepAr='المفتاح العملي هو '+areaAr+'. '+alternateAr+' '+(a?.house?'موضع الكوكب بالبيت '+a.house+' يربط الرمز بـ'+areaHouseAr+'. ':'')+angleHintAr;
- const deepEn='The practical focus is '+areaEn+'. '+alternateEn+' '+(a?.house?'Its calculated house '+a.house+' relates symbolically to '+areaHouseEn+'. ':'')+angleHintEn;
+ const deepAr=specific.ar+'. '+alternateAr+' '+(a?.house?'من جهة موضع الكوكب بالبيت '+a.house+'، يظهر محور '+areaHouseAr+'. ':'')+angleHintAr;
+ const deepEn=specific.en+'. '+alternateEn+' '+(a?.house?'The calculated house '+a.house+' adds '+areaHouseEn+'. ':'')+angleHintEn;
  const strengths1Ar=dom(category,strengthsAr)+' عند مناقشة «'+topic.ar+'» من غير حكم مسبق';
  const strengths1En=capitalize(dom(category,strengthsEn))+' when exploring '+topic.en.toLocaleLowerCase()+' without a premature label';
  const strengths2Ar='استعمال '+keyA+(hasTwo?' مع '+keyB:'')+' لتجربة تفسيرين قبل اختيار موقف';
