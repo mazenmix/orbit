@@ -58,3 +58,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .metric-card code{font-size:10px;overflow-wrap:anywhere}
 @media(max-width:1100px){.go-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.go-grid,.why-grid{grid-template-columns:1fr}.metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metric-card{padding:12px}.metric-card>b{font-size:23px}}
+
+/* Additional traditional symbolic techniques */
+.advanced-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0}
+.advanced-grid h2{font-size:21px}.advanced-grid td,.advanced-grid th{font-size:13px}
+@media(max-width:870px){.advanced-grid{grid-template-columns:1fr}}
