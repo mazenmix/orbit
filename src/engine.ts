@@ -1,5 +1,6 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {calculateEclipses,type EclipseAPI} from './realEclipses.ts';
+import type {AsteroidSwiss} from './asteroidRuntime.ts';
 import {bodies,normalize,aspects,signals,scores,houseNumber,synastry,compatibilityScore,type Point,type Dimension} from './math.ts';
 export type Profile={id:string;name:string;date:string;time:string;zone:string;lat:number;lon:number;city:string;known:boolean;kind:'self'|'dating'|'work'|'friend'|'family'};
 export const defaultProfile:Profile={id:'demo',name:'Demo',date:'2000-01-01',time:'12:00',zone:'Etc/UTC',lat:51.4779,lon:0,city:'Greenwich',known:true,kind:'self'};
@@ -18,6 +19,7 @@ type Swiss=EclipseAPI & {initSwissEph:()=>Promise<void>;calc_ut:(jd:number,id:nu
 let swiss:Swiss;
 export async function initEngine(){const mod=await (window as unknown as {mxSwissReady:Promise<{default:new()=>Swiss}>}).mxSwissReady;swiss=new mod.default();await swiss.initSwissEph();return swiss.version()}
 export function setEngineForTests(value:Swiss){swiss=value}
+export function asteroidSwissRuntime(){if(!swiss)throw Error('Swiss ephemeris is not initialized');return swiss as unknown as AsteroidSwiss}
 export function confirmedEclipses(at:Date,count=2,coords?:{lat:number;lon:number},local=false){if(at.getUTCFullYear()<1800||at.getUTCFullYear()>2399)throw Error('Eclipse date outside supported range');return calculateEclipses(swiss,at,count,coords,local)}
 export function julianDay(date:Date){if(!Number.isFinite(+date))throw Error('Invalid date');return +date/86400000+2440587.5}
 export function sunMoonState(at:Date){if(at.getUTCFullYear()<1800||at.getUTCFullYear()>2399)throw Error('Supported dates: 1800–2399');const jd=julianDay(at),flags=2|256;const sun=swiss.calc_ut(jd,0,flags),moon=swiss.calc_ut(jd,1,flags);if(!sun||!moon||![sun[0],moon[0],moon[1]].every(Number.isFinite))throw Error('Sun or Moon ephemeris unavailable');return {sunLongitude:normalize(sun[0]),moonLongitude:normalize(moon[0]),moonLatitude:moon[1]}}
