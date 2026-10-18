@@ -14,7 +14,7 @@ run('remote public MX Orbit proxy returns valid Swiss Eros/Psyche SE1 data that 
   const now=namedAsteroidPositions(runtime,new Date('2026-10-18T10:00:00Z')).find(p=>p.id===body.name);
   assert.ok(now,'calculated '+body.name+' using mounted real ephemeris');
   assert.ok(Number.isFinite(now.longitude)&&now.longitude>=0&&now.longitude<360);
-  const yearLater=namedAsteroidPositions(swe,new Date('2027-10-18T10:00:00Z')).find(p=>p.id===body.name);
+  const yearLater=namedAsteroidPositions(runtime,new Date('2027-10-18T10:00:00Z')).find(p=>p.id===body.name);
   assert.ok(yearLater,'future real coordinate '+body.name);
   assert.notEqual(now.longitude,yearLater.longitude,'positions move with time');
  }
