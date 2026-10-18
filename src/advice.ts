@@ -26,7 +26,6 @@ export function advice(s:Signal,language:'ar'|'en'){
  }
  if(['love','emotions'].includes(s.category)&&positive?.transit.id==='Venus'){title=['خلّي الاهتمام يبين بتصرف','Show care through an action'];good=['لفتة بسيطة أو تقدير صريح يفتح باب للتقارب.','A small gesture or sincere appreciation can invite connection.'];action=['عبّر عن شي محدد تقدّره، بدون اختبار مشاعر الطرف الثاني.','Name something specific you appreciate without testing the other person’s feelings.'];}
  if(positive?.transit.id==='Mars'&&['energy','overview'].includes(s.category)){title=['ابدأ بالشي اللي ظلّ معلّق','Start what has been on hold'];good=['توجيه حماسك لإنجاز ملموس بدل نقاش طويل.','Channel enthusiasm into a tangible result rather than a long debate.'];action=positive.applying?['افتح المهمة المؤجلة وأنجز أول جزء واضح منها.','Open the postponed task and complete its first clear step.']:['كمّل الخطوة اللي بديتها، وراجع النتيجة قبل التوسع.','Finish the step you started and check the result before expanding.'];}
- if(!positive)good=language==='ar'?['يفيدك تتمسك بالواضح: '+pick(g.ease),'']:['','Stay with what is clear: '+pick(g.ease)];
  if(!negative)careful=g.careful;
  return {title:pick(title),good:pick(good),careful:pick(careful),action:pick(action)};
 }
