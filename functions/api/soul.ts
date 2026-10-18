@@ -51,17 +51,17 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
    const prepared=ar?{
     summary:theme.focusAr,
     detailedAnalysis:depth.ar+' فلكياً عندنا فقط '+safeBasisSummary(basis,true)+'. هاي مو حقائق عن شخصية الشخص، وأي دلالة تحتاج تحقق من السلوك الحقيقي.',
-    strengths:['توضيح السؤال الحقيقي في هذا المجال','مقارنة تجربة واقعية بدل الاعتماد على توقع'],
-    challenges:['تجنب افتراض أفكار أو دوافع الآخرين','لا تعامل رمز الخارطة كدليل على سلوك قطعي'],
-    practicalInsights:[theme.actionAr,'اختبر الفكرة بموقف صغير قابل للمراجعة قبل اتخاذ قرار كبير'],
-    reflectionQuestions:['شنو موقف حقيقي يدعم أو يخالف هذا التفسير؟']
+    strengths:['الانتباه لفكرة «'+selected.ar+'» دون تعميم: '+theme.focusAr,'فهم اختلاف الموقف الواقعي بهذا الموضوع: '+depth.ar],
+    challenges:['لا تعتبر «'+selected.ar+'» حكماً نهائياً على مشاعر أو نوايا شخص','لا تحول الرمز الفلكي إلى دليل على هذا الموضوع دون موقف حقيقي قابل للفحص'],
+    practicalInsights:[theme.actionAr,'بموضوع «'+selected.ar+'»، اختبر خطوة صغيرة قابلة للتراجع وقارن النتيجة بواقعك'],
+    reflectionQuestions:['بخصوص «'+selected.ar+'»، شنو موقف حقيقي يخلّيك توافق أو تختلف ويا هذا التفسير؟']
    }:{
     summary:theme.focusEn,
     detailedAnalysis:depth.en+' Only these natal indicators were provided: '+safeBasisSummary(basis,false)+'. These symbols are not proven psychological facts.',
-    strengths:['Framing a clearer question about this theme','Checking real experiences instead of assuming a hidden trait'],
-    challenges:['Assuming access to another person’s private motives','Confusing symbolic placements with factual behavior'],
-    practicalInsights:[theme.actionEn,'Test the idea with a small reversible step before any major decision'],
-    reflectionQuestions:['What actual experience supports or challenges this interpretation?']
+    strengths:['Exploring '+selected.en+' without assuming an identity: '+theme.focusEn,'Considering the concrete example: '+depth.en],
+    challenges:['Treating '+selected.en+' as a certain label for another person','Assuming this symbolic interpretation proves specific observed behavior'],
+    practicalInsights:[theme.actionEn,'For '+selected.en+', try a small reversible step before committing to any high-impact decision'],
+    reflectionQuestions:['For '+selected.en+', which real experience supports or challenges this interpretation?']
    };
    return respond({topicId:selected.id,...prepared,astrologicalEvidence:basis,provider:'qwen3',quality:'verified-editorial-fallback'});
   }
