@@ -271,3 +271,22 @@ test('intraday calendar uses verified three-checkpoint score and exposes range',
  const marker=await button.locator('.astro-cal-index').textContent();
  expect(marker).toMatch(/^\d+$/);
 });
+
+test('Today and Time Machine use compact cards without losing navigation on iPhone',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/#today',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.mx-today-compact')).toBeVisible({timeout:75000});
+ await expect(page.locator('#expand-sky-wheel')).toBeVisible();
+ const height=await page.locator('.mx-today-compact .score-card').first().evaluate(el=>el.getBoundingClientRect().height);
+ expect(height).toBeLessThan(155);
+ await page.goto('/#time',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.mx-time-compact')).toBeVisible({timeout:75000});
+ await expect(page.locator('#time-input')).toBeVisible();
+ await expect(page.locator('.mx-time-compact .quick-times .chip').first()).toBeVisible();
+});
+test('Moon timing uses six coherent SVG icons instead of assorted arrow characters',async({page})=>{
+ await page.goto('/#lunar',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.lunar-premium-grid .lunar-emblem svg')).toHaveCount(2,{timeout:75000});
+ await expect(page.locator('.lunar-premium-grid .mx-lunar-tile-icon svg')).toHaveCount(4);
+ await expect(page.locator('.premium-time-tile')).toHaveCount(4);
+});

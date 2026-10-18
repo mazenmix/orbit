@@ -183,3 +183,23 @@ test('calendar computations reuse one verified natal chart and never use truncat
  assert.ok(!task.includes('r.evidence'));
  assert.ok(task.includes('calendarCursor+2'));
 });
+
+test('Today and Time Machine compact styles scope card density without removing controls',()=>{
+ assert.ok(main.includes('dashboard-grid mx-today-compact'));
+ assert.ok(main.includes('panel time-controls mx-time-compact'));
+ const compact=readFileSync('src/typography.css','utf8');
+ assert.ok(compact.includes('.mx-today-compact .score-card'));
+ assert.ok(compact.includes('#live-view-body:has(.mx-time-compact) .score-card'));
+ assert.ok(compact.includes('.mx-time-compact .quick-times'));
+ for(const term of ['id="time-form"','data-shift="','scoresHTML(data!)','expand-sky-wheel'])assert.ok(main.includes(term),term);
+});
+test('Moon timing status and four milestones use matching inline SVG pictograms',()=>{
+ const lunar=main.slice(main.indexOf('function lunarUiIcon('),main.indexOf('function timePage(){'));
+ assert.ok(lunar.includes('mx-lunar-icon'));
+ assert.ok(lunar.includes('aria-hidden="true"'));
+ for(const id of ["moon","void","entered","next","voc-start","voc-end"])assert.ok(lunar.includes(id),id);
+ for(const glyph of ["'↘'","'↗'","'↤'","'↦'"])assert.ok(!lunar.includes(glyph),glyph);
+ const styles=readFileSync('src/typography.css','utf8');
+ assert.ok(styles.includes('.lunar-emblem .mx-lunar-icon'));
+ assert.ok(styles.includes('.mx-lunar-tile-icon .mx-lunar-icon'));
+});
