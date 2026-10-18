@@ -6,6 +6,6 @@ test('full 25 × 8 corpus contains 200 authored, bilingual, topical interpretati
   assert.equal(new Set(soulThemes.map(x=>x[key])).size,200,key+' must have no duplicated entries');
   assert.ok(soulThemes.every(x=>x[key].length>=25));
  }
- assert.match(getSoulTheme(1).focusAr,/قناعة/);
+ assert.match(getSoulTheme(1).focusAr,/قناعت/);
  assert.match(getSoulTheme(200).actionAr,/هدف/);
 });
