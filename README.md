@@ -1,4 +1,4 @@
-# MX Orbit — web edition
+# MX Astro — personal astronomy and symbolic astrology
 
 A working mobile-first Iraqi Arabic / English PWA, built from inspected MazenmiXOracle Swift source. This is a source-backed web foundation, not a verified pixel-for-pixel port of MXOrbit v2.3.2.
 
@@ -99,3 +99,17 @@ Shipped: bounded exact natal-transit root refinement, 30-day selectable time hea
 **Certified solar/lunar eclipses:** existing Swiss global and optional birth-location visibility routines now provide event type, UTC maximum, available contact times and greatest-eclipse coordinates. Confirmed 2027 events agree with NASA. The older near-node screen remains separately labeled *preliminary*.
 
 **Still not implemented/verified:** persistent background Web Push service and permissions/device tests, native watchOS/WidgetKit, exact original v2.3.2 UI/component parity, and encrypted-at-rest multi-device synchronization. See SOURCE_AUDIT.md and VERIFICATION.md.
+
+## 2026-10-18 — MX Astro owner-facing upgrade
+
+- Redesigned the twelve-house wheel with explicitly **counterclockwise** house numbering, stronger color-separated zodiac bands and readable first-house marker. Added source-backed natal/transit/overlay owner details, interpretative themes, and advanced numeric sections only on request.
+- Added voluntary Male/Female fields for self and other profiles, with Iraqi feminine/masculine language handling; sex does not alter actual planetary positions or permit claims about another person's thoughts or consent.
+- Added original 56 individually written, distinct and actionable named-asteroid symbolic summaries, data-derived supporting natal contacts and separate mathematical inspection.
+- Added narrative-first astrological evidence (reason and actionable step, tables tucked away), eight colored topic gauges, and 24/12-hour clock setting with English date/month names.
+- Added global place search, detailed place/province lookup and historical IANA zone selection with hidden automatic longitude/latitude; profiles stay in local browser storage.
+- Added **12 calculated monthly readings**, plus time-machine **30-day daily**, **90-day every-third-day**, and **365-day weekly** sampled heatmaps, never inventing readings for unsampled days.
+- Added **21-day relationship communication/date planning windows** and optional downloadable iCalendar reminders. These measure one user's symbolic timing; they cannot predict another person's agreement, attraction or response.
+- PWA service worker now knows how to **display and open incoming push events**, but the app DOES NOT yet have VAPID subscriber registration, authenticated server storage or a recurring delivery scheduler. Closed-app push is not active. Foreground MX Eye and optional device-calendar reminders are separate.
+- No user-specific birth details are hardcoded into the public web bundle. Existing personal birth data can be imported privately using an opt-in one-time browser fragment.
+
+**Not 100% yet:** reliable autonomous MX Eye background delivery needs a provisioned subscription backend and scheduled Worker with explicit consent and device testing; the original iOS 2.3.2 source/native Apple Watch/WidgetKit integration is not verified here; encrypted-at-rest multi-device data sync and physical iPhone Safari E2E testing are not complete; Qwen3 narrative quality and exact original DecisionEngine parity need further independent evaluation. Astro indices are symbolic, not scientifically calibrated probabilities.

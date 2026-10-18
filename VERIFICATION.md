@@ -89,3 +89,11 @@ The public repository's anonymous demo configuration passed all 20 automated tes
 - GitHub Actions [run 39118371658](https://github.com/mazenmix/orbit/actions/runs/39118371658) passed 92 default tests (plus 1 skipped online-gated test) and a separate **56/56** live online test. The TypeScript + Vite production build succeeded.
 - Users opt in to fetching additional asteroid files; CacheStorage avoids network re-downloads when supported and malformed/unavailable files are not given invented longitudes. Qwen3 optionally receives up to eight server-allowlisted calculated asteroid/natal contacts without private birth profile metadata.
 - Native iPhone Safari lifecycle, full Swift v2.3.2 parity, reliable closed-app push delivery, watchOS/WidgetKit and end-to-end encrypted sync are still unimplemented or unverified.
+
+## 2026-10-18 MX Astro owner-facing release verification
+
+- Automated CI run [39122919420](https://github.com/mazenmix/orbit/actions/runs/39122919420): **118 passing automated checks, zero failures, one opt-in integration test skipped inside the default suite**. Production TypeScript/Vite build passed. Separate **56/56 live Swiss WASM binary integration check passed**.
+- Source tests cover counterclockwise house-cusp geometry, separate readable glyphs and colors, actual natal owner dossier, Male/Female grammatical handling with neutral fallback, 12-month calculation samples, 21-day relationship score windows and actual 30/90/365-day sampling intervals.
+- The PWA service-worker test validates incoming push display and click handling plus an allowlisted internal destination. It does **not** prove server delivery or subscription persistence; those remain unimplemented.
+- The website was retrieved and checked at [/#chart](https://mxastro.pages.dev/#chart), [/#advanced](https://mxastro.pages.dev/#advanced), [/#time](https://mxastro.pages.dev/#time) after deployment: geometric wheel heading, chart owner dossier, monthly reading and long-heatmap controls appeared in the rendered document.
+- **Not certified**: native Apple Watch/iOS WidgetKit, closed-app background subscription flow, real iPhone Safari/Web Push lifecycle tests, encrypted-at-rest cross-device sync, and complete native v2.3.2 source parity.

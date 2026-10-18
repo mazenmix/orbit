@@ -65,3 +65,13 @@ Recover the v2.3.2 source archive and representative iPhone screens, then reconc
 **Validation:** GitHub Actions run 39118371658, 92 automated tests passed and one online-gated test skipped by the default test suite, plus a separately executed 56/56 production binary/WASM smoke test. Earlier claims in this file that this particular WASM wrapper lacked eclipse search routines or that all 56 asteroid positions were unavailable are superseded.
 
 **Still outstanding:** verified exact screen/function parity with unavailable v2.3.2 native source; watchOS, WidgetKit, signed native app, full backend Web Push/trigger scheduler and device-permission testing; encryption-at-rest/opt-in cross-device sync; production iPhone Safari background/offline E2E certification; and source-identical complete DecisionEngine narrative postprocessing.
+
+## 2026-10-18 visual and relationship parity update
+
+- Web chart house geometry is explicitly Ascendant left, numbering 1→12 counterclockwise. SVG now uses shaded Placidus house sectors, clear borders, wider text glyphs, and a first-house marker. Geometry is unit-tested; physical iPhone visual certification is still outstanding.
+- The natal chart page displays selected profile owner details, Male/Female designation (if specified), natal narratives, transit/overlay explanation, separate inspection details. Male/Female only changes appropriate grammar, not astronomy.
+- Today's homepage, 56 named asteroid cards, evidence dossier and People insights are deliberately action/narrative-first, with color-coded symbolic index values and hidden opt-in technical details.
+- Additional Time Machine functionality: twelve monthly interpretation snapshots and 30/90/365-day heatmap sampling (sampling periods explicitly disclosed). Native annual predictive catalogue remains nonidentical to unavailable 2.3.2.
+- Additional People functionality: 21-day sample windows for each saved profile, messaging and date planning separated, optional local iCalendar reminders. Other person's free choice/consent cannot be inferred.
+- PWA push display/click handling is implemented; VAPID, authentication, subscription persistence, scheduling and cross-platform reliability are NOT. Foreground MX Eye is distinct.
+- Pending: signed native iOS/watchOS features, native source pixel matching, independently validated Qwen3 output quality, encrypted local persistent and cross-device authenticated sync, true background delivery and full iPhone/Safari field tests.
