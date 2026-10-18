@@ -1,0 +1,53 @@
+/* MX Astro — unified premium observatory design. */
+:root{--mx-royal:#bca1ff;--mx-gold:#f0ca88;--mx-aqua:#8de4d5;--mx-hairline:#4d436b}
+body{background:radial-gradient(ellipse 72% 42% at 50% -13%,#44305b23,transparent),#0b0d19}
+.workspace{min-width:0}
+.sidebar{background:linear-gradient(180deg,#101323 0%,#0d1020 70%,#0b0e1c 100%)!important;border-inline-end:1px solid #3b3252}
+.topbar{background:#111526f2;border-bottom:1px solid #3c3453;backdrop-filter:blur(18px)}
+.brand-wordmark i{color:#cfb0ff}
+.nav-caption{color:#969fbb;letter-spacing:.11em}
+.nav-item{border:1px solid transparent;border-radius:13px;transition:background .22s,border-color .22s,transform .22s}
+.nav-item:hover{background:#34304d85;border-color:#595071;transform:translateY(-1px)}
+.nav-item.active{background:linear-gradient(110deg,#3b2d5c80,#25253f90);border-color:#5e507f;box-shadow:inset 0 1px 0 #e6cbff20,0 7px 20px #09051630}
+.page-heading{padding-block:4px 10px;border-bottom:1px solid #322d46}
+.page-heading h1{color:#f4ecff;text-wrap:balance}
+.page-heading .eyebrow,.eyebrow{color:#c1aaf6}
+.panel,.signal-card,.score-card,.metric-card,.go-card,.meaning-card,.annual-card,.evidence-line,.lunation-item,.timeline-entry{background:radial-gradient(ellipse 75% 90% at 2% 0%,#60437713,transparent 80%),linear-gradient(138deg,#191d32,#121727 82%);border:1px solid #48405f;border-radius:18px;box-shadow:0 12px 28px #02030c25,inset 0 1px 0 #ffffff08}
+.panel,.signal-card,.score-card,.metric-card,.go-card{transition:border-color .2s,box-shadow .2s}
+.panel:hover,.signal-card:hover,.score-card:hover,.metric-card:hover,.go-card:hover{border-color:#766096;box-shadow:0 15px 34px #03051435,inset 0 1px 0 #d9b8ff12}
+.signal-card:hover,.score-card:hover,.metric-card:hover{transform:none}
+.section-title h2,.panel h2,.panel h3{letter-spacing:-.012em}
+.section-title{gap:12px}
+.primary{background:linear-gradient(120deg,#6541b0,#3c286a);border:1px solid #ae86f6;box-shadow:0 7px 18px #4d268134,inset 0 1px 0 #f1e4ff33}
+.secondary,.icon-button,.chip{border-color:#514667;background:linear-gradient(140deg,#28263e,#1b2032)}
+.primary,.secondary,.icon-button,.chip{transition:transform .17s,border-color .17s,background .17s,box-shadow .17s}
+.primary:hover,.secondary:hover,.icon-button:hover,.chip:hover{transform:translateY(-1px);border-color:#bf9bf4;box-shadow:0 7px 18px #5d38801a}
+input:not([type="checkbox"]),select,textarea{background-color:#171b2e;color:#f5efff;border-color:#53466c;border-radius:11px}
+select{max-width:100%;text-overflow:ellipsis}
+select option{background:#181b2e;color:#f4f0ff}
+input:focus,select:focus,textarea:focus{outline:1px solid #bc97ff;border-color:#a987eb;box-shadow:0 0 0 3px #936aea1d}
+#active-profile,.mx-chart-person-picker select,.soul-owner-picker select{font-weight:700;letter-spacing:.015em;color:#f4eaff;border-color:#796098;background-color:#1c1b34;box-shadow:inset 0 1px 0 #ffffff0e,0 5px 16px #07061322}
+.mx-chart-meta-card{background:linear-gradient(137deg,#231e3a,#181b30);border-color:#62537e}
+.mx-chart-meta-card:hover{border-color:#b68bea}
+.mx-chart-owner{box-shadow:0 15px 36px #07051455,inset 0 1px 0 #f0d8ff18!important}
+.soul-hero{background:radial-gradient(circle at 13% 40%,#6741a23b,transparent 33%),linear-gradient(140deg,#1a1936,#0e1429 72%)!important;border-color:#69518f}
+.soul-art{max-width:230px;filter:drop-shadow(0 0 20px #9a55e446)}
+.soul-art img{filter:drop-shadow(0 0 7px #a679ff20)}
+.soul-profile-strip,.soul-planet-grid,.soul-who{border-color:#5b4a7a}
+.soul-category,.soul-topic-rail button{transition:background .2s,border-color .2s,box-shadow .2s}
+.soul-category:hover,.soul-topic-rail button:hover{box-shadow:0 7px 22px #6b3da21a}
+.lunar-premium-card.mx-voc-status{transition:background .45s,border-color .45s,box-shadow .45s}
+.lunar-premium-card.mx-voc-status.is-clear{border:1px solid #4e5574;border-top:2px solid #7fbcac;background:linear-gradient(140deg,#1b2838,#141a2d 75%)}
+.lunar-premium-card.mx-voc-status.is-voc{border:1px solid #d06479;border-top:2px solid #ff8b9a;background:radial-gradient(ellipse at 95% 0%,#d958774a,transparent 65%),linear-gradient(140deg,#402037,#25182b 82%);box-shadow:0 0 0 1px #ff8da72b,0 0 32px #dc527933,inset 0 1px 0 #ffc7d32c}
+.mx-voc-status.is-voc .lunar-emblem.violet{background:#592b43;color:#ffbbcc;border-color:#c75a7b}
+.mx-voc-status.is-voc .lunar-state{color:#ffe1e8;border-color:#d87891;background:#783750}
+.mx-lunar-live-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 3px}
+.mx-lunar-live-indicator{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.12em;font-weight:800;color:#a5e4d3}
+.mx-lunar-live-indicator i{width:8px;height:8px;border-radius:50%;background:#77d6bd;box-shadow:0 0 9px #5bcfb5}
+.is-voc .mx-lunar-live-indicator{color:#ffd6df}.is-voc .mx-lunar-live-indicator i{background:#ff859a;box-shadow:0 0 9px #ff6d8d}
+.mx-lunar-countdown{color:#e1d6ed;font:700 12px/1.5 Manrope,'Noto Sans Arabic',sans-serif;font-variant-numeric:tabular-nums;unicode-bidi:plaintext;direction:ltr}
+.is-voc .mx-lunar-countdown{color:#ffe0e7}
+.lunar-premium-card.is-voc .premium-time-tile.lunar-violet{border-color:#a65374;background:linear-gradient(138deg,#46263b,#251c30)}
+@media(max-width:760px){.panel,.signal-card,.score-card{border-radius:17px}.page-heading{gap:12px}.heading-actions select{max-width:min(180px,40vw)!important}.mx-lunar-live-row{align-items:flex-start}.soul-art{max-width:150px}.topbar{backdrop-filter:none}}
+@media(max-width:410px){.mx-lunar-live-row{flex-direction:column;gap:5px}#active-profile{max-width:115px!important}}
+@media(prefers-reduced-motion:reduce){.nav-item,.panel,.signal-card,.score-card,.metric-card,.go-card,.primary,.secondary,.icon-button,.chip,.lunar-premium-card.mx-voc-status{transition:none!important}.nav-item:hover,.primary:hover,.secondary:hover,.icon-button:hover,.chip:hover{transform:none!important}}
