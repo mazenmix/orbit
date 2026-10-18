@@ -33,3 +33,19 @@ export function summarizeJournal(items:readonly JournalEntry[]):JournalSummary{
  const mean=(tone:Outcome)=>{const v=sample.filter(e=>e.outcome===tone).map(e=>e.symbolicIndex!);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null};
  return {total:items.length,positive:items.filter(e=>e.outcome==='positive').length,neutral:items.filter(e=>e.outcome==='neutral').length,difficult:items.filter(e=>e.outcome==='difficult').length,observedIndexCount:sample.length,positiveMeanIndex:mean('positive'),difficultMeanIndex:mean('difficult')};
 }
+
+/** Parse imported journal only if all observations belong to imported profiles.
+ * Reject oversized or tampered backups atomically before mutating any storage.
+ */
+export function parseJournalBackup(value:unknown,profileIds:ReadonlySet<string>):JournalEntry[]{
+ if(value===undefined)return [];
+ if(!Array.isArray(value)||value.length>250)throw Error('Invalid imported journal');
+ const seen=new Set<string>(),result:JournalEntry[]=[];
+ for(const candidate of value){
+  const entry=checkJournal(candidate as JournalEntry);
+  if(!profileIds.has(entry.personId))throw Error('Journal refers to an unknown profile');
+  if(seen.has(entry.id))throw Error('Duplicate imported journal ID');
+  seen.add(entry.id);result.push(entry);
+ }
+ return result;
+}
