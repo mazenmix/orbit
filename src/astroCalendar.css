@@ -55,3 +55,12 @@
 @media(max-width:750px){.astro-cal-months{grid-template-columns:1fr;gap:12px}.astro-cal-hero{padding:23px 18px}.astro-cal-ornament{font-size:36px;top:4%}.astro-cal-month{padding:18px!important}.astro-cal-day{min-height:39px;aspect-ratio:auto}.astro-day-detail-head{align-items:flex-start}.astro-day-main-score{min-width:78px;padding:12px}.astro-day-main-score b{font-size:29px}.astro-day-factors{grid-template-columns:1fr}.astro-cal-hero p{font-size:12px}}
 @media(min-width:751px) and (max-width:1080px){.astro-cal-months{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){.astro-cal-day{transition:none}}
+
+.astro-cal-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid #504361;border-radius:16px;padding:13px 19px;background:linear-gradient(120deg,#21213b,#12192b)}
+.astro-cal-toolbar-left{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.astro-cal-toolbar .astro-legend{margin:0}
+.astro-cal-toolbar .astro-legend-item{padding:6px 10px;font-size:10px}
+.astro-cal-toolbar .astro-cal-meta{margin-inline-start:auto;gap:13px}
+.astro-cal-month-head h3,.astro-cal-weekdays,.astro-cal-number,.astro-cal-index{font-family:Manrope,system-ui,sans-serif!important;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+.astro-cal-month-head h3{text-align:start}
+@media(max-width:750px){.astro-cal-toolbar{padding:13px}.astro-cal-toolbar .astro-cal-meta{margin-inline-start:0}}

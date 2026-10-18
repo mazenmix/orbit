@@ -99,3 +99,41 @@ input:focus,select:focus,textarea:focus{outline:1px solid #bc97ff;border-color:#
 .mx-aspect-upcoming .mx-aspect-phase{color:#a7edda;border-color:#3e937e}
 .mx-aspect-past{opacity:.84}
 .go-card .go-decision{font-size:12px;line-height:1.8;margin:12px 0 0;color:#ece3f7}
+
+/* Responsive precision chart interpretation, asteroid dossiers and live sign insight. */
+.mx-moon-sign-reading{display:grid;gap:7px;margin:17px 0 20px}
+.mx-moon-sign-line{display:flex;gap:9px;align-items:flex-start;color:#e7def5!important;font-size:12px!important;line-height:1.8!important;margin:0!important}
+.mx-moon-sign-line>span{color:#e4ba84;font-size:14px;flex:none}
+.mx-moon-sign-line.mx-moon-personal{background:#65518c35;border:1px solid #635079;padding:10px 12px;border-radius:10px;color:#f7e8fe!important}
+.mx-natal-asteroid-status p,.mx-asteroid-note{font-size:12px;line-height:1.8;color:#c9c0da}
+.mx-natal-asteroid-dossier>summary{font-weight:800;color:#f0dcff;cursor:pointer;line-height:1.8}
+.mx-asteroid-dossier-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:18px}
+.mx-asteroid-dossier-item{min-width:0;padding:12px;border:1px solid #5b4c73;border-radius:12px;background:#12182b}
+.mx-asteroid-dossier-item>div{display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:7px}
+.mx-asteroid-dossier-item b{font-size:12px;color:#e2c7fa}
+.mx-asteroid-dossier-item span,.mx-asteroid-dossier-item small{font-size:10px;color:#b8accd}
+.mx-asteroid-dossier-item p{font-size:11px;line-height:1.8;margin:7px 0}
+.mx-chart-fingerprint h3{font-size:16px;color:#ebd1fb}
+.mx-chart-fingerprint-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mx-chart-fingerprint-grid article{padding:13px;border:1px solid #53436e;border-radius:11px;background:#151a2d}
+.mx-chart-fingerprint-grid b{color:#ead6ff;font-size:12px}
+.mx-chart-fingerprint-grid p{font-size:12px;line-height:1.85;margin:7px 0 0}
+.mx-chart-disclaimer{margin-top:17px;font-size:11px!important}
+@media(max-width:850px){.mx-asteroid-dossier-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.mx-asteroid-dossier-grid,.mx-chart-fingerprint-grid{grid-template-columns:1fr}}
+/* MX Ai: fit more readable data into each viewport with clear hierarchy. */
+#live-view-body .go-grid{gap:8px!important;margin-top:12px}
+#live-view-body .go-card{padding:11px 12px!important;border-radius:11px;min-height:0}
+#live-view-body .go-card small{font-size:9px}
+#live-view-body .go-card h3{font-size:13px!important;margin:5px 0 1px!important;line-height:1.45}
+#live-view-body .go-card strong{font-size:26px!important;line-height:1.2}
+#live-view-body .go-card .go-decision{font-size:10.5px!important;line-height:1.6!important;margin:7px 0 0!important}
+#live-view-body .metrics-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:8px!important;margin:11px 0!important}
+#live-view-body .metric-card{padding:10px!important;border-radius:11px;min-height:0}
+#live-view-body .metric-card small{font-size:10px!important;line-height:1.5}
+#live-view-body .metric-card>b{font-size:21px!important;margin:4px 0!important;line-height:1.2}
+#live-view-body .metric-card .meter{margin:6px 0}
+#live-view-body .metric-card details{margin-top:4px;font-size:9px}
+@media(max-width:1250px){#live-view-body .metrics-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+@media(max-width:700px){#live-view-body .metrics-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}#live-view-body .go-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#live-view-body .go-card{padding:10px!important}}
+@media(max-width:360px){#live-view-body .metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}

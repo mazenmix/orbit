@@ -5,6 +5,8 @@ import './observatory.css';
 import './security.css';
 import './mychart.css';
 import './premium.css';
+import {moonSignReading} from './moonSignNarrative.ts';
+import {precisionChartStories} from './chartPrecisionNarrative.ts';
 import './astroCalendar.css';
 import {astroCalendarDays,colorizeAstroDay,type AstroCalendarDay,type AstroCalendarRating} from './astroCalendar.ts';
 import {compareContacts,distinctParagraphs} from './reading.ts';
@@ -89,7 +91,8 @@ const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 const icon=(name:string)=>({today:'✦',signals:'⌁',people:'♧',chart:'◎',settings:'⚙',time:'◷',lunar:'☾',eclipses:'◑',asteroids:'✧',advanced:'◈',intel:'✦',calendar:'▦',ai:'✧',evidence:'⎔'}[name]??'·');
 const labels:Record<string,()=>string>={today:()=>t('اليوم','Today'),signals:()=>t('الإشارات','Signals'),people:()=>t('الناس','People'),chart:()=>t('خارطتي','My chart'),settings:()=>t('الإعدادات','Settings'),time:()=>t('آلة الزمن','Time Machine'),lunar:()=>t('توقيت القمر','Moon timing'),eclipses:()=>t('الكسوف والخسوف','Eclipses'),asteroids:()=>t('الكويكبات','Named asteroids'),advanced:()=>t('التوقيت المتقدم','Advanced timing'),calendar:()=>t('التقويم','Calendar'),intel:()=>t('MX Ai','MX Ai'),ai:()=>t('شرح Qwen3','Qwen3 explanations'),evidence:()=>t('الدليل الفلكي','Astrological evidence')};
 let clockFormat: '24'|'12'=localStorage.getItem('mx.clockFormat')==='12'?'12':'24';
-let liveTimePinned=false,liveLastRender=0,liveMinute=-1;
+let liveTimePinned=false,liveLastRender=0,liveMinute=-1,moonNarrativeLastMinute=-1;
+const natalAsteroidHtmlCache=new Map<string,string>();
 const dateText=(d:Date,options:Intl.DateTimeFormatOptions={dateStyle:'full',timeStyle:'short'})=>new Intl.DateTimeFormat('en-GB',{...options,timeZone:active.zone,numberingSystem:'latn',hour12:clockFormat==='12'}).format(d);
 function getReport(at=selected){const key=active.id+JSON.stringify(active)+at.toISOString();let r=cache.get(key);if(!r){r=report(active,at);cache.set(key,r);if(cache.size>150)cache.delete(cache.keys().next().value!)}return r}
 function average(r:Report){return Math.round(Object.values(r.scores).reduce((a,b)=>a+b,0)/8)}
@@ -189,28 +192,57 @@ function chartPlanetIndex(c:Chart,transit?:Chart){
  });
  return '<details class="mx-wheel-index"><summary>'+t('كل الكواكب بأسمائها ودرجاتها الدقيقة','All planets, names and exact degrees')+'</summary><div class="mx-wheel-planets">'+all(c.points,'natal').join('')+(transit?all(transit.points,'transit').join(''):'')+'</div></details>';
 }
+
+function natalAsteroidDetails(person:Profile,natal:Chart){
+ const count=mountedAsteroidCount();
+ if(count===0)return '<section class="panel mx-natal-asteroid-status"><h3>'+t('الكويكبات المحسوبة لصاحب الخارطة','Asteroids for this birth chart')+'</h3><p>'+t('حتى أفسّر الكويكبات بصورة مختلفة لهذا الشخص، لازم تتحمّل ملفات المواقع الفلكية أولاً، وبدونها ما أخمّن مواضع.','To give this person’s asteroid-specific reading, the actual ephemeris files must be available; no placements are invented.')+'</p><button class="secondary" id="load-named-asteroids">'+t('حساب الكويكبات المتاحة','Calculate available asteroids')+' ↗</button><small id="asteroid-progress" role="status">'+esc(asteroidProgress)+'</small></section>';
+ const key=JSON.stringify([person,natal.date.toISOString(),count,lang]);
+ const cached=natalAsteroidHtmlCache.get(key);if(cached)return cached;
+ try{
+  const positions=namedAsteroidPositions(asteroidSwissRuntime(),birthInstant(person));
+  const map=new Map(positions.map(pt=>[pt.id,pt]));
+  const contacts=namedAsteroidContacts(positions,targets(natal).filter(pt=>person.known||!['Moon','Ascendant','MC'].includes(pt.id)),birthInstant(person));
+  const closest=new Map<string,typeof contacts[number]>();
+  for(const e of contacts)if(!closest.has(e.transit.id))closest.set(e.transit.id,e);
+  const entries=namedAsteroids.map(a=>{
+   const pos=map.get(a.name),near=closest.get(a.name);if(!pos)return '';
+   const story=asteroidReading(a,near,lang==='en');
+   const sign=t(signsAr[Math.floor((((pos.longitude%360)+360)%360)/30)],signsEn[Math.floor((((pos.longitude%360)+360)%360)/30)]);
+   const literal=near?(t('أقرب اتصال محسوب: ','Closest exact natal contact: ')+planet(near.natal.id)+' · '+aspect(near.angle)+' · '+near.orb.toFixed(2)+'°') : t('ماكو اتصال ولادي قوي ضمن حدّ الحساب.','No close natal contact within the calculation threshold.');
+   return '<article class="mx-asteroid-dossier-item"><div><b>'+esc(a.name)+'</b><span>MPC '+a.number+' · '+sign+' '+(pos.longitude%30).toFixed(2)+'°</span></div><p>'+esc(story.theme)+'</p><small>'+esc(literal)+'</small><p>'+esc(story.action)+'</p></article>';
+  }).filter(Boolean);
+  const html='<details class="panel mx-natal-asteroid-dossier"><summary>'+t('الكويكبات: مواقع صاحب الخارطة واتصالاته الخاصة','Asteroids: this person’s own positions and natal aspects')+' · '+entries.length+'/'+namedAsteroids.length+'</summary><p class="mx-asteroid-note">'+t('هذه المواضع محسوبة من ميلاد الشخص المختار، مو من ميلاد حسابك. تأويلاتها رمزية، ولا تكشف أسرار أو رغبات الشخص.','Positions belong to the selected person’s birth, not your account. Interpretations are symbolic; they cannot reveal private desires.')+'</p><div class="mx-asteroid-dossier-grid">'+entries.join('')+'</div></details>';
+  natalAsteroidHtmlCache.set(key,html);if(natalAsteroidHtmlCache.size>10)natalAsteroidHtmlCache.delete(natalAsteroidHtmlCache.keys().next().value!);
+  return html;
+ }catch(e){return '<section class="panel"><p>'+t('تعذر تحليل الكويكبات المحسوبة لهذه الخارطة: ','Asteroid readings unavailable for this chart: ')+esc(String(e))+'</p></section>'}
+}
+function chartSpecificFingerprint(person:Profile,natal:Chart){
+ const readings=precisionChartStories(natal,undefined,[],person.known).slice(0,4);
+ return '<section class="panel mx-chart-fingerprint"><h3>'+t('البصمة الحسابية الفريدة لصاحب الخارطة','This chart owner’s calculated natal fingerprint')+'</h3><div class="mx-chart-fingerprint-grid">'+readings.map(r=>'<article><b>'+t(r.titleAr,r.titleEn)+'</b><p>'+t(r.ar,r.en)+'</p></article>').join('')+'</div></section>';
+}
+
 function chartPage(){
  if(chartMode==='details'){
   try{
    const {person,natal}=soulViewProfile();
    const profileSelect=chartOwnerHeader(person);
    const privateNote=person.kind==='self'?sessionStorage.getItem('mx.soul.discovery.v1:'+person.id+':'+soulTopic)??'':undefined;
-   return '<div class="section-title chart-view-tabs"><div class="segmented"><button data-chart="natal">'+t('خارطة الولادة','Natal')+'</button><button data-chart="transit">'+t('العبور','Transits')+'</button><button data-chart="overlay">'+t('مقارنة العبور','Transit overlay')+'</button><button class="selected" data-chart="details">'+t('التفاصيل','Details')+'</button></div></div>'+profileSelect+soulRender({profile:person,chart:natal,categoryId:soulCategory,topicId:soulTopic,query:soulQuery,privateNote,ai:soulAIResults.get(soulAIKey(person,soulTopic)),aiBusy:soulAIBusy&&soulAIActive===soulAIKey(person,soulTopic),aiError:soulAIActive===soulAIKey(person,soulTopic)?soulAIError:''});
+   return '<div class="section-title chart-view-tabs"><div class="segmented"><button data-chart="natal">'+t('خارطة الولادة','Natal')+'</button><button data-chart="transit">'+t('العبور','Transits')+'</button><button data-chart="overlay">'+t('مقارنة العبور','Transit overlay')+'</button><button class="selected" data-chart="details">'+t('التفاصيل','Details')+'</button></div></div>'+profileSelect+chartSpecificFingerprint(person,natal)+soulRender({profile:person,chart:natal,categoryId:soulCategory,topicId:soulTopic,query:soulQuery,privateNote,ai:soulAIResults.get(soulAIKey(person,soulTopic)),aiBusy:soulAIBusy&&soulAIActive===soulAIKey(person,soulTopic),aiError:soulAIActive===soulAIKey(person,soulTopic)?soulAIError:''});
   }catch(e){return '<section class="panel"><h2>'+t('تعذر حساب تحليل الشخصية','Unable to calculate personality analysis')+'</h2><p>'+esc(String(e))+'</p></section>'}
  }
  const person=chartOwnerProfile();
  const r=person.id===active.id?data!:report(person,selected),c=chartMode==='transit'?r.current:r.natal;
- const owner=profileAddress(person,lang==='ar'),info=chartStories(r.natal),now=transitOverview(r);
+ const owner=profileAddress(person,lang==='ar'),info=precisionChartStories(r.natal,chartMode==='natal'?undefined:r.current,chartMode==='natal'?[]:r.evidence,person.known),now=transitOverview(r);
  const sex=person.sex==='male'?'Male':person.sex==='female'?'Female':t('مو محدد','Not specified');
  const chartLead=chartMode==='natal'?t('هاي خارطة الميلاد الثابتة؛ التفاصيل أدناه تخص صاحب أو صاحبة الخارطة، مو أحداث اليوم.','This is the fixed natal chart; its descriptions concern the owner, not events today.'):chartMode==='transit'?t('هنا حركة الكواكب في الوقت المختار؛ التفسير مرتبط بالحاضر مو بطباع الشخص الثابتة.','These are current transits for the chosen moment, not fixed personality traits.'):t('المقارنة تعرض حركة اليوم فوق مواضع الميلاد. الألوان والرموز توضح الطبقتين.','The overlay compares current transits with natal positions. Colored symbols distinguish the layers.');
  const cards=info.map(x=>'<article class="chart-story"><span class="eyebrow">'+t(x.titleAr,x.titleEn)+' · '+t(x.signAr,x.signEn)+'</span><p>'+t(x.ar,x.en)+'</p><p class="advice-action"><b>'+t('نصيحة عملية: ','Practical suggestion: ')+'</b>'+(lang==='ar'?actionForGender(x.actionAr,person.sex):x.actionEn)+'</p></article>').join('');
  const lead=chartOwnerHeader(person);
- const stories='<section class="panel"><div class="section-title"><h2>'+t('شرح خارطتك','Chart interpretation')+'</h2><details class="mx-reading-help"><summary>'+t('طريقة القراءة','How to read')+'</summary><p>'+t('المواقع الفلكية محسوبة، والتأويل رمزي ولا يثبت صفات الشخص أو المستقبل.','Planetary positions are calculated; interpretations are symbolic and cannot establish personality or future events.')+'</p></details></div><div class="chart-stories">'+cards+'</div></section>';
+ const stories='<section class="panel"><div class="section-title"><h2>'+t('قراءة الكواكب والزوايا لصاحب الخارطة','Planetary placements and calculated aspects for this person')+'</h2></div><div class="chart-stories">'+cards+'</div><p class="subtle mx-chart-disclaimer">'+t('كل درجة وزاوية محسوبة من بيانات ميلاد صاحب الخارطة، والتأويلات تقليدية رمزية وليست قياساً علمياً للشخصية.','Positions and aspects belong to the chosen birth chart; their meanings are traditional symbolism, not a scientific personality assessment.')+'</p></section>';
  const daily='<section class="panel chart-transit-summary"><h2>'+t('شنو تقول الحركة الفلكية عن اللحظة؟','What stands out at this moment?')+'</h2><p>'+t(now.ar,now.en)+'</p><div class="mini-trends">'+r.signals.slice(0,4).map(signal=>'<div class="trend-item"><b>'+cat(signal.category)+'</b><span class="reading-level '+gaugeLevel(signal.score)+'">'+signal.score+'</span><small>'+esc(copy(signal).action)+'</small></div>').join('')+'</div></section>';
  return '<div class="section-title"><div class="segmented"><button data-chart="natal" class="'+(chartMode==='natal'?'selected':'')+'">'+t('خارطة الولادة','Natal')+'</button><button data-chart="transit" class="'+(chartMode==='transit'?'selected':'')+'">'+t('العبور','Transits')+'</button><button data-chart="overlay" class="'+(chartMode==='overlay'?'selected':'')+'">'+t('مقارنة العبور','Transit overlay')+'</button><button data-chart="details" class="'+(chartMode==='details'?'selected':'')+'">'+t('التفاصيل','Details')+'</button></div></div>'+lead+
- (!active.known||!c.cusps.length?'<div class="alert">'+t('وقت الميلاد غير معروف أو البيوت غير متاحة لهذا الموقع، لهذا ما نظهر أرقام بيوت غير موثوقة.','Birth time unknown or houses unavailable for these coordinates, so house positions are not invented.')+'</div>':'')+
+ (!person.known||!c.cusps.length?'<div class="alert">'+t('وقت الميلاد غير معروف أو البيوت غير متاحة لهذا الموقع، لهذا ما نظهر أرقام بيوت غير موثوقة.','Birth time unknown or houses unavailable for these coordinates, so house positions are not invented.')+'</div>':'')+
  '<div class="chart-layout chart-expanded"><section class="panel large-wheel"><h2>'+t('الدائرة الفلكية — البيوت عكس عقارب الساعة','Astrological wheel — houses counterclockwise')+'</h2>'+wheel(c,chartMode==='overlay'?r.current:undefined)+chartPlanetIndex(c,chartMode==='overlay'?r.current:undefined)+'<p>'+dateText(chartMode==='natal'?r.natal.date:selected,{dateStyle:'full',timeStyle:'short'})+'</p><div class="wheel-guide"><span class="natal-dot">'+t('خارطة الولادة','Natal planets')+'</span>'+(chartMode==='overlay'?'<span class="transit-dot">'+t('العبور','Transits')+'</span>':'')+'</div><div class="mx-aspect-legend"><span class="harmonious">'+t('تثليث / تسديس','Trine / Sextile')+'</span><span class="challenging">'+t('تربيع / مقابلة','Square / Opposition')+'</span><span class="conjunction">'+t('اقتران','Conjunction')+'</span><span>Rx = '+t('تراجع','Retrograde')+'</span></div></section><section class="panel chart-side-reading">'+(chartMode==='natal'?'<h2>'+t('أهم صفات الخارطة','The chart at a glance')+'</h2>'+cards.split('</article>').slice(0,3).join('</article>')+'</article>':'<h2>'+t('شرح اللحظة','Moment summary')+'</h2><p>'+t(now.ar,now.en)+'</p>')+'</section></div>'+
- (chartMode==='natal'?stories:daily+stories)+
+ (chartMode==='natal'?stories:daily+stories)+natalAsteroidDetails(person,r.natal)+
  '<details class="panel chart-math"><summary>'+t('التفاصيل الرياضية: مواقع الكواكب والبيوت','Advanced technical positions and house cusps')+'</summary><h3>'+t('مواضع الكواكب','Celestial positions')+'</h3>'+positionTable(c.points)+(c.cusps.length?'<div class="house-grid">'+c.cusps.map((lon,i)=>'<div><small>'+t('البيت','House')+' '+(i+1)+'</small><b>'+signName(lon)+'</b><span>'+(lon%30).toFixed(2)+'°</span></div>').join('')+'</div>':'')+'</details>';
 }
 function positionTable(points:Report['current']['points']){return `<div class="table-wrap"><table><thead><tr><th>${t('الجرم','Body')}</th><th>${t('البرج','Sign')}</th><th>${t('الدرجة','Degree')}</th><th>${t('السرعة / يوم','Speed / day')}</th></tr></thead><tbody>${points.map(p=>`<tr><td><span class="planet-symbol">${p.symbol}</span> ${planet(p.id)} ${p.speed<0?'<b class="retro">℞</b>':''}</td><td>${signName(p.longitude)}</td><td dir="ltr">${(p.longitude%30).toFixed(4)}°</td><td dir="ltr">${p.speed.toFixed(4)}°</td></tr>`).join('')}</tbody></table></div>`}
@@ -327,11 +359,11 @@ function astroCalendarPage(){
  initializeAstroCalendar();
  const months=new Map<string,AstroCalendarDay[]>();
  for(const day of calendarDays){const items=months.get(day.monthKey)??[];items.push(day);months.set(day.monthKey,items)}
- const weekdays=[t('إث','Mo'),t('ثل','Tu'),t('أر','We'),t('خم','Th'),t('جم','Fr'),t('سب','Sa'),t('أح','Su')];
+ const weekdays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
  const legend=(color:AstroCalendarRating['color'])=>'<span class="astro-legend-item"><i class="astro-legend-dot astro-'+color+'"></i>'+calendarColorLabel(color)+'</span>';
- const header='<div class="astro-cal-hero"><div class="astro-cal-ornament" aria-hidden="true">☽ <span>✧</span> ☉</div><span class="astro-eyebrow">MX ASTRO · CELESTIAL YEAR</span><h2>'+t('تقويم المدار · السنة القادمة','Celestial calendar · next twelve months')+'</h2><p>'+t('من اليوم إلى 12 شهر جاي. كل يوم يُحسب بمواقع فلكية فعلية عند الساعة 12 ظهراً بتوقيت ملفك؛ الألوان مجرد تقييمات تنجيمية رمزية وليست توقعاً علمياً أو مؤشر أمان.','From today through the next twelve months. Every day is calculated from actual planetary positions at 12:00 in your profile time zone. Colors are symbolic, not scientific predictions or safety assessments.')+'</p><div class="astro-legend">'+(['green','yellow','orange','red'] as const).map(legend).join('')+'</div><div class="astro-cal-meta"><span>✦ '+calendarDays.length+' '+t('يوم','days')+'</span><span>◷ '+esc(active.zone)+'</span><span id="astro-calendar-progress" role="status">'+calendarSnapshots.size+'/'+calendarDays.length+' '+t('محسوب','calculated')+'</span></div></div>';
+ const header='<div class="astro-cal-toolbar"><div class="astro-cal-toolbar-left"><span class="astro-eyebrow">☽  CELESTIAL INDEX  ·  12 MONTHS</span><div class="astro-legend">'+(['green','yellow','orange','red'] as const).map(legend).join('')+'</div></div><div class="astro-cal-meta"><span>✦ '+calendarDays.length+' DAYS</span><span>◷ '+esc(active.zone)+'</span><span id="astro-calendar-progress" role="status">'+calendarSnapshots.size+'/'+calendarDays.length+' '+t('محسوب','calculated')+'</span></div></div>';
  const groups=[...months.entries()].map(([key,days])=>{
-  const initial=days[0],title=new Intl.DateTimeFormat(lang==='ar'?'ar-IQ':'en-US',{timeZone:'UTC',month:'long',year:'numeric'}).format(new Date(Date.UTC(initial.year,initial.month-1,1)));
+  const initial=days[0],title=new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'long',year:'numeric',numberingSystem:'latn'}).format(new Date(Date.UTC(initial.year,initial.month-1,1)));
   const blanks=Array.from({length:initial.weekday},()=>'<span class="astro-cal-blank" aria-hidden="true"></span>').join('');
   return '<section class="astro-cal-month panel"><div class="astro-cal-month-head"><span>✦</span><h3>'+esc(title)+'</h3><small>'+String(initial.month).padStart(2,'0')+'/'+initial.year+'</small></div><div class="astro-cal-weekdays">'+weekdays.map(x=>'<span>'+x+'</span>').join('')+'</div><div class="astro-cal-days">'+blanks+days.map(d=>{
    const v=calendarSnapshots.get(d.iso),color=v?.color??'pending',selected=d.iso===calendarSelected,today=d.iso===calendarAnchor;
@@ -425,6 +457,25 @@ function moonMomentNarrative(window:LunarWindow){
   'No additional exact classical contact remains in this sign. The next sign ingress is the verified upcoming astronomical event.');
  return ifVoid+' '+t('هذه قراءة فلكية حسابية وتأويل رمزي، مو سبب مثبت للأحداث أو لقرارات الأمان.','These are calculated events with symbolic interpretations, not proven causes of events or a safety assessment.');
 }
+
+function moonSignLiveHtml(sign:number,r:Report):string{
+ const lines=moonSignReading(sign,r.current,r.natal,active.known,lang==='ar');
+ return lines.map((line,i)=>'<p class="mx-moon-sign-line'+(i===4?' mx-moon-personal':'')+'"><span aria-hidden="true">'+(i===4?'✧':'◦')+'</span>'+esc(line)+'</p>').join('');
+}
+function updateLiveMoonSign(now:number){
+ if(screen!=='lunar'||liveTimePinned||document.visibilityState==='hidden')return;
+ const minute=Math.floor(now/60000);
+ if(minute===moonNarrativeLastMinute)return;
+ moonNarrativeLastMinute=minute;
+ const at=new Date(now),r=getReport(at),moon=r.current.points.find(pt=>pt.id==='Moon');
+ if(!moon)return;
+ const sign=Math.floor((((moon.longitude%360)+360)%360)/30);
+ const box=root.querySelector<HTMLElement>('#mx-moon-sign-reading');
+ if(!box||Number(box.dataset.moonSign)!==sign){selected=at;recalculate();refreshLiveBody(now);return}
+ const html=moonSignLiveHtml(sign,r);
+ if(box.innerHTML!==html)box.innerHTML=html;
+}
+
 function lunarPage(){
  try{
   const w=moonWindow(),last=w.lastAspect,when=w.isVoid?w.ingressAt:w.vocStartsAt;
@@ -432,7 +483,7 @@ function lunarPage(){
   const tile=(label:string,at:Date,cls:string,sign:string)=>'<div class="premium-time-tile '+cls+'"><div class="time-tile-top"><span>'+sign+'</span><small>'+label+'</small></div><time datetime="'+at.toISOString()+'">'+date(at)+'</time><span class="time-tile-zone">'+esc(active.zone)+'</span></div>';
   const lastLabel=last?planet(last.transit)+' · '+aspect(last.angle)+' · '+planet(last.target):t('ما انحسب اتصال كلاسيكي دقيق ضمن البرج الحالي.','No classical exact aspect in the current sign.');
   return '<div class="section-title"><div><span class="eyebrow">MX EYE · MOON TIMING</span><h2>'+t('توقيت القمر وخلو المسار','Moon timing and void-of-course')+'</h2></div></div>'+
-   '<div class="lunar-premium-grid"><section class="panel lunar-premium-card"><div class="lunar-card-heading"><span class="lunar-emblem">☾</span><div><small>'+t('موقع القمر الحالي','CURRENT MOON SIGN')+'</small><h2>'+signName(w.sign*30)+'</h2></div></div><p>'+t('انتقال القمر من برج إلى آخر محسوب من مواضعه الفلكية، وتوقيتك يعرض حسب منطقتك الزمنية.','Moon sign transitions are calculated from astronomical positions, shown in your saved time zone.')+'</p><div class="premium-time-pair">'+tile(t('دخل البرج الحالي','Entered current sign'),w.enteredAt,'lunar-muted','↘')+tile(t('يدخل البرج القادم','Next sign ingress'),w.ingressAt,'lunar-teal','↗')+'</div></section>'+
+   '<div class="lunar-premium-grid"><section class="panel lunar-premium-card"><div class="lunar-card-heading"><span class="lunar-emblem">☾</span><div><small>'+t('موقع القمر الحالي · بث حي','CURRENT MOON SIGN · LIVE')+'</small><h2>'+signName(w.sign*30)+'</h2></div></div><div class="mx-moon-sign-reading" id="mx-moon-sign-reading" data-moon-sign="'+w.sign+'">'+moonSignLiveHtml(w.sign,data!)+'</div><div class="premium-time-pair">'+tile(t('دخل البرج الحالي','Entered current sign'),w.enteredAt,'lunar-muted','↘')+tile(t('يدخل البرج القادم','Next sign ingress'),w.ingressAt,'lunar-teal','↗')+'</div></section>'+
    '<section class="panel lunar-premium-card mx-voc-status '+(w.isVoid?'is-voc':'is-clear')+'" data-voc-start="'+(+w.vocStartsAt)+'" data-voc-end="'+(+w.ingressAt)+'"><div class="lunar-card-heading"><span class="lunar-emblem violet">◌</span><div><small>VOID OF COURSE</small><h2>'+ (w.isVoid?t('القمر خالي المسار الآن','Moon is void-of-course'):t('القمر خارج خلو المسار','Moon is not VOC'))+'</h2></div><span class="lunar-state">'+(w.isVoid?t('فعّال','Active'):t('غير فعّال','Not active'))+'</span></div><div class="mx-lunar-live-row"><span class="mx-lunar-live-indicator"><i></i>'+(liveTimePinned?t('وقت مختار','SELECTED TIME'):'LIVE')+'</span><span class="mx-lunar-countdown" data-voc-countdown></span></div><p>'+t('هاي الفترة تبدأ بعد آخر زاوية رئيسية دقيقة للقمر، وتنتهي لحظة دخوله البرج الجديد.','This interval begins after the Moon’s final exact major aspect and ends with the next sign ingress.')+'</p><div class="premium-time-pair">'+tile(t('بداية خلو المسار','VOC begins'),w.vocStartsAt,'lunar-violet','↤')+tile(t('نهاية خلو المسار','VOC ends'),w.ingressAt,'lunar-gold','↦')+'</div></section></div>'+
    '<section class="panel lunar-advice-card"><div class="lunar-advice-head"><div><span class="eyebrow">MX EYE · EXPLAINED TIMING</span><h2>'+t('شنو معناه بهاللحظة؟','How to use this timing')+'</h2></div><span class="lunar-advice-badge">'+(w.isVoid?t('خلو المسار فعّال','Void-of-course active'):t('القمر يتحرك باتجاه اتصالاته','Moon approaching aspects'))+'</span></div><p class="mx-lunar-explained">'+moonMomentNarrative(w)+'</p><div class="lunar-last-aspect"><small>'+t('آخر اتصال دقيق قبل الانتقال','Last exact major aspect')+'</small><strong>'+lastLabel+'</strong>'+(last?'<time datetime="'+last.time.toISOString()+'">'+date(last.time)+'</time>':'')+'</div><div class="button-row"><button id="export-lunar-calendar" class="primary">'+(w.isVoid?t('أضف موعد انتقال القمر للتقويم','Add next ingress to calendar'):t('أضف بداية خلو المسار للتقويم','Add VOC start to calendar'))+'</button><button class="secondary" data-go="time">'+t('افتح آلة الزمن','Open Time Machine')+'</button></div><small>'+t('تذكير التقويم: ','Calendar reminder: ')+date(when)+'</small></section>'+
    '<section class="panel lunar-timeline"><div class="section-title"><div><span class="eyebrow">EXACT EPHEMERIS · MEANING</span><h2>'+t('الاتصالات الدقيقة بهذا البرج','Exact aspects in this sign')+'</h2></div></div><p class="mx-lunar-timeline-lead">'+t('الأوقات أدناه لحظات فلكية دقيقة محسوبة، والنص يشرح معناها الرمزي بلغة سهلة. الأحداث الماضية مكتوب عليها «صار»، والقادمة «قادم».','Times below are calculated exact astronomical contacts with a plain-language symbolic explanation. Past and upcoming events are marked.')+'</p><div class="premium-timeline">'+(w.events.length?w.events.map(e=>'<div class="timeline-entry '+(+e.time<=+selected?'mx-aspect-past':'mx-aspect-upcoming')+'"><span class="timeline-dot"></span><div><b>'+planet(e.transit)+' · '+aspect(e.angle)+' · '+planet(e.target)+'</b><span class="mx-aspect-phase">'+(+e.time<=+selected?t('صار بالفعل','Already exact'):t('قادم','Upcoming'))+'</span><time datetime="'+e.time.toISOString()+'">'+date(e.time)+'</time><p class="mx-lunar-aspect-story">'+moonAspectNarrative(e)+'</p></div></div>').join(''):'<p>'+t('ماكو زاوية كلاسيكية دقيقة ضمن التعريف المحدد.','No exact classical aspects under the chosen convention.')+'</p>')+'</div><details><summary>'+t('طريقة الحساب الفلكي','Astronomical calculation convention')+'</summary><p>'+t('يستخدم آخر زاوية رئيسية دقيقة للقمر مع الشمس أو عطارد أو الزهرة أو المريخ أو المشتري أو زحل، حتى لحظة دخوله البرج التالي.','Uses the last exact major aspect of the Moon to the Sun, Mercury, Venus, Mars, Jupiter or Saturn until its next sign ingress.')+'</p></details></section>';
@@ -743,33 +794,42 @@ function updateLiveVocClock(now:number):boolean{
  }
  return false;
 }
+
+function refreshLiveBody(now:number){
+ const focused=document.activeElement as HTMLElement|null;
+ const editing=focused&&root.contains(focused)&&(focused.matches('input,textarea,select,[contenteditable="true"]')||focused.isContentEditable);
+ if(editing)return;
+ const region=root.querySelector<HTMLElement>('#live-view-body');
+ if(!region||error){render();return}
+ const preserved=Array.from(region.querySelectorAll<HTMLDetailsElement>('details')).map((el,index)=>el.open?index:-1).filter(index=>index>=0);
+ const scrollX=window.scrollX,scrollY=window.scrollY;
+ region.innerHTML=content();
+ const details=region.querySelectorAll<HTMLDetailsElement>('details');
+ for(const index of preserved)if(details[index])details[index].open=true;
+ bind();
+ liveLastRender=now;
+ if(screen==='lunar')updateLiveVocClock(now);
+ if(Math.abs(scrollY-window.scrollY)>4)window.scrollTo({left:scrollX,top:scrollY,behavior:'instant'});
+}
+
 function refreshLiveView(force=false){
  if(!ready||document.visibilityState==='hidden')return;
+ const now=Date.now(),minute=Math.floor(now/60000);
+ if(minute!==liveMinute){liveMinute=minute;const el=root.querySelector<HTMLElement>('#live-page-clock');if(el&&!liveTimePinned)el.textContent=dateText(new Date(now))}
  if(screen==='calendar'){
   if(astroCalendarToday()!==calendarAnchor){render();return}
   if(!calendarRunning&&calendarCursor<calendarDays.length)startCalendarWork();
   return;
  }
- if(screen==='ai'){
-  void refreshLiveQwen(force);
-  const clock=root.querySelector<HTMLElement>('#live-page-clock');if(clock)clock.textContent=dateText(new Date());
-  return;
+ if(screen==='ai'){void refreshLiveQwen(force);return}
+ if(liveTimePinned)return; // A user-selected time remains intentionally fixed.
+ const boundary=screen==='lunar'&&updateLiveVocClock(now);
+ if(screen==='lunar'&&!boundary)updateLiveMoonSign(now);
+ const canUpdate=!['settings','people','time'].includes(screen);
+ const cadence=screen==='lunar'?60000:screen==='chart'?120000:90000;
+ if(canUpdate&&(force||boundary||now-liveLastRender>=cadence)){
+  selected=new Date(now);recalculate();refreshLiveBody(now);
  }
- if(liveTimePinned)return;
- const now=Date.now(),boundary=screen==='lunar'&&updateLiveVocClock(now);
- const safeScreen=!['settings','people','ai','time'].includes(screen);
- if(safeScreen&&(force||boundary||now-liveLastRender>=300000)){
-  const focused=document.activeElement as HTMLElement|null;
-  const editing=focused&&root.contains(focused)&&(focused.matches('input,textarea,select,[contenteditable="true"]')||focused.isContentEditable);
-  if(!editing){
-   selected=new Date(now);recalculate();
-   const region=root.querySelector<HTMLElement>('#live-view-body');
-   if(region&&!error){region.innerHTML=content();bind();liveLastRender=now;if(screen==='lunar')updateLiveVocClock(now)}
-   else render();
-  }
- }
- const minute=Math.floor(now/60000);
- if(minute!==liveMinute){liveMinute=minute;const el=root.querySelector<HTMLElement>('#live-page-clock');if(el&&screen!=='time')el.textContent=dateText(new Date(now))}
 }
 
 function navigate(value:string){screen=labels[value]?value:'today';if(screen==='today'||screen==='ai'){liveTimePinned=false;selected=new Date();recalculate()}location.hash=screen;render();if(screen==='ai'&&!aiConnection.checked)void refreshAIConnection();window.scrollTo({top:0,behavior:'instant'})}

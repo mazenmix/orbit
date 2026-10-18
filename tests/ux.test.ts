@@ -68,3 +68,26 @@ test('Go-mode uses unique domain-specific recommendations rather than repetitive
  assert.ok(!main.includes('تظهر زاوية رمزية داعمة؛ استثمرها بخطوة محدودة'));
  assert.ok(main.includes('mxGoNarrative(d.domain,state,memo)'));
 });
+
+test('Moon sign has live five-line calculation tied to owner natal data',()=>{
+ assert.ok(main.includes('moonSignReading(sign,r.current,r.natal,active.known'));
+ assert.ok(main.includes('id="mx-moon-sign-reading"'));
+ assert.ok(main.includes('function updateLiveMoonSign('));
+});
+test('chart interpretation is calculated per person, not generic repeated boilerplate',()=>{
+ assert.ok(main.includes('precisionChartStories(r.natal'));
+ assert.ok(main.includes('natalAsteroidDetails(person,r.natal)'));
+ assert.ok(main.includes('chartSpecificFingerprint(person,natal)'));
+ assert.ok(!main.includes('<summary>'+ "'+t('طريقة القراءة'" ));
+});
+test('calendar uses English-only weekdays and month names, no large hero',()=>{
+ assert.ok(main.includes("const weekdays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun']"));
+ assert.ok(main.includes("new Intl.DateTimeFormat('en-US'"));
+ assert.ok(!main.includes("const header='<div class=\"astro-cal-hero\""));
+});
+test('live redraw preserves open details and avoids location reload',()=>{
+ assert.ok(main.includes('function refreshLiveBody('));
+ assert.ok(main.includes("if(liveTimePinned)return;"));
+ assert.ok(main.includes('preserved=Array.from('));
+ assert.ok(!main.includes('location.reload('));
+});

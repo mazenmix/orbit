@@ -169,3 +169,19 @@ test('MX Ai has new indicators and useful moon explanations',async({page})=>{
  const count=await page.locator('.timeline-entry').count();
  if(count)await expect(page.locator('.mx-lunar-aspect-story')).toHaveCount(count);
 });
+
+test('live Moon sign and refined chart reading remain visible',async({page})=>{
+ await page.goto('/#lunar',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#mx-moon-sign-reading p')).toHaveCount(5,{timeout:75000});
+ await page.goto('/#chart',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.chart-story')).toHaveCount(14,{timeout:75000}).catch(async()=>{
+  expect(await page.locator('.chart-story').count()).toBeGreaterThanOrEqual(10);
+ });
+ await expect(page.locator('.mx-reading-help')).toHaveCount(0);
+});
+test('calendar month labels stay in English even when app language is Arabic',async({page})=>{
+ await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.astro-cal-hero')).toHaveCount(0);
+ await expect(page.locator('.astro-cal-month-head h3').first()).toContainText(/[A-Z][a-z]+/,{timeout:75000});
+ await expect(page.locator('.astro-cal-weekdays').first()).toContainText('Mon');
+});
