@@ -9,7 +9,7 @@ import {moonSignReading} from './moonSignNarrative.ts';
 import {precisionChartStories} from './chartPrecisionNarrative.ts';
 import './astroCalendar.css';
 import './typography.css';
-import {astroCalendarDays,colorizeAstroDay,type AstroCalendarDay,type AstroCalendarRating} from './astroCalendar.ts';
+import {astroCalendarDays,calendarDaySynthesis,calendarMomentEvidence,CALENDAR_SAMPLE_HOURS,type AstroCalendarDay,type AstroCalendarRating,type CalendarDayRating} from './astroCalendar.ts';
 import {compareContacts,distinctParagraphs} from './reading.ts';
 import {distinctHighlights} from './highlights.ts';
 import {refineNatalTransit} from './precision.ts';
@@ -75,7 +75,7 @@ const cache=new Map<string,Report>();
 let heatmapCategory:Category|'average'='average';
 let heatmapSpan:30|90|365=30;
 let calendarAnchor='',calendarVersion='',calendarDays:AstroCalendarDay[]=[],calendarCursor=0,calendarGeneration=0,calendarRunning=false,calendarSelected='';
-type CalendarSnapshot=AstroCalendarRating & {at:Date;data:Report};
+type CalendarSnapshot=CalendarDayRating & {at:Date;data:Report};
 const calendarSnapshots=new Map<string,CalendarSnapshot>();
 const calendarFailures=new Map<string,string>();
 let asteroidCategory:Category|'all'='all';
@@ -344,12 +344,12 @@ function astroCalendarDetail(iso:string){
  const date=new Intl.DateTimeFormat('en-US',{timeZone:active.zone,weekday:'short',day:'numeric',month:'short',year:'numeric',numberingSystem:'latn'}).format(at);
  const grade=color==='green'?t('مرتفع','High'):color==='yellow'?t('متوسط','Moderate'):t('منخفض','Low');
  const ranked=Object.entries(r.scores).sort((a,b)=>b[1]-a[1]);
- const factor=(e:typeof snap.strongestSupport,kind:'good'|'check')=>e?
-  '<span class="astro-compact-aspect '+kind+'"><span>'+(kind==='good'?t('✦ داعمة','✦ Favorable'):t('◇ متحدية','◇ Challenging'))+'</span><b>'+esc(planet(e.transit.id))+' '+aspect(e.angle)+' '+esc(planet(e.natal.id))+'</b><small dir="ltr">'+e.orb.toFixed(2)+'°</small></span>':'';
- const contacts=factor(snap.strongestSupport,'good')+factor(snap.strongestChallenge,'check');
- return '<div class="astro-day-compact-head"><div class="astro-day-compact-title"><span class="astro-day-kicker">'+t('حظ اليوم · 12:00','Daily fortune · 12:00')+'</span><h3 dir="ltr">'+esc(date)+'</h3><small>'+t('الأعلى: ','Top: ')+cat(ranked[0][0] as Category)+' '+ranked[0][1]+' · '+t('الأقل: ','Lowest: ')+cat(ranked[ranked.length-1][0] as Category)+' '+ranked[ranked.length-1][1]+'</small></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'<small>/100</small></b><span>'+grade+'</span></div></div>'+
+ const factor=(e:typeof snap.strongestSupport,kind:'good'|'check',hour:number|null)=>e?
+  '<span class="astro-compact-aspect '+kind+'"><span>'+(kind==='good'?t('✦ داعمة','✦ Favorable'):t('◇ متحدية','◇ Challenging'))+'</span><b>'+esc(planet(e.transit.id))+' '+aspect(e.angle)+' '+esc(planet(e.natal.id))+'</b><small dir="ltr">'+e.orb.toFixed(2)+'° · '+String(hour??12).padStart(2,'0')+':00</small></span>':'';
+ const contacts=factor(snap.strongestSupport,'good',snap.strongestSupportHour)+factor(snap.strongestChallenge,'check',snap.strongestChallengeHour);
+ return '<div class="astro-day-compact-head"><div class="astro-day-compact-title"><span class="astro-day-kicker">'+t('حظ اليوم · 3 أوقات','Daily fortune · 3 checkpoints')+'</span><h3 dir="ltr">'+esc(date)+'</h3><small>'+t('الأعلى: ','Top: ')+cat(ranked[0][0] as Category)+' '+ranked[0][1]+' · '+t('الأقل: ','Lowest: ')+cat(ranked[ranked.length-1][0] as Category)+' '+ranked[ranked.length-1][1]+'</small></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'<small>/100</small></b><span>'+grade+'</span></div></div>'+
   '<div class="astro-day-compact-aspects">'+(contacts||'<span class="astro-compact-no-aspect">'+t('ماكو زاوية قريبة مهيمنة بهذا الوقت.','No dominant close aspect at this time.')+'</span>')+'</div>'+
-  '<div class="astro-day-compact-footer"><small>'+t('تصنيف تنجيمي رمزي، مو ضمان لنتيجة فعلية.','Symbolic astrological index, not a guaranteed outcome.')+'</small><button type="button" class="secondary astro-day-open-time" data-calendar-open="'+(+at)+'">'+t('تفاصيل بآلة الزمن','Time Machine details')+' ↗</button></div>';
+  '<div class="astro-day-compact-footer"><small>'+t('الفحص: 04 / 12 / 20 · المدى ','Checks: 04 / 12 / 20 · range ')+snap.minimum+'–'+snap.maximum+' · '+t('مؤشر رمزي مو تنبؤ','Symbolic index, not a forecast')+'</small><button type="button" class="secondary astro-day-open-time" data-calendar-open="'+(+at)+'">'+t('تفاصيل بآلة الزمن','Time Machine details')+' ↗</button></div>';
 }
 function calendarColorLabel(color:AstroCalendarRating['color']){
  return color==='green'?t('مرتفع · 71–99','High · 71–99'):color==='yellow'?t('متوسط · 31–70','Moderate · 31–70'):t('منخفض · 1–30','Low · 1–30');
@@ -385,17 +385,21 @@ function startCalendarWork(){
    const day=calendarDays[calendarCursor];
    try{
     const at=zonedInstant(day.iso+'T12:00',active.zone),r=getReport(at);
-    const required=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
-    if(required.some(id=>!r.current.points.some(p=>p.id===id)||!r.natal.points.some(p=>p.id===id)))throw Error('Essential planetary ephemeris unavailable');
-    if(localValue(at,active.zone).slice(0,16)!==day.iso+'T12:00')throw Error('Invalid profile-local noon calculation');
-    const rating=colorizeAstroDay(r.evidence);
+    const samples=CALENDAR_SAMPLE_HOURS.map(hour=>{
+     const label=day.iso+'T'+String(hour).padStart(2,'0')+':00';
+     const sampledAt=hour===12?at:zonedInstant(label,active.zone);
+     if(localValue(sampledAt,active.zone).slice(0,16)!==label)throw Error('Local astronomical sample differs from expected time: '+label);
+     const current=hour===12?r.current:chart(sampledAt,active,false,false);
+     return {hour,evidence:calendarMomentEvidence(current,r.natal,sampledAt,active.known)};
+    });
+    const rating=calendarDaySynthesis(samples);
     calendarSnapshots.set(day.iso,{...rating,at,data:r});
     const el=root.querySelector<HTMLButtonElement>('[data-calendar-date="'+day.iso+'"]');
     if(el){
      el.classList.remove('astro-pending');
      el.classList.add('astro-'+rating.color);
-     el.setAttribute('aria-label',day.iso+' · '+calendarColorLabel(rating.color)+' · '+rating.value+'/100');
-     el.title=calendarColorLabel(rating.color);
+     el.setAttribute('aria-label',day.iso+' · '+calendarColorLabel(rating.color)+' · '+rating.value+'/100 · '+t('المدى اليومي','day range')+' '+rating.minimum+'–'+rating.maximum);
+     el.title=calendarColorLabel(rating.color)+' · '+rating.value+'/100 · '+rating.minimum+'–'+rating.maximum;
      const index=el.querySelector('.astro-cal-index');if(index)index.textContent=String(rating.value);
     }
     if(calendarSelected===day.iso){const area=root.querySelector<HTMLElement>('#astro-calendar-detail');if(area)area.innerHTML=astroCalendarDetail(day.iso);bindCalendarDayButtons()}
