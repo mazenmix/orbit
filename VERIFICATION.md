@@ -72,3 +72,11 @@ The public repository's anonymous demo configuration passed all 20 automated tes
 - GitHub Actions run 39113962881 passed 61/61 tests, production build and artifact upload; later runs cover the follow-up next Solar Return change.
 - Live inspections confirmed /#lunar, /#intel, /#advanced, /#settings and configured Qwen3 server binding on mxastro.pages.dev.
 - Remaining: v2.3.2 source/UI parity, 56 named asteroid resources, eclipse/event catalogue, backend Web Push, native widgets and Apple Watch integration.
+
+## 2026-10-18 precision, source recovery and publishing verification
+
+- GitHub Actions 39116397461 passed **79 tests out of 79** and production TypeScript/Vite build, covering new exact aspect roots (including retrograde), mix-of-evidence audit, heatmaps, syzygy/near-node screening, private journal validation, and 56 asteroid identifiers.
+- Navigation correction commit e6f65373ddee3065b87f2baf068fbb6cd61264dd also passed GitHub Actions 39116421554.
+- Actual public site was inspected on https://mxastro.pages.dev/#asteroids (56 original catalog entries and explicit missing datasets), https://mxastro.pages.dev/#eclipses (six new/full Moon events in a 90-day demo interval and honest near-node screening), and https://mxastro.pages.dev/#time (calculated 30-day heatmap).
+- Qwen3 server-side prompt was expanded to discuss actual both-sided evidence with no predictive certainty. Server integration tests passed but **no fresh end-to-end content-quality evaluation on the live provider** is claimed.
+- Native 56-asteroid position data and dedicated global/local eclipse geometry are not part of the current Swiss WASM build. App Store/watchOS parity, closed-app push, UI pixel matching, real iPhone installation and encrypted cross-device sync remain unverified/unimplemented.
