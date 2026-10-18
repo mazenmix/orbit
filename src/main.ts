@@ -24,7 +24,7 @@ import {derivedMetrics,goModes,type GoDomain} from './metrics.ts';
 import {supportive,difficult} from './math.ts';
 import {initEngine,report,defaultProfile,compatibility,chart,sunMoonState,confirmedEclipses,asteroidSwissRuntime,birthInstant,targets,localValue,zonedInstant,validateProfile,type Profile,type Report} from './engine.ts';
 import {categories,category as evidenceCategory,aspects,angles,aspectNames,type Category,type Signal} from './math.ts';
-import {lang,setLang,t,cat,categoryLabels,planet,signSymbols,signName,copy,tone,notice,technical,aspect} from './i18n.ts';
+import {lang,setLang,t,cat,categoryLabels,planet,signSymbols,signName,copy as sourceCopy,tone,notice,technical,aspect} from './i18n.ts';
 import {loadProfiles,saveProfiles,download,parseBackup} from './storage.ts';
 import {wheel} from './chart.ts';
 import {chartStories,profileAddress,transitOverview,actionForGender,partnerArabic} from './chartNarrative.ts';
@@ -48,6 +48,7 @@ let screen=location.hash.slice(1)||'today',selected=new Date(),data:Report|undef
 let aiConnection={checked:false,configured:false,provider:'none',model:'Qwen3'};
 async function refreshAIConnection(){try{const response=await fetch('/api/explain',{cache:'no-store',signal:AbortSignal.timeout(8000)});const result=await response.json();aiConnection={checked:true,configured:result.configured===true,provider:String(result.provider??'none'),model:String(result.model??'Qwen3')};}catch{aiConnection={checked:true,configured:false,provider:'none',model:'Qwen3'}}if(screen==='ai'&&!aiBusy)render()}
 let compareId='',chartMode='natal',filter:Category|'all'='all',aiAnswer='',aiBusy=false,aiContext='';
+const copy=(signal:Signal)=>{const result=sourceCopy(signal);if(lang!=='ar'||active.sex!=='female')return result;return {...result,good:actionForGender(result.good,'female'),careful:actionForGender(result.careful,'female'),action:actionForGender(result.action,'female')};};
 const readingContext=()=>JSON.stringify([active,selected.toISOString(),lang]);
 const cache=new Map<string,Report>();
 let heatmapCategory:Category|'average'='average';
