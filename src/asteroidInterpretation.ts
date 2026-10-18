@@ -81,6 +81,7 @@ export function asteroidReading(item:NamedAsteroid,contact:NamedContact|undefine
  const c=meanings[item.name];if(!c)throw Error('Missing original asteroid interpretation');
  const theme=english?c.enTheme:c.arTheme;
  const action=english?c.enAction:c.arAction;
- const emphasis=!contact?(english?'No tight natal contact found at this selected moment; treat this as a theme to reflect on, not an active prediction.':'بهاللحظة ماكو اتصال ولادي قريب ضمن الحد المحدد؛ هاي فكرة للتأمل مو توقع بأن حدث راح يصير.'):english?('Currently near a '+contact.natal.id+' natal contact; this emphasizes the theme symbolically, not another person’s private feelings.'):('حاليّاً قريب من اتصال مع '+({Sun:'شمسك',Moon:'قمرك',Mercury:'عطاردك',Venus:'زهرتك',Mars:'مريخك',Jupiter:'مشتريك',Saturn:'زحلك',Uranus:'أورانوسك',Neptune:'نبتونك',Pluto:'بلوتوك',Ascendant:'طالعك',MC:'مهنتك'} as Record<string,string>)[contact.natal.id]||contact.natal.id+'؛ وهذا توصيف رمزي مو قراءة لأفكار أحد.');
+ const natalName=contact?(({Sun:'شمسك',Moon:'قمرك',Mercury:'عطاردك',Venus:'زهرتك',Mars:'مريخك',Jupiter:'مشتريك',Saturn:'زحلك',Uranus:'أورانوسك',Neptune:'نبتونك',Pluto:'بلوتوك',Ascendant:'طالعك',MC:'مهنتك',Chiron:'كيرونك',Ceres:'سيريسك',Pallas:'بالاسك',Juno:'جونوك',Vesta:'فيستاك',Pholus:'فولوسك'} as Record<string,string>)[contact.natal.id]??contact.natal.id):'';
+ const emphasis=!contact?(english?'No tight natal contact at this selected moment.':'ماكو اتصال ولادي قريب بهاللحظة.'):english?('A close contact to natal '+contact.natal.id+' highlights this theme symbolically, without revealing anyone’s private feelings.'):('حاليّاً قريب من اتصال مع '+natalName+'؛ ركّز على النصيحة العملية مو توقع أحداث مؤكدة.');
  return {theme,action,emphasis};
 }
