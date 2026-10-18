@@ -155,5 +155,5 @@ test('calendar focused-day card is compact, with core evidence but no verbose br
  assert.ok(!detail.includes('astro-day-summary'));
  assert.ok(!detail.includes('شلون تحدد لون الحظ'));
  const styles=readFileSync('src/astroCalendar.css','utf8');
- assert.ok(styles.includes('#live-view-body .astro-calendar-detail{\\n padding:14px 18px!important;'));
+ assert.match(styles, /#live-view-body \.astro-calendar-detail\{\s*padding:14px 18px!important;/);
 });
