@@ -33,3 +33,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .demo-notice{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 24px;border:1px solid #7c6aab77;background:#17172b;border-radius:15px;padding:18px 20px}
 .demo-notice strong{font-size:15px;color:#ecddff}.demo-notice p{font-size:13px;line-height:1.8;color:#b8b8cf;margin:6px 0 0}.demo-notice .secondary{flex-shrink:0}
 @media(max-width:760px){.demo-notice{display:block;padding:17px}.demo-notice p{font-size:13px}.demo-notice .secondary{margin-top:12px;width:100%}}
+
+/* MX Eye lunar timing */
+.lunar-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0}
+.lunar-stat h2{font-size:24px;line-height:1.6;margin:12px 0;color:#e3d5ff}
+.lunar-stat p{font-size:14px;line-height:1.9;color:#bfc3dc}.lunar-stat b{color:#efeffa}
+.lunar-events{display:grid;gap:10px;margin:20px 0}.lunar-events>div{display:flex;justify-content:space-between;gap:12px;padding:13px 12px;border-radius:12px;background:#171a2b;color:#e9e4f4}.lunar-events span{color:#b4b9d1}
+@media(max-width:760px){.lunar-grid{grid-template-columns:1fr}.lunar-events>div{display:grid;gap:5px}.lunar-stat h2{font-size:21px}}
