@@ -1,4 +1,4 @@
-import {aspects,normalize,distance,type Evidence,type Point} from './math.ts';
+import {aspects,type Evidence,type Point} from './math.ts';
 export type CalendarColor='green'|'yellow'|'red';
 export type AstroCalendarDay={iso:string;year:number;month:number;day:number;weekday:number;monthKey:string};
 export type AstroCalendarRating={
@@ -104,15 +104,8 @@ export function calendarMomentEvidence(current:CalendarChart,natal:CalendarChart
  }
  const results:Evidence[]=[];
  for(const id of primaryBodies){
-  // A six-hour linear lookahead can jump over the Moon's exact contact and
-  // invert "applying". Use a one-minute derivative at the actual longitude
-  // and keep only the observed orb; no fictitious time-of-exactness.
-  for(const contact of aspects([transit.get(id)!],fixed,at)){
-   const step=Math.sign(contact.transit.speed)*Math.min(Math.abs(contact.transit.speed)/1440,contact.orb/3);
-   const oneMinute=normalize(contact.transit.longitude+step);
-   const nextOrb=Math.abs(distance(oneMinute,contact.natal.longitude)-contact.angle);
-   results.push({...contact,applying:nextOrb+1e-10<contact.orb,exact:null});
-  }
+  // Same instantaneous-motion rubric as Today and Time Machine.
+  results.push(...aspects([transit.get(id)!],fixed,at));
  }
  return results;
 }
@@ -157,7 +150,9 @@ export function astroCalendarDays(today:string):AstroCalendarDay[]{
  const [y,m,d]=today.split('-').map(Number);
  const first=new Date(Date.UTC(y,m-1,d));
  if(first.toISOString().slice(0,10)!==today)throw Error('Invalid calendar date');
- const end=new Date(Date.UTC(y,m-1+12,d));
+ // Constrain a Feb 29 anniversary to Feb 28, rather than overflowing to Mar 1.
+ const lastDay=new Date(Date.UTC(y+1,m,0)).getUTCDate();
+ const end=new Date(Date.UTC(y+1,m-1,Math.min(d,lastDay)));
  const days:AstroCalendarDay[]=[];
  for(let time=+first;time<+end;time+=86400000){
   const at=new Date(time),year=at.getUTCFullYear(),month=at.getUTCMonth()+1,day=at.getUTCDate();

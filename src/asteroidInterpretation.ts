@@ -1,4 +1,4 @@
-import {angles,distance,importance,type Point,type Evidence} from './math.ts';
+import {angles,distance,importance,applyingToNatal,type Point,type Evidence} from './math.ts';
 import {namedAsteroids,type NamedAsteroid} from './asteroids.ts';
 export type NamedContact=Evidence;
 /** Optional real-orb measured extra contacts, distinct from eight source scores.
@@ -12,7 +12,7 @@ export function namedAsteroidContacts(transits:readonly Point[],natal:readonly P
   for(const n of natal)for(const angle of angles){
    const orb=Math.abs(distance(t.longitude,n.longitude)-angle),limit=1.5;
    if(orb>limit)continue;
-   const applying=Math.abs(distance(t.longitude+t.speed/24,n.longitude)-angle)<orb;
+   const applying=applyingToNatal(t,n,angle);
    out.push({id:'named-'+asteroid.number+'-'+angle+'-'+n.id,transit:t,natal:n,angle,orb,maximumOrb:limit,applying,weight:Math.min(1,(1-orb/limit)*.62+asteroid.baseWeight*.20+importance(n.id)*.18),exact:null});
   }
  }

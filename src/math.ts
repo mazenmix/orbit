@@ -23,30 +23,46 @@ export type Category='overview'|'career'|'love'|'communication'|'energy'|'emotio
 export const categories:Category[]=['overview','career','love','communication','energy','emotions','recovery','timing'];
 export type Tone='exceptional'|'opportunity'|'supportive'|'neutral'|'watch'|'caution';
 export type Signal={category:Category;score:number;tier:'S'|'A'|'B'|'C';tone:Tone;factors:Evidence[]};
+/** Instantaneous motion toward a fixed natal point. The step cannot cross the
+ * exact contact, even for a fast Moon or a retrograde transit near zero orb. */
+export function applyingToNatal(t:Point,n:Point,angle:number):boolean{
+ const orb=Math.abs(distance(t.longitude,n.longitude)-angle);
+ if(orb<=1e-10||Math.abs(t.speed)<1e-12)return false;
+ const step=Math.sign(t.speed)*Math.min(Math.abs(t.speed)/1440,orb/3);
+ return Math.abs(distance(normalize(t.longitude+step),n.longitude)-angle)+1e-10<orb;
+}
 export function importance(id:string){return ['Ascendant','MC','Sun','Moon'].includes(id)?1:['Mercury','Venus','Mars'].includes(id)?.86:['Jupiter','Saturn'].includes(id)?.78:.64}
 export function aspects(transits:Point[],natal:Point[],at:Date):Evidence[]{
+ if(!Number.isFinite(+at)||[...transits,...natal].some(p=>!Number.isFinite(p.longitude)||!Number.isFinite(p.speed)))throw Error('Invalid aspect coordinates or instant');
  const out:Evidence[]=[];
  for(const t of transits){const spec=bodies.find(b=>b[1]===t.id);if(!spec)continue;const max=spec[5];
   for(const n of natal)for(const angle of angles){const orb=Math.abs(distance(t.longitude,n.longitude)-angle);if(orb>max)continue;
-   const applying=Math.abs(distance(normalize(t.longitude+t.speed/4),n.longitude)-angle)<orb;
-   const days=orb/Math.abs(t.speed);
+   const applying=applyingToNatal(t,n,angle);
    out.push({id:`${t.id}-${angle}-${n.id}`,transit:t,natal:n,angle,orb,maximumOrb:max,applying,
     weight:Math.min(1,(1-orb/max)*.58+spec[4]*.24+importance(n.id)*.12+([0,180].includes(angle)?1:.92)*.06),
-    exact:applying&&Math.abs(t.speed)>.015&&days<=30?new Date(+at+days*86400000).toISOString():null});
+    // Only a numerical ephemeris crossing can establish an exact timestamp.
+    exact:null});
   }
  }
- return out.sort((a,b)=>b.weight-a.weight||a.orb-b.orb).slice(0,48);
+ return out.sort((a,b)=>b.weight-a.weight||a.orb-b.orb||a.id.localeCompare(b.id));
 }
 export const harmonious=(e:Pick<Evidence,'angle'>)=>e.angle===60||e.angle===120;
 export const challenging=(e:Pick<Evidence,'angle'>)=>e.angle===90||e.angle===180;
 export const supportive=(e:Evidence)=>harmonious(e)||(!challenging(e)&&['Jupiter','Venus'].includes(e.transit.id));
 export const difficult=(e:Evidence)=>challenging(e)||(!harmonious(e)&&['Saturn','Mars','Pluto','Uranus'].includes(e.transit.id));
+export function balancedFactors(input:readonly Evidence[],limit:number):Evidence[]{
+ const ranked=[...new Map(input.map(e=>[e.id,e])).values()].sort((a,b)=>b.weight-a.weight||a.orb-b.orb||a.id.localeCompare(b.id));
+ const selected=new Map<string,Evidence>();
+ for(const predicate of [supportive,difficult]){const e=ranked.find(predicate);if(e)selected.set(e.id,e)}
+ for(const e of ranked){if(selected.size>=limit)break;selected.set(e.id,e)}
+ return [...selected.values()].sort((a,b)=>b.weight-a.weight||a.orb-b.orb||a.id.localeCompare(b.id));
+}
 export function category(e:Evidence):Category{
  switch(e.natal.id){case 'Ascendant':case 'Venus':return 'love';case 'MC':case 'Sun':case 'Jupiter':case 'Saturn':return 'career';case 'Mercury':return 'communication';case 'Mars':return 'energy';case 'Moon':return challenging(e)?'emotions':'recovery';case 'Uranus':return 'timing';case 'Neptune':return 'emotions';default:return 'overview'}
 }
 export function signals(evidence:Evidence[]):Signal[]{
  const out:Signal[]=[];
- for(const c of categories){const factors=evidence.filter(e=>category(e)===c).sort((a,b)=>b.weight-a.weight).slice(0,4);const e=factors[0];if(!e||e.weight<.30)continue;
+ for(const c of categories){const factors=balancedFactors(evidence.filter(e=>category(e)===c),4);const e=factors[0];if(!e||e.weight<.30)continue;
   const net=factors.reduce((v,f)=>v+(supportive(f)?f.weight:0)-(difficult(f)?f.weight:0),0);
   const tier=e.weight>=.86&&factors.length>=3?'S':e.weight>=.72||(e.weight>=.62&&factors.length>=2)?'A':e.weight>=.46?'B':'C';
   const tone:Tone=net>=1.35&&tier==='S'?'exceptional':net>=.46?(tier==='A'||tier==='S'?'opportunity':'supportive'):net<=-.72?'caution':net<=-.18?'watch':difficult(e)?'watch':supportive(e)?'supportive':'neutral';
@@ -57,7 +73,7 @@ export function signals(evidence:Evidence[]):Signal[]{
  const rank={S:4,A:3,B:2,C:1};return out.sort((a,b)=>rank[b.tier]-rank[a.tier]||b.score-a.score);
 }
 export function profectionCategory(house:number):Category{return [2,6,10].includes(house)?'career':[5,7,8].includes(house)?'love':[3,9].includes(house)?'communication':house===1?'energy':[4,12].includes(house)?'emotions':house===11?'timing':'overview'}
-export function scores(items:Signal[],house:number){const out=Object.fromEntries(categories.map(c=>[c,50])) as Record<Category,number>;for(const s of items)out[s.category]=s.score;const c=profectionCategory(house);out[c]=Math.min(99,out[c]+5);return out}
+export function scores(items:Signal[],house:number){const out=Object.fromEntries(categories.map(c=>[c,50])) as Record<Category,number>;for(const s of items)out[s.category]=s.score;if(Number.isInteger(house)&&house>=1&&house<=12){const c=profectionCategory(house);out[c]=Math.min(99,out[c]+5)}return out}
 export function houseNumber(lon:number,cusps:number[]){if(cusps.length!==12)return 0;for(let i=0;i<12;i++){const start=normalize(cusps[i]);const arc=normalize(cusps[(i+1)%12]-start);if(normalize(lon-start)<arc)return i+1}return 0}
 export type SynastryEvidence={first:Point;second:Point;angle:number;orb:number;influence:number};
 export function synastry(a:Point[],b:Point[]):SynastryEvidence[]{const out:SynastryEvidence[]=[];for(const first of a)for(const second of b){

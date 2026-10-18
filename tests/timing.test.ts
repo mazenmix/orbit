@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {bisectAngle,exactCrossings,lunarWindow,type SkyReader} from '../src/timing.ts';
 const start=Date.parse('2026-10-18T00:00:00Z'),day=86400000;
-const mock:SkyReader=at=>[{id:'Moon',longitude:5+(+at-start)/day*12},{id:'Sun',longitude:20}];
+const extra=['Mercury','Venus','Mars','Jupiter','Saturn'].map((id,i)=>({id,longitude:50+i}));
+const mock:SkyReader=at=>[{id:'Moon',longitude:5+(+at-start)/day*12},{id:'Sun',longitude:20},...extra];
 test('sub-minute lunar aspect root is found from sampled signs',()=>{
  const events=exactCrossings(mock,'Moon','Sun',0,new Date(start),new Date(start+2*day));
  assert.equal(events.length,1);
@@ -16,7 +17,7 @@ test('lunar VOC begins after final exact classical aspect, ends at ingress',()=>
  assert.equal(after.lastAspect?.target,'Sun');
 });
 test('lunar sign and aspect geometry wrap across 360 degrees',()=>{
- const read:SkyReader=d=>[{id:'Moon',longitude:350+(+d-start)/day*12},{id:'Sun',longitude:358}];
+ const read:SkyReader=d=>[{id:'Moon',longitude:350+(+d-start)/day*12},{id:'Sun',longitude:358},...extra];
  const r=lunarWindow(new Date(start),read);
  assert.equal(r.sign,11);
  assert.ok(+r.ingressAt>start&&+r.ingressAt<start+day);
@@ -30,3 +31,5 @@ test('search refuses invalid spans and unsupported aspect types',()=>{
  assert.throws(()=>exactCrossings(mock,'Moon','Sun',45,new Date(start),new Date(start+day)));
  assert.throws(()=>exactCrossings(mock,'Moon','Sun',90,new Date(start+day),new Date(start)));
 });
+
+test('incomplete VOC data fails instead of inventing a void window',()=>{assert.throws(()=>lunarWindow(new Date(start),at=>mock(at).filter(p=>p.id!=='Saturn')),/VOC ephemeris body: Saturn/)});

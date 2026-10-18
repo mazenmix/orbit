@@ -8,7 +8,7 @@ test('unsupported probability, secret desires, eclipse and invented exact date t
  for(const x of ['هذا مضمون 90%','she secretly wants you','الكسوف الجاي سيؤثر عليك','2027-05-13 سيتصل بيك']){
   const out=reviewGeneratedAdvice(x,ctx);
   assert.equal(out.fallback,true,x);assert.ok(out.problems.length);
-  assert.ok(out.text.includes('Venus'));assert.ok(out.text.includes('Saturn'));
+  assert.ok(out.text.includes('الزهرة'));assert.ok(out.text.includes('زحل'));
  }
 });
 test('safe source-based two-paragraph text passes unchanged',()=>{

@@ -32,7 +32,7 @@ test('grouped feature tabs preserve old deep links and keep evidence contextual'
  for(const route of ["signals","asteroids","lunar","eclipses","advanced","ai","evidence"]){
   assert.ok(main.includes("case '"+route+"'"),route+' deep link remains');
  }
- assert.match(main,/sectionTabs\(\)\+inner/);
+ assert.match(main,/return sectionTabs\(\)/);
  assert.match(main,/data-go="evidence"/);
  assert.match(main,/data-go="ai"/);
  assert.ok(!main.includes('function annualOutlookUI()'));
@@ -165,7 +165,6 @@ test('precision calendar samples 3 separately calculated local chart times',()=>
  assert.ok(source.includes('CALENDAR_SAMPLE_HOURS=[4,12,20]'));
  assert.ok(source.includes('for(const id of primaryBodies)'));
  assert.ok(source.includes('aspects([transit.get(id)!],fixed,at)'));
- assert.ok(source.includes('nextOrb+1e-10<contact.orb'));
  assert.ok(main.includes('rating.minimum'));
  assert.ok(main.includes('rating.maximum'));
  assert.ok(main.includes('snap.minimum'));

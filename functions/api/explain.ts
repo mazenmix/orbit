@@ -1,5 +1,6 @@
 import {namedAsteroids} from '../../src/asteroids.ts';
 import {reviewGeneratedAdvice} from '../../src/aiQuality.ts';
+import {bodies as ephemerisBodies} from '../../src/math.ts';
 type Message={role:'system'|'user';content:string};
 type AIInput={messages:Message[];temperature:number;max_tokens:number;stream:false};
 type Env={AI?:{run:(model:string,input:AIInput)=>Promise<unknown>};QWEN_GATEWAY_URL?:string;QWEN_GATEWAY_TOKEN?:string;QWEN_MODEL?:string};
@@ -25,8 +26,12 @@ export async function onRequestPost({request,env}:Context){
  if(!input||!['ar','en'].includes(input.language)||!Array.isArray(input.evidence)||input.evidence.length>12)return json({error:'Invalid evidence packet.'},400);
  type Factor={transit:string;natal:string;angle:number;orb:number;applying:boolean;weight:number;direction:'supportive'|'challenging'|'neutral'};
  const evidence:Factor[]=[];
+ const seenEvidence=new Set<string>();
  for(const e of input.evidence){
   if(!e||!bodies.has(e.transit)||!bodies.has(e.natal)||![0,60,90,120,180].includes(e.angle)||typeof e.orb!=='number'||!Number.isFinite(e.orb)||e.orb<0||e.orb>6||typeof e.weight!=='number'||!Number.isFinite(e.weight)||e.weight<0||e.weight>1||typeof e.applying!=='boolean')return json({error:'Invalid numeric evidence.'},400);
+  const spec=ephemerisBodies.find(b=>b[1]===e.transit),key=e.transit+':'+e.natal+':'+e.angle;
+  if(!spec||e.orb>spec[5]||seenEvidence.has(key))return json({error:'Inconsistent or duplicate calculated aspect.'},400);
+  seenEvidence.add(key);
   const direction=[60,120].includes(e.angle)||(e.angle===0&&['Venus','Jupiter'].includes(e.transit))?'supportive':[90,180].includes(e.angle)||(e.angle===0&&['Saturn','Mars','Pluto','Uranus'].includes(e.transit))?'challenging':'neutral';
   evidence.push({transit:e.transit,natal:e.natal,angle:e.angle,orb:e.orb,applying:e.applying,weight:e.weight,direction});
  }
@@ -83,8 +88,8 @@ export async function onRequestPost({request,env}:Context){
   }
   const raw=result?.choices?.[0]?.message?.content??result?.response;
   if(typeof raw!=='string')return json({error:'Ai returned no explanation. Please retry.',code:'AI_EMPTY_RESPONSE'},502);
-  const checked=reviewGeneratedAdvice(raw,{language:input.language,support:describe(strongestSupporting),challenge:describe(strongestChallenging),events:eclipseEvents});
+  const checked=reviewGeneratedAdvice(raw,{language:input.language,support:describe(strongestSupporting),challenge:describe(strongestChallenging),events:eclipseEvents,evidence, supplemental:extendedEvidence,strict:true});
   if(!checked.text)return json({error:'Ai returned no explanation. Please retry.',code:'AI_EMPTY_RESPONSE'},502);
-  return json({explanation:checked.text,model:status.model,provider:status.provider,quality:checked.fallback?'grounded-fallback':'reviewed-model'});
+  return json({explanation:checked.text,model:status.model,provider:status.provider,quality:checked.fallback?'grounded-fallback':'reviewed-model',calculatedAt});
  }catch{return json({error:input.language==='ar'?'خدمة Ai على السيرفر غير متاحة حالياً. تحقق من تفعيل Workers AI وحصته بحساب Cloudflare، وجرّب مرة ثانية.':'Ai is unavailable. Check Workers AI activation and quota in Cloudflare, then retry.',code:'AI_UNAVAILABLE'},503)}
 }

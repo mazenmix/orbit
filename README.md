@@ -113,3 +113,8 @@ Shipped: bounded exact natal-transit root refinement, 30-day selectable time hea
 - No user-specific birth details are hardcoded into the public web bundle. Existing personal birth data can be imported privately using an opt-in one-time browser fragment.
 
 **Not 100% yet:** reliable autonomous MX Eye background delivery needs a provisioned subscription backend and scheduled Worker with explicit consent and device testing; the original iOS 2.3.2 source/native Apple Watch/WidgetKit integration is not verified here; encrypted-at-rest multi-device data sync and physical iPhone Safari E2E testing are not complete; Qwen3 narrative quality and exact original DecisionEngine parity need further independent evaluation. Astro indices are symbolic, not scientifically calibrated probabilities.
+
+
+## 2026-10-19 — reliability revision
+
+Calculation method `2026-10-19.1` unifies applying/separating direction across sections, removes linear exact-time guesses and global aspect truncation, preserves counter-evidence in domain and AI summaries, fails closed on missing core data, and omits ungrounded annual-house bonuses. Calendar failure states and leap-day boundaries are corrected. AI explanations receive stricter evidence checks and show their calculation instant. See the dated section of `VERIFICATION.md` for checks and remaining limits.
