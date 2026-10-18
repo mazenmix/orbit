@@ -1,6 +1,6 @@
 import {encryptBackup,decryptBackup,type EncryptedBackup} from './secureBackup.ts';
 export type SyncCredentials={v:1;slot:string;secret:string};
-export class SyncError extends Error{constructor(public code:string,message:string){super(message)}}
+export class SyncError extends Error{code:string;constructor(code:string,message:string){super(message);this.code=code}}
 const random=(n:number)=>{const bytes=crypto.getRandomValues(new Uint8Array(n));return Array.from(bytes,x=>String.fromCharCode(x)).join('')};
 const b64url=(s:string)=>btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 export const createSyncCode=():string=>b64url(JSON.stringify({v:1,slot:b64url(random(16)),secret:b64url(random(32))} satisfies SyncCredentials));
