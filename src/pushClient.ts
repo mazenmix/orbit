@@ -24,10 +24,10 @@ export function pushAvailableOnThisDevice(){
 }
 export async function subscribeBackgroundPush(settings:EyeSettings,zone:string,events:MoonPushEvent[]){
  if(!pushAvailableOnThisDevice())throw Error('Web Push is not available here; install this site as a Home Screen app on iPhone');
- const status=await getPushStatus();
- if(!status.configured||!status.vapidPublicKey)throw Error('Cloudflare D1 and VAPID are not configured on this website yet');
  const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();
  if(permission!=='granted')throw Error('Notification permission was not granted');
+ const status=await getPushStatus();
+ if(!status.configured||!status.vapidPublicKey)throw Error('Cloudflare D1 and VAPID are not configured on this website yet');
  const registration=await navigator.serviceWorker.ready;
  let subscription=await registration.pushManager.getSubscription();
  if(!subscription)subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:Uint8Array.from(from64(status.vapidPublicKey)).buffer});

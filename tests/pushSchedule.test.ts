@@ -8,7 +8,7 @@ test('hourly and daily dispatch follows selected IANA local zone, not UTC clock'
  assert.equal(dueBackgroundPush(base,new Date('2026-10-18T00:15:00Z')).length,0);
 });
 test('Moon VOC push window is no earlier than 16 minutes before actual scheduled event',()=>{
- const a=new Date('2026-10-18T00:00:00Z'),data={...base,hourly:false,daily:false,events:[{kind:'voc',at:'2026-10-18T00:15:00.000Z'}]};
+ const a=new Date('2026-10-18T00:00:00Z'),data={...base,hourly:false,daily:false,events:[{kind:'voc' as const,at:'2026-10-18T00:15:00.000Z'}]};
  assert.equal(dueBackgroundPush(data,a).length,1);
  assert.equal(dueBackgroundPush(data,new Date('2026-10-17T23:30:00Z')).length,0);
  assert.equal(dueBackgroundPush(data,new Date('2026-10-18T00:16:00Z')).length,0);
