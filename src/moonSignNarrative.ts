@@ -33,7 +33,17 @@ export function moonSignReading(sign:number,current:Chart,natal:Chart,knownTime=
   const relationship=arabic?(aspectAr[best.angle]??String(best.angle)+'°'):(aspectEn[best.angle]??String(best.angle)+'°');
   personal=arabic?'على خارطتك إنت تحديداً: القمر عنده '+relationship+' مع '+target+' الأصلي، بفارق '+best.orb.toFixed(2)+'°؛ هذا اتصال محسوب، وتأويله رمزي مو تأثير مثبت.':
    'For your selected chart: the Moon forms a '+relationship+' to natal '+target+', orb '+best.orb.toFixed(2)+'°. That aspect is calculated; its interpretation is symbolic.';
- }else personal=arabic?'بخارطتك الحالية ما ظهر اتصال رئيسي قوي للقمر مع المواضع الأصلية ضمن حدّ الحساب؛ ما راح نخترع واحد.':
-  'No major close Moon-to-natal contact was calculated in the configured orb; none is invented.';
+ }else{
+  // An individualized nearest-distance note is still available without inventing an aspect.
+  const nearest=body?targets.flatMap(p=>{
+   const degrees=distance(body.longitude,p.longitude);
+   return [0,60,90,120,180].map(angle=>({p,angle,orb:Math.abs(degrees-angle)}));
+  }).sort((a,b)=>a.orb-b.orb)[0]:null;
+  if(nearest){
+   const name=arabic?(arName[nearest.p.id]??nearest.p.id):nearest.p.id;
+   personal=arabic?'على خارطتك: أقرب زاوية للقمر هسه باتجاه '+name+'، تبعد '+nearest.orb.toFixed(2)+'° عن زاوية '+(aspectAr[nearest.angle]??nearest.angle+'°')+'؛ خارج حدّ الدقة، لذلك ما نعتبرها اتصال قوي.':
+    'In your chart, the Moon is '+nearest.orb.toFixed(2)+'° away from a '+(aspectEn[nearest.angle]??nearest.angle+'°')+' with natal '+name+'. It is outside the close-orb limit, so no strong aspect is claimed.';
+  }else personal=arabic?'لا تتوفر مواضع ولادية كافية لمقارنة القمر بدقة.':'Insufficient natal positions are available for a reliable Moon comparison.';
+}
  return [...intro,personal];
 }

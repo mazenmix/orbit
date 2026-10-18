@@ -2,8 +2,8 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {moonSignReading} from '../src/moonSignNarrative.ts';
 const date=new Date('2026-10-18T12:00:00Z');
 const current={date,asc:null,mc:null,cusps:[],missing:[],points:[{id:'Moon',symbol:'☾',longitude:273,speed:13}]};
-const natalA={...current,points:[{id:'Venus',symbol:'♀',longitude:274,speed:1}]};
-const natalB={...current,points:[{id:'Saturn',symbol:'♄',longitude:8,speed:1}]};
+const natalA={...current,points:[{id:'Venus',symbol:'♀',longitude:273.2,speed:1}]};
+const natalB={...current,points:[{id:'Saturn',symbol:'♄',longitude:3,speed:1}]};
 test('every Moon sign has exactly five meaningful lines in both languages',()=>{
  for(let s=0;s<12;s++){for(const ar of [true,false]){const v=moonSignReading(s,current,natalA,true,ar);assert.equal(v.length,5);assert.ok(v.every(x=>x.length>35));}}
 });
