@@ -1,0 +1,6 @@
+import {validateProfile,defaultProfile,type Profile} from './engine.ts';
+const key='mx.orbit.profiles.v1';
+export function loadProfiles():Profile[]{try{const stored=JSON.parse(localStorage.getItem(key)??'null');if(!Array.isArray(stored)||!stored.length)return [{...defaultProfile}];return stored.map(validateProfile)}catch{return [{...defaultProfile}]}}
+export function saveProfiles(items:Profile[]){if(!items.length||items.length>100)throw Error('Keep 1–100 profiles.');items.forEach(validateProfile);localStorage.setItem(key,JSON.stringify(items))}
+export function download(data:unknown,filename:string){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+export function parseBackup(text:string):Profile[]{const value=JSON.parse(text);if(value.schema!==1||!Array.isArray(value.profiles)||!value.profiles.length||value.profiles.length>100||!value.profiles.some((p:Profile)=>p.kind==='self'))throw Error('Invalid backup.');const seen=new Set<string>();return value.profiles.map((p:Profile)=>{validateProfile(p);if(seen.has(p.id))throw Error('Duplicate profile');seen.add(p.id);return p})}

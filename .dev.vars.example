@@ -1,0 +1,5 @@
+# Optional Qwen3 OpenAI-compatible chat-completions endpoint.
+# Copy to .dev.vars for local Wrangler preview; never commit real tokens.
+QWEN_GATEWAY_URL=""
+QWEN_GATEWAY_TOKEN=""
+QWEN_MODEL="qwen3"

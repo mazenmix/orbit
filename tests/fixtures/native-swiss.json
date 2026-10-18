@@ -1,0 +1,321 @@
+{
+  "provenance": {
+    "native": "Official Astrodienst swetest64.exe, Swiss Ephemeris 2.10.03",
+    "url": "https://github.com/aloistr/swisseph/blob/master/windows/programs/swetest64.exe",
+    "sha256": "c44d29554927ad1ba44196b5b274904f012dacaa3b4797f7f4ae6a48618fc1c5",
+    "created": "2026-10-18",
+    "toleranceDegrees": 0.000001,
+    "note": "Independent native executable compared with WASM, using identical ephemeris data extracted from bundled swisseph.data. This validates native/WASM agreement, not Swift app parity."
+  },
+  "samples": [
+    {
+      "date": "1900-01-01T12:00:00Z",
+      "lat": 33.3152,
+      "lon": 44.3661,
+      "points": [
+        {
+          "id": "Sun",
+          "longitude": 280.6632879,
+          "speed": 1.0198555
+        },
+        {
+          "id": "Moon",
+          "longitude": 279.6163788,
+          "speed": 14.4736455
+        },
+        {
+          "id": "Mercury",
+          "longitude": 259.6393502,
+          "speed": 1.2896033
+        },
+        {
+          "id": "Venus",
+          "longitude": 306.9961523,
+          "speed": 1.2433435
+        },
+        {
+          "id": "Mars",
+          "longitude": 284.2530337,
+          "speed": 0.7707463
+        },
+        {
+          "id": "Jupiter",
+          "longitude": 241.233611,
+          "speed": 0.1950479
+        },
+        {
+          "id": "Saturn",
+          "longitude": 267.7749544,
+          "speed": 0.1162224
+        },
+        {
+          "id": "Uranus",
+          "longitude": 250.1669247,
+          "speed": 0.0551576
+        },
+        {
+          "id": "Neptune",
+          "longitude": 85.2050724,
+          "speed": -0.0271203
+        },
+        {
+          "id": "Pluto",
+          "longitude": 75.2428651,
+          "speed": -0.0171855
+        },
+        {
+          "id": "Chiron",
+          "longitude": 258.9518725,
+          "speed": 0.1117399
+        },
+        {
+          "id": "Ceres",
+          "longitude": 271.2233277,
+          "speed": 0.4062054
+        },
+        {
+          "id": "Pallas",
+          "longitude": 260.8203556,
+          "speed": 0.4136909
+        },
+        {
+          "id": "Juno",
+          "longitude": 292.5489024,
+          "speed": 0.4021155
+        },
+        {
+          "id": "Vesta",
+          "longitude": 17.4353178,
+          "speed": 0.200711
+        },
+        {
+          "id": "Pholus",
+          "longitude": 95.0032842,
+          "speed": -0.0799138
+        }
+      ],
+      "cusps": [
+        72.1459998,
+        95.5338478,
+        117.7375711,
+        142.695621,
+        174.0385783,
+        212.8212976,
+        252.1459998,
+        275.5338478,
+        297.7375711,
+        322.695621,
+        354.0385783,
+        32.8212976
+      ],
+      "asc": 72.1459998,
+      "mc": 322.695621
+    },
+    {
+      "date": "2026-10-18T09:00:00Z",
+      "lat": 33.3152,
+      "lon": 44.3661,
+      "points": [
+        {
+          "id": "Sun",
+          "longitude": 205.004424,
+          "speed": 0.9926841
+        },
+        {
+          "id": "Moon",
+          "longitude": 291.7316084,
+          "speed": 11.8705131
+        },
+        {
+          "id": "Mercury",
+          "longitude": 228.9797513,
+          "speed": 0.6216593
+        },
+        {
+          "id": "Venus",
+          "longitude": 214.1449582,
+          "speed": -0.5400724
+        },
+        {
+          "id": "Mars",
+          "longitude": 131.4836548,
+          "speed": 0.5427895
+        },
+        {
+          "id": "Jupiter",
+          "longitude": 142.465608,
+          "speed": 0.150251
+        },
+        {
+          "id": "Saturn",
+          "longitude": 10.2307174,
+          "speed": -0.0745415
+        },
+        {
+          "id": "Uranus",
+          "longitude": 65.1243972,
+          "speed": -0.0290587
+        },
+        {
+          "id": "Neptune",
+          "longitude": 2.399465,
+          "speed": -0.025066
+        },
+        {
+          "id": "Pluto",
+          "longitude": 303.0698222,
+          "speed": 0.0010718
+        },
+        {
+          "id": "Chiron",
+          "longitude": 28.7078206,
+          "speed": -0.0465937
+        },
+        {
+          "id": "Ceres",
+          "longitude": 110.1799378,
+          "speed": 0.2006236
+        },
+        {
+          "id": "Pallas",
+          "longitude": 10.3615275,
+          "speed": -0.285059
+        },
+        {
+          "id": "Juno",
+          "longitude": 298.8160733,
+          "speed": 0.1919713
+        },
+        {
+          "id": "Vesta",
+          "longitude": 18.6269218,
+          "speed": -0.2529454
+        },
+        {
+          "id": "Pholus",
+          "longitude": 280.0266736,
+          "speed": 0.0124184
+        }
+      ],
+      "cusps": [
+        279.1311095,
+        316.6087745,
+        355.469311,
+        28.2434342,
+        54.2844464,
+        76.7054276,
+        99.1311095,
+        136.6087745,
+        175.469311,
+        208.2434342,
+        234.2844464,
+        256.7054276
+      ],
+      "asc": 279.1311095,
+      "mc": 208.2434342
+    },
+    {
+      "date": "2030-06-15T18:30:00Z",
+      "lat": 33.3152,
+      "lon": 44.3661,
+      "points": [
+        {
+          "id": "Sun",
+          "longitude": 84.7101157,
+          "speed": 0.9547815
+        },
+        {
+          "id": "Moon",
+          "longitude": 264.6020317,
+          "speed": 15.0784746
+        },
+        {
+          "id": "Mercury",
+          "longitude": 74.4815243,
+          "speed": 2.0661295
+        },
+        {
+          "id": "Venus",
+          "longitude": 51.9791798,
+          "speed": 1.1866946
+        },
+        {
+          "id": "Mars",
+          "longitude": 79.1633342,
+          "speed": 0.6888612
+        },
+        {
+          "id": "Jupiter",
+          "longitude": 229.0284632,
+          "speed": -0.0833712
+        },
+        {
+          "id": "Saturn",
+          "longitude": 61.8442774,
+          "speed": 0.1228887
+        },
+        {
+          "id": "Uranus",
+          "longitude": 79.0314891,
+          "speed": 0.0590206
+        },
+        {
+          "id": "Neptune",
+          "longitude": 13.1247788,
+          "speed": 0.0165029
+        },
+        {
+          "id": "Pluto",
+          "longitude": 311.8167416,
+          "speed": -0.013837
+        },
+        {
+          "id": "Chiron",
+          "longitude": 44.9743932,
+          "speed": 0.0531421
+        },
+        {
+          "id": "Ceres",
+          "longitude": 32.7652965,
+          "speed": 0.337929
+        },
+        {
+          "id": "Pallas",
+          "longitude": 345.4778187,
+          "speed": 0.0790839
+        },
+        {
+          "id": "Juno",
+          "longitude": 276.7358224,
+          "speed": -0.2162582
+        },
+        {
+          "id": "Vesta",
+          "longitude": 40.5852522,
+          "speed": 0.4110603
+        },
+        {
+          "id": "Pholus",
+          "longitude": 287.2699231,
+          "speed": -0.025876
+        }
+      ],
+      "cusps": [
+        299.7955461,
+        341.267265,
+        19.0731018,
+        48.4118392,
+        72.2364506,
+        94.5537762,
+        119.7955461,
+        161.267265,
+        199.0731018,
+        228.4118392,
+        252.2364506,
+        274.5537762
+      ],
+      "asc": 299.7955461,
+      "mc": 228.4118392
+    }
+  ]
+}

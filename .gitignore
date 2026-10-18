@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.dev.vars
+.wrangler/
+*.log
+
+public/vendor/
+public/fonts/*.ttf
+public/fonts/*.woff2

@@ -1,0 +1,21 @@
+{
+  "name": "MX Orbit cloud workspace",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "postCreateCommand": "corepack enable && corepack prepare pnpm@11.25.0 --activate && pnpm install --frozen-lockfile",
+  "forwardPorts": [
+    5173
+  ],
+  "portsAttributes": {
+    "5173": {
+      "label": "MX Orbit preview",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true
+      }
+    }
+  }
+}
