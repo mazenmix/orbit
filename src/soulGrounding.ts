@@ -25,11 +25,11 @@ export function detectInventedNatalText(texts:readonly string[],placements:reado
   const placement=byPlanet.get(id);if(!placement)continue;
   for(const alias of aliases){
    const planet=escapeAlias(alias);
-   const arabicPattern=new RegExp('(?:^|[^\\p{L}])'+planet+'\\s+(?:في\\s+)?(?:برج\\s+)?('+signsAr.join('|')+')(?:$|[^\\p{L}])','giu');
+   const arabicPattern=new RegExp('(?:^|[^\\p{L}])(?:و)?'+planet+'\\s+(?:في\\s+)?(?:برج\\s+)?('+signsAr.join('|')+')(?:$|[^\\p{L}])','giu');
    const englishPattern=new RegExp('(?:^|[^\\p{L}])'+planet+'\\s+in\\s+(?:the\\s+sign\\s+of\\s+)?('+signsEn.join('|')+')(?:$|[^\\p{L}])','giu');
    for(const m of compact.matchAll(arabicPattern)){const sign=signsAr.indexOf(m[1]);if(sign!==placement.sign)errors.push('wrong-planet-sign:'+id+':'+m[1])}
    for(const m of compact.matchAll(englishPattern)){const sign=signsEn.findIndex(v=>v.toLowerCase()===m[1].toLowerCase());if(sign!==placement.sign)errors.push('wrong-planet-sign:'+id+':'+m[1])}
-   const houseArPattern=new RegExp('(?:^|[^\\p{L}])'+planet+'\\s+(?:في\\s+|ب)?البيت\\s+('+houseAr.join('|')+')(?:$|[^\\p{L}])','giu');
+   const houseArPattern=new RegExp('(?:^|[^\\p{L}])(?:و)?'+planet+'\\s+(?:في\\s+|ب)?البيت\\s+('+houseAr.join('|')+')(?:$|[^\\p{L}])','giu');
    const houseEnPattern=new RegExp('(?:^|[^\\p{L}])'+planet+'\\s+in\\s+house\\s+([1-9]|1[0-2])\\b','giu');
    for(const m of compact.matchAll(houseArPattern))if(placement.house!==houseAr.indexOf(m[1])+1)errors.push('wrong-planet-house:'+id+':'+m[1]);
    for(const m of compact.matchAll(houseEnPattern))if(placement.house!==Number(m[1]))errors.push('wrong-planet-house:'+id+':'+m[1]);
