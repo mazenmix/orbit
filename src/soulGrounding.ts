@@ -31,3 +31,8 @@ export function detectInventedNatalText(texts:readonly string[],placements:reado
  if(/[0-9]+(?:\.[0-9]+)?\s*°/.test(body))errors.push('unsourced-precise-degree');
  return [...new Set(errors)];
 }
+
+export function safeBasisSummary(positions:readonly GroundedPlacement[],arabic:boolean){
+ const arNames:Record<string,string>={Sun:'الشمس',Moon:'القمر',Mercury:'عطارد',Venus:'الزهرة',Mars:'المريخ',Jupiter:'المشتري',Saturn:'زحل',Uranus:'أورانوس',Neptune:'نبتون',Pluto:'بلوتو',Ascendant:'الطالع',MC:'وسط السماء'};
+ return positions.map(p=>(arabic?(arNames[p.planet]??p.planet):p.planet)+(arabic?' في ':' in ')+(arabic?signsAr[p.sign]:signsEn[p.sign])+(p.house?(arabic?' بالبيت '+p.house:' in house '+p.house):'')).join(arabic?'، ':', ');
+}

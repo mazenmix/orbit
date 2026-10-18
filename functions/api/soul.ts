@@ -1,7 +1,7 @@
 import {soulTopics} from '../../src/soulData.ts';
 import {getSoulTheme} from '../../src/soulThemes.ts';
 import {soulDeepFor} from '../../src/soulDeep.ts';
-import {detectInventedNatalText} from '../../src/soulGrounding.ts';
+import {detectInventedNatalText,safeBasisSummary} from '../../src/soulGrounding.ts';
 type Env={AI?:{run:(model:string,arg:any)=>Promise<any>}};
 const respond=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const valid=new Set(['Sun','Moon','Ascendant','MC','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Chiron','Ceres','Pallas','Juno','Vesta','Pholus']);
@@ -50,14 +50,14 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
   if(errors.length){
    const prepared=ar?{
     summary:theme.focusAr,
-    detailedAnalysis:depth.ar+' فلكياً عندنا فقط '+basis.map((b:any)=>b.planet+' في البرج '+b.sign+(b.house?' والبيت '+b.house:'')).join('، ')+'. هاي مو حقائق عن شخصية الشخص، وأي دلالة تحتاج تحقق من السلوك الحقيقي.',
+    detailedAnalysis:depth.ar+' فلكياً عندنا فقط '+safeBasisSummary(basis,true)+'. هاي مو حقائق عن شخصية الشخص، وأي دلالة تحتاج تحقق من السلوك الحقيقي.',
     strengths:['توضيح السؤال الحقيقي في هذا المجال','مقارنة تجربة واقعية بدل الاعتماد على توقع'],
     challenges:['تجنب افتراض أفكار أو دوافع الآخرين','لا تعامل رمز الخارطة كدليل على سلوك قطعي'],
     practicalInsights:[theme.actionAr,'اختبر الفكرة بموقف صغير قابل للمراجعة قبل اتخاذ قرار كبير'],
     reflectionQuestions:['شنو موقف حقيقي يدعم أو يخالف هذا التفسير؟']
    }:{
     summary:theme.focusEn,
-    detailedAnalysis:depth.en+' Only these natal indicators were provided: '+basis.map((b:any)=>b.planet+' in sign '+b.sign+(b.house?' and house '+b.house:'')).join(', ')+'. These symbols are not proven psychological facts.',
+    detailedAnalysis:depth.en+' Only these natal indicators were provided: '+safeBasisSummary(basis,false)+'. These symbols are not proven psychological facts.',
     strengths:['Framing a clearer question about this theme','Checking real experiences instead of assuming a hidden trait'],
     challenges:['Assuming access to another person’s private motives','Confusing symbolic placements with factual behavior'],
     practicalInsights:[theme.actionEn,'Test the idea with a small reversible step before any major decision'],
