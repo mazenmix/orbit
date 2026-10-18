@@ -19,7 +19,7 @@ test('complete interactive page outputs 25 clickable SVG category cards and all 
  assert.equal((html.match(/data-soul-topic="/g)||[]).length,10); // 8 navigation + prev/next
  assert.ok(html.includes('data-soul-save="1"'));
  assert.ok(html.includes('soul-head.svg'));
- assert.ok(html.includes('أفكار')||html.includes('صفات'));
+ assert.ok(html.includes('شخصيتك الحقيقية')&&html.includes('نقاط القوة'));
 });
 test('details UI switches category, topic and owner without stale natal evidence',async()=>{
  const {soulRender}=await import('../src/soulUI.ts');
