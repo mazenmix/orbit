@@ -75,7 +75,8 @@ const cache=new Map<string,Report>();
 let heatmapCategory:Category|'average'='average';
 let heatmapSpan:30|90|365=30;
 let calendarAnchor='',calendarVersion='',calendarDays:AstroCalendarDay[]=[],calendarCursor=0,calendarGeneration=0,calendarRunning=false,calendarSelected='';
-type CalendarSnapshot=CalendarDayRating & {at:Date;data:Report};
+type CalendarSnapshot=CalendarDayRating & {at:Date};
+let calendarNatal:Chart|null=null;
 const calendarSnapshots=new Map<string,CalendarSnapshot>();
 const calendarFailures=new Map<string,string>();
 let asteroidCategory:Category|'all'='all';
@@ -335,7 +336,7 @@ function initializeAstroCalendar(){
  const today=astroCalendarToday(),version=JSON.stringify([active,today]);
  if(version===calendarVersion)return;
  calendarVersion=version;calendarAnchor=today;calendarDays=astroCalendarDays(today);
- calendarSnapshots.clear();calendarFailures.clear();calendarCursor=0;calendarGeneration++;calendarRunning=false;calendarSelected=today;
+ calendarSnapshots.clear();calendarFailures.clear();calendarNatal=null;calendarCursor=0;calendarGeneration++;calendarRunning=false;calendarSelected=today;
 }
 function astroCalendarDetail(iso:string){
  const snap=calendarSnapshots.get(iso);
@@ -379,20 +380,21 @@ function startCalendarWork(){
  const generation=calendarGeneration;
  const tick=()=>{
   if(generation!==calendarGeneration||screen!=='calendar'||document.visibilityState==='hidden'){calendarRunning=false;return}
-  const limit=Math.min(calendarDays.length,calendarCursor+4);
+  const limit=Math.min(calendarDays.length,calendarCursor+2);
   for(;calendarCursor<limit;calendarCursor++){
    const day=calendarDays[calendarCursor];
    try{
-    const at=zonedInstant(day.iso+'T12:00',active.zone),r=getReport(at);
+    const at=zonedInstant(day.iso+'T12:00',active.zone);
+    const natal=calendarNatal??(calendarNatal=chart(birthInstant(active),active));
     const samples=CALENDAR_SAMPLE_HOURS.map(hour=>{
      const label=day.iso+'T'+String(hour).padStart(2,'0')+':00';
      const sampledAt=hour===12?at:zonedInstant(label,active.zone);
      if(localValue(sampledAt,active.zone).slice(0,16)!==label)throw Error('Local astronomical sample differs from expected time: '+label);
-     const current=hour===12?r.current:chart(sampledAt,active,false,false);
-     return {hour,evidence:calendarMomentEvidence(current,r.natal,sampledAt,active.known)};
+     const current=chart(sampledAt,active,false,false);
+     return {hour,evidence:calendarMomentEvidence(current,natal,sampledAt,active.known)};
     });
     const rating=calendarDaySynthesis(samples);
-    calendarSnapshots.set(day.iso,{...rating,at,data:r});
+    calendarSnapshots.set(day.iso,{...rating,at});
     const el=root.querySelector<HTMLButtonElement>('[data-calendar-date="'+day.iso+'"]');
     if(el){
      el.classList.remove('astro-pending');

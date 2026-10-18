@@ -172,3 +172,14 @@ test('precision calendar samples 3 separately calculated local chart times',()=>
  assert.ok(main.includes('snap.maximum'));
  assert.ok(!main.includes('colorizeAstroDay(r.evidence)'));
 });
+
+test('calendar computations reuse one verified natal chart and never use truncated report data',()=>{
+ const start=main.indexOf('function startCalendarWork(){'),end=main.indexOf('function bindCalendarDayButtons(){',start);
+ const task=main.slice(start,end);
+ assert.ok(task.includes('calendarNatal=chart(birthInstant(active),active)'));
+ assert.ok(task.includes('chart(sampledAt,active,false,false)'));
+ assert.ok(task.includes('calendarMomentEvidence(current,natal,sampledAt,active.known)'));
+ assert.ok(!task.includes('getReport(at)'));
+ assert.ok(!task.includes('r.evidence'));
+ assert.ok(task.includes('calendarCursor+2'));
+});
