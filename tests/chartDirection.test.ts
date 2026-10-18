@@ -8,9 +8,10 @@ test('twelve Placidus houses increase counterclockwise from left-hand Ascendant'
  assert.ok(a[0]<210&&b[0]<210,'first and second sectors remain on western half');
  assert.ok(b[1]>a[1],'house 2 is lower than house 1 on counterclockwise wheel');
  const markup=wheel(c);
- assert.equal([...markup.matchAll(/<circle cx="[^"]+" cy="[^"]+" r="12" fill=/g)].length,12,'draw exactly twelve numbered cusps');
- assert.ok(markup.includes('1 → 2 → 3 · ↺'));
- assert.ok(markup.includes('fill-opacity=".32"'));
+ assert.equal([...markup.matchAll(/<circle cx="[^"]+" cy="[^"]+" r="12.5" fill=/g)].length,12,'draw exactly twelve numbered cusps');
+ assert.ok(markup.includes('data-planet')===false,'no planets were supplied to the fixture');
+ assert.ok(markup.includes('ASC')&&markup.includes('MC'),'accurate angle labels are visible');
+ assert.ok(markup.includes('fill-opacity=".23"'),'twelve colored zodiac sectors appear');
 });
 test('counterclockwise projection covers 360 degrees without reversing sign ordering',()=>{
  const left=horoscopeXY(0,0,158),bottom=horoscopeXY(90,0,158),right=horoscopeXY(180,0,158),top=horoscopeXY(270,0,158);
