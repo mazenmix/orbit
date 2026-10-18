@@ -32,3 +32,23 @@ test('Qwen3 repeated clauses are rejected rather than displayed as a premium exp
  const env={AI:{run:async()=>({response:JSON.stringify(response)})}};
  assert.equal((await onRequestPost({request:req(v),env})).status,502);
 });
+
+test('nested personal fields are stripped and aspect geometry is checked before inference',async()=>{
+ let packet='';
+ const env={AI:{run:async(_model:string,payload:unknown)=>{packet=JSON.stringify(payload);return {response:'not JSON'}}}};
+ const input={...v,evidence:v.evidence.map(p=>({...p,privateNote:'NESTED PRIVATE',birthDate:'PRIVATE BIRTH'}))};
+ await onRequestPost({request:req(input),env});
+ assert.ok(packet.includes('computedAspects'));
+ assert.ok(!packet.includes('NESTED PRIVATE')&&!packet.includes('PRIVATE BIRTH'));
+ packet='';
+ const fabricated={...v,evidence:[{...v.evidence[0],angle:{planet:'Moon',type:0,orb:0}},v.evidence[1]]};
+ assert.equal((await onRequestPost({request:req(fabricated),env})).status,400);
+ assert.equal(packet,'');
+});
+
+test('a summary copied inside a longer analysis is rejected as repeated content',async()=>{
+ const summary='نراجع أسلوب اتخاذ القرار من خلال مواقف متكررة تشمل معلومات واضحة وخيارات مختلفة';
+ const response={summary,detailedAnalysis:'تفسير إضافي: '+summary+' قبل تعميم أي استنتاج.',strengths:['تحديد الأولوية'],challenges:['تأجيل الحسم'],practicalInsights:['دوّن تجربة حديثة'],reflectionQuestions:['ما المعلومة التي غيرت قرارك؟']};
+ const env={AI:{run:async()=>({response:JSON.stringify(response)})}};
+ assert.equal((await onRequestPost({request:req(v),env})).status,502);
+});

@@ -1,6 +1,7 @@
 /** Guard model-produced natal statements against invented celestial bodies,
  * signs, houses and exact degrees; only actual client Swiss placements authorize them.
  */
+import {distance} from './math.ts';
 export type GroundedPlacement={planet:string;longitude:number;sign:number;house:number|null};
 const labels:Readonly<Record<string,readonly string[]>>={
  Sun:['الشمس','Sun'],Moon:['القمر','Moon'],Mercury:['عطارد','Mercury'],Venus:['الزهرة','Venus'],Mars:['المريخ','Mars'],
@@ -19,8 +20,8 @@ export function detectInventedNatalText(texts:readonly string[],placements:reado
  // Check per-body sign attribution as well as the overall allowed bodies list.
  // Venus in Cancer is not allowed just because the chart's Moon is in Cancer.
  const byPlanet=new Map(placements.map(p=>[p.planet,p]));
- const escapeAlias=(v:string)=>v.replace(/[.*+?^$()|[\]{}\\]/g,'\\ const allowedSigns=new Set(placements.map(x=>x.sign));');
- const compact=body.normalize('NFKC').replace(/[\u064B-\u065F\u0670]/g,'');
+ const escapeAlias=(v:string)=>v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ const compact=body.normalize('NFKC').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[٠-٩]/g,v=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(v)));
  for(const [id,aliases] of Object.entries(labels)){
   const placement=byPlanet.get(id);if(!placement)continue;
   for(const alias of aliases){
@@ -29,9 +30,9 @@ export function detectInventedNatalText(texts:readonly string[],placements:reado
    const englishPattern=new RegExp('(?:^|[^\\p{L}])'+planet+'\\s+in\\s+(?:the\\s+sign\\s+of\\s+)?('+signsEn.join('|')+')(?:$|[^\\p{L}])','giu');
    for(const m of compact.matchAll(arabicPattern)){const sign=signsAr.indexOf(m[1]);if(sign!==placement.sign)errors.push('wrong-planet-sign:'+id+':'+m[1])}
    for(const m of compact.matchAll(englishPattern)){const sign=signsEn.findIndex(v=>v.toLowerCase()===m[1].toLowerCase());if(sign!==placement.sign)errors.push('wrong-planet-sign:'+id+':'+m[1])}
-   const houseArPattern=new RegExp('(?:^|[^\\p{L}])(?:و)?'+planet+'\\s+(?:في\\s+|ب)?البيت\\s+('+houseAr.join('|')+')(?:$|[^\\p{L}])','giu');
+   const houseArPattern=new RegExp('(?:^|[^\\p{L}])(?:و)?'+planet+'\\s+(?:في\\s+|ب)?البيت\\s+('+houseAr.join('|')+'|1[0-2]|[1-9])(?:$|[^\\p{L}\\d])','giu');
    const houseEnPattern=new RegExp('(?:^|[^\\p{L}])'+planet+'\\s+in\\s+house\\s+([1-9]|1[0-2])\\b','giu');
-   for(const m of compact.matchAll(houseArPattern))if(placement.house!==houseAr.indexOf(m[1])+1)errors.push('wrong-planet-house:'+id+':'+m[1]);
+   for(const m of compact.matchAll(houseArPattern))if(placement.house!==(Number(m[1])||houseAr.indexOf(m[1])+1))errors.push('wrong-planet-house:'+id+':'+m[1]);
    for(const m of compact.matchAll(houseEnPattern))if(placement.house!==Number(m[1]))errors.push('wrong-planet-house:'+id+':'+m[1]);
   }
  }
@@ -43,11 +44,21 @@ export function detectInventedNatalText(texts:readonly string[],placements:reado
   if(index>=0&&!allowedSigns.has(index))errors.push('invented-sign:'+m[1]);
  }
  const allowedHouses=new Set(placements.map(p=>p.house).filter(h=>h!==null));
- for(const m of body.matchAll(/البيت\s+(الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|الحادي عشر|الثاني عشر)/gu)){
-  if(!allowedHouses.has(houseAr.indexOf(m[1])+1))errors.push('invented-house:'+m[1]);
+ for(const m of compact.matchAll(/البيت\s+(الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|الحادي عشر|الثاني عشر|1[0-2]|[1-9])(?:$|[^\p{L}\d])/gu)){
+  if(!allowedHouses.has(Number(m[1])||houseAr.indexOf(m[1])+1))errors.push('invented-house:'+m[1]);
  }
  for(const m of body.matchAll(/\bhouse\s+([1-9]|1[0-2])\b/giu))if(!allowedHouses.has(Number(m[1])))errors.push('invented-house:'+m[1]);
- if(/[0-9]+(?:\.[0-9]+)?\s*°/.test(body))errors.push('unsourced-precise-degree');
+ if(/[0-9]+(?:\.[0-9]+)?\s*°/.test(compact))errors.push('unsourced-precise-degree');
+ const aspectLabels:readonly (readonly [number,string])[]=[[0,'اقتران|conjunction|conjunct'],[60,'تسديس|sextile'],[90,'تربيع|square'],[120,'تثليث|trine'],[180,'مقابلة|opposition|opposite']];
+ for(const a of placements)for(const b of placements){
+  if(a.planet===b.planet)continue;
+  const first=(labels[a.planet]??[a.planet]).map(escapeAlias).join('|'),second=(labels[b.planet]??[b.planet]).map(escapeAlias).join('|');
+  for(const [angle,terms] of aspectLabels){
+   const direct=new RegExp('(?:'+first+')\\s+(?:في\\s+|ب)?(?:'+terms+')\\s+(?:مع\\s+|with\\s+|to\\s+|و|ب)?(?:'+second+')(?:$|[^\\p{L}])','iu');
+   const leading=new RegExp('(?:'+terms+')\\s+(?:'+first+')\\s+(?:مع\\s+|with\\s+|to\\s+|و|ب)(?:'+second+')(?:$|[^\\p{L}])','iu');
+   if((direct.test(compact)||leading.test(compact))&&Math.abs(distance(a.longitude,b.longitude)-angle)>3)errors.push('invented-aspect:'+a.planet+':'+angle+':'+b.planet);
+  }
+ }
  return [...new Set(errors)];
 }
 

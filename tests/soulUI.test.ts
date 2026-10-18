@@ -28,5 +28,20 @@ test('details UI switches category, topic and owner without stale natal evidence
  const page=soulRender({profile:profile as any,chart:natal as any,categoryId:21,topicId:165,query:''});
  assert.ok(page.includes('Alex'));assert.ok(page.includes('الألوان المقترحة رمزياً')||page.includes('أنواع العطر'));
  assert.ok(!page.includes('data-soul-save='));
- assert.ok(page.includes('البيوت غير متاحة')||page.includes('وقت الميلاد/البيوت'));
+ assert.ok(page.includes('وقت الولادة غير معروف'));
+});
+
+test('summary appears once and calculation provenance remains visible in the evidence disclosure',async()=>{
+ const {soulRender}=await import('../src/soulUI.ts');
+ const {soulReading}=await import('../src/soulEngine.ts');
+ const {defaultProfile}=await import('../src/engine.ts');
+ const chart={date:new Date('2000-01-01T12:00:00Z'),points:[planet('Sun',280),planet('Venus',240),planet('Moon',210),planet('Saturn',40)],asc:24,mc:280,cusps:Array.from({length:12},(_,i)=>(24+i*30)%360),missing:[]};
+ const {soulTopics}=await import('../src/soulData.ts');
+ const reading=soulReading(chart,soulTopics[66]);
+ const html=soulRender({profile:defaultProfile,chart,categoryId:9,topicId:67,query:''});
+ const encoded=reading.summary.ar.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+ assert.equal(html.split(encoded).length-1,1);
+ assert.ok(html.includes('Etc/UTC')&&html.includes('2000-01-01T12:00:00.000Z'));
+ assert.ok(html.includes('Placidus')&&html.includes('Swiss Ephemeris'));
+ assert.match(html,/class="soul-detail-box deep"><h4>.*?<\/h4><p>[\s\S]*?<\/p><p>/);
 });

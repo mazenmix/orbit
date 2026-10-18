@@ -2,6 +2,9 @@ import {soulTopics} from '../../src/soulData.ts';
 import {getSoulTheme} from '../../src/soulThemes.ts';
 import {soulDeepFor} from '../../src/soulDeep.ts';
 import {detectInventedNatalText,safeBasisSummary} from '../../src/soulGrounding.ts';
+import {soulRule} from '../../src/soulTopicRules.ts';
+import {soulAspectPairs,type NatalBasis} from '../../src/soulEngine.ts';
+import {repeatedSoulPassage} from '../../src/soulQuality.ts';
 type Env={AI?:{run:(model:string,arg:any)=>Promise<any>}};
 const respond=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const valid=new Set(['Sun','Moon','Ascendant','MC','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Chiron','Ceres','Pallas','Juno','Vesta','Pholus']);
@@ -15,16 +18,20 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
   input=JSON.parse(raw);
  }catch{return respond({error:'Invalid JSON'},400)}
  if(!['ar','en'].includes(input?.language)||!Number.isInteger(input?.topicId)||input.topicId<1||input.topicId>200)return respond({error:'Unknown topic'},400);
- const basis=input.evidence;
- if(!Array.isArray(basis)||basis.length<1||basis.length>3)return respond({error:'Invalid evidence'},400);
- for(const p of basis){
+ const supplied=input.evidence;
+ if(!Array.isArray(supplied)||supplied.length<1||supplied.length>3)return respond({error:'Invalid evidence'},400);
+ for(const p of supplied){
   if(!valid.has(p?.planet)||!Number.isFinite(p.longitude)||p.longitude<0||p.longitude>=360||p.sign!==Math.floor(p.longitude/30)||p.house!==null&&(!Number.isInteger(p.house)||p.house<1||p.house>12)||typeof p.retrograde!=='boolean')return respond({error:'Invalid natal placement'},400);
   if(p.angle!==null&&p.angle!==undefined&&(!valid.has(p.angle.planet)||![0,60,90,120,180].includes(p.angle.type)||!Number.isFinite(p.angle.orb)||p.angle.orb<0||p.angle.orb>3))return respond({error:'Invalid natal angle'},400);
  }
- if(new Set(basis.map((x:any)=>x.planet)).size!==basis.length)return respond({error:'Duplicate planets'},400);
- const selected=soulTopics[input.topicId-1],theme=getSoulTheme(selected.id),depth=soulDeepFor(selected.id),ar=input.language==='ar';
+ if(new Set(supplied.map((x:any)=>x.planet)).size!==supplied.length)return respond({error:'Duplicate planets'},400);
+ // Strip nested extra fields as well as top-level identity/birth metadata.
+ const basis:NatalBasis[]=supplied.map(p=>({planet:p.planet,longitude:p.longitude,sign:p.sign,house:p.house,retrograde:p.retrograde,angle:p.angle?{planet:p.angle.planet,type:p.angle.type,orb:p.angle.orb,conflict:[90,180].includes(p.angle.type)}:null}));
+ const aspects=soulAspectPairs(basis);
+ for(const p of basis)if(p.angle&&!aspects.some(a=>((a.first===p.planet&&a.second===p.angle!.planet)||(a.second===p.planet&&a.first===p.angle!.planet))&&a.type===p.angle!.type&&Math.abs(a.orb-p.angle!.orb)<1e-6))return respond({error:'Natal angle does not match supplied positions'},400);
+ const selected=soulTopics[input.topicId-1],theme=getSoulTheme(selected.id),depth=soulDeepFor(selected.id),rule=soulRule(selected.id),ar=input.language==='ar';
  const system='Act as an astrology interpretation editor in '+(ar?'natural Iraqi Arabic':'clear English')+'. Use ONLY provided validated natal placements and aspects. Zodiac positions are supplied from client Swiss Ephemeris: NEVER invent a new planet, aspect, sign, degree, house or person. The goal is thoughtful symbolic self-reflection, not a clinical psychological diagnosis, validated personality fact, secret desire, future certainty or statistical probability. Return ONLY valid JSON containing summary (string), detailedAnalysis (string), strengths (array of 2 strings), challenges (array of 2 strings), practicalInsights (array of 2 strings), reflectionQuestions (array of 1 string). Write about the UNIQUE topic-specific editorial angle and concrete real-life counterexample provided. Do not repeat the same sentence or advice across summary, detailed analysis, strengths, challenges and practical insights. Avoid generic horoscope filler such as everyone wants love, trust and growth. Avoid mathematical degree tables in reader-facing prose; computed evidence stays separate. If any placement does not appear in the computedNatalEvidence, DO NOT mention that planet, sign or house at all. Do not invent a precise degree. Specific to the topic. No markdown or think tags. /no_think';
- const message=JSON.stringify({topic:ar?selected.ar:selected.en,uniqueEditorialAngle:ar?theme.focusAr:theme.focusEn,realLifeCounterExample:ar?depth.ar:depth.en,nonRepeatedPracticalAction:ar?theme.actionAr:theme.actionEn,computedNatalEvidence:basis})+'\n/no_think';
+ const message=JSON.stringify({topic:ar?selected.ar:selected.en,uniqueEditorialAngle:ar?theme.focusAr:theme.focusEn,illustrativeExample:ar?depth.ar:depth.en,potentialResource:rule.resource[ar?'ar':'en'],patternToExamine:rule.risk[ar?'ar':'en'],nonRepeatedPracticalAction:ar?theme.actionAr:theme.actionEn,computedNatalEvidence:basis,computedAspects:aspects})+'\n/no_think';
  try{
   const result=await env.AI.run('@cf/qwen/qwen3-30b-a3b-fp8',{
    messages:[{role:'system',content:system},{role:'user',content:message}],
@@ -43,25 +50,24 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
   const validList=(v:unknown)=>Array.isArray(v)&&v.length>=1&&v.length<=3&&v.every(x=>validText(x,3,250));
   if(!validText(parsed.summary,8,400)||!validText(parsed.detailedAnalysis,20,950)||!validList(parsed.strengths)||!validList(parsed.challenges)||!validList(parsed.practicalInsights)||!validList(parsed.reflectionQuestions))return respond({error:'Incomplete Qwen3 interpretation'},502);
   const all=[parsed.summary,parsed.detailedAnalysis,...parsed.strengths,...parsed.challenges,...parsed.practicalInsights,...parsed.reflectionQuestions];
-  const normalize=(x:string)=>x.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
-  if(new Set(all.map(normalize)).size!==all.length)return respond({error:'Qwen3 repeated the same passage'},502);
+  if(repeatedSoulPassage(all))return respond({error:'Qwen3 repeated the same passage'},502);
   const sections=[parsed.summary,parsed.detailedAnalysis,...parsed.strengths,...parsed.challenges,...parsed.practicalInsights,...parsed.reflectionQuestions];
   const errors=detectInventedNatalText(sections,basis);
   if(errors.length){
    const prepared=ar?{
     summary:theme.focusAr,
     detailedAnalysis:depth.ar+' فلكياً عندنا فقط '+safeBasisSummary(basis,true)+'. هاي مو حقائق عن شخصية الشخص، وأي دلالة تحتاج تحقق من السلوك الحقيقي.',
-    strengths:['الانتباه لفكرة «'+selected.ar+'» دون تعميم: '+theme.focusAr,'فهم اختلاف الموقف الواقعي بهذا الموضوع: '+depth.ar],
-    challenges:['لا تعتبر «'+selected.ar+'» حكماً نهائياً على مشاعر أو نوايا شخص','لا تحول الرمز الفلكي إلى دليل على هذا الموضوع دون موقف حقيقي قابل للفحص'],
-    practicalInsights:[theme.actionAr,'بموضوع «'+selected.ar+'»، اختبر خطوة صغيرة قابلة للتراجع وقارن النتيجة بواقعك'],
-    reflectionQuestions:['بخصوص «'+selected.ar+'»، شنو موقف حقيقي يخلّيك توافق أو تختلف ويا هذا التفسير؟']
+    strengths:[rule.resource.ar],
+    challenges:[rule.risk.ar],
+    practicalInsights:[theme.actionAr,'اختبر الفكرة بموقف صغير قابل للمراجعة قبل اتخاذ قرار كبير'],
+    reflectionQuestions:['شنو موقف حقيقي يدعم أو يخالف هذا التفسير؟']
    }:{
     summary:theme.focusEn,
     detailedAnalysis:depth.en+' Only these natal indicators were provided: '+safeBasisSummary(basis,false)+'. These symbols are not proven psychological facts.',
-    strengths:['Exploring '+selected.en+' without assuming an identity: '+theme.focusEn,'Considering the concrete example: '+depth.en],
-    challenges:['Treating '+selected.en+' as a certain label for another person','Assuming this symbolic interpretation proves specific observed behavior'],
-    practicalInsights:[theme.actionEn,'For '+selected.en+', try a small reversible step before committing to any high-impact decision'],
-    reflectionQuestions:['For '+selected.en+', which real experience supports or challenges this interpretation?']
+    strengths:[rule.resource.en],
+    challenges:[rule.risk.en],
+    practicalInsights:[theme.actionEn,'Test the idea with a small reversible step before any major decision'],
+    reflectionQuestions:['What actual experience supports or challenges this interpretation?']
    };
    return respond({topicId:selected.id,...prepared,astrologicalEvidence:basis,provider:'qwen3',quality:'verified-editorial-fallback'});
   }

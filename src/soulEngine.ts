@@ -1,164 +1,132 @@
 import type {Chart,Profile} from './engine.ts';
 import {distance,houseNumber,type Point} from './math.ts';
-import {soulCategories,soulTopics,type SoulTopic} from './soulData.ts';
+import {soulTopics,type SoulTopic} from './soulData.ts';
 import {getSoulTheme} from './soulThemes.ts';
 import {soulDeepFor} from './soulDeep.ts';
+import {soulRule} from './soulTopicRules.ts';
+
 export type NatalBasis={planet:string;longitude:number;sign:number;house:number|null;retrograde:boolean;angle:{planet:string;type:number;orb:number;conflict:boolean}|null};
+export type NatalAspect={first:string;second:string;type:number;orb:number};
+export type SoulOptions={knownTime?:boolean};
 export type SoulReading={topic:SoulTopic;basis:NatalBasis[];summary:{ar:string;en:string};deep:{ar:string;en:string};strengths:{ar:string[];en:string[]};weaknesses:{ar:string[];en:string[]};example:{ar:string;en:string};advice:{ar:string;en:string};question:{ar:string;en:string};limitations:{ar:string;en:string};contradictory:boolean};
 const arSigns=['الحمل','الثور','الجوزاء','السرطان','الأسد','العذراء','الميزان','العقرب','القوس','الجدي','الدلو','الحوت'];
 const enSigns=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
-const styleAr=['المبادرة والوضوح','الثبات وتقدير الراحة','الفضول وتبادل الأفكار','الحاجة إلى الألفة والرعاية','الظهور والتعبير الواثق','الانتباه للتفاصيل والتحسين','الموازنة والإنصاف','العمق ووضع حدود للثقة','التجربة والانفتاح على الجديد','التخطيط وتحمل الالتزام','الاستقلال وإعادة التفكير','الخيال والتعاطف'];
-const styleEn=['direct initiative','steady values and comfort','curiosity and dialogue','emotional belonging','creative self-expression','careful practical analysis','balance and fairness','emotional intensity and trust','exploration and perspective','structure and responsibility','autonomy and unconventional thinking','imagination and empathy'];
+const styleAr=['المبادرة والتعبير المباشر','الثبات وتقدير الملموس','الفضول وتبادل الأفكار','الألفة والرعاية','الإبداع والتعبير الواثق','التدقيق والتحسين العملي','الموازنة والإنصاف','العمق وحماية الثقة','التجربة وتوسيع المنظور','التخطيط وتحمل المسؤولية','الاستقلال وإعادة النظر في المألوف','الخيال والتعاطف'];
+const styleEn=['initiative and direct expression','consistency and tangible values','curiosity and exchanging ideas','belonging and care','creativity and confident expression','precision and practical improvement','balance and fairness','depth and protecting trust','exploration and wider perspective','planning and responsibility','autonomy and questioning convention','imagination and empathy'];
 const arPlanets:Record<string,string>={Sun:'الشمس',Moon:'القمر',Ascendant:'الطالع',MC:'وسط السماء',Mercury:'عطارد',Venus:'الزهرة',Mars:'المريخ',Jupiter:'المشتري',Saturn:'زحل',Uranus:'أورانوس',Neptune:'نبتون',Pluto:'بلوتو',Chiron:'كيرون',Ceres:'سيريس',Pallas:'بالاس',Juno:'جونو',Vesta:'فيستا',Pholus:'فولوس'};
-const roleAr:Record<string,string>={Sun:'الهوية والإرادة',Moon:'الأمان والمزاج',Ascendant:'الانطباع الأول',MC:'العمل والحضور',Mercury:'التفكير والكلام',Venus:'القيم والانجذاب',Mars:'المبادرة والطاقة',Jupiter:'التوسّع والتجربة',Saturn:'الحدود والمسؤولية',Uranus:'التجديد والاستقلال',Neptune:'الخيال والتصور',Pluto:'التحوّل والقوة',Chiron:'التعلم من الحساسيات',Juno:'التعاون في الالتزام'};
-const roleEn:Record<string,string>={Sun:'identity and direction',Moon:'comfort and emotion',Ascendant:'first impressions',MC:'career visibility',Mercury:'thought and speech',Venus:'values and attraction',Mars:'drive and initiative',Jupiter:'openness and growth',Saturn:'limits and commitment',Uranus:'change and autonomy',Neptune:'imagination',Pluto:'power and transformation',Chiron:'learning through sensitivity',Juno:'partnership agreements'};
+const roleAr:Record<string,string>={Sun:'الهوية والاختيار الشخصي',Moon:'الاحتياج العاطفي والاطمئنان',Ascendant:'أسلوب الظهور والانطباع الأول',MC:'الاتجاه المهني والحضور العام',Mercury:'التفكير وصياغة الكلام',Venus:'التفضيل والانجذاب والتقدير',Mars:'المبادرة والتعامل مع الاحتكاك',Jupiter:'التوسع والمعنى والفرص',Saturn:'الحدود والاستمرارية والمسؤولية',Uranus:'التجديد والاستقلال',Neptune:'الخيال والتوقعات',Pluto:'القوة والتحول وحدود التأثير'};
+const roleEn:Record<string,string>={Sun:'identity and personal choice',Moon:'emotional needs and reassurance',Ascendant:'presentation and first impressions',MC:'career direction and public presence',Mercury:'thinking and putting ideas into words',Venus:'preference, attraction and appreciation',Mars:'initiative and handling friction',Jupiter:'growth, meaning and opportunity',Saturn:'boundaries, continuity and responsibility',Uranus:'renewal and autonomy',Neptune:'imagination and expectations',Pluto:'power, change and limits of influence'};
 const aspectNamesAr:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
 const aspectNamesEn:Record<number,string>={0:'conjunction',60:'sextile',90:'square',120:'trine',180:'opposition'};
-const aspectAngles=[0,60,90,120,180];
-export function soulBasis(chart:Chart,topic:SoulTopic):NatalBasis[]{
- const config=soulCategories[topic.categoryId-1];
- if(!config)throw Error('Invalid category');
- const order=[config.planets[topic.slot%config.planets.length],config.planets[(topic.slot+1)%config.planets.length],config.planets[(topic.slot+2)%config.planets.length]];
- const planets=new Map(chart.points.map(p=>[p.id,p]));
- // Use angle only if birth time is known and the engine actually returned it.
- if(chart.asc!==null)planets.set('Ascendant',{id:'Ascendant',symbol:'ASC',longitude:chart.asc,speed:0});
- if(chart.mc!==null)planets.set('MC',{id:'MC',symbol:'MC',longitude:chart.mc,speed:0});
- const choose=(id:string)=>planets.get(id);
- return [...new Set(order)].map(id=>choose(id)).filter((p):p is Point=>!!p).map(p=>{
-  const others=chart.points.filter(q=>q.id!==p.id);
-  const matches=others.flatMap(q=>aspectAngles.map(angle=>({planet:q.id,type:angle,orb:Math.abs(distance(q.longitude,p.longitude)-angle),conflict:angle===90||angle===180}))).filter(x=>x.orb<=3).sort((a,b)=>a.orb-b.orb);
-  const sign=Math.floor(((p.longitude%360)+360)%360/30);
-  const house=chart.cusps.length===12?houseNumber(p.longitude,chart.cusps):0;
-  return {planet:p.id,longitude:p.longitude,sign,house:house||null,retrograde:p.speed<0,angle:matches[0]??null};
+const houseFocusAr=['','الهوية والصورة الأولى','الموارد والشعور بالقيمة','التواصل اليومي والتعلم','البيت والجذور','الإبداع والمرح والتعبير','العادات والعمل اليومي','الشراكات والاتفاقات','الموارد المشتركة والثقة','التعلم والسفر والمنظور','العمل والدور العام','الأصدقاء والمجموعات','الخلوة والخصوصية'];
+const houseFocusEn=['','identity and first impressions','resources and self-worth','everyday communication and learning','home and roots','creativity, play and expression','habits and everyday work','partnerships and agreements','shared resources and trust','learning, travel and perspective','career and public role','friends and groups','solitude and privacy'];
+const sign=(longitude:number)=>Math.floor(((longitude%360)+360)%360/30);
+const name=(id:string,ar:boolean)=>ar?(arPlanets[id]??id):id;
+const role=(id:string,ar:boolean)=>(ar?roleAr:roleEn)[id]??name(id,ar);
+const finitePosition=(p:Point)=>Number.isFinite(p.longitude)&&p.longitude>=0&&p.longitude<360;
+
+function canonicalTopic(topic:SoulTopic){
+ const selected=soulTopics[topic.id-1];
+ if(!selected||selected.id!==topic.id||selected.categoryId!==topic.categoryId)throw Error('Unknown analysis topic');
+ return selected;
+}
+
+/** Close major aspects between selected natal indicators only. An orb is an
+ * editorial inclusion limit, never statistical confidence in personality. */
+export function soulAspectPairs(basis:readonly Pick<NatalBasis,'planet'|'longitude'>[]):NatalAspect[]{
+ const pairs:NatalAspect[]=[];
+ basis.forEach((a,i)=>basis.slice(i+1).forEach(b=>{
+  if(!Number.isFinite(a.longitude)||!Number.isFinite(b.longitude)||a.planet===b.planet)return;
+  const separation=distance(a.longitude,b.longitude);
+  for(const type of [0,60,90,120,180]){
+   const orb=Math.abs(separation-type);
+   if(orb<=3)pairs.push({first:a.planet,second:b.planet,type,orb});
+  }
+ }));
+ return pairs.sort((a,b)=>a.orb-b.orb||a.first.localeCompare(b.first)||a.second.localeCompare(b.second));
+}
+
+export function soulBasis(chart:Chart,topic:SoulTopic,{knownTime=true}:SoulOptions={}):NatalBasis[]{
+ const rule=soulRule(canonicalTopic(topic).id);
+ const planets=new Map(chart.points.filter(finitePosition).filter(p=>knownTime||!['Moon','Ascendant','MC'].includes(p.id)).map(p=>[p.id,p]));
+ if(knownTime&&chart.asc!==null&&Number.isFinite(chart.asc))planets.set('Ascendant',{id:'Ascendant',symbol:'ASC',longitude:chart.asc,speed:0});
+ if(knownTime&&chart.mc!==null&&Number.isFinite(chart.mc))planets.set('MC',{id:'MC',symbol:'MC',longitude:chart.mc,speed:0});
+ const houses=knownTime&&chart.cusps.length===12&&chart.cusps.every(Number.isFinite);
+ const basis:NatalBasis[]=[...new Set(rule.planets)].flatMap(id=>{
+  const p=planets.get(id);if(!p)return [];
+  const house=houses?houseNumber(p.longitude,chart.cusps):0;
+  return [{planet:p.id,longitude:p.longitude,sign:sign(p.longitude),house:house||null,retrograde:p.speed<0,angle:null}];
  });
+ const pairs=soulAspectPairs(basis);
+ for(const p of basis){
+  const pair=pairs.find(x=>x.first===p.planet||x.second===p.planet);
+  if(pair)p.angle={planet:pair.first===p.planet?pair.second:pair.first,type:pair.type,orb:pair.orb,conflict:pair.type===90||pair.type===180};
+ }
+ return basis;
 }
-const fmt=(b:NatalBasis,ar:boolean)=>{
- const pl=ar?(arPlanets[b.planet]??b.planet):b.planet;
- const sign=ar?arSigns[b.sign]:enSigns[b.sign];
- const house=b.house?(ar?' · البيت ':' · house ')+b.house:'';
- const retro=b.retrograde?(ar?' · متراجع':' · retrograde'):'';
- return pl+' · '+sign+' '+(b.longitude%30).toFixed(2)+'°'+house+retro;
-};
-const houseFocusAr=['','الهوية والصورة الأولى','الموارد والشعور بالقيمة','التواصل اليومي والتعلم','البيت والجذور','التعبير والإبداع والمرح','العادات اليومية والعمل','الشراكات والتفاهم','الثقة والتغيير الشخصي','الأفق والتجربة والتعلم','العمل والمسؤولية العامة','المجتمع والأصدقاء','الداخل والراحة والخصوصية'];
-const houseFocusEn=['','identity and first impressions','resources and self-worth','communication and learning','home and roots','creative expression and play','habits and work','partnership and cooperation','trust and private change','exploration and perspective','career and public role','community and friendship','inner life and privacy'];
-const contextAr=[
- 'كيف تختار صورة نفسك أمام غيرك','كيف تتعامل مع الأمان والتعبير عن المشاعر','شلون ترتب الأفكار قبل الحسم',
- 'طريقة الحوار وفهم الإشارات','التصرفات اللي تحتاج مواجهة صادقة بدون جلد الذات','ما تخليه بخصوصيتك وبحدودك',
- 'الفرق بين الإعجاب والتوافق الواقعي','المغازلة مع مراعاة تجاوب الطرف المقابل','الثقة اللي تنبني بمواقف متكررة',
- 'اختيار شريك بقيم وسلوك فعلي','الالتزامات اللي تحتاج اتفاقاً واضحاً','حوار الاحترام والرضا والأمان',
- 'فضولك وخصوصيتك وقرارك الحر','موازنة الغيرة مع استقلال الطرفين','كسر نمط علاقات يتكرر',
- 'طريقة توزيع طاقتك الاجتماعية','قيم البيت والعائلة مقابل الاختيار الشخصي','القرارات المهنية القابلة للقياس',
- 'تفضيلاتك الحقيقية بالأمان والصرف','تجريب موهبة بدل الاكتفاء بوصفها','مقارنة ذوقك الحقيقي بالمقترح الرمزي',
- 'المبادرة والمسؤولية عن التأثير','تجاربك اليومية وما ينفعك بيها','الاستجابة للضغط ثم التعافي',
- 'مراحل النمو والأهداف اللي تختارها'
-];
-const contextEn=[
- 'how you define your identity around other people','your emotional safety and expression','how you organize information before deciding',
- 'actual communication and listening habits','observing difficult behavior without self-blame','what you choose to keep private',
- 'distinguishing attraction from genuine compatibility','flirting while respecting the other person’s response','trust built through repeated actions',
- 'choosing a partner using observed values and behavior','commitments that need explicit agreements','respect, consent and emotional safety',
- 'curiosity, privacy and freedom of choice','balancing jealousy with another person’s autonomy','interrupting repeating relationship patterns',
- 'where you spend social energy','home and family values versus individual choice','career decisions you can evaluate in practice',
- 'your actual security and spending needs','experimenting with skill rather than labeling a talent','comparing your real taste with symbolic suggestions',
- 'initiative and responsibility for your influence','daily life experiments and what actually works','stress reactions and recovery',
- 'self-development and self-chosen long-range goals'
-];
-const strengthsAr=[
- 'وعي أوضح بهويتك','حساسية أفضل لاحتياجاتك','قدرة على تنظيم سؤال معقد','فرصة لتحسين وضوح الحوار',
- 'قابلية ملاحظة عادة قابلة للإصلاح','قدرة على وضع حد صحي','تقدير اختيار متبادل','مبادرة لطيفة وواضحة',
- 'رعاية روابط فيها ثقة','اختيار قيم مشتركة','بناء اتفاقات طويلة الأمد','تعامل صريح يحفظ الرضا',
- 'فضول مع احترام الخصوصية','تمييز الشعور عن السيطرة','مراجعة معايير العلاقة',
- 'اهتمام حقيقي بالناس','بناء روابط عائلية بحدود واضحة','تطوير مهارة عملية','قراءة أوضح للأولويات المالية',
- 'تشجيع موهبة بالتجربة','تطوير ذوق واعٍ','تأثير نافع ومسؤول','اختيار إيقاع يومي مرن',
- 'قدرة على التعافي والتعلم','تحويل الأهداف إلى أفعال'
-];
-const strengthsEn=[
- 'clearer self-awareness','attention to your emotional needs','asking better questions','communicating with clarity',
- 'spotting changeable habits','setting healthy boundaries','recognizing mutual choice','taking a considerate initiative',
- 'building dependable bonds','finding shared values','creating lasting agreements','protecting mutual consent',
- 'exploring with privacy and care','separating feelings from control','reviewing relationship criteria',
- 'investing in real people','maintaining family ties and boundaries','developing practical skills','clarifying financial priorities',
- 'testing talents through practice','refining informed preferences','using influence responsibly','building a flexible daily rhythm',
- 'recovering and learning','turning goals into actions'
-];
-const challengesAr=[
- 'التسرع بوصف نفسك نهائياً','تفسير المشاعر بدل سماعها','البحث عن جواب كامل قبل أي خطوة',
- 'افتراض أنك فهمت الطرف الثاني دون سؤال','تبرير سلوك مؤذٍ باسم الطبع','اعتبار الصمت دليلاً على رغبة سرية',
- 'خلط الانبهار بالثقة','الاستمرار بالمبادرة دون تجاوب','توقع ثبات المشاعر من البداية',
- 'رفع التوقعات قبل فهم الشخص','ترك الالتزامات للتخمين','الضغط أو تجاوز الموافقة',
- 'الظن أن الخارطة تعرف الأسرار','تحويل القلق إلى مراقبة','تكرار تجربة دون مراجعة الأفعال',
- 'استنزاف نفسك لإرضاء الجميع','ذوبان الاختيار الشخصي بضغوط العائلة','الخلط بين الإنجاز والكمال',
- 'الإنفاق أو الخوف دون مراجعة الأرقام','الاعتقاد بموهبة مؤكدة دون تدريب','اعتبار الألوان الرمزية ذوقاً مثبتاً',
- 'المبالغة بالإنجاز على حساب الراحة','الخلط بين عادة مريحة وهروب','الاندفاع تحت ضغط مؤقت',
- 'تحويل الطموح إلى أحكام على نفسك'
-];
-const challengesEn=[
- 'locking identity into a final label','explaining away feelings without listening','demanding complete certainty before action',
- 'assuming you understand another person without asking','excusing harm as a personality trait','treating silence as proof of hidden desire',
- 'mistaking excitement for trust','persisting without reciprocity','assuming early feelings will remain fixed',
- 'idealizing before learning who someone is','leaving commitments unspoken','pressuring past consent and boundaries',
- 'pretending a chart reveals secrets','turning worry into monitoring','repeating choices without examining behavior',
- 'exhausting yourself trying to please everyone','losing autonomy under family pressure','confusing progress with perfection',
- 'spending or worrying without examining figures','claiming talent before practice','mistaking symbolic colors for verified taste',
- 'sacrificing recovery for status','mistaking avoidance for rest','acting rashly under temporary pressure',
- 'turning ambition into harsh self-judgment'
-];
-if([contextAr,contextEn,strengthsAr,strengthsEn,challengesAr,challengesEn].some(a=>a.length!==25))throw Error('Incomplete 25-domain Soul DNA writing rubric');
-const spot=(a:NatalBasis|undefined,ar:boolean)=>a?(ar?(arPlanets[a.planet]??a.planet):a.planet)+' '+(ar?'في برج ':'in ')+(ar?arSigns[a.sign]:enSigns[a.sign]):(ar?'بيانات الميلاد غير كافية':'insufficient natal placements');
-const dom=(c:number,array:readonly string[])=>array[c-1]??'';
-const capitalize=(s:string)=>s.length?s[0].toUpperCase()+s.slice(1):s;
-export function soulReading(chart:Chart,topic:SoulTopic):SoulReading{
- if(!soulTopics.some(t=>t.id===topic.id&&t.categoryId===topic.categoryId))throw Error('Unknown analysis topic');
- const theme=getSoulTheme(topic.id),specific=soulDeepFor(topic.id),basis=soulBasis(chart,topic),a=basis[0],b=basis[1];
- const category=topic.categoryId, hasTwo=!!a&&!!b;
- const keyA=a?styleAr[a.sign]:'بيانات غير كافية',keyB=b?styleAr[b.sign]:'بيانات غير كافية';
- const keyEnA=a?styleEn[a.sign]:'missing chart data',keyEnB=b?styleEn[b.sign]:'missing chart data';
- const areaAr=dom(category,contextAr),areaEn=dom(category,contextEn);
- const areaHouseAr=a?.house?houseFocusAr[a.house]:'الموضوع الفلكي من غير تحديد بيت';
- const areaHouseEn=a?.house?houseFocusEn[a.house]:'this natal theme without a fabricated house';
- const supportiveAngle=basis.some(v=>v.angle&&(v.angle.type===60||v.angle.type===120));
- const challengingAngle=basis.some(v=>v.angle?.conflict);
- const contrasted=challengingAngle&&supportiveAngle;
- const angleHintAr=contrasted?'الأدلة بيها زوايا داعمة وضاغطة معاً؛ وهذا يفتح قراءتين، لا نتيجة واحدة محسومة.':challengingAngle?'توجد زاوية ميلادية ضاغطة محسوبة؛ تعامل وياها كموضوع يحتاج موازنة مو كصفة سيئة.':supportiveAngle?'توجد زاوية متناغمة محسوبة تساعد القراءة الرمزية لهذا المحور، مو ضمان لسلوك.':'ماكو اتصال قوي ضمن الأورب المختار يثبت حكم إضافي بهذا المجال.';
- const angleHintEn=contrasted?'Actual supportive and challenging aspects coexist; the symbolism points in more than one direction.':challengingAngle?'A calculated challenging natal aspect adds a tension to explore, not a negative fixed personality label.':supportiveAngle?'A calculated harmonious aspect supports this symbolic theme but cannot guarantee behavior.':'No close aspect within the configured orb adds certainty to this theme.';
- const openingAr=theme.focusAr+'. عند تفسير «'+topic.ar+'»، '+(a?'وجود '+spot(a,true)+' يفتح سؤال '+(roleAr[a.planet]??'القيمة الرمزية')+' من زاوية '+keyA+'.':'المواضع المتاحة غير كافية لاستنتاج موقف فلكي موثوق.') ;
- const openingEn=theme.focusEn+'. For “'+topic.en+'”, '+(a?spot(a,false)+' suggests considering '+(roleEn[a.planet]??'symbolic meaning')+' through '+keyEnA+'.':'there are insufficient reliable natal positions for this theme.');
- const alternateAr=hasTwo?'بنفس الوقت، '+spot(b,true)+' يوجّه الانتباه إلى '+keyB+'؛ وهنا تگدر تفحص الشد أو التعاون بين الاحتياجين من خلال تجاربك.':'ما عدنا كوكب ثاني محسوب بهذا الاختيار حتى نقارن الاتجاهين.';
- const alternateEn=hasTwo?'Meanwhile, '+spot(b,false)+' brings '+keyEnB+' into the picture; real experiences can show how these needs interact.':'A second reliable placement is unavailable for comparison.';
- const deepAr=specific.ar+'. '+alternateAr+' '+(a?.house?'من جهة موضع الكوكب بالبيت '+a.house+'، يظهر محور '+areaHouseAr+'. ':'')+angleHintAr;
- const deepEn=specific.en+'. '+alternateEn+' '+(a?.house?'The calculated house '+a.house+' adds '+areaHouseEn+'. ':'')+angleHintEn;
- const strengths1Ar=dom(category,strengthsAr)+' عند مناقشة «'+topic.ar+'» من غير حكم مسبق';
- const strengths1En=capitalize(dom(category,strengthsEn))+' when exploring '+topic.en.toLocaleLowerCase()+' without a premature label';
- const skillAr=['تمييز حاجتك من توقع الآخرين','تبديل الأسلوب بحسب الظروف','طلب معلومة واضحة قبل التخمين','ملاحظة أكثر من موقف قبل الاستنتاج','صياغة شرط واقعي بدل أمنية','الإنصات لتجاوب الشخص المقابل','مقارنة فائدة القرار بكلفته','تقبّل تجربة تختلف عن توقعك'][topic.slot];
- const skillEn=['distinguishing your needs from expectations','adapting your approach to context','seeking a clear fact before guessing','examining more than one situation','setting a practical condition','listening to the other person’s response','comparing cost with benefit','learning from a counterexample'][topic.slot];
- const trapAr=['الحكم من موقف منفرد','التنازل عن رأيك لإرضاء الجماعة','اعتبار الإشارة الغامضة معلومة','تجاهل اختلاف المكان والوقت','التصرف قبل الاتفاق على الشروط','افتراض أن الآخر يشعر بما تشعر','تفسير كل شيء باتجاه واحد','تحويل الرمز إلى وعد بنتيجة'][topic.slot];
- const trapEn=['generalizing from one incident','giving up your judgment for approval','treating ambiguity as a fact','ignoring changing circumstances','acting without agreed conditions','assuming someone else feels what you feel','forcing a one-sided explanation','turning symbolism into a promise'][topic.slot];
- const strengths2Ar='فرصة الاستفادة من '+skillAr+' عند مراجعة «'+topic.ar+'» مع مراعاة '+keyA;
- const strengths2En='An opportunity for '+skillEn+' while considering '+topic.en.toLocaleLowerCase()+' and '+keyEnA;
- const risks1Ar=dom(category,challengesAr)+' خصوصاً بمواقف '+topic.ar;
- const risks1En=capitalize(dom(category,challengesEn))+' when dealing with '+topic.en.toLocaleLowerCase();
- const risks2Ar='الخطر المحتمل هو '+trapAr+' بموضوع «'+topic.ar+'»؛ راجع سلوكاً حقيقياً حتى تتأكد';
- const risks2En='A possible pitfall is '+trapEn+' in '+topic.en.toLocaleLowerCase()+'; check real behavior before judging.';
- const scenarioAr='في موقف مرتبط بـ«'+topic.ar+'»، إذا ظهر '+keyA+' واحتجت أيضاً إلى '+keyB+'، جرّب تلاحظ شنو يحتاجه الموقف فعلياً قبل ما تقرر. هنا '+areaAr+'.';
- const scenarioEn='In a real situation involving '+topic.en.toLocaleLowerCase()+', you might experience '+keyEnA+' alongside '+keyEnB+'. Notice which response fits the context; the relevant area is '+areaEn+'.';
- const questionAr='على ضوء «'+topic.ar+'»، شنو موقف من حياتك يخليك توافق أو تختلف مع الفكرة: '+theme.focusAr+'؟';
- const questionEn='For '+topic.en.toLocaleLowerCase()+', which lived example supports or challenges this interpretation: '+theme.focusEn+'?';
- return {topic,basis,summary:{ar:openingAr,en:openingEn},deep:{ar:deepAr,en:deepEn},
-  strengths:{ar:[strengths1Ar,strengths2Ar],en:[strengths1En,strengths2En]},
-  weaknesses:{ar:[risks1Ar,risks2Ar],en:[risks1En,risks2En]},
-  example:{ar:scenarioAr,en:scenarioEn},
-  advice:{ar:theme.actionAr,en:theme.actionEn},
-  question:{ar:questionAr,en:questionEn},
-  limitations:{ar:'الدرجة والشرح تأويل تنجيمي مو اختبار نفسي أو وسيلة لمعرفة رغبات الآخرين. '+(chart.cusps.length===12?'البيوت محسوبة من وقت الميلاد.':'وقت الميلاد غير معروف أو البيوت غير متاحة، لذلك ما افترضنا أرقام بيوت.'),en:'Astrological symbolism is not a validated psychological test or a way to know others’ private wishes. '+(chart.cusps.length===12?'Houses follow the calculated birth-time chart.':'Birth time/houses unavailable; no house was invented.')},contradictory:contrasted||challengingAngle};
+
+function placementText(b:NatalBasis,ar:boolean){
+ return name(b.planet,ar)+(ar?' في ':' in ')+(ar?arSigns:enSigns)[b.sign];
 }
+function pairInterpretation(basis:NatalBasis[],ar:boolean){
+ const [a,b]=basis;
+ if(!a)return ar?'المواضع اللازمة لهذا الموضوع غير متاحة؛ لا نضيف صفات شخصية لتعويض نقص البيانات.':'The required indicators are unavailable; missing data do not justify invented traits.';
+ if(!b)return ar?'نقرأ '+placementText(a,true)+' رمزياً من زاوية '+role(a.planet,true)+' و'+styleAr[a.sign]+'. لا تتوفر إشارة ثانية للمقارنة.':placementText(a,false)+' is read symbolically through '+role(a.planet,false)+' and '+styleEn[a.sign]+'. A second indicator is unavailable.';
+ if(a.sign===b.sign)return ar?
+  'يشترك '+name(a.planet,true)+' و'+name(b.planet,true)+' في برج '+arSigns[a.sign]+'، المرتبط رمزياً بـ'+styleAr[a.sign]+'. لكن الأول يتعلق بـ'+role(a.planet,true)+'، والثاني بـ'+role(b.planet,true)+'؛ لذلك نقرأ الأسلوب المشترك في وظيفتين مختلفتين.':
+  name(a.planet,false)+' and '+name(b.planet,false)+' share '+enSigns[a.sign]+', symbolically associated with '+styleEn[a.sign]+'. The first concerns '+role(a.planet,false)+' and the second '+role(b.planet,false)+', giving the shared style two different roles.';
+ return ar?
+  'نقرأ موضع '+placementText(a,true)+' بوصفه رمزاً لموضوع '+role(a.planet,true)+' بأسلوب '+styleAr[a.sign]+'، بينما يرتبط موضع '+placementText(b,true)+' بموضوع '+role(b.planet,true)+' عبر '+styleAr[b.sign]+'. محور القراءة هو كيفية إعطاء كل دور مساحة تناسب الموقف.':
+  placementText(a,false)+' symbolizes '+role(a.planet,false)+' through '+styleEn[a.sign]+', while '+placementText(b,false)+' connects '+role(b.planet,false)+' with '+styleEn[b.sign]+'. The focus is on giving each role room appropriate to the situation.';
+}
+function aspectInterpretation(basis:NatalBasis[],ar:boolean){
+ const pairs=soulAspectPairs(basis);
+ if(!pairs.length)return ar?'لا يوجد اتصال رئيسي ضمن أورب 3° بين المؤشرات المختارة؛ هذا لا يعني خلو الخارطة كلها من الاتصالات.':'No major aspect falls within 3° among the selected indicators; this does not mean the entire chart lacks aspects.';
+ const a=pairs[0];
+ const describe=(p:NatalAspect)=>name(p.first,ar)+(ar?' و':' and ')+name(p.second,ar)+' ('+(ar?aspectNamesAr:aspectNamesEn)[p.type]+')';
+ const roles=role(a.first,ar)+(ar?' و':' and ')+role(a.second,ar);
+ const meaning=ar?(a.type===0?'يجمع '+roles+' في تعبير متقارب، وقد يصعب الفصل بينهما':a.type===90?'يطرح موازنة بين '+roles+' حين يتطلب كل منهما استجابة مختلفة':a.type===180?'يبرز قطبين هما '+roles+'؛ يهم هنا التبادل بينهما دون إلغاء أحدهما':'يتيح قراءة '+roles+' كمسارين يمكن تنسيقهما، دون افتراض مهارة مكتسبة'):
+  (a.type===0?'combines '+roles+', which may be difficult to separate':a.type===90?'raises a balance between '+roles+' when they call for different responses':a.type===180?'sets out two poles, '+roles+', to consider without excluding either':'suggests coordinating '+roles+', without implying an acquired skill');
+ const lead=ar?'أقرب اتصال مختار هو '+describe(a)+'؛ رمزياً '+meaning+'.':'The closest selected aspect is '+describe(a)+'; symbolically it '+meaning+'.';
+ const contrasting=pairs.find(p=>[90,180].includes(a.type)?[60,120].includes(p.type):[60,120].includes(a.type)&&[90,180].includes(p.type));
+ return lead+(contrasting?(ar?' ويوجد أيضاً '+describe(contrasting)+'؛ لذلك تضم القراءة جانباً داعماً وآخر يحتاج موازنة.':' There is also '+describe(contrasting)+', so the reading includes both ease and a need for adjustment.'):'');
+}
+
+export function soulReading(chart:Chart,topic:SoulTopic,options:SoulOptions={}):SoulReading{
+ topic=canonicalTopic(topic);
+ const theme=getSoulTheme(topic.id),specific=soulDeepFor(topic.id),rule=soulRule(topic.id),basis=soulBasis(chart,topic,options),a=basis[0];
+ const pairs=soulAspectPairs(basis),mixed=pairs.some(p=>[90,180].includes(p.type))&&pairs.some(p=>[60,120].includes(p.type));
+ const introAr=a?' في القراءة الرمزية لـ«'+topic.ar+'»، يضيف موضع '+placementText(a,true)+' منظور '+role(a.planet,true)+' عبر '+styleAr[a.sign]+'.':' لا تتوفر بيانات كافية لربط هذا الموضوع بخارطتك.';
+ const introEn=a?' For “'+topic.en+'”, '+placementText(a,false)+' adds the symbolic perspective of '+role(a.planet,false)+' through '+styleEn[a.sign]+'.':' The available data are insufficient to connect this topic to your chart.';
+ const c=basis[2];
+ const thirdAr=c?' ويضيف '+placementText(c,true)+' منظور '+role(c.planet,true)+(basis.slice(0,2).some(b=>b.sign===c.sign)?'':' عبر '+styleAr[c.sign])+'.':'';
+ const thirdEn=c?' '+placementText(c,false)+' adds '+role(c.planet,false)+(basis.slice(0,2).some(b=>b.sign===c.sign)?'':' through '+styleEn[c.sign])+'.':'';
+ const housesAr=a?.house?' موضع '+name(a.planet,true)+' في البيت '+a.house+' يضيف سياق '+houseFocusAr[a.house]+' إلى هذا الموضوع.':'';
+ const housesEn=a?.house?' '+name(a.planet,false)+' in house '+a.house+' adds the context of '+houseFocusEn[a.house]+' to this theme.':'';
+ const retro=basis.filter(b=>b.retrograde).map(b=>name(b.planet,true)).join(' و'),retroEn=basis.filter(b=>b.retrograde).map(b=>name(b.planet,false)).join(' and ');
+ const retroAr=retro?' يظهر '+retro+' بحركة تراجعية ظاهرية؛ يمكن قراءتها رمزياً كمراجعة لطريقة التعبير، ولا تدل وحدها على ضعف أو فشل.':'';
+ const retroTextEn=retroEn?' '+retroEn+' shows apparent retrograde motion, which may be used as a reflection on expression; it does not establish weakness or failure.':'';
+ const knownTime=options.knownTime!==false;
+ return {topic,basis,
+  summary:{ar:theme.focusAr+'.'+introAr,en:theme.focusEn+'.'+introEn},
+  deep:{ar:['في «'+topic.ar+'»: '+pairInterpretation(basis,true)+thirdAr,housesAr.trim(),(a?aspectInterpretation(basis,true):'')+retroAr].filter(Boolean).join('\n\n'),en:['For “'+topic.en+'”: '+pairInterpretation(basis,false)+thirdEn,housesEn.trim(),(a?aspectInterpretation(basis,false):'')+retroTextEn].filter(Boolean).join('\n\n')},
+  strengths:{ar:[rule.resource.ar],en:[rule.resource.en]},weaknesses:{ar:[rule.risk.ar],en:[rule.risk.en]},
+  example:{ar:specific.ar+'.',en:specific.en+'.'},advice:{ar:theme.actionAr,en:theme.actionEn},
+  question:{ar:'بخصوص «'+topic.ar+'»، ما الموقف الذي يدعم هذه القراءة، وما الموقف الذي يخالفها؟',en:'For “'+topic.en+'”, which experience supports this reading, and which experience challenges it?'},
+  limitations:{ar:'مواقع الأجرام بيانات حسابية؛ معاني الشخصية تأويلات تنجيمية غير مثبتة علمياً، وليست اختباراً نفسياً أو كشفاً لرغبات الآخرين. نقاط القوة والتحديات محاور للمراجعة، وليست صفات مؤكدة. '+(!knownTime?'وقت الولادة غير معروف: بقية المواضع تقريبية عند الظهر المحلي؛ استُبعد القمر والطالع ووسط السماء والبيوت واتصالاتها من هذه القراءة.':chart.cusps.length===12?'البيوت محسوبة بنظام Placidus من وقت ومكان الولادة.':'البيوت غير متاحة لهذا الحساب؛ لم نفترض طالعاً أو أرقام بيوت.'),en:'Celestial positions are calculated data; personality meanings are astrological interpretations without scientific validation, not psychological tests or access to private wishes. Strengths and challenges are reflection themes, not established traits. '+(!knownTime?'Birth time is unknown: remaining positions use approximate local noon; Moon, angles, houses and their aspects are excluded from this reading.':chart.cusps.length===12?'Placidus houses use birth time and location.':'Houses are unavailable for this calculation; no angles or houses are assumed.')},contradictory:mixed};
+}
+
 export function soulProfileSummary(chart:Chart,profile:Profile){
- const sun=chart.points.find(x=>x.id==='Sun'),moon=chart.points.find(x=>x.id==='Moon');
- const first=sun?arSigns[Math.floor(((sun.longitude%360)+360)%360/30)]:'غير متاح';
- const second=moon?arSigns[Math.floor(((moon.longitude%360)+360)%360/30)]:'غير متاح';
- const asc=chart.asc!==null?arSigns[Math.floor(((chart.asc%360)+360)%360/30)]:null;
- return {ar:'خارطة '+profile.name+' تربط رمزية الشمس في '+first+' باتجاه الهوية والمبادرة، والقمر في '+second+' بالاحتياجات العاطفية. '+(asc?'الطالع في '+asc+' يضيف منظور الانطباع الأول. ':'ما عدنا طالع موثوق لأن وقت الميلاد مو معلوم. ')+'النتيجة إطار للتأمل بشخصيتك، مو حقيقة مؤكدة عن دوافعك أو أسرارك.',en:profile.name+"'s natal symbolism combines the Sun in "+(sun?enSigns[Math.floor(sun.longitude/30)]:'an unknown sign')+' with core direction and Moon in '+(moon?enSigns[Math.floor(moon.longitude/30)]:'an unknown sign')+' with emotional needs. '+(asc?'Ascendant '+enSigns[Math.floor(chart.asc!/30)]+' adds first-impression themes. ':'Unknown birth time means the Ascendant cannot be interpreted.')+' Use this as reflection, not a factual psychological diagnosis.'};
+ const sun=chart.points.find(x=>x.id==='Sun'&&finitePosition(x)),moon=profile.known?chart.points.find(x=>x.id==='Moon'&&finitePosition(x)):undefined;
+ const asc=profile.known&&chart.asc!==null&&Number.isFinite(chart.asc)?chart.asc:null;
+ return {
+  ar:(sun?'تُقرأ الشمس في '+arSigns[sign(sun.longitude)]+' هنا من زاوية الهوية والاختيار. ':'موضع الشمس غير متاح. ')+(moon?'والقمر في '+arSigns[sign(moon.longitude)]+' من زاوية الاحتياج العاطفي. ':profile.known?'موضع القمر غير متاح. ':'وقت الولادة غير معروف؛ لا نعتمد القمر في التفسير. ')+(asc!==null?'الطالع في '+arSigns[sign(asc)]+' يضيف موضوع الحضور والانطباع الأول. ':profile.known?'الطالع غير متاح لهذا الحساب. ':'لا نعتمد الطالع والبيوت من وقت مفترض. ')+'قارن الدلالات أدناه بتجربتك؛ لا تثبت الخارطة صفاتك أو أسرارك.',
+  en:(sun?'The Sun in '+enSigns[sign(sun.longitude)]+' is read through identity and choice. ':'The Sun position is unavailable. ')+(moon?'The Moon in '+enSigns[sign(moon.longitude)]+' adds emotional needs. ':profile.known?'The Moon position is unavailable. ':'Unknown birth time means the Moon is excluded from interpretation. ')+(asc!==null?'Ascendant '+enSigns[sign(asc)]+' adds presentation and first impressions. ':profile.known?'Angles are unavailable for this calculation. ':'No assumed birth time supplies an Ascendant or houses. ')+'Compare these symbols with lived experience; a chart does not establish traits or secrets.'
+ };
 }
 export function soulEvidenceText(basis:NatalBasis[],arabic:boolean){
  if(!basis.length)return arabic?'بيانات الميلاد غير كافية لهذا الموضوع.':'Insufficient natal data for this topic.';
- return basis.map(x=>fmt(x,arabic)+(x.angle?' · '+(arabic?aspectNamesAr[x.angle.type]:aspectNamesEn[x.angle.type])+' '+(arabic?(arPlanets[x.angle.planet]??x.angle.planet):x.angle.planet)+' orb '+x.angle.orb.toFixed(2)+'°':'')).join(' | ');
+ const places=basis.map(b=>placementText(b,arabic)+' '+(((b.longitude%30)+30)%30).toFixed(2)+'°'+(b.house?(arabic?' · البيت ':' · house ')+b.house:'')+(b.retrograde?(arabic?' · متراجع ظاهرياً':' · apparent retrograde'):''));
+ const pairs=soulAspectPairs(basis).map(p=>name(p.first,arabic)+' '+(arabic?aspectNamesAr:aspectNamesEn)[p.type]+' '+name(p.second,arabic)+(arabic?' · الأورب ':' · orb ')+p.orb.toFixed(2)+'°');
+ return places.join(' | ')+(pairs.length?' — '+pairs.join(' | '):'');
 }

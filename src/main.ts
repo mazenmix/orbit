@@ -349,7 +349,7 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
    const {person,natal}=soulViewProfile(),topic=soulTopics.find(x=>x.id===soulTopic);
    if(!topic)throw Error('Invalid Soul topic');
    key=soulAIKey(person,topic.id);soulAIActive=key;soulAIBusy=true;soulAIError='';render();
-   const evidence=soulReading(natal,topic).basis;
+   const evidence=soulReading(natal,topic,{knownTime:person.known}).basis;
    const response=await fetch('/api/soul',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topicId:topic.id,language:lang,evidence}),signal:AbortSignal.timeout(65000)});
    const result=await response.json();
    if(!response.ok)throw Error(result.error||'Qwen3 structured response unavailable');

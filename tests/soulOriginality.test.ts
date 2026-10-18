@@ -14,7 +14,8 @@ test('200 readings have original deep content, summaries and actions, not reword
  };
  for(const key of ['ar','en'] as const)for(const field of ['summary','deep','advice','example'] as const)unique(key,field);
  assert.ok(list.every((x,i)=>x.summary.ar.startsWith(soulThemes[i].focusAr)));
- assert.ok(list.every((x,i)=>x.deep.ar.startsWith(soulDeep[i].ar)));
+ assert.ok(list.every((x,i)=>x.example.ar.startsWith(soulDeep[i].ar)));
+ assert.ok(list.every((x,i)=>!x.deep.ar.includes(soulDeep[i].ar)),'the illustrative example must not be copied into deep analysis');
  assert.ok(list.every((x,i)=>x.advice.ar===soulThemes[i].actionAr));
  assert.ok(list.every((x,i)=>!x.deep.ar.includes('المفتاح العملي هو')));
 });
@@ -37,7 +38,7 @@ test('strength and challenge points are not verbatim recycled across the 200 dis
  for(const language of ['ar','en'] as const){
   for(const field of ['strengths','weaknesses'] as const){
    const lines=list.flatMap(x=>x[field][language]);
-   assert.equal(lines.length,400);
+   assert.equal(lines.length,200); // One authored point beats a second boilerplate bullet.
    assert.equal(new Set(lines).size,lines.length,field+' '+language+' has repeated bullet paragraphs');
   }
  }
