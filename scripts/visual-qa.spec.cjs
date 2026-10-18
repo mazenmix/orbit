@@ -75,3 +75,49 @@ test('Encrypted vault survives reload and hides both profiles and relationship j
  expect(crashes).toEqual([]);
  await context.close();
 });
+
+for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
+ test(device+' saved People owner switches all four chart tabs and styled five info cards',async({browser},testInfo)=>{
+  const context=await browser.newContext({viewport:{width,height},isMobile:device==='iphone',hasTouch:device==='iphone'}),page=await context.newPage(),errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('/#chart',{waitUntil:'domcontentloaded'});
+  await page.locator('#soul-person-select').waitFor({state:'visible',timeout:75000});
+  await page.evaluate(()=>{
+   const people=[
+    {id:'qa-self',kind:'self',name:'Test Owner',date:'1985-03-29',time:'19:20',zone:'Asia/Baghdad',city:'Baghdad',lat:33.3,lon:44.4,known:true,sex:'male'},
+    {id:'qa-person',kind:'dating',name:'Test Person',date:'1996-05-13',time:'08:30',zone:'Asia/Manila',city:'Manila',lat:14.6,lon:120.98,known:true,sex:'female'},
+    {id:'qa-unknown',kind:'friend',name:'Unknown Time',date:'2001-07-04',time:'12:00',zone:'Europe/London',city:'London',lat:51.5,lon:-0.12,known:false,sex:'male'}
+   ];
+   localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify(people));
+   localStorage.setItem('mx.active','qa-self');
+  });
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#soul-person-select option')).toHaveCount(3);
+  await expect(page.locator('.mx-chart-meta-card')).toHaveCount(5);
+  await expect(page.locator('.professional-wheel')).toBeVisible();
+  const initial=await page.locator('.professional-wheel .wheel-planet[data-planet="Sun"] title').textContent();
+  await page.locator('#soul-person-select').selectOption('qa-person');
+  await expect(page.locator('.mx-chart-owner-title h2')).toHaveText('Test Person');
+  await expect(page.locator('.mx-meta-place b')).toHaveText('Manila');
+  await expect(page.locator('.mx-meta-time b')).toHaveText('08:30');
+  await expect(page.locator('.mx-meta-gender b')).toHaveText('Female');
+  const changed=await page.locator('.professional-wheel .wheel-planet[data-planet="Sun"] title').textContent();
+  expect(changed).not.toEqual(initial);
+  await expect(page.locator('.professional-wheel .wheel-planet').first()).toBeVisible();
+  await page.screenshot({path:'artifacts/ui-qa/chart-'+device+'-'+testInfo.project.name+'.png',fullPage:true});
+  for(const mode of ['transit','overlay','details','natal']){
+   await page.locator('[data-chart="'+mode+'"]').first().click();
+   await expect(page.locator('#soul-person-select')).toHaveValue('qa-person');
+   await expect(page.locator('.mx-chart-owner-title h2')).toHaveText('Test Person');
+  }
+  await page.locator('#soul-person-select').selectOption('qa-unknown');
+  await expect(page.locator('.mx-meta-time b')).toContainText(/غير معروف|Unknown/);
+  await expect(page.locator('.chart-expanded .professional-wheel')).toBeVisible();
+  await expect(page.locator('.professional-wheel')).not.toContainText('ASC');
+  await expect(page.locator('.professional-wheel')).not.toContainText('MC');
+  expect(errors).toEqual([]);
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+  expect(overflow).toBeLessThan(8);
+  await context.close();
+ });
+}
