@@ -8,7 +8,7 @@ function base64(bytes:Uint8Array){let text='';for(let i=0;i<bytes.length;i+=8192
 function fromBase64(text:string){if(!/^[A-Za-z0-9+/]*={0,2}$/.test(text)||text.length>3000000)throw Error('Invalid protected backup encoding');return Uint8Array.from(atob(text),x=>x.charCodeAt(0))}
 async function derive(passphrase:string,salt:Uint8Array,usage:KeyUsage[]){
  const raw=await crypto.subtle.importKey('raw',encoder.encode(passphrase),'PBKDF2',false,['deriveKey']);
- return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,usage);
+ return crypto.subtle.deriveKey({name:'PBKDF2',salt:Uint8Array.from(salt).buffer,iterations,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,usage);
 }
 function validatePassword(password:string){if(typeof password!=='string'||password.length<12||password.length>256)throw Error('Use a passphrase of 12–256 characters')}
 export async function encryptBackup(payload:unknown,password:string):Promise<EncryptedBackup>{
