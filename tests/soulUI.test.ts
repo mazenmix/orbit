@@ -14,11 +14,12 @@ test('complete interactive page outputs 25 clickable SVG category cards and all 
  const natal={date,points,cusps:Array.from({length:12},(_,i)=>(180+i*30)%360),asc:180,mc:90,missing:[]};
  const profile={id:'test-owner',name:'Nadia',date:'1985-03-29',time:'19:20',city:'Baghdad',zone:'Asia/Baghdad',lat:33.3,lon:44.4,kind:'self',known:true,sex:'female'};
  const html=soulRender({profile:profile as any,chart:natal as any,categoryId:1,topicId:1,query:''});
- assert.ok(html.includes('MX SOUL DNA'));
+ assert.ok(html.includes('تحليل الخارطة الشخصية'));
+ assert.ok(!html.includes('MX SOUL DNA'));
  assert.equal((html.match(/class="soul-category /g)||[]).length,25);
  assert.equal((html.match(/data-soul-topic="/g)||[]).length,10); // 8 navigation + prev/next
  assert.ok(html.includes('data-soul-save="1"'));
- assert.ok(html.includes('soul-head.svg'));
+ assert.ok(!html.includes('soul-head.svg'));
  assert.ok(html.includes('شخصيتك الحقيقية')&&html.includes('نقاط القوة'));
 });
 test('details UI switches category, topic and owner without stale natal evidence',async()=>{

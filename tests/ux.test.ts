@@ -91,3 +91,25 @@ test('live redraw preserves open details and avoids location reload',()=>{
  assert.ok(main.includes('preserved=Array.from('));
  assert.ok(!main.includes('location.reload('));
 });
+
+test('soul identity and natal wheel remove decorative face and obsolete labels',()=>{
+ const soul=readFileSync('src/soulUI.ts','utf8');
+ const wheel=readFileSync('src/chart.ts','utf8');
+ assert.ok(!soul.includes('soul-head.svg')&&!soul.includes('MX SOUL DNA'));
+ assert.ok(soul.includes('تحليل الخارطة الشخصية'));
+ assert.ok(!main.includes('الدائرة الفلكية — البيوت عكس عقارب الساعة'));
+ assert.ok(!wheel.includes('خارطة فلكية مفصلة تشمل الأبراج والكواكب والبيوت والزوايا'));
+});
+test('live sky wheel is directly tappable and launches an expanded SVG modal',()=>{
+ assert.ok(main.includes('id="expand-sky-wheel"'));
+ assert.ok(main.includes('mx-expanded-wheel'));
+ assert.ok(main.includes("on('expand-sky-wheel',expandSky)"));
+});
+test('fortune calendar color must come from genuine aspect weights and show transparent proof',()=>{
+ assert.ok(main.includes('colorizeAstroDay(r.evidence)'));
+ assert.ok(!main.includes('colorizeAstroDay(r.scores)'));
+ assert.ok(main.includes('snap.favorableWeight.toFixed(3)'));
+ assert.ok(main.includes('snap.challengingWeight.toFixed(3)'));
+ assert.ok(main.includes("localValue(at,active.zone).slice(0,16)"));
+ assert.ok(main.includes('calendarFailures.set(day.iso'));
+});

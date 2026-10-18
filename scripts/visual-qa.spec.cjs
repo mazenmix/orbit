@@ -185,3 +185,30 @@ test('calendar month labels stay in English even when app language is Arabic',as
  await expect(page.locator('.astro-cal-month-head h3').first()).toContainText(/[A-Z][a-z]+/,{timeout:75000});
  await expect(page.locator('.astro-cal-weekdays').first()).toContainText('Mon');
 });
+
+test('tapping today sky wheel opens a readable enlarged diagram',async({page})=>{
+ await page.goto('/#today',{waitUntil:'domcontentloaded'});
+ await page.locator('#expand-sky-wheel').waitFor({state:'visible',timeout:75000});
+ await page.locator('#expand-sky-wheel').click();
+ await expect(page.locator('dialog#detail')).toBeVisible();
+ await expect(page.locator('.mx-expanded-wheel .professional-wheel')).toBeVisible();
+ await page.keyboard.press('Escape');
+ await expect(page.locator('dialog#detail')).not.toBeVisible();
+});
+test('natal details hide face logo and DNA wording',async({page})=>{
+ await page.goto('/#chart',{waitUntil:'domcontentloaded'});
+ await page.locator('[data-chart="details"]').waitFor({state:'visible',timeout:75000});
+ await page.locator('[data-chart="details"]').click();
+ await expect(page.locator('.soul-art')).toHaveCount(0);
+ await expect(page.locator('.soul-hero')).not.toContainText('MX SOUL DNA');
+});
+test('calendar fortune evidence exposes actual planetary angle weights',async({page})=>{
+ await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
+ await page.locator('[data-calendar-date]').first().waitFor({state:'visible',timeout:75000});
+ await expect(page.locator('.astro-cal-day.astro-pending').first()).toHaveCount(0,{timeout:90000}).catch(()=>{});
+ const n=await page.locator('[data-calendar-date]').count();
+ expect(n).toBeGreaterThanOrEqual(365);
+ await expect(page.locator('.astro-cal-day.astro-green, .astro-cal-day.astro-yellow, .astro-cal-day.astro-orange, .astro-cal-day.astro-red').first()).toBeVisible({timeout:75000});
+ await expect(page.locator('.astro-fortune-proof')).toBeVisible({timeout:75000});
+ await expect(page.locator('#astro-calendar-progress')).toContainText(/verified|محسوب فعلياً/);
+});
