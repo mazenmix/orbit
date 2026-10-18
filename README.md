@@ -4,7 +4,7 @@ A working mobile-first Iraqi Arabic / English PWA, built from inspected MazenmiX
 
 ## Work on GitHub
 
-The source of truth is this repository. Open **Code → Codespaces → Create codespace on main** to develop in GitHub’s cloud without a local checkout. The **Build and test** Actions workflow runs the tests and produces a downloadable `mx-orbit-web-build` artifact. Website publication remains pending domain selection.
+The source of truth is this repository. Open **Code → Codespaces → Create codespace on main** to develop in GitHub’s cloud without a local checkout. The **Build and test** Actions workflow runs the tests and produces a downloadable `mx-orbit-web-build` artifact. The live Pages project is https://mxastro.pages.dev .
 
 ## Run
 
@@ -29,7 +29,7 @@ pnpm preview
 - Local profiles with edit/delete, known/unknown birth times, role-aware synastry dimensions, house overlays, backup/import and calculation-receipt export.
 - Iraqi Arabic RTL / English LTR, mobile navigation and desktop sidebar.
 - PWA manifest, install icons, static offline caching, and original repository brand asset.
-- Qwen3 evidence-packet export/copy and an optional Cloudflare Pages explanation endpoint. AI is off until configured.
+- Qwen3 explanation engine through the Cloudflare Workers AI binding; optional custom gateway support. No browser model download or client-side API key.
 
 ## Calculations and limits
 
@@ -47,23 +47,23 @@ Profiles are stored only in this origin's localStorage. They are not encrypted. 
 
 Qwen requests occur only after pressing the request button. The packet preview lists the fields. Server-side allowlisting sends planet/contact evidence to the configured model; profile names, birth dates, coordinates and CRM records are excluded. API responses are not cached by the service worker. Gateway tokens stay in server environment variables.
 
-## Cloudflare Pages preparation — deployment pending domain
+## Cloudflare Pages and Qwen3
 
-Source repository: https://github.com/mazenmix/orbit . No domain has been selected and no website has been deployed.
+Live project: https://mxastro.pages.dev . Build command: `pnpm build`; output: `dist`. The `functions/` directory stays at repository root.
 
-After the owner chooses a domain, connect this source directory as a Pages project (or publish a dedicated repository/branch). Use `pnpm build` and output directory `dist`. The `functions/` directory must remain at project root for Pages Functions. A static drag-and-drop upload of only `dist` provides the offline app but does **not** deploy the optional Qwen endpoint. Configure the chosen custom domain in Pages after deployment.
+`wrangler.toml` declares a Workers AI binding named `AI`. The explanation endpoint invokes the actual Cloudflare-hosted Qwen3 model `@cf/qwen/qwen3-30b-a3b-fp8`; there is no model download on the visitor's device. New commits trigger the connected Pages deployment.
 
-Optional server environment settings:
+If Cloudflare does not apply the binding automatically, open **Workers & Pages → mxastro → Settings → Bindings → Add → Workers AI**, set variable name **AI**, then redeploy. Workers AI must be available in the account and have remaining usage quota. This change does not upgrade the account to a paid plan.
 
-| Setting | Meaning |
-| --- | --- |
-| `QWEN_GATEWAY_URL` | Complete HTTPS OpenAI-compatible `/chat/completions` URL |
-| `QWEN_GATEWAY_TOKEN` | Gateway credential; set as a server secret |
-| `QWEN_MODEL` | Exact deployed model name, default `qwen3` |
+`GET /api/explain` reports whether a binding or gateway is configured, without credentials or inference. A real explanation occurs only on `POST /api/explain` after the user clicks the button. Inputs are limited to twelve calculated contacts and allowlisted symbolic indices. Names, birth dates, coordinates, free-form user prompts and CRM fields are not forwarded. The endpoint supports Cloudflare's chat-completion and legacy response shapes and strips reasoning tags.
 
-Local full-stack preview can use `wrangler pages dev dist`; the Vite preview is static and intentionally reports that the AI gateway is unavailable. Copy `.dev.vars.example` to `.dev.vars` only when configuring a local gateway. Keep `.dev.vars` untracked. Before enabling a paid/public gateway, configure access/rate controls in Cloudflare or at the gateway: the supplied route enforces same-origin requests and bounded input, but does not implement user authentication or billing quotas.
+Workers AI usage follows Cloudflare's account quota and billing settings. The public endpoint bounds payload size and output tokens but is not an authentication or billing-quota system; apply account-side access/rate controls if restricting use is required.
 
-Original native llama.cpp Qwen3 inference is not running in the browser. A future WebGPU/WebLLM implementation needs a compatible Qwen3 quantization, model download UX, memory/device capability checks and separate validation. It is not represented here as completed.
+An existing private OpenAI-compatible Qwen3 server remains optional. Set `QWEN_GATEWAY_URL` to a complete HTTPS chat-completions endpoint, `QWEN_GATEWAY_TOKEN` as a server secret, and `QWEN_MODEL` to the server model name. When explicitly configured, that gateway takes precedence. No token belongs in frontend code.
+
+Original native llama.cpp inference is not running in the browser. This implementation runs Qwen3 on Cloudflare servers and returns its explanation to the browser; it does not impersonate on-device inference.
+
+References: [Cloudflare Pages AI bindings](https://developers.cloudflare.com/pages/functions/bindings/#workers-ai), [Qwen3 model API](https://developers.cloudflare.com/workers-ai/models/qwen3-30b-a3b-fp8/).
 
 ## Native-only features
 
@@ -72,12 +72,12 @@ Original native llama.cpp Qwen3 inference is not running in the browser. A futur
 | Apple Watch companion | Responsive installable dashboard; no watchOS app |
 | iOS widgets | PWA home-screen icon and quick dashboard; no WidgetKit widgets |
 | Background local alert scheduling | Not implemented; Web Push requires a server, permission and supported installed PWA conditions |
-| Native on-device llama.cpp Qwen3 | Evidence packet + optional hosted/private gateway; no automatic cloud upload |
+| Native on-device llama.cpp Qwen3 | Cloudflare-hosted Qwen3; evidence sent only on explicit explanation request |
 | Native calendar integration | Not implemented; future explicit calendar-file export is feasible |
 
 ## Verification
 
-20 automated tests: direct Swift mathematical vectors, historical timezones, source score/synastry cases, three independent official native Swiss Ephemeris reference snapshots, Time Machine, unknown-time exclusions, polar-house handling and gateway privacy/input checks. The native/WASM reference tolerance is 0.000001° across all 16 bodies' longitude/speed, 12 cusps, ASC and MC at three dates. Native fixture provenance is in `tests/fixtures/native-swiss.json`.
+26 automated tests: direct Swift mathematical vectors, historical timezones, source score/synastry cases, three independent official native Swiss Ephemeris reference snapshots, Time Machine, unknown-time exclusions, polar-house handling and gateway privacy/input checks. The native/WASM reference tolerance is 0.000001° across all 16 bodies' longitude/speed, 12 cusps, ASC and MC at three dates. Native fixture provenance is in `tests/fixtures/native-swiss.json`.
 
 This does **not** establish complete Swift-app or v2.3.2 score equivalence: post-processing and advanced source layers remain pending. See the audit and verification notes.
 

@@ -1,5 +1,7 @@
-name = "mx-orbit"
+name = "mxastro"
 pages_build_output_dir = "./dist"
 compatibility_date = "2026-01-01"
-# Domain intentionally unset. Do not deploy until the owner selects a domain.
-# QWEN_GATEWAY_URL, QWEN_GATEWAY_TOKEN and QWEN_MODEL are server-side settings.
+
+# Server-side Qwen3 inference: no model download or frontend credential.
+[ai]
+binding = "AI"
