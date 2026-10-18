@@ -63,3 +63,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .advanced-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0}
 .advanced-grid h2{font-size:21px}.advanced-grid td,.advanced-grid th{font-size:13px}
 @media(max-width:870px){.advanced-grid{grid-template-columns:1fr}}
+
+/* Explicit opt-in: MX Eye notifications are foreground-only without Web Push. */
+.eye-options{display:grid;gap:9px;margin:16px 0}.eye-options label{display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.7;cursor:pointer}
+.eye-options input[type=checkbox]{min-height:18px;width:19px;height:19px;accent-color:#a698e8}
