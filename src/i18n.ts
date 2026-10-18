@@ -1,3 +1,4 @@
+import {advice} from './advice.ts';
 import {bodies,angles,aspectArabic,aspectNames,type Category,type Signal,type Evidence} from './math.ts';
 export type Lang='ar'|'en';
 export let lang:Lang=(localStorage.getItem('mx.language')==='en'?'en':'ar');
@@ -14,17 +15,5 @@ export const aspect=(angle:number)=>t(aspectArabic[angles.indexOf(angle as 0)],a
 export const toneLabels={exceptional:['نافذة استثنائية','Exceptional window'],opportunity:['فرصة قوية','Strong opportunity'],supportive:['داعم','Supportive'],neutral:['متوازن','Balanced'],watch:['انتبه','Watch'],caution:['تمهّل','Caution']} as const;
 export const tone=(s:Signal)=>{const v=toneLabels[s.tone];return t(v[0],v[1])};
 export const notice=()=>t('المواضع الفلكية محسوبة. الإرشاد رمزي؛ المؤشرات من 100 مو نسب احتمال، وما تضمن حدوث شي.','Astronomical positions are calculated. Guidance is symbolic; indices out of 100 are not probabilities or guarantees.');
-export function copy(s:Signal){
- const e=[...s.factors].sort((a,b)=>b.weight-a.weight)[0];
- if(!e)return {title:t('ماكو اتصال بارز بهالمجال','No prominent contact in this area'),action:t('الدليل الحالي ما يكفي حتى نطلع بإرشاد محدد.','The current evidence is insufficient for specific guidance.')};
- const contact=t(planet(e.transit.id)+' الحالي · '+aspect(e.angle)+' · '+planet(e.natal.id)+' بخريطة الولادة',planet(e.transit.id)+' transit · '+aspect(e.angle)+' · natal '+planet(e.natal.id));
- const themes:Record<string,[string,string]>={Sun:['التركيز والتعبير عن نفسك','focus and self-expression'],Moon:['المزاج والاحتياجات اليومية','mood and everyday needs'],Mercury:['الكلام وترتيب الأفكار','communication and organizing ideas'],Venus:['العلاقات والذوق والقيم','relationships, taste and values'],Mars:['المبادرة وطريقة التصرف','initiative and how you act'],Jupiter:['التوسع والتوقعات','growth and expectations'],Saturn:['الحدود والمسؤوليات','boundaries and responsibilities'],Uranus:['التغيير والمرونة','change and flexibility'],Neptune:['الخيال ووضوح الصورة','imagination and clarity'],Pluto:['التعلق وإعادة الترتيب','attachment and restructuring'],Ascendant:['الحضور والبدايات','presence and beginnings'],MC:['العمل والاتجاه العام','work and direction']};
- const field:Record<Category,[string,string]>={overview:['ترتيب أولوياتك','prioritizing'],career:['قرار العمل','a work decision'],love:['حوار العلاقة','a relationship conversation'],communication:['صياغة رسالتك','wording your message'],energy:['توزيع جهدك','allocating effort'],emotions:['فهم رد فعلك','understanding your response'],recovery:['حماية وقت الراحة','protecting rest time'],timing:['اختيار الخطوة التالية','choosing the next step']};
- const theme=t(...field[s.category])+t('، خصوصاً '+t(...(themes[e.natal.id]??['الأولويات الشخصية','personal priorities'])),' — especially '+t(...(themes[e.natal.id]??['الأولويات الشخصية','personal priorities'])));
- const supportive=[60,120].includes(e.angle)||(e.angle===0&&['Venus','Jupiter'].includes(e.transit.id));
- const challenging=[90,180].includes(e.angle)||(e.angle===0&&['Saturn','Mars','Pluto','Uranus'].includes(e.transit.id));
- const motion=e.applying?t('دا يقترب من الدقة','moving toward exactness'):t('دا يبتعد عن الدقة','moving away from exactness');
- const advice=supportive?t('جرّب خطوة صغيرة تخص '+theme+'، وقيّم النتيجة الواقعية قبل التوسع.','Try one small step involving '+theme+' and assess the real outcome before expanding.'):challenging?t('بموضوع '+theme+'، راجع نقطة الاحتكاك وخلي القرار قابل للمراجعة.','For '+theme+', check the point of friction and keep your decision reversible.'):t('راقب '+theme+' وحدد شنو يحتاج انتباهك فعلياً.','Observe '+theme+' and identify what actually needs attention.');
- return {title:contact,action:t('أقوى عامل بهالمجال '+motion+'، بفارق '+e.orb.toFixed(2)+'°. ','The leading factor here is '+motion+', with an orb of '+e.orb.toFixed(2)+'°. ')+advice};
-}
+export const copy=(s:Signal)=>advice(s,lang);
 export const technical=(e:Evidence)=>`${e.transit.symbol} ${planet(e.transit.id)} · ${aspect(e.angle)} · ${planet(e.natal.id)} ${e.natal.symbol} — ${e.orb.toFixed(2)}° · ${e.applying?t('مقترب','applying'):t('مبتعد','separating')}`;
