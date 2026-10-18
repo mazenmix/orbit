@@ -1,4 +1,4 @@
-import type {Evidence} from './math.ts';
+import {aspects,type Evidence,type Point} from './math.ts';
 export type CalendarColor='green'|'yellow'|'red';
 export type AstroCalendarDay={iso:string;year:number;month:number;day:number;weekday:number;monthKey:string};
 export type AstroCalendarRating={
@@ -63,6 +63,82 @@ export function colorizeAstroDay(evidence:readonly Evidence[]):AstroCalendarRati
   strongestSupport,strongestChallenge
  };
 }
+
+/** Three evenly spaced checks across the local day, instead of a noon-only
+ * snapshot. A complete major-planet vector is mandatory for each check. */
+export const CALENDAR_SAMPLE_HOURS=[4,12,20] as const;
+const primaryBodies=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'] as const;
+export type CalendarChart={points:readonly Point[];asc?:number|null;mc?:number|null};
+export type CalendarSample={hour:(typeof CALENDAR_SAMPLE_HOURS)[number];evidence:readonly Evidence[]};
+export type CalendarDayRating=AstroCalendarRating & {
+ sampleHours:number[];sampleScores:number[];minimum:number;maximum:number;
+ strongestSupportHour:number|null;strongestChallengeHour:number|null;
+};
+function bodyMap(c:CalendarChart,required:readonly string[]):Map<string,Point>{
+ const byName=new Map<string,Point>();
+ for(const pt of c.points){
+  if(byName.has(pt.id))throw Error('Duplicate ephemeris body: '+pt.id);
+  if(!Number.isFinite(pt.longitude)||pt.longitude<0||pt.longitude>=360||!Number.isFinite(pt.speed))throw Error('Invalid ephemeris coordinates for '+pt.id);
+  byName.set(pt.id,pt);
+ }
+ for(const id of required)if(!byName.has(id))throw Error('Missing required ephemeris body: '+id);
+ return byName;
+}
+/** Contacts are calculated independently for all ten primary transiting
+ * bodies, not from report.evidence (which caps its strongest 48 contacts and
+ * also includes minor bodies). Unknown birth time never contributes a
+ * fabricated natal Moon or Ascendant/MC to the calendar.
+ */
+export function calendarMomentEvidence(current:CalendarChart,natal:CalendarChart,at:Date,knownTime:boolean):Evidence[]{
+ if(!Number.isFinite(+at))throw Error('Invalid calendar sample instant');
+ const transit=bodyMap(current,primaryBodies);
+ const natalRequired=knownTime?primaryBodies:primaryBodies.filter(id=>id!=='Moon');
+ const birth=bodyMap(natal,natalRequired);
+ const fixed:Point[]=[...natalRequired.map(id=>birth.get(id)!)];
+ if(knownTime)for(const [id,longitude] of [['Ascendant',natal.asc],['MC',natal.mc]] as const){
+  if(longitude!==null&&longitude!==undefined){
+   if(!Number.isFinite(longitude)||longitude<0||longitude>=360)throw Error('Invalid natal '+id);
+   fixed.push({id,symbol:id==='MC'?'MC':'ASC',longitude,speed:0});
+  }
+ }
+ const results:Evidence[]=[];
+ for(const id of primaryBodies)results.push(...aspects([transit.get(id)!],fixed,at));
+ return results;
+}
+/** Mean of verified checkpoints, with the sampled range shown to users.
+ * This preserves a neutral score for no evidence and exposes intraday
+ * variation instead of claiming the local-noon value describes 24 hours.
+ */
+export function calendarDaySynthesis(samples:readonly CalendarSample[]):CalendarDayRating{
+ if(samples.length!==CALENDAR_SAMPLE_HOURS.length||
+    samples.some((s,i)=>s.hour!==CALENDAR_SAMPLE_HOURS[i]))throw Error('Incomplete or unordered calendar day samples');
+ const rated=samples.map(s=>colorizeAstroDay(s.evidence));
+ const value=Math.round(rated.reduce((sum,r)=>sum+r.value,0)/rated.length);
+ let strongestSupport:Evidence|null=null,strongestChallenge:Evidence|null=null;
+ let strongestSupportHour:number|null=null,strongestChallengeHour:number|null=null;
+ let supportWeight=0,challengeWeight=0;
+ for(let i=0;i<rated.length;i++){
+  const r=rated[i],hour=samples[i].hour;
+  if(r.strongestSupport){
+   const w=fortuneContactWeight(r.strongestSupport);
+   if(w>supportWeight){supportWeight=w;strongestSupport=r.strongestSupport;strongestSupportHour=hour}
+  }
+  if(r.strongestChallenge){
+   const w=fortuneContactWeight(r.strongestChallenge);
+   if(w>challengeWeight){challengeWeight=w;strongestChallenge=r.strongestChallenge;strongestChallengeHour=hour}
+  }
+ }
+ return {
+  value,color:calendarColorForScore(value),
+  sampleHours:samples.map(s=>s.hour),sampleScores:rated.map(r=>r.value),
+  minimum:Math.min(...rated.map(r=>r.value)),maximum:Math.max(...rated.map(r=>r.value)),
+  favorableWeight:Number((rated.reduce((sum,r)=>sum+r.favorableWeight,0)/rated.length).toFixed(3)),
+  challengingWeight:Number((rated.reduce((sum,r)=>sum+r.challengingWeight,0)/rated.length).toFixed(3)),
+  considered:rated.reduce((sum,r)=>sum+r.considered,0),
+  strongestSupport,strongestChallenge,strongestSupportHour,strongestChallengeHour
+ };
+}
+
 /** Exactly twelve calendar months from the visitor's today (exclusive of the
  * same date next year). Leap years and month lengths are handled in UTC. */
 export function astroCalendarDays(today:string):AstroCalendarDay[]{
