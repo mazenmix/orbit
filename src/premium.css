@@ -137,3 +137,16 @@ input:focus,select:focus,textarea:focus{outline:1px solid #bc97ff;border-color:#
 @media(max-width:1250px){#live-view-body .metrics-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
 @media(max-width:700px){#live-view-body .metrics-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}#live-view-body .go-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#live-view-body .go-card{padding:10px!important}}
 @media(max-width:360px){#live-view-body .metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+.mx-sky-enlarge{display:block;position:relative;width:100%;border:0;padding:0;background:transparent;cursor:zoom-in;border-radius:14px}
+.mx-sky-enlarge .chart-wheel{pointer-events:none}.mx-sky-enlarge:focus-visible{outline:2px solid #e3c8ff;outline-offset:4px}
+.mx-wheel-zoom-hint{position:absolute;inset-inline-end:9px;bottom:7px;padding:6px 10px;border:1px solid #806b9d;border-radius:10px;background:#101527de;color:#f7ebff;font-size:11px;font-weight:800;pointer-events:none}
+.mx-sky-buttons{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+dialog#detail:has(.mx-expanded-sky){width:min(96vw,1150px)!important;max-width:1150px!important;max-height:94dvh!important;overflow-y:auto!important;padding:clamp(13px,2vw,25px)!important;background:linear-gradient(145deg,#15182c,#0d1121)!important}
+dialog#detail:has(.mx-expanded-sky) #dialog-content{width:100%}
+.mx-expanded-sky h2{font-size:clamp(19px,2vw,29px);margin:7px 40px 0 0}
+.mx-expanded-sky-time{font-size:12px;color:#c8bdd6}
+.mx-expanded-wheel{display:flex;align-items:center;justify-content:center;width:min(100%,925px);margin:0 auto}
+.mx-expanded-wheel .chart-wheel,.mx-expanded-wheel svg{display:block;width:100%!important;max-width:none!important;height:auto!important;max-height:78dvh}
+.mx-expanded-sky-notes{color:#b9b3c8;font-size:11px}
+@media(max-width:680px){dialog#detail:has(.mx-expanded-sky){width:98vw!important;padding:12px!important}.mx-expanded-wheel svg{max-height:70dvh}.mx-expanded-sky h2{font-size:18px}.mx-wheel-zoom-hint{font-size:9px;padding:4px 6px}}

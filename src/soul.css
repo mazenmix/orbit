@@ -130,3 +130,9 @@
 @media(max-width:700px){.soul-ai-head{flex-direction:column;align-items:stretch}.soul-ai-result{grid-template-columns:1fr}.soul-ai-trigger{width:100%}}
 
 .soul-ai-grounding-note{grid-column:1/-1;margin:0;padding:12px 15px;border:1px solid #b79050;border-radius:10px;color:#e7d9bd;background:#4b3a1e29;font-size:12px;line-height:1.75}
+
+.soul-hero{grid-template-columns:minmax(0,.95fr) minmax(0,1.4fr)!important;min-height:0!important;padding:21px 24px!important;gap:22px!important}
+.soul-identity{min-width:0}.soul-hero-stats{grid-column:2;min-width:0}
+.soul-identity h2{font-size:clamp(19px,1.8vw,27px)!important;line-height:1.5}
+@media(max-width:850px){.soul-hero{grid-template-columns:minmax(0,1fr)!important;gap:13px!important}.soul-hero-stats{grid-column:1!important;grid-row:auto!important}}
+@media(max-width:680px){.soul-hero{padding:16px!important}}

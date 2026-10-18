@@ -64,3 +64,11 @@
 .astro-cal-month-head h3,.astro-cal-weekdays,.astro-cal-number,.astro-cal-index{font-family:Manrope,system-ui,sans-serif!important;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
 .astro-cal-month-head h3{text-align:start}
 @media(max-width:750px){.astro-cal-toolbar{padding:13px}.astro-cal-toolbar .astro-cal-meta{margin-inline-start:0}}
+
+.astro-fortune-proof{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:15px 0 17px}
+.astro-fortune-proof>span{font-size:11px;border:1px solid #635278;border-radius:9px;background:#121526;padding:7px 10px;color:#d9cfe6;font-variant-numeric:tabular-nums}
+.astro-fortune-proof>span b{color:#f0d6a8}
+.astro-fortune-proof details{width:100%;font-size:11px;color:#c8bdd9}
+.astro-fortune-proof summary{cursor:pointer;color:#e5c49c;padding:5px 0}
+.astro-fortune-proof p{font-size:11px;line-height:1.85}
+.astro-cal-day.astro-unavailable{background:#292b37!important;border:1px dashed #c27689;color:#eebfc9}
