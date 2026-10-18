@@ -13,13 +13,13 @@ export const vaultError=()=>lastError;
 const validate=(raw:any):VaultData=>{
  if(!raw||raw.schema!==1||!Array.isArray(raw.profiles)||raw.profiles.length<1||raw.profiles.length>100||!raw.profiles.some((x:Profile)=>x.kind==='self')||!Array.isArray(raw.journal)||raw.journal.length>250)throw Error('Invalid vault contents');
  const profiles=raw.profiles.map((p:Profile)=>validateProfile(p));
- const ids=new Set(profiles.map(p=>p.id));
+ const ids=new Set(profiles.map((p:Profile)=>p.id));
  if(ids.size!==profiles.length)throw Error('Duplicate vault profile IDs');
  const journal=raw.journal.map((e:JournalEntry)=>{
   if(!e||typeof e.id!=='string'||!ids.has(e.personId)||typeof e.note!=='string'||e.note.length>500||!['message','call','meeting','note'].includes(e.kind)||!['positive','neutral','difficult'].includes(e.outcome)||!Number.isFinite(Date.parse(e.at)))throw Error('Invalid vault journal entry');
   return e;
  });
- if(new Set(journal.map(e=>e.id)).size!==journal.length)throw Error('Duplicate vault journal IDs');
+ if(new Set(journal.map((e:JournalEntry)=>e.id)).size!==journal.length)throw Error('Duplicate vault journal IDs');
  return {schema:1,profiles,journal};
 };
 function commitEncrypted(value:EncryptedBackup){localStorage.setItem(VAULT_KEY,JSON.stringify(value))}
