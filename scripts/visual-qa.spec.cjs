@@ -45,3 +45,33 @@ test('Moon, eclipse and MX Intelligence premium cards',async({page},testInfo)=>{
  await page.locator('.metric-card').first().waitFor({timeout:75000});
  await page.screenshot({path:'artifacts/ui-qa/intelligence-'+testInfo.project.name+'.png',fullPage:true});
 });
+
+test('Encrypted vault survives reload and hides both profiles and relationship journal at rest',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:1024,height:800}}),page=await context.newPage(),crashes=[];
+ page.on('pageerror',e=>crashes.push(e.message));
+ await page.goto('/#settings',{waitUntil:'domcontentloaded'});
+ await page.locator('#vault-password').waitFor({state:'visible',timeout:75000});
+ await page.locator('#vault-password').fill('MX Astro vault long unique test passphrase');
+ page.once('dialog',dialog=>dialog.accept());
+ await page.locator('#vault-enable').click();
+ await expect(page.locator('.vault-enabled-indicator')).toBeVisible({timeout:40000});
+ const values=await page.evaluate(()=>({
+  plaintextProfiles:localStorage.getItem('mx.orbit.profiles.v1'),
+  plaintextJournal:localStorage.getItem('mx.orbit.journal.v1'),
+  ciphertext:localStorage.getItem('mx.astro.vault.v1')
+ }));
+ expect(values.plaintextProfiles).toBe(null);
+ expect(values.plaintextJournal).toBe(null);
+ expect(values.ciphertext).toContain('ciphertext');
+ expect(values.ciphertext).not.toContain('Baghdad');
+ await page.reload({waitUntil:'domcontentloaded'});
+ await expect(page.locator('#vault-unlock')).toBeVisible();
+ await page.locator('#vault-unlock-password').fill('incorrect password long enough');
+ await page.locator('#vault-unlock button').click();
+ await expect(page.locator('#vault-unlock-error')).not.toBeEmpty();
+ await page.locator('#vault-unlock-password').fill('MX Astro vault long unique test passphrase');
+ await page.locator('#vault-unlock button').click();
+ await expect(page.locator('.vault-enabled-indicator')).toBeVisible({timeout:50000});
+ expect(crashes).toEqual([]);
+ await context.close();
+});
