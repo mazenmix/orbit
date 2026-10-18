@@ -76,15 +76,15 @@ export async function onRequestPost({request,env}:Context){
   if(status.provider==='gateway'){
    const upstream=new URL(env.QWEN_GATEWAY_URL!);if(upstream.protocol!=='https:')return json({error:'Gateway must use HTTPS.'},503);
    const response=await fetch(upstream,{method:'POST',headers:{'Content-Type':'application/json',...(env.QWEN_GATEWAY_TOKEN?{Authorization:`Bearer ${env.QWEN_GATEWAY_TOKEN}`}:{})},body:JSON.stringify({model:status.model,messages,temperature:.3,max_tokens:1200,stream:false}),signal:AbortSignal.timeout(50000)});
-   if(!response.ok)return json({error:'Qwen3 gateway did not complete the request.',code:'AI_UPSTREAM_ERROR'},502);
+   if(!response.ok)return json({error:'Ai gateway did not complete the request.',code:'AI_UPSTREAM_ERROR'},502);
    result=await response.json();
   }else{
    result=await env.AI!.run(CF_MODEL,{messages,temperature:.3,max_tokens:1200,stream:false});
   }
   const raw=result?.choices?.[0]?.message?.content??result?.response;
-  if(typeof raw!=='string')return json({error:'Qwen3 returned no explanation. Please retry.',code:'AI_EMPTY_RESPONSE'},502);
+  if(typeof raw!=='string')return json({error:'Ai returned no explanation. Please retry.',code:'AI_EMPTY_RESPONSE'},502);
   const checked=reviewGeneratedAdvice(raw,{language:input.language,support:describe(strongestSupporting),challenge:describe(strongestChallenging),events:eclipseEvents});
-  if(!checked.text)return json({error:'Qwen3 returned no explanation. Please retry.',code:'AI_EMPTY_RESPONSE'},502);
+  if(!checked.text)return json({error:'Ai returned no explanation. Please retry.',code:'AI_EMPTY_RESPONSE'},502);
   return json({explanation:checked.text,model:status.model,provider:status.provider,quality:checked.fallback?'grounded-fallback':'reviewed-model'});
- }catch{return json({error:input.language==='ar'?'خدمة Qwen3 على السيرفر غير متاحة حالياً. تحقق من تفعيل Workers AI وحصته بحساب Cloudflare، وجرّب مرة ثانية.':'Qwen3 is unavailable. Check Workers AI activation and quota in Cloudflare, then retry.',code:'AI_UNAVAILABLE'},503)}
+ }catch{return json({error:input.language==='ar'?'خدمة Ai على السيرفر غير متاحة حالياً. تحقق من تفعيل Workers AI وحصته بحساب Cloudflare، وجرّب مرة ثانية.':'Ai is unavailable. Check Workers AI activation and quota in Cloudflare, then retry.',code:'AI_UNAVAILABLE'},503)}
 }

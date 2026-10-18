@@ -113,3 +113,23 @@ test('fortune calendar color must come from genuine aspect weights and show tran
  assert.ok(main.includes("localValue(at,active.zone).slice(0,16)"));
  assert.ok(main.includes('calendarFailures.set(day.iso'));
 });
+
+test('MX Ai no longer renders the WHY NOW audit box',()=>{
+ const block=main.slice(main.indexOf('function intelPage(){'),main.indexOf('function asteroidsPage(){'));
+ for(const word of ['WHY NOW','ليش هسه؟','intel-audit','مجموع أوزان الإشارات الداعمة'])assert.ok(!block.includes(word),word);
+ assert.ok(block.includes('وين تركز هسّه؟')&&block.includes('مصفوفة المؤشرات الـ29'));
+});
+test('presentation labels use Ai and never expose provider model branding',()=>{
+ const soul=readFileSync('src/soulUI.ts','utf8'),ai=main.slice(main.indexOf('function aiPage(){'),main.indexOf('function moonPushSchedule()',main.indexOf('function aiPage(){')));
+ assert.ok(!soul.includes('Qwen3')&&!soul.includes('QWEN3'));
+ assert.ok(!ai.includes('Qwen3')&&!ai.includes('QWEN3'));
+ assert.ok(ai.includes('aria-label="Ai"'));
+ assert.ok(main.includes("t('شرح Ai','Ai explanations')"));
+});
+test('Tahoma style covers all application surfaces after prior feature styles',()=>{
+ const font=readFileSync('src/typography.css','utf8');
+ assert.match(main,/import '\.\/astroCalendar\.css';\s*import '\.\/typography\.css';/);
+ assert.ok(font.includes('Tahoma, Arial, sans-serif !important'));
+ assert.ok(font.includes('svg text'));
+ assert.ok(font.includes('.mobile-nav'));
+});

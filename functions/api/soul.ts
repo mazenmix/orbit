@@ -12,7 +12,7 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
  const url=new URL(request.url);
  if(request.headers.get('origin')!==url.origin)return respond({error:'Same origin only'},403);
  if(!request.headers.get('content-type')?.startsWith('application/json'))return respond({error:'JSON required'},415);
- if(!env.AI)return respond({error:'Qwen3 unavailable'},503);
+ if(!env.AI)return respond({error:'Ai unavailable'},503);
  let input:any;try{
   const raw=await request.text();if(raw.length>6000)return respond({error:'Request too large'},413);
   input=JSON.parse(raw);
@@ -51,17 +51,17 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
   else{
    const raw=String(responseValue??'').replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*$/gi,'').split(String.fromCharCode(96)).join('').trim();
    const begin=raw.indexOf('{'),end=raw.lastIndexOf('}');
-   if(begin<0||end<begin)return respond({error:'Unstructured Qwen3 response',code:'MODEL_NON_JSON',diagnostic:{responseKind:typeof responseValue,rawLength:raw.length}},502);
-   try{parsed=JSON.parse(raw.slice(begin,end+1))}catch{return respond({error:'Invalid Qwen3 JSON',code:'MODEL_INVALID_JSON'},502)}
+   if(begin<0||end<begin)return respond({error:'Unstructured Ai response',code:'MODEL_NON_JSON',diagnostic:{responseKind:typeof responseValue,rawLength:raw.length}},502);
+   try{parsed=JSON.parse(raw.slice(begin,end+1))}catch{return respond({error:'Invalid Ai JSON',code:'MODEL_INVALID_JSON'},502)}
   }
   const validText=(x:unknown,min=3,max=900)=>typeof x==='string'&&x.trim().length>=min&&x.length<=max;
   const validList=(v:unknown)=>Array.isArray(v)&&v.length>=1&&v.length<=3&&v.every(x=>validText(x,3,250));
-  if(!validText(parsed.summary,8,400)||!validText(parsed.detailedAnalysis,20,950)||!validList(parsed.strengths)||!validList(parsed.challenges)||!validList(parsed.practicalInsights)||!validList(parsed.reflectionQuestions))return respond({error:'Incomplete Qwen3 interpretation'},502);
+  if(!validText(parsed.summary,8,400)||!validText(parsed.detailedAnalysis,20,950)||!validList(parsed.strengths)||!validList(parsed.challenges)||!validList(parsed.practicalInsights)||!validList(parsed.reflectionQuestions))return respond({error:'Incomplete Ai interpretation'},502);
   const all=[parsed.summary,parsed.detailedAnalysis,...parsed.strengths,...parsed.challenges,...parsed.practicalInsights,...parsed.reflectionQuestions];
   if(repeatedSoulPassage(all))return editorialFallback('repetition');
   const sections=[parsed.summary,parsed.detailedAnalysis,...parsed.strengths,...parsed.challenges,...parsed.practicalInsights,...parsed.reflectionQuestions];
   const errors=detectInventedNatalText(sections,basis);
   if(errors.length)return editorialFallback('natal-evidence');
   return respond({topicId:selected.id,summary:parsed.summary,detailedAnalysis:parsed.detailedAnalysis,strengths:parsed.strengths,challenges:parsed.challenges,practicalInsights:parsed.practicalInsights,reflectionQuestions:parsed.reflectionQuestions,astrologicalEvidence:basis,provider:'qwen3',quality:'source-grounded-model'});
- }catch{return respond({error:'Qwen3 service currently unavailable'},503)}
+ }catch{return respond({error:'Ai service currently unavailable'},503)}
 }

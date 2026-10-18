@@ -212,3 +212,24 @@ test('calendar fortune evidence exposes actual planetary angle weights',async({p
  await expect(page.locator('.astro-fortune-proof')).toBeVisible({timeout:75000});
  await expect(page.locator('#astro-calendar-progress')).toContainText(/verified|محسوب فعلياً/);
 });
+
+test('MX Ai has no WHY NOW callout and explanation is labeled Ai',async({page})=>{
+ await page.goto('/#intel',{waitUntil:'domcontentloaded'});
+ await page.locator('.metrics-grid').waitFor({state:'visible',timeout:75000});
+ await expect(page.getByText('WHY NOW',{exact:false})).toHaveCount(0);
+ await expect(page.locator('.intel-audit')).toHaveCount(0);
+ await page.goto('/#ai',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.mx-qwen-live[aria-label="Ai"]')).toBeVisible({timeout:75000});
+});
+test('all major text areas request Tahoma with readable mobile labels',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/#intel',{waitUntil:'domcontentloaded'});
+ await page.locator('.metric-card').first().waitFor({state:'visible',timeout:75000});
+ const fonts=await page.evaluate(()=>Object.fromEntries([
+  ['body','body'],['heading','.page-heading h1'],
+  ['metric','.metric-card small'],['navigation','.mobile-nav .nav-item b']
+ ].map(([key,query])=>{const c=getComputedStyle(document.querySelector(query));return [key,{family:c.fontFamily,size:parseFloat(c.fontSize)}]})));
+ for(const font of Object.values(fonts))expect(font.family.toLowerCase()).toContain('tahoma');
+ expect(fonts.metric.size).toBeGreaterThanOrEqual(12);
+ expect(fonts.navigation.size).toBeGreaterThanOrEqual(11);
+});

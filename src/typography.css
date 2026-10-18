@@ -1,0 +1,49 @@
+/* Site-wide clarity: a Tahoma-first system typography layer.
+   Tahoma is provided by the operating system; Arial is the fallback. */
+:root, html, body, body *, dialog, dialog *, svg text, svg tspan {
+ font-family: Tahoma, Arial, sans-serif !important;
+}
+html{font-size:16px}
+body{font-size:16px!important;font-weight:500;line-height:1.85;-webkit-font-smoothing:auto;text-rendering:optimizeLegibility}
+p,li,blockquote,.reading-paragraph,.mx-qwen-paragraph{line-height:1.9}
+main p,main li,dialog p{overflow-wrap:break-word}
+button,input,select,textarea,summary{font-family:Tahoma,Arial,sans-serif!important;font-size:14px!important;letter-spacing:normal}
+button{font-weight:650}input,select,textarea{font-weight:500}
+small,.eyebrow,.subtle,.tag,.nav-caption,.page-heading p,.location,.signal-meta,.source-note,.soul-eyebrow {
+ font-size:12px!important;line-height:1.65
+}
+#live-view-body .go-card .go-decision,#live-view-body .mx-moon-sign-line,
+#live-view-body .mx-lunar-aspect-story,#live-view-body .astro-day-summary,
+#live-view-body .astro-day-factor b,#live-view-body .astro-day-factor span,
+#live-view-body .soul-reading-body p,#live-view-body .soul-detail-box p,
+#live-view-body .mx-asteroid-dossier-item p{
+ font-size:13px!important;line-height:1.85!important
+}
+#live-view-body .metric-card small,#live-view-body .metric-card details,
+#live-view-body .go-card small,#live-view-body .mx-meta-label,
+#live-view-body .mx-meta-copy small,#live-view-body .astro-cal-meta,
+#live-view-body .astro-legend-item,#live-view-body .astro-cal-weekdays span,
+#live-view-body .astro-cal-month-head small{
+ font-size:12px!important;line-height:1.5
+}
+#live-view-body .metric-card small{font-weight:650}
+#live-view-body .astro-cal-number{font-size:14px!important}
+#live-view-body .astro-cal-index{font-size:11px!important}
+#live-view-body .astro-cal-day{min-height:43px}
+#live-view-body .mx-qwen-live-copy,#live-view-body .mx-qwen-paragraph{
+ font-size:16px!important;line-height:2!important
+}
+.chart-wheel text,.professional-wheel text{font-family:Tahoma,Arial,sans-serif!important}
+.nav-item b{font-size:13px!important;font-weight:700}
+.table-wrap{font-size:13px}
+.table-wrap th,.table-wrap td{font-size:12px!important}
+@media(max-width:760px){
+ body{font-size:16px!important}
+ .mobile-nav{justify-content:flex-start!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+ .mobile-nav .nav-item{flex:0 0 66px!important;min-width:66px!important;max-width:76px!important;scroll-snap-align:start;padding:5px 4px!important}
+ .mobile-nav .nav-item b{font-size:11px!important;line-height:1.35;max-width:none!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;letter-spacing:0!important}
+ .mx-section-tab,.chip{font-size:13px!important}
+ .heading-actions select{font-size:13px!important;max-width:125px}
+ .astro-cal-weekdays span{font-size:12px!important}
+}
+@media(max-width:390px){.mobile-nav .nav-item{flex-basis:64px!important;min-width:64px!important}}
