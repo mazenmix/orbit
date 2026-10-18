@@ -26,7 +26,7 @@ import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
 import {derivedMetrics,goModes,type GoDomain} from './metrics.ts';
 import {supportive,difficult} from './math.ts';
-import {initEngine,report,defaultProfile,compatibility,chart,sunMoonState,confirmedEclipses,asteroidSwissRuntime,birthInstant,targets,localValue,zonedInstant,validateProfile,type Profile,type Report} from './engine.ts';
+import {initEngine,report,defaultProfile,compatibility,chart,sunMoonState,confirmedEclipses,asteroidSwissRuntime,birthInstant,targets,localValue,zonedInstant,validateProfile,type Profile,type Report,type Chart} from './engine.ts';
 import {categories,category as evidenceCategory,aspects,angles,aspectNames,type Category,type Signal} from './math.ts';
 import {lang,setLang,t,cat,categoryLabels,planet,signSymbols,signName,copy as sourceCopy,tone,notice,technical,aspect} from './i18n.ts';
 import {loadProfiles,saveProfiles,download,parseBackup} from './storage.ts';

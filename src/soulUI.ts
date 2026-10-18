@@ -40,7 +40,7 @@ const signsEn=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio
 const signOf=(degree:number,ar:boolean)=>[...(ar?signsAr:signsEn)][Math.floor(((degree%360)+360)%360/30)];
 const point=(c:Chart,id:string)=>id==='Ascendant'?(c.asc===null?null:c.asc):id==='MC'?(c.mc===null?null:c.mc):(c.points.find(p=>p.id===id)?.longitude??null);
 export function soulRender(view:SoulView){
- const {profile,chart,categoryId,topicId,query}=view,ar=lang==='ar',l=(arabic:string,english:string)=>ar?arabic:english;
+ const {profile,chart,categoryId,topicId,query}=view,ar=lang==='ar',l=<T,>(arabic:T,english:T):T=>ar?arabic:english;
  const summary=soulProfileSummary(chart,profile);
  const filtered=soulSearch(query);
  const current=soulCategories.find(c=>c.id===categoryId)??soulCategories[0];
