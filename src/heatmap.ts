@@ -16,3 +16,18 @@ export function heatSummary(cells:readonly HeatCell[],key:Category|'average'){
  const sorted=[...cells].sort((a,b)=>get(b)-get(a)||(+a.instant)-(+b.instant));
  return {highest:sorted[0],lowest:sorted[sorted.length-1],mean:Math.round(cells.reduce((sum,c)=>sum+get(c),0)/cells.length)};
 }
+
+/** Real ephemeris samples every 3 days over 90 days, or every 7 days over a year.
+ * Does not imply that un-sampled dates were measured or predict future events.
+ */
+export function sampledHeatmap(at:Date,spanDays:90|365,read:(at:Date)=>Record<Category,number>):HeatCell[]{
+ if(!Number.isFinite(+at))throw Error('Invalid heatmap date');
+ const step=spanDays===90?3:7,items:HeatCell[]=[];
+ for(let d=0;d<spanDays;d+=step){
+  const instant=new Date(+at+d*86400000),indices=read(instant);
+  if(!categories.every(c=>Number.isFinite(indices[c])&&indices[c]>=1&&indices[c]<=99))throw Error('Invalid sampled symbolic indices');
+  const average=Math.round(categories.reduce((total,c)=>total+indices[c],0)/categories.length);
+  items.push({instant,indices,average});
+ }
+ return items;
+}
