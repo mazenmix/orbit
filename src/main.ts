@@ -27,7 +27,7 @@ import {calendarEvent,calendarDownload} from './calendar.ts';
 import {encryptBackup,decryptBackup} from './secureBackup.ts';
 import {isVaultConfigured,vaultOpened,setupVault,flushVault,vaultPending,unlockVaultWithUI} from './vault.ts';
 import {createSyncCode,parseSyncCode,uploadEncrypted,downloadEncrypted,syncStatus} from './syncClient.ts';
-import {subscribeBackgroundPush,unsubscribeBackgroundPush,sendBackgroundPushTest,getPushStatus,pushAvailableOnThisDevice,type MoonPushEvent} from './pushClient.ts';
+import {subscribeBackgroundPush,unsubscribeBackgroundPush,sendBackgroundPushTest,getPushStatus,pushAvailableOnThisDevice,backgroundPushOptedIn,refreshBackgroundPushIfNeeded,type MoonPushEvent} from './pushClient.ts';
 import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './progressions.ts';
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
 import {derivedMetrics,goModes,type GoDomain} from './metrics.ts';
@@ -402,8 +402,8 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
  }catch(e){toast(String(e))}});
  on('push-test',async()=>{try{const response=await sendBackgroundPushTest();toast(response.sent?t('انرسل اختبار حقيقي لخدمة الإشعارات','A real Web Push test was sent'):t('الاختبار ما تأكد','Push test unconfirmed'))}catch(e){toast(String(e))}});
  on('push-unsubscribe',async()=>{try{const response=await unsubscribeBackgroundPush();toast(response.remotelyRemoved===false?t('انلغى اشتراك المتصفح؛ إلغاء تسجيل السيرفر يتطلب اتصال','Unsubscribed browser; server record could not be removed now'):t('انلغى اشتراك تنبيهات الخلفية لهذا الجهاز','This device unsubscribed from background alerts'))}catch(e){toast(String(e))}});
- on('eye-toggle',async()=>{eyeSettings={...eyeSettings,enabled:!eyeSettings.enabled};saveEyeSettings(eyeSettings);if(eyeSettings.enabled&&typeof Notification!=='undefined'&&Notification.permission==='default'){try{await Notification.requestPermission()}catch{}}render();void runEyeCheck()});
- for(const field of root.querySelectorAll<HTMLInputElement>('[data-eye]'))field.onchange=()=>{const key=field.dataset.eye;if(key==='moon'||key==='hourly'||key==='daily'){eyeSettings={...eyeSettings,[key]:field.checked};saveEyeSettings(eyeSettings)}};
+ on('eye-toggle',async()=>{const disabling=eyeSettings.enabled;eyeSettings={...eyeSettings,enabled:!eyeSettings.enabled};saveEyeSettings(eyeSettings);if(disabling&&backgroundPushOptedIn()){try{const off=await unsubscribeBackgroundPush();if(!off.remotelyRemoved)toast(t('تنبيهات الجهاز توقفت؛ يحتاج اتصال لحذف الاشتراك من السيرفر.','Local notifications stopped; reconnect to remove the remote subscription.'))}catch(e){toast(String(e))}}if(eyeSettings.enabled&&typeof Notification!=='undefined'&&Notification.permission==='default'){try{await Notification.requestPermission()}catch{}}render();void runEyeCheck()});
+ for(const field of root.querySelectorAll<HTMLInputElement>('[data-eye]'))field.onchange=()=>{const key=field.dataset.eye;if(key==='moon'||key==='hourly'||key==='daily'){eyeSettings={...eyeSettings,[key]:field.checked};saveEyeSettings(eyeSettings);if(backgroundPushOptedIn()&&eyeSettings.enabled&&ready)void refreshBackgroundPushIfNeeded(eyeSettings,active.zone,moonPushSchedule(),0).catch(e=>toast(String(e)))}};
  const syncField=root.querySelector<HTMLTextAreaElement>('#sync-code');if(syncField)syncField.oninput=()=>{syncCode=syncField.value.trim()};
  on('sync-new',()=>{if(syncCode&&!confirm(t('رح تغيّر رمز الاتصال الحالي. تأكد محتفظ بالقديم إذا عندك بيانات مرفوعة عليه.','This replaces the current connection code. Keep the previous one if data is synced to it.')))return;syncCode=createSyncCode();render();toast(t('انعمل رمز اتصال جديد، انسخه وخزّنه','New private sync code created. Copy and store it safely'))});
  on('sync-copy',async()=>{try{parseSyncCode(syncCode);await navigator.clipboard.writeText(syncCode);toast(t('انسخ الرمز للجهاز الثاني بدون كلمة السر','Connection code copied; share the passphrase separately'))}catch(e){toast(String(e))}});
@@ -479,7 +479,7 @@ function navigate(value:string){screen=labels[value]?value:'today';if(screen==='
 window.addEventListener('hashchange',()=>{const value=location.hash.slice(1);if(labels[value]&&value!==screen){screen=value;if(screen==='today'){selected=new Date();recalculate()}render()}});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
 render();
-initEngine().then(v=>{engineVersion=v;ready=true;recalculate();render();void refreshAIConnection();if('serviceWorker' in navigator&&import.meta.env.PROD)navigator.serviceWorker.register('/sw.js').catch(()=>toast(t('تعذر تفعيل العمل بدون إنترنت.','Offline support could not be activated.')))}).catch(e=>{error=t('تعذر تحميل المحرك الفلكي: ','Could not load the calculation engine: ')+String(e);render()});
+initEngine().then(v=>{engineVersion=v;ready=true;recalculate();render();void refreshAIConnection();if('serviceWorker' in navigator&&import.meta.env.PROD)navigator.serviceWorker.register('/sw.js').then(()=>{if(backgroundPushOptedIn()&&eyeSettings.enabled)void refreshBackgroundPushIfNeeded(eyeSettings,active.zone,moonPushSchedule()).catch(e=>console.warn('Background push renewal unavailable',e))}).catch(()=>toast(t('تعذر تفعيل العمل بدون إنترنت.','Offline support could not be activated.')))}).catch(e=>{error=t('تعذر تحميل المحرك الفلكي: ','Could not load the calculation engine: ')+String(e);render()});
 setInterval(()=>{if(ready&&screen!=='time'&&Math.abs(Date.now()-+selected)<20*60000){selected=new Date();recalculate();render()}},10*60000);
 function eyeClock(now:Date,zone:string):EyeClock{
  const parts=new Intl.DateTimeFormat('en-GB',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now);
@@ -501,4 +501,4 @@ async function runEyeCheck(){
  }
 }
 setInterval(()=>{void runEyeCheck()},60000);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void runEyeCheck()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){void runEyeCheck();if(ready&&backgroundPushOptedIn()&&eyeSettings.enabled)void refreshBackgroundPushIfNeeded(eyeSettings,active.zone,moonPushSchedule()).catch(e=>console.warn('Background push refresh unavailable',e))}});
