@@ -1,22 +1,119 @@
 import {normalize,distance,angles,type Point} from './math.ts';
-import {signSymbols,planet,t} from './i18n.ts';
+import {signSymbols,signsAr,signsEn,planet,t} from './i18n.ts';
 import type {Chart} from './engine.ts';
-export function horoscopeXY(lon:number,asc:number,r:number,center=210):[number,number]{const a=(180+normalize(lon-asc))*Math.PI/180;return [center+Math.cos(a)*r,center-Math.sin(a)*r]}
-/** Houses increase counterclockwise: from the left-hand Ascendant, house 2 lies below left. */
-export function houseOrder(cusps:readonly number[]){return cusps.length===12&&cusps.every((lon,i)=>normalize(cusps[(i+1)%12]-lon)>0&&normalize(cusps[(i+1)%12]-lon)<180)}
+
+export function horoscopeXY(lon:number,asc:number,r:number,center=210):[number,number]{
+ const a=(180+normalize(lon-asc))*Math.PI/180;
+ return [center+Math.cos(a)*r,center-Math.sin(a)*r];
+}
+/** From the left-hand ASC house 2 lies below-left; zodiac longitude increases counterclockwise. */
+export function houseOrder(cusps:readonly number[]){
+ return cusps.length===12&&cusps.every((lon,i)=>normalize(cusps[(i+1)%12]-lon)>0&&normalize(cusps[(i+1)%12]-lon)<180);
+}
+const palette=['#f59c8e','#f1c681','#a7dccd','#92bbf6','#e9b976','#a7dc9c','#d6a4f4','#f29dc1','#b8abff','#b4c9ea','#8cdbde','#a6aff8'];
+const aspects:Record<number,string>={0:'#d7b1ff',60:'#7ad7e5',90:'#ed9a81',120:'#83ddb3',180:'#f18ba5'};
+const escape=(x:string)=>x.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+const fixed=(n:number)=>Number(n.toFixed(2));
+const dms=(n:number)=>(normalize(n)%30).toFixed(1)+'°';
+export type WheelLabel={id:string;longitude:number;displayAngle:number;lane:number};
+/** Rotate at the largest gap and distribute labels without changing actual planet longitudes. */
+export function layoutWheelLabels(points:readonly Point[],asc:number,minGap=11):WheelLabel[]{
+ if(!points.length)return [];
+ const sorted=points.map(p=>({p,a:normalize(p.longitude-asc)})).sort((a,b)=>a.a-b.a);
+ let cut=0,max=-1;
+ for(let i=0;i<sorted.length;i++){
+  const space=normalize(sorted[(i+1)%sorted.length].a-sorted[i].a);
+  if(space>max){max=space;cut=(i+1)%sorted.length}
+ }
+ const order=[...sorted.slice(cut),...sorted.slice(0,cut)],first=order[0].a,gap=Math.min(minGap,360/order.length-.1);
+ const original=order.map(v=>first+normalize(v.a-first));
+ const output=[original[0]];
+ for(let i=1;i<order.length;i++)output[i]=Math.max(original[i],output[i-1]+gap);
+ const shift=output.reduce((sum,n,i)=>sum+n-original[i],0)/order.length;
+ const placements=order.map((v,i)=>({id:v.p.id,longitude:v.p.longitude,displayAngle:normalize(output[i]-shift),lane:i%2}));
+ return placements.sort((a,b)=>points.findIndex(p=>p.id===a.id)-points.findIndex(p=>p.id===b.id));
+}
 export function wheel(chart:Chart,transit?:Chart){
- const center=210,asc=chart.asc??chart.cusps[0]??0;const xy=(lon:number,r:number)=>horoscopeXY(lon,asc,r,center);
- const line=(a:number[],b:number[],attrs='')=>`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" ${attrs}/>`;
- const colors=['#ff9b9c','#f4c47c','#9ef5c4','#a6d6ff','#ffd390','#88e7d6','#f5abd9','#d0acf8','#f4c083','#92c9f9','#8ceaf2','#dac4ff'];
- let svg=`<svg viewBox="0 0 420 420" role="img" aria-label="${t('الخارطة الفلكية المحسوبة','Calculated astrology chart')}" class="chart-wheel"><defs><radialGradient id="space"><stop stop-color="#171b32"/><stop offset="1" stop-color="#0d111f"/></radialGradient></defs><circle cx="210" cy="210" r="200" fill="url(#space)" stroke="#9691c4" stroke-width="1.5"/>`;
- for(let i=0;i<12;i++){const o=xy(i*30,190),end=xy((i+1)*30,190),c=xy((i+1)*30,159),d=xy(i*30,159);svg+=`<path d="M${o[0]} ${o[1]} A190 190 0 0 0 ${end[0]} ${end[1]} L${c[0]} ${c[1]} A159 159 0 0 1 ${d[0]} ${d[1]} Z" fill="${colors[i]}" fill-opacity=".32" stroke="${colors[i]}" stroke-opacity=".95" stroke-width="1.1"/>`}
- for(const r of [190,158,138,104])svg+=`<circle cx="210" cy="210" r="${r}" fill="none" stroke="#6c7396" stroke-opacity=".85" stroke-width="${r===158?2:1}"/>`;
- for(let deg=0;deg<360;deg+=2)svg+=line(xy(deg,deg%10===0?184:188),xy(deg,193),`stroke="${deg%30===0?'#8d83ff':'#444963'}" stroke-width="${deg%30===0?1.3:.5}"`);
- for(let i=0;i<12;i++){svg+=line(xy(i*30,158),xy(i*30,190),'stroke="#4f486f"');const p=xy(i*30+15,174);svg+=`<text x="${p[0]}" y="${p[1]+6}" fill="${colors[i]}" text-anchor="middle" font-size="29" font-weight="800">${signSymbols[i]}</text>`}
- chart.cusps.forEach((lon,i)=>{const width=normalize(chart.cusps[(i+1)%12]-lon);if(width>0&&width<180){const p1=xy(lon,158),p2=xy(lon+width,158),p3=xy(lon+width,105),p4=xy(lon,105);svg+=`<path d="M${p1[0]} ${p1[1]} A158 158 0 0 0 ${p2[0]} ${p2[1]} L${p3[0]} ${p3[1]} A105 105 0 0 1 ${p4[0]} ${p4[1]} Z" fill="${colors[(i+6)%12]}" fill-opacity="${i%2===0?.12:.065}"/>`;}svg+=line(xy(lon,104),xy(lon,158),`stroke="${i%3===0?'#87e5d8':'#7882a3'}" stroke-opacity="1" stroke-width="${i===0?'3':i%3===0?'2.2':'1.35'}"`);const p=xy(normalize(lon+normalize(chart.cusps[(i+1)%12]-lon)/2),148);svg+=`<circle cx="${p[0]}" cy="${p[1]}" r="12" fill="${i===0?'#765eac':'#222940'}" stroke="${i===0?'#e6d2ff':'#988dc0'}"/><text x="${p[0]}" y="${p[1]+4.5}" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">${i+1}</text>`});
- for(let i=0;i<chart.points.length;i++)for(let j=i+1;j<chart.points.length;j++){const a=chart.points[i],b=chart.points[j],sep=distance(a.longitude,b.longitude),angle=angles.find(x=>Math.abs(sep-x)<=4);if(angle===undefined)continue;svg+=line(xy(a.longitude,102),xy(b.longitude,102),`stroke="${angle===60||angle===120?'#64d4cf':angle===0?'#a29aff':'#c76b8f'}" stroke-width="1" stroke-opacity=".53"`)}
- const points=(items:Point[],r:number,color:string)=>items.map((p,i)=>{const near=items.filter((q,j)=>j<i&&distance(p.longitude,q.longitude)<12).length;const pos=xy(p.longitude,r-near*15),tick=xy(p.longitude,135);return line(tick,xy(p.longitude,r-9),'stroke="#6b7592" stroke-width=".6"')+`<text x="${pos[0]}" y="${pos[1]+5}" fill="${color}" text-anchor="middle" font-size="19" font-weight="700"><title>${planet(p.id)} ${p.longitude.toFixed(4)}°</title>${p.symbol}</text>`}).join('');
- svg+=points(chart.points,124,'#f2e0ff');if(transit)svg+=points(transit.points,201,'#6ee5d9');
- if(chart.asc!==null){const p=xy(chart.asc,154);svg+=`<text x="${p[0]}" y="${p[1]-5}" fill="#74e7d9" text-anchor="middle" font-size="9">ASC</text>`}
- svg+=`<circle cx="210" cy="210" r="26" fill="#101423" stroke="#665e9d" stroke-width="1.7"/><text x="210" y="208" text-anchor="middle" fill="#e1c8ff" font-size="17" font-weight="800">MX</text><text x="210" y="219" text-anchor="middle" fill="#89e9d2" font-size="7.5" letter-spacing="1">ASTRO</text><text x="210" y="245" text-anchor="middle" fill="#9ee6c6" font-size="8.5">1 → 2 → 3 · ↺</text></svg>`;return svg;
+ const C=440,asc=chart.asc??chart.cusps[0]??0;
+ const xy=(lon:number,r:number):[number,number]=>{
+  const a=(180+normalize(lon-asc))*Math.PI/180;
+  return [fixed(C+Math.cos(a)*r),fixed(C-Math.sin(a)*r)];
+ };
+ const line=(a:number[],b:number[],color:string,width=1,opacity=1)=>'<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="'+color+'" stroke-width="'+width+'" stroke-opacity="'+opacity+'"/>';
+ const ring=(r:number,color:string,width=1,opacity=1)=>'<circle cx="'+C+'" cy="'+C+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+width+'" stroke-opacity="'+opacity+'"/>';
+ const txt=(lon:number,r:number,value:string,color:string,size:number,weight=600)=>{const [x,y]=xy(lon,r);return '<text x="'+x+'" y="'+y+'" fill="'+color+'" font-size="'+size+'" text-anchor="middle" dominant-baseline="central" font-weight="'+weight+'">'+escape(value)+'</text>'};
+ let svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 880" class="chart-wheel professional-wheel" role="img" aria-label="'+escape(t('خارطة فلكية مفصلة تشمل الأبراج والكواكب والبيوت والزوايا','Professional astrological wheel with signs, planets, houses and aspects'))+'"><defs><radialGradient id="mxprofessional"><stop stop-color="#1b223b"/><stop offset=".78" stop-color="#11182a"/><stop offset="1" stop-color="#0d1122"/></radialGradient></defs>';
+ svg+='<circle cx="'+C+'" cy="'+C+'" r="421" fill="url(#mxprofessional)" stroke="#a893d2" stroke-width="2.2"/>';
+ for(let i=0;i<12;i++){
+  const a=xy(i*30,408),b=xy((i+1)*30,408),c=xy((i+1)*30,366),d=xy(i*30,366);
+  svg+='<path d="M'+a.join(' ')+' A408 408 0 0 0 '+b.join(' ')+' L'+c.join(' ')+' A366 366 0 0 1 '+d.join(' ')+' Z" fill="'+palette[i]+'" fill-opacity=".23" stroke="'+palette[i]+'" stroke-width="1"/>';
+  svg+=txt(i*30+15,393,signSymbols[i],palette[i],25,800);
+  svg+=txt(i*30+15,372,t(signsAr[i],signsEn[i]),'#f3e8ff',9,700);
+ }
+ svg+=ring(409,'#a996d1',1.1)+ring(366,'#9a8ab8',1.4)+ring(337,'#696f99',1.1)+ring(327,'#575f86',1.1);
+ // One degree precision, with prominent five and ten degree graduations.
+ for(let i=0;i<360;i++){
+  const major=i%10===0,medium=i%5===0;
+  svg+=line(xy(i,major?347:medium?353:358),xy(i,364),major?'#f0d29a':medium?'#a2a5c9':'#5c688b',major?1.25:.55,major?.96:.6);
+  if(major&&i%30!==0)svg+=txt(i,342,String(i%30),'#afb7d8',8.4);
+ }
+ const houses=chart.cusps.length===12&&chart.cusps.every(Number.isFinite);
+ if(houses){
+  for(let i=0;i<12;i++){
+   const start=chart.cusps[i],finish=chart.cusps[(i+1)%12],width=normalize(finish-start);
+   if(width>0&&width<180){
+    const a=xy(start,234),b=xy(finish,234),c=xy(finish,184),d=xy(start,184);
+    svg+='<path d="M'+a.join(' ')+' A234 234 0 0 0 '+b.join(' ')+' L'+c.join(' ')+' A184 184 0 0 1 '+d.join(' ')+' Z" fill="'+palette[(i+4)%12]+'" fill-opacity="'+(i%2===0?.13:.07)+'"/>';
+   }
+   const axis=i%3===0;
+   svg+=line(xy(start,183),xy(start,327),axis?'#f1c58f':'#69769f',axis?2.3:1,axis?.95:.78);
+   const [x,y]=xy(start+width/2,211);
+   svg+='<circle cx="'+x+'" cy="'+y+'" r="12.5" fill="'+(axis?'#59416a':'#222a47')+'" stroke="'+(axis?'#f7ca96':'#938cbb')+'" stroke-width="1"/>';
+   svg+='<text x="'+x+'" y="'+(y+4.3)+'" fill="#fff" font-weight="850" font-size="12" text-anchor="middle">'+(i+1)+'</text>';
+  }
+  const marks=[{lon:chart.asc,label:'ASC',color:'#8debd7'},{lon:chart.mc,label:'MC',color:'#f7d094'},{lon:chart.asc===null?null:normalize(chart.asc+180),label:'DSC',color:'#8debd7'},{lon:chart.mc===null?null:normalize(chart.mc+180),label:'IC',color:'#f7d094'}];
+  for(const mark of marks){
+   if(mark.lon===null)continue;
+   const [x,y]=xy(mark.lon,246);
+   svg+='<rect x="'+(x-21)+'" y="'+(y-11)+'" width="42" height="21" rx="6" fill="#121b30" stroke="'+mark.color+'" stroke-width="1.4"/>';
+   svg+='<text x="'+x+'" y="'+(y+3.6)+'" fill="'+mark.color+'" font-size="12" font-weight="900" text-anchor="middle">'+mark.label+'</text>';
+  }
+ }else svg+='<text x="'+C+'" y="664" fill="#f4c998" text-anchor="middle" font-size="13">'+escape(t('البيوت والطالع مخفيان: وقت الولادة غير معروف','Houses and ASC hidden: birth time is unknown'))+'</text>';
+ svg+=ring(184,'#7e8bb5',1.5,.96)+ring(173,'#647496',.8,.66);
+ // Real natal aspects inside the innermost circle.
+ for(let i=0;i<chart.points.length;i++)for(let j=i+1;j<chart.points.length;j++){
+  const a=chart.points[i],b=chart.points[j],sep=distance(a.longitude,b.longitude),angle=angles.find(v=>Math.abs(sep-v)<=4);
+  if(angle===undefined)continue;
+  const color=aspects[angle]??'#9e91c2';
+  if(angle===0){const p=xy(a.longitude,166);svg+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4" fill="'+color+'"/>';continue}
+  svg+=line(xy(a.longitude,164),xy(b.longitude,164),color,angle===90||angle===180?1.6:1.2,.72);
+ }
+ svg+=ring(163,'#7480a8',.9,.6);
+ // Label routing uses displacement lines but never changes the actual longitude.
+ const positioned=layoutWheelLabels(chart.points,asc,12);
+ for(const label of positioned){
+  const p=chart.points.find(v=>v.id===label.id)!;
+  const onRing=xy(p.longitude,326),bend=xy(asc+label.displayAngle,315),[x,y]=xy(asc+label.displayAngle,label.lane?277:297);
+  svg+=line(xy(p.longitude,335),onRing,'#d9c3ff',1.2,.84);
+  svg+='<path d="M'+onRing.join(' ')+' L'+bend.join(' ')+' L'+x+' '+y+'" fill="none" stroke="#8996be" stroke-width=".9" stroke-opacity=".75"/>';
+  const right=x>=C,tx=right?x+22:x-22,anchor=right?'start':'end';
+  const full=escape(planet(p.id)+' '+dms(p.longitude)+' '+t(signsAr[Math.floor(normalize(p.longitude)/30)],signsEn[Math.floor(normalize(p.longitude)/30)])+(p.speed<0?' Rx':''));
+  svg+='<g class="wheel-planet" data-planet="'+escape(p.id)+'"><title>'+full+'</title><circle cx="'+x+'" cy="'+y+'" r="16" fill="#162137" stroke="'+(p.speed<0?'#f6bf89':'#b6a6e8')+'" stroke-width="1.25"/>';
+  svg+='<text x="'+x+'" y="'+(y+5.8)+'" fill="'+(p.speed<0?'#ffcc9c':'#efe7ff')+'" font-size="21" text-anchor="middle" font-weight="850">'+escape(p.symbol)+'</text>';
+  svg+='<text x="'+tx+'" y="'+(y-2)+'" text-anchor="'+anchor+'" fill="#eee9fb" font-size="10.5" font-weight="800">'+escape(p.id)+'</text>';
+  svg+='<text x="'+tx+'" y="'+(y+11)+'" text-anchor="'+anchor+'" fill="'+(p.speed<0?'#fbc390':'#9fe1db')+'" font-size="9.5" font-weight="650">'+dms(p.longitude)+(p.speed<0?' Rx':'')+'</text></g>';
+ }
+ if(transit){
+  svg+=ring(330,'#69e9d8',1.9,.87);
+  for(const p of transit.points){
+   const [x,y]=xy(p.longitude,330);
+   svg+='<g data-transit="'+escape(p.id)+'"><title>'+escape(planet(p.id)+' '+dms(p.longitude))+'</title><circle cx="'+x+'" cy="'+y+'" r="7.5" fill="#11323b" stroke="#81f3e1" stroke-width="1.3"/>';
+   svg+='<text x="'+x+'" y="'+(y+3.6)+'" font-size="10" text-anchor="middle" fill="#c0fff3">'+escape(p.symbol)+'</text></g>';
+  }
+ }
+ svg+='<circle cx="'+C+'" cy="'+C+'" r="47" fill="#0d172a" stroke="#987bcb" stroke-width="1.7"/>';
+ svg+='<circle cx="'+C+'" cy="'+C+'" r="38" fill="none" stroke="#eac78c" stroke-opacity=".62"/>';
+ svg+='<text x="'+C+'" y="'+(C-2)+'" font-size="25" fill="#f3e1ff" font-weight="900" text-anchor="middle">MX</text>';
+ svg+='<text x="'+C+'" y="'+(C+16)+'" font-size="10" fill="#8ce3d0" letter-spacing="2.4" font-weight="800" text-anchor="middle">ASTRO</text>';
+ return svg+'</svg>';
 }
