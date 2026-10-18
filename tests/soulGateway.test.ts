@@ -25,3 +25,10 @@ test('Invalid model response cannot override locally calculated Soul DNA interpr
  const env={AI:{run:async()=>({response:'not JSON'})}};
  assert.equal((await onRequestPost({request:req(v),env})).status,502);
 });
+
+test('Qwen3 repeated clauses are rejected rather than displayed as a premium explanation',async()=>{
+ const duplicate='نفس الكلام ينكتب في الخلاصة والتحليل العميق ويصير تكرار مزعج';
+ const response={summary:duplicate,detailedAnalysis:duplicate,strengths:['فرصة للاختبار العملي'],challenges:['تجنب القفز للاستنتاجات'],practicalInsights:['اسأل الطرف المعني مباشرة'],reflectionQuestions:['شنو السلوك اللي تأكدت منه؟']};
+ const env={AI:{run:async()=>({response:JSON.stringify(response)})}};
+ assert.equal((await onRequestPost({request:req(v),env})).status,502);
+});

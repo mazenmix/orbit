@@ -31,3 +31,14 @@ test('an unknown birth time never gets imaginary house or ascendant statements i
  assert.ok(list.every(x=>x.basis.every(b=>b.house===null)));
  assert.ok(list.every(x=>!x.deep.ar.includes('موضع الكوكب بالبيت')));
 });
+
+test('strength and challenge points are not verbatim recycled across the 200 displayed topics',()=>{
+ const list=soulTopics.map(t=>soulReading(chart as any,t));
+ for(const language of ['ar','en'] as const){
+  for(const field of ['strengths','weaknesses'] as const){
+   const lines=list.flatMap(x=>x[field][language]);
+   assert.equal(lines.length,400);
+   assert.equal(new Set(lines).size,lines.length,field+' '+language+' has repeated bullet paragraphs');
+  }
+ }
+});
