@@ -16,7 +16,7 @@ self.addEventListener('push',e=>{
  let payload={};try{payload=e.data&&e.data.json()||{}}catch{}
  const body=typeof payload.body==='string'?payload.body.slice(0,240):'A new MX Astro update is available.';
  const id=typeof payload.id==='string'&&/^[a-zA-Z0-9:_-]{1,100}$/.test(payload.id)?payload.id:'mx-astro-update';
- const page=typeof payload.page==='string'&&/^#(today|signals|time|people|eclipses|advanced)$/.test(payload.page)?payload.page:'#today';
+ const page=typeof payload.page==='string'&&/^#(today|signals|time|people|chart|lunar|eclipses|asteroids|advanced|intel|evidence|ai|settings)$/.test(payload.page)?payload.page:'#today';
  e.waitUntil(self.registration.showNotification('MX Astro',{body,tag:id,icon:'/original-brand.png',data:{page},requireInteraction:false}));
 });
 self.addEventListener('notificationclick',e=>{
