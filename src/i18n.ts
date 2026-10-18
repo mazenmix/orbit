@@ -14,6 +14,6 @@ export const signName=(lon:number)=>(lang==='ar'?signsAr:signsEn)[Math.floor(lon
 export const aspect=(angle:number)=>t(aspectArabic[angles.indexOf(angle as 0)],aspectNames[angles.indexOf(angle as 0)]);
 export const toneLabels={exceptional:['نافذة استثنائية','Exceptional window'],opportunity:['فرصة قوية','Strong opportunity'],supportive:['داعم','Supportive'],neutral:['متوازن','Balanced'],watch:['انتبه','Watch'],caution:['تمهّل','Caution']} as const;
 export const tone=(s:Signal)=>{const v=toneLabels[s.tone];return t(v[0],v[1])};
-export const notice=()=>t('المواضع الفلكية محسوبة. الإرشاد رمزي؛ المؤشرات من 100 مو نسب احتمال، وما تضمن حدوث شي.','Astronomical positions are calculated. Guidance is symbolic; indices out of 100 are not probabilities or guarantees.');
+export const notice=()=>t('تفسير رمزي مبني على مواضع فلكية محسوبة.','Symbolic interpretation based on calculated astronomical positions.');
 export const copy=(s:Signal)=>advice(s,lang);
 export const technical=(e:Evidence)=>`${e.transit.symbol} ${planet(e.transit.id)} · ${aspect(e.angle)} · ${planet(e.natal.id)} ${e.natal.symbol} — ${e.orb.toFixed(2)}° · ${e.applying?t('مقترب','applying'):t('مبتعد','separating')}`;

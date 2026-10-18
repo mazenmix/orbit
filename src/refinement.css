@@ -103,3 +103,63 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .eclipse-contacts{display:grid;gap:10px;margin:15px 0}.eclipse-contacts span{display:grid;gap:3px;border-bottom:1px solid #33394d;padding-bottom:8px;font-size:13px;color:#b5bace}.eclipse-contacts b{color:#f0eef9}
 .eclipse-local-row{padding:14px 0;border-bottom:1px solid #373a50}.eclipse-local-row b{font-size:13px}
 @media(max-width:850px){.confirmed-eclipses{grid-template-columns:1fr}}
+
+
+/* MX Astro branding: editorial typographic wordmark, no duplicate insignia or subtitle. */
+.brand{padding:4px 10px 27px;letter-spacing:0}
+.brand-wordmark{font-family:Manrope,'Noto Sans Arabic',sans-serif;font-size:25px;letter-spacing:-1.1px;font-weight:850;line-height:1.25;white-space:nowrap;background:linear-gradient(115deg,#fff 5%,#dcc1ff 61%,#9bd7e9 100%);background-clip:text;-webkit-background-clip:text;color:transparent}
+.brand-wordmark i{font-style:normal;letter-spacing:-1.9px;color:#d4baff;font-weight:900;margin-inline-end:5px}
+.mobile-brand .brand-wordmark{font-size:19px}
+.brand:hover .brand-wordmark{filter:brightness(1.1)}
+/* Narrative-first evidence and per-asteroid personal actionable interpretations. */
+.narrative-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0}
+.narrative-evidence{background:linear-gradient(145deg,#171b2b,#131624);border:1px solid #343a4f;border-radius:17px;padding:23px;min-width:0}
+.narrative-heading{display:flex;align-items:center;gap:10px;margin-bottom:12px}.narrative-heading h3{flex:1}.narrative-heading>span{font-size:25px}
+.narrative-evidence>h3{font-size:16px;color:#e9d8ff}.narrative-evidence>p{font-size:14px;line-height:1.95}.narrative-evidence>small{font-size:11px;line-height:1.7}
+.advice-action{background:rgba(127,223,212,.065);border-inline-start:3px solid #8ed8c0;padding:12px 13px;border-radius:5px 11px 11px 5px;color:#e6f0ed!important}
+.advice-caution{color:#d9c1b1}
+.reading-level{font-variant-numeric:tabular-nums;min-width:42px;text-align:center;border-radius:10px;padding:3px 9px}
+.reading-level.strong{color:#8ff7c1;background:#164c3b}.reading-level.steady{color:#beeab1;background:#304533}.reading-level.caution{color:#f7be81;background:#594022}.reading-level.low{color:#ffc0b1;background:#5a2d31}
+.insight-lead{border-inline-start:4px solid #b9a5e9}.insight-lead h2{font-size:20px}
+.reading-asteroids{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.meaning-card{padding:20px 22px;display:flex;flex-direction:column;gap:5px;min-height:180px}
+.meaning-card .meaning-head{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.meaning-card .meaning-head h3{font-size:19px;color:#f4ecff}
+.meaning-head span{font-size:11px;padding:4px 9px;border-radius:50px;line-height:1.5}
+.reading-active{background:#244336;color:#a4f6c4}.reading-neutral{background:#2a2c43;color:#c4b7e4}
+.meaning-card>p{font-size:14px;line-height:1.9;margin:6px 0}.meaning-card .advice-action{font-size:13px}
+.meaning-card>small{font-size:11px;line-height:1.75;margin-top:auto}
+.meaning-card details{margin-top:12px;font-size:11px}.meaning-card details summary{color:#a8a4c8}
+.asteroid-intro .button-row{margin:14px 0}
+/* Profile search: user sees city names and IANA zones; numeric coordinates remain hidden. */
+.place-picker{grid-column:1/-1;position:relative}
+.place-picker label{display:flex;flex-direction:column;gap:7px}
+.place-picker input[type=search]{width:100%}
+.place-picker .subtle{margin:5px 0 8px;font-size:12px}
+.place-results{display:grid;gap:5px;max-height:240px;overflow:auto;border-radius:11px}
+.place-option{padding:12px 14px;text-align:start;background:#20273b;border:1px solid #343b54;border-radius:9px;font-size:13px}
+.place-option:hover,.place-option:focus-visible{background:#303650;border-color:#9e88e1}
+.chosen-place{font-size:12px;color:#8de5d2;line-height:1.8;margin:7px 0 10px}
+.timezone-field{grid-column:1/-1}.timezone-field select{width:100%;direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
+.timezone-field small{display:block;line-height:1.7}
+.profile-form input[type=date],.profile-form input[type=time]{direction:ltr;font-variant-numeric:tabular-nums;color-scheme:dark}
+.setting-row select{min-height:43px;padding:10px 14px;border-radius:10px;background:#202437;border:1px solid #363b54;color:#eee}
+.page-heading .location{white-space:nowrap}
+.page-heading>div>p{direction:ltr;unicode-bidi:plaintext;text-align:start;font-variant-numeric:tabular-nums}
+/* Color means higher symbolic favorability, independent of score type. */
+.clear-gauges,.partner-insights-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:17px}
+.partner-score{background:#1b2130;border:1px solid #343950;padding:14px;border-radius:12px;display:grid;gap:10px}
+.partner-score>span{font-size:13px;color:#e6e4f4}
+.partner-insight{background:#151c2b;border:1px solid #343b4e;border-inline-start:3px solid #555b68;border-radius:15px;padding:20px;min-width:0}
+.partner-insight.strong{border-inline-start-color:#59e2a0}.partner-insight.steady{border-inline-start-color:#a0d586}.partner-insight.caution{border-inline-start-color:#f3a85d}.partner-insight.low{border-inline-start-color:#e87c68}
+.partner-insight-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.partner-insight-head h3{font-size:17px}.partner-insight>p{font-size:14px;line-height:1.9;margin:12px 0}
+.partner-insight .advice-action{font-size:13px}
+.gauge{position:relative;display:flex;align-items:baseline;gap:2px;font-variant-numeric:tabular-nums}
+.gauge b{font-size:22px;color:var(--gauge-color)}.gauge small{font-size:11px}.gauge i{position:absolute;inset-inline-start:0;bottom:-5px;max-width:100%;height:3px;background:var(--gauge-color);border-radius:4px;box-shadow:0 0 8px var(--gauge-color)}
+.gauge.strong{--gauge-color:#5ae3a3}.gauge.steady{--gauge-color:#9acb86}.gauge.caution{--gauge-color:#edac60}.gauge.low{--gauge-color:#ee7767}
+.big-score.strong{color:#5ae3a3}.big-score.steady{color:#9acb86}.big-score.caution{color:#edac60}.big-score.low{color:#ee7767}
+.partner-overview .dimension-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.partner-overview .clear-gauges .partner-score{display:grid}
+@media(max-width:930px){.reading-asteroids,.narrative-grid,.partner-insights-grid{grid-template-columns:1fr}.partner-overview .dimension-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.reading-asteroids,.narrative-grid,.partner-insights-grid,.clear-gauges,.partner-overview .dimension-grid{grid-template-columns:1fr}.meaning-card{padding:17px}.partner-insight{padding:16px}.brand-wordmark{font-size:21px}.place-picker .subtle{font-size:11px}}
