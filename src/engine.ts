@@ -1,4 +1,5 @@
 import {Temporal} from '@js-temporal/polyfill';
+import {calculateEclipses,type EclipseAPI} from './realEclipses.ts';
 import {bodies,normalize,aspects,signals,scores,houseNumber,synastry,compatibilityScore,type Point,type Dimension} from './math.ts';
 export type Profile={id:string;name:string;date:string;time:string;zone:string;lat:number;lon:number;city:string;known:boolean;kind:'self'|'dating'|'work'|'friend'|'family'};
 export const defaultProfile:Profile={id:'demo',name:'Demo',date:'2000-01-01',time:'12:00',zone:'Etc/UTC',lat:51.4779,lon:0,city:'Greenwich',known:true,kind:'self'};
@@ -13,10 +14,11 @@ export function validateProfile(p:Profile){
  const d=birthInstant(p);if(d.getUTCFullYear()<1800||d.getUTCFullYear()>2399)throw Error('Supported birth years: 1800–2399.');return p;
 }
 // Loaded as a same-origin vendored ES module, keeping WASM/data URL resolution intact.
-type Swiss={initSwissEph:()=>Promise<void>;calc_ut:(jd:number,id:number,flags:number)=>Float64Array;houses:(jd:number,lat:number,lon:number,sys:string)=>{cusps:number[];ascmc:number[];error?:string};julday:(y:number,m:number,d:number,h:number)=>number;version:()=>string};
+type Swiss=EclipseAPI & {initSwissEph:()=>Promise<void>;calc_ut:(jd:number,id:number,flags:number)=>Float64Array;houses:(jd:number,lat:number,lon:number,sys:string)=>{cusps:number[];ascmc:number[];error?:string};julday:(y:number,m:number,d:number,h:number)=>number;version:()=>string};
 let swiss:Swiss;
 export async function initEngine(){const mod=await (window as unknown as {mxSwissReady:Promise<{default:new()=>Swiss}>}).mxSwissReady;swiss=new mod.default();await swiss.initSwissEph();return swiss.version()}
 export function setEngineForTests(value:Swiss){swiss=value}
+export function confirmedEclipses(at:Date,count=2,coords?:{lat:number;lon:number},local=false){if(at.getUTCFullYear()<1800||at.getUTCFullYear()>2399)throw Error('Eclipse date outside supported range');return calculateEclipses(swiss,at,count,coords,local)}
 export function julianDay(date:Date){if(!Number.isFinite(+date))throw Error('Invalid date');return +date/86400000+2440587.5}
 export function sunMoonState(at:Date){if(at.getUTCFullYear()<1800||at.getUTCFullYear()>2399)throw Error('Supported dates: 1800–2399');const jd=julianDay(at),flags=2|256;const sun=swiss.calc_ut(jd,0,flags),moon=swiss.calc_ut(jd,1,flags);if(!sun||!moon||![sun[0],moon[0],moon[1]].every(Number.isFinite))throw Error('Sun or Moon ephemeris unavailable');return {sunLongitude:normalize(sun[0]),moonLongitude:normalize(moon[0]),moonLatitude:moon[1]}}
 export type Chart={date:Date;points:Point[];cusps:number[];asc:number|null;mc:number|null;missing:string[]};
