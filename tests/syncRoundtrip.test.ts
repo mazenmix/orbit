@@ -42,11 +42,11 @@ test('Two simulated devices sync only ciphertext; stale writes and wrong secret 
   assert.ok(!entry.payload.includes('first device'));
   const remote=await downloadEncrypted(code,password);
   assert.equal(remote.revision,1);assert.deepEqual(remote.payload,p1);
-  await assert.rejects(uploadEncrypted(code,password,0,{schema:1,profiles:[],journal:[]}),e=>e.code==='SYNC_CONFLICT');
+  await assert.rejects(uploadEncrypted(code,password,0,{schema:1,profiles:[],journal:[]}),(e:any)=>e.code==='SYNC_CONFLICT');
   const updated=await uploadEncrypted(code,password,1,{schema:1,profiles:[{name:'second device'}],journal:[]});
   assert.equal(updated.revision,2);
   const result=await downloadEncrypted(code,password);
-  assert.equal(result.revision,2);assert.equal(result.payload.profiles[0].name,'second device');
+  assert.equal(result.revision,2);assert.equal((result.payload as any).profiles[0].name,'second device');
   const {slot}=parseSyncCode(code),invalid=JSON.stringify({action:'pull',slot,secret:'z'.repeat(43)});
   const denied=await onRequestPost({request:new Request(domain+'/api/sync',{method:'POST',headers:{Origin:domain,'Content-Type':'application/json'},body:invalid}),env:{MX_SYNC_DB:fakeDB}});
   assert.equal(denied.status,403);
