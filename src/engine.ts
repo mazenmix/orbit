@@ -18,6 +18,7 @@ let swiss:Swiss;
 export async function initEngine(){const mod=await (window as unknown as {mxSwissReady:Promise<{default:new()=>Swiss}>}).mxSwissReady;swiss=new mod.default();await swiss.initSwissEph();return swiss.version()}
 export function setEngineForTests(value:Swiss){swiss=value}
 export function julianDay(date:Date){if(!Number.isFinite(+date))throw Error('Invalid date');return +date/86400000+2440587.5}
+export function sunMoonState(at:Date){if(at.getUTCFullYear()<1800||at.getUTCFullYear()>2399)throw Error('Supported dates: 1800–2399');const jd=julianDay(at),flags=2|256;const sun=swiss.calc_ut(jd,0,flags),moon=swiss.calc_ut(jd,1,flags);if(!sun||!moon||![sun[0],moon[0],moon[1]].every(Number.isFinite))throw Error('Sun or Moon ephemeris unavailable');return {sunLongitude:normalize(sun[0]),moonLongitude:normalize(moon[0]),moonLatitude:moon[1]}}
 export type Chart={date:Date;points:Point[];cusps:number[];asc:number|null;mc:number|null;missing:string[]};
 export function chart(at:Date,p:Profile,minor=false,withHouses=p.known):Chart{
  if(at.getUTCFullYear()<1800||at.getUTCFullYear()>2399)throw Error('Supported dates: 1800–2399.');
