@@ -7,6 +7,7 @@ type Device={device_id:string;subscription:string;zone:string;moon:number;daily:
 export async function sendDueBackgroundNotifications(env:Env,now=new Date()){
  if(!env.MX_SYNC_DB||!env.MX_VAPID_PRIVATE_JWK||!env.MX_VAPID_PUBLIC_KEY)throw Error('Missing D1 or VAPID sender secrets');
  const db=env.MX_SYNC_DB;
+ await db.prepare("DELETE FROM mx_push_sent_v1 WHERE delivered_at < ?").bind(new Date(+now-35*86400000).toISOString()).run();
  const {results:devices}=await db.prepare('SELECT device_id,subscription,zone,moon,daily,hourly,events FROM mx_push_v1 LIMIT 500').bind().all<Device>();
  let sent=0,failed=0,duplicates=0,removed=0;
  for(const device of devices){

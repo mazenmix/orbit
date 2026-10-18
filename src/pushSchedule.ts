@@ -10,8 +10,8 @@ export function dueBackgroundPush(settings:PushSettings,now:Date):DuePush[]{
  if(!Number.isFinite(+now))return [];
  const clock=parts(now,settings.zone),results:DuePush[]=[];
  // Cron dispatch scheduled every quarter-hour, not exact real-time.
- if(settings.hourly&&clock.minute===0)results.push({id:'hour-'+clock.date+'-'+clock.hour,body:'MX Eye · مراجعة الساعة الجديدة / New hour check-in',page:'#today'});
- if(settings.daily&&clock.hour===8&&clock.minute===0)results.push({id:'day-'+clock.date,body:'MX Eye · مراجعة يومية الساعة 08:00 / Daily review',page:'#today'});
+ if(settings.hourly&&clock.minute>=0&&clock.minute<15)results.push({id:'hour-'+clock.date+'-'+clock.hour,body:'MX Eye · مراجعة الساعة الجديدة / New hour check-in',page:'#today'});
+ if(settings.daily&&clock.hour===8&&clock.minute>=0&&clock.minute<15)results.push({id:'day-'+clock.date,body:'MX Eye · مراجعة يومية الساعة 08:00 / Daily review',page:'#today'});
  if(settings.moon)for(const event of settings.events){
   const at=Date.parse(event.at),gap=at-+now;
   if(!Number.isFinite(at)||gap<0||gap>16*60000||!['voc','ingress'].includes(event.kind))continue;
