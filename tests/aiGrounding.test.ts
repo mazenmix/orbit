@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {reviewGeneratedAdvice,unsafeAIGuesses} from '../src/aiQuality.ts';
+import {reviewGeneratedAdvice,unsafeAIGuesses,groundedFallback} from '../src/aiQuality.ts';
 import {onRequestPost} from '../functions/api/explain.ts';
 const support={transit:'Venus',natal:'Sun',angle:120,orb:.23,applying:true};
 const challenge={transit:'Saturn',natal:'Moon',angle:90,orb:.8,applying:false};
@@ -19,6 +19,14 @@ test('both correct contact descriptions and mixed context pass without replacing
 test('a missing counter-factor or generic ungrounded prose is replaced rather than presented as a trusted explanation',()=>{
  assert.equal(reviewGeneratedAdvice('You are special and lucky.',ctx).fallback,true);
  assert.equal(reviewGeneratedAdvice('Venus trine Sun is favorable.',ctx).fallback,true);
+});
+test('verified fallback actions adapt to the actual target domain rather than repeating generic advice',()=>{
+ const forTarget=(natal:string)=>groundedFallback({...ctx,language:'en',support:null,challenge:{...challenge,natal}}).split('\n\n')[1];
+ assert.match(forTarget('Mercury'),/clear request/);
+ assert.match(forTarget('MC'),/commitment/);
+ assert.match(forTarget('Venus'),/actual response/);
+ assert.match(forTarget('Mars'),/actual effort/);
+ assert.equal(new Set(['Mercury','MC','Venus','Mars','Moon'].map(forTarget)).size,5);
 });
 test('Arabic aspect descriptions use normalized Arabic letters and diacritics',()=>{
  const text='الزُهرة تثليث الشمس، لكن زحل تربيع القمر؛ الدلالات متعاكسة ضمن القراءة الرمزية.';

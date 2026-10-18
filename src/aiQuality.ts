@@ -78,14 +78,27 @@ export function groundedFallback(ctx:AIAdviceContext){
  const factor=(v:AIContact)=>ctx.language==='ar'?
   (aliases[v.transit]?.at(-1)??v.transit)+' '+arAngles[v.angle]+' '+(aliases[v.natal]?.at(-1)??v.natal)+'، بفارق '+v.orb.toFixed(2)+'° '+(v.applying?'ويقترب حالياً من الدقة':'ولا يقترب حالياً من الدقة'):
   v.transit+' '+enAngles[v.angle]+' '+v.natal+' (orb '+v.orb.toFixed(2)+'°, '+(v.applying?'currently applying':'not currently applying')+')';
+ // A verified fallback still needs a useful reading: tailor its practical
+ // focus to the actual natal target instead of repeating one generic action.
+ const target=(ctx.challenge??ctx.support)?.natal??'';
+ const domain=['Sun','MC','Jupiter','Saturn'].includes(target)?'work':['Venus','Ascendant'].includes(target)?'relationships':target==='Mercury'?'communication':target==='Mars'?'energy':['Moon','Neptune'].includes(target)?'reflection':target==='Uranus'?'planning':'priorities';
+ const guidance:Record<string,[string,string]>={
+  work:['راجع التزام واحد: وضّح المطلوب والموعد قبل ما توافق، وبعدها شوف إذا صار عندك وقت وخطوة تنفيذ أوضح.','Review one commitment: clarify the request and deadline before agreeing, then check whether you have a clearer next step and enough time.'],
+  relationships:['إذا التواصل متبادل، عبّر عن شي محدد تقدّره أو اسأل سؤالاً واضحاً بدون ضغط. قيّم وضوح الرد واحترام الحدود؛ لا تعتبر الدرجة دليلاً على مشاعر الطرف الثاني.','Where communication is mutual, express one specific appreciation or ask a clear, unpressured question. Judge the actual response and respect boundaries; the index cannot establish the other person’s feelings.'],
+  communication:['اكتب رسالة بطلب واحد واضح واقرأها قبل الإرسال. شوف إذا الجواب تناول طلبك فعلاً، وإذا بقى غموض اسأل عن النقطة الناقصة.','Write one clear request and reread it before sending. Check whether the reply actually addresses it, and ask about any unresolved detail.'],
+  energy:['اختار جزءاً صغيراً من مهمة بدل ما تفتح عدة مهام. بعد ما تخلصه، قيّم جهدك وتركيزك الفعلي قبل ما تضيف شي جديد.','Choose one small part of a task instead of opening several tasks. After finishing it, assess your actual effort and focus before adding more.'],
+  reflection:['دوّن موقفاً واحداً: شنو صار فعلاً، وشنو التفسير اللي أضفته إنت؟ ارجع للملاحظة بعد استراحة وشوف أي افتراض يحتاج دليل أو تعديل.','Write down one situation: what actually happened, and what did you infer? Revisit it after a break and identify any assumption that needs evidence or revision.'],
+  planning:['اختار خطوة قابلة للتعديل وحدد شرطاً واضحاً للاستمرار أو التوقف. دقق الموعد والتفاصيل الواقعية قبل ما توسّع الخطة.','Choose an adjustable step and define a clear condition for continuing or stopping. Verify actual dates and practical details before expanding the plan.'],
+  priorities:['حدد أولوية واحدة وجرّب أصغر خطوة ممكنة إلها. سجّل النتيجة الفعلية قبل ما تعتبر الانطباع الأول حكماً نهائياً.','Choose one priority and test its smallest useful step. Record the actual result before treating a first impression as a conclusion.']
+ };
  if(ctx.language==='ar'){
   const a=ctx.support?'أكو اتصال داعم محسوب: '+factor(ctx.support)+'.':'ماكو اتصال داعم بارز ضمن الدليل الحالي.';
   const b=ctx.challenge?'بالمقابل اتصال يحتاج انتباه: '+factor(ctx.challenge)+'.':'ما ظهر اتصال معاكس بارز بنفس العينة.';
-  return a+' '+b+' هاي مؤشرات تنجيمية رمزية، مو كشف لنوايا الآخرين ولا تأكيد لحدث.\n\nاختار خطوة صغيرة قابلة للتراجع تناسب ظرفك، وراقب النتيجة الحقيقية قبل ما تتوسع.';
+  return a+' '+b+' هاي مؤشرات تنجيمية رمزية، مو تأكيد لحدث.\n\n'+guidance[domain][0];
  }
  const a=ctx.support?'A supporting calculated contact is '+factor(ctx.support)+'.':'No leading supporting contact is in the supplied evidence.';
  const b=ctx.challenge?'A challenging contact is '+factor(ctx.challenge)+'.':'No leading challenging contact is in this sample.';
- return a+' '+b+' These are symbolic themes, not probabilities or access to private intentions.\n\nTry one small reversible action, and judge it by the real result.';
+ return a+' '+b+' These are symbolic themes, not probabilities.\n\n'+guidance[domain][1];
 }
 export function reviewGeneratedAdvice(raw:string,ctx:AIAdviceContext){
  const clean=conciseAI(raw),problems=unsafeAIGuesses(clean,ctx);
