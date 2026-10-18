@@ -25,11 +25,19 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
  const system='Act as an astrology interpretation editor in '+(ar?'natural Iraqi Arabic':'clear English')+'. Use ONLY provided validated natal placements and aspects. Zodiac positions are supplied from client Swiss Ephemeris: NEVER invent a new planet, aspect, sign, degree, house or person. The goal is thoughtful symbolic self-reflection, not a clinical psychological diagnosis, validated personality fact, secret desire, future certainty or statistical probability. Return ONLY valid JSON containing summary (string), detailedAnalysis (string), strengths (array of 2 strings), challenges (array of 2 strings), practicalInsights (array of 2 strings), reflectionQuestions (array of 1 string). Write about the UNIQUE topic-specific editorial angle and concrete real-life counterexample provided. Do not repeat the same sentence or advice across summary, detailed analysis, strengths, challenges and practical insights. Avoid generic horoscope filler such as everyone wants love, trust and growth. Avoid mathematical degree tables in reader-facing prose; computed evidence stays separate. Specific to the topic. No markdown or think tags. /no_think';
  const message=JSON.stringify({topic:ar?selected.ar:selected.en,uniqueEditorialAngle:ar?theme.focusAr:theme.focusEn,realLifeCounterExample:ar?depth.ar:depth.en,nonRepeatedPracticalAction:ar?theme.actionAr:theme.actionEn,computedNatalEvidence:basis})+'\n/no_think';
  try{
-  const result=await env.AI.run('@cf/qwen/qwen3-30b-a3b-fp8',{messages:[{role:'system',content:system},{role:'user',content:message}],temperature:.25,max_tokens:1400,stream:false});
-  const raw=String(result?.response??result?.choices?.[0]?.message?.content??'').replace(/<think>[\s\S]*?<\/think>/gi,'').split(String.fromCharCode(96)).join('').trim();
-  const begin=raw.indexOf('{'),end=raw.lastIndexOf('}');
-  if(begin<0||end<begin)return respond({error:'Unstructured Qwen3 response'},502);
-  let parsed:any;try{parsed=JSON.parse(raw.slice(begin,end+1))}catch{return respond({error:'Invalid Qwen3 JSON'},502)}
+  const result=await env.AI.run('@cf/qwen/qwen3-30b-a3b-fp8',{
+   messages:[{role:'system',content:system},{role:'user',content:message}],
+   temperature:.22,max_tokens:2600,stream:false,response_format:{type:'json_object'}
+  });
+  const responseValue=result?.response??result?.result?.response??result?.choices?.[0]?.message?.content??result;
+  let parsed:any;
+  if(responseValue&&typeof responseValue==='object'&&!Array.isArray(responseValue))parsed=responseValue;
+  else{
+   const raw=String(responseValue??'').replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*$/gi,'').split(String.fromCharCode(96)).join('').trim();
+   const begin=raw.indexOf('{'),end=raw.lastIndexOf('}');
+   if(begin<0||end<begin)return respond({error:'Unstructured Qwen3 response',code:'MODEL_NON_JSON',diagnostic:{responseKind:typeof responseValue,rawLength:raw.length}},502);
+   try{parsed=JSON.parse(raw.slice(begin,end+1))}catch{return respond({error:'Invalid Qwen3 JSON',code:'MODEL_INVALID_JSON'},502)}
+  }
   const validText=(x:unknown,min=3,max=900)=>typeof x==='string'&&x.trim().length>=min&&x.length<=max;
   const validList=(v:unknown)=>Array.isArray(v)&&v.length>=1&&v.length<=3&&v.every(x=>validText(x,3,250));
   if(!validText(parsed.summary,8,400)||!validText(parsed.detailedAnalysis,20,950)||!validList(parsed.strengths)||!validList(parsed.challenges)||!validList(parsed.practicalInsights)||!validList(parsed.reflectionQuestions))return respond({error:'Incomplete Qwen3 interpretation'},502);
