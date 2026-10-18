@@ -1,5 +1,5 @@
 import type {EyeSettings} from './eye.ts';
-const key='mx.astro.push.device.v1';
+const key='mx.astro.push.device.v1',consentKey='mx.astro.push.optin.v1',refreshKey='mx.astro.push.refreshed.v1';
 type Credentials={deviceId:string;secret:string};
 export type PushStatus={configured:boolean;schedulerEnabled:boolean;vapidPublicKey:string|null;requiresInstalledPWAOnIOS:boolean};
 export type MoonPushEvent={kind:'voc'|'ingress';at:string};
@@ -34,17 +34,29 @@ export async function subscribeBackgroundPush(settings:EyeSettings,zone:string,e
  const browser=subscription.toJSON();
  if(!browser.keys?.p256dh||!browser.keys?.auth)throw Error('Browser did not provide push encryption keys');
  const result=await send({action:'subscribe',...device(),subscription:browser,zone,moon:settings.moon,hourly:settings.hourly,daily:settings.daily,events});
+ localStorage.setItem(consentKey,'true');localStorage.setItem(refreshKey,String(Date.now()));
  return {...result,schedulerEnabled:status.schedulerEnabled};
 }
+export const backgroundPushOptedIn=()=>localStorage.getItem(consentKey)==='true';
 export async function unsubscribeBackgroundPush(){
- if(!pushAvailableOnThisDevice())throw Error('No Web Push support');
- const saved=localStorage.getItem(key);if(!saved)return {enabled:false};
- const value=JSON.parse(saved);
- const result=await send({action:'unsubscribe',...value});
- const subscription=await (await navigator.serviceWorker.ready).pushManager.getSubscription();
- if(subscription)await subscription.unsubscribe();
- localStorage.removeItem(key);
- return result;
+ const saved=localStorage.getItem(key),value=saved?JSON.parse(saved):null;
+ let remoteFailure='';
+ if(value){try{await send({action:'unsubscribe',...value})}catch(e){remoteFailure=String(e)}}
+ if(pushAvailableOnThisDevice()){
+  const reg=await navigator.serviceWorker.getRegistration();
+  const sub=await reg?.pushManager.getSubscription();
+  if(sub)await sub.unsubscribe();
+ }
+ localStorage.removeItem(consentKey);localStorage.removeItem(refreshKey);
+ if(!remoteFailure)localStorage.removeItem(key);
+ return {enabled:false,remotelyRemoved:!remoteFailure,warning:remoteFailure};
+}
+export async function refreshBackgroundPushIfNeeded(settings:EyeSettings,zone:string,events:MoonPushEvent[],maxAgeHours=20){
+ if(!backgroundPushOptedIn()||!pushAvailableOnThisDevice()||Notification.permission!=='granted'||!settings.enabled)return {refreshed:false};
+ const last=Number(localStorage.getItem(refreshKey)??0);
+ if(Number.isFinite(last)&&Date.now()-last<maxAgeHours*3600000)return {refreshed:false};
+ await subscribeBackgroundPush(settings,zone,events);
+ return {refreshed:true};
 }
 export async function sendBackgroundPushTest(){
  return send({action:'test',...device()});
