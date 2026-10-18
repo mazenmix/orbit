@@ -83,3 +83,11 @@ input:focus,select:focus,textarea:focus{outline:1px solid #bc97ff;border-color:#
 
 /* Dedicated lunar navigation fits alongside the six other main destinations. */
 @media(max-width:760px){.mobile-nav{gap:0}.mobile-nav .nav-item{min-width:0;max-width:none;flex:1 1 0}.mobile-nav .nav-item b{font-size:clamp(7px,1.85vw,9px);letter-spacing:-.035em}.mobile-nav .nav-item span{font-size:20px}}
+
+/* Qwen3 is now one content-first live card, without request buttons. */
+.mx-qwen-live{max-width:1050px;margin:12px auto 0;padding:clamp(24px,4vw,50px)!important;min-height:210px;border:1px solid #6d5489!important;background:radial-gradient(ellipse at 0% 0%,#7045ab24,transparent 58%),linear-gradient(145deg,#1b2036,#11172a)!important;box-shadow:0 18px 45px #0607153b,inset 0 1px 0 #fff2!important}
+.mx-qwen-live-copy{font-size:clamp(15px,1.25vw,18px);color:#f5f1fc;line-height:2.05;max-width:85ch;margin-inline:auto}
+.mx-qwen-live-copy .mx-qwen-paragraph{color:#f0ebfa;font-size:inherit;line-height:inherit;margin:0 0 24px}
+.mx-qwen-live-copy .mx-qwen-paragraph:last-child{margin-bottom:0}
+.mx-qwen-live-copy .mx-qwen-placeholder{color:#c6bad8;font-size:14px;line-height:1.9;min-height:75px;margin:0}
+@media(max-width:760px){.mx-qwen-live{min-height:180px;margin-top:4px;padding:22px 18px!important}.mx-qwen-live-copy{font-size:15px;line-height:2}}

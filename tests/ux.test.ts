@@ -37,3 +37,14 @@ test('grouped feature tabs preserve old deep links and keep evidence contextual'
  assert.match(main,/data-go="ai"/);
  assert.ok(!main.includes('function annualOutlookUI()'));
 });
+
+test('Qwen3 has one automatic answer panel without manual controls',()=>{
+ const begin=main.indexOf('function aiPage(){'),end=main.indexOf('function qwenLiveMarkup(){',begin);
+ const ui=main.slice(begin,end);
+ assert.ok(ui.includes('mx-qwen-live'));
+ assert.ok(!ui.includes('ask-ai')&&!ui.includes('copy-prompt')&&!ui.includes('EXPLANATION LAYER'));
+ assert.ok(!main.includes("on('ask-ai'")&&!main.includes("on('copy-prompt'"));
+ assert.ok(main.includes('async function refreshLiveQwen('));
+ assert.ok(main.includes("fetch('/api/explain',{method:'POST'"));
+ assert.ok(main.includes('AI_MIN_INTERVAL_MS'));
+});

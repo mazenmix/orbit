@@ -140,3 +140,13 @@ test('six primary links and accessible feature tabs preserve deep links',async({
  await page.goto('/#evidence',{waitUntil:'domcontentloaded'});
  await expect(page.locator('.sidebar [data-go="intel"]')).toHaveAttribute('aria-current','page');
 });
+
+test('Qwen3 automatically displays only one read-only text panel',async({page})=>{
+ await page.goto('/#ai',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.mx-qwen-live')).toBeVisible({timeout:75000});
+ await expect(page.locator('.mx-qwen-live')).toHaveCount(1);
+ await expect(page.locator('#ask-ai')).toHaveCount(0);
+ await expect(page.locator('#copy-prompt')).toHaveCount(0);
+ await expect(page.locator('.ai-intro')).toHaveCount(0);
+ await expect(page.locator('.sidebar [data-go="intel"]')).toHaveAttribute('aria-current','page');
+});
