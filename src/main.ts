@@ -2,6 +2,7 @@ import './style.css';
 import './refinement.css';
 import './soul.css';
 import './observatory.css';
+import './security.css';
 import {compareContacts,distinctParagraphs} from './reading.ts';
 import {distinctHighlights} from './highlights.ts';
 import {refineNatalTransit} from './precision.ts';

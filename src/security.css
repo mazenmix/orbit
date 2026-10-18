@@ -1,0 +1,19 @@
+/* Secure vault unlock and opt-in E2E sync, accessible on mobile Safari. */
+.vault-lock-screen{min-height:100dvh;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 20%,#302056,#090e1d 70%);padding:24px}
+.vault-lock-card{width:min(100%,470px);background:linear-gradient(145deg,#1c2037,#121726);border:1px solid #765ca7;box-shadow:0 0 37px #7043bb28;padding:30px;border-radius:20px;color:#e9dfff;text-align:center}
+.vault-lock-card h1{font-size:29px;margin:10px 0;color:#edd2ff}.vault-lock-card h2{font-size:18px;color:#d4b8ff}.vault-lock-card p{line-height:1.85;font-size:13px;color:#b8accd}
+.vault-lock-emblem{display:grid;place-items:center;margin:auto;width:70px;height:70px;font-size:48px;color:#f3cb80;border:1px solid #8461a5;border-radius:20px;box-shadow:0 0 22px #7542da4b}
+.vault-lock-card form{text-align:start;display:grid;gap:14px}.vault-lock-card form label{font-size:12px;color:#d8c9ef}
+.vault-lock-card form input{width:100%;font-size:16px;padding:13px;border-radius:10px;border:1px solid #5c5274;background:#121629;color:white}
+.vault-lock-card form button{border-radius:10px;border:1px solid #d1a2ff;background:linear-gradient(130deg,#7546b8,#493579);color:white;padding:13px;font-size:15px}
+.vault-lock-card #vault-unlock-error{color:#ffaca4;min-height:15px;font-size:12px}
+.vault-settings,.mx-sync-panel{background:linear-gradient(135deg,#1e1a35,#151a29);padding:17px;border:1px solid #504368;border-radius:13px;margin:19px 0;display:grid;gap:11px}
+.vault-settings h3,.mx-sync-panel h3{margin:0;color:#e9d8ff;font-size:16px}
+.vault-settings p,.mx-sync-panel p,.mx-sync-panel small{margin:0;font-size:12px;color:#c5bfd4;line-height:1.85}
+.vault-settings .secure-password,.mx-sync-panel .secure-password{display:grid;gap:9px;font-size:12px;color:#c7c0db}
+.mx-sync-panel textarea{width:100%;min-height:82px;resize:vertical;line-height:1.65;padding:12px;color:#d6cbf2;background:#101528;border:1px solid #54476b;border-radius:10px;font-size:12px;word-break:break-all;direction:ltr;text-align:left}
+.vault-settings input,.mx-sync-panel input{width:100%;border:1px solid #54476b;border-radius:10px;background:#101528;color:white;padding:12px;font-size:15px}
+.mx-sync-panel .button-row{gap:8px;flex-wrap:wrap}
+.mx-sync-panel .button-row button,.vault-settings button{font-size:12px}
+.vault-enabled-indicator{display:inline-flex;align-items:center;color:#9be9bb;font-size:12px;gap:9px}.vault-enabled-indicator:before{content:"✓";display:grid;place-items:center;background:#28503e;border:1px solid #64af88;border-radius:50%;width:22px;height:22px}
+@media(max-width:600px){.vault-lock-card{padding:20px}.mx-sync-panel{padding:13px}.mx-sync-panel .button-row{display:grid;grid-template-columns:1fr 1fr}.mx-sync-panel .button-row button{white-space:normal}}
