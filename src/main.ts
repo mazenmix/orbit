@@ -19,7 +19,7 @@ import {partnerInsights,gaugeLevel} from './peopleInsights.ts';
 import {decodePrivateSetup} from './privateSetup.ts';
 import {readJournal,writeJournal,checkJournal,parseJournalBackup,summarizeJournal,type JournalEntry,type InteractionKind,type Outcome} from './journal.ts';
 import {reviewEvidence,reviewSignal} from './decision.ts';
-import {resolveDecisions,type DecisionDetail} from './decisionUltra.ts';
+import {resolveDecisions,decisionExplanation,type DecisionDetail} from './decisionUltra.ts';
 import {calculateHeatmap,sampledHeatmap,heatSummary,type HeatCell} from './heatmap.ts';
 import {soulRender,type SoulAI} from './soulUI.ts';
 import {soulReading} from './soulEngine.ts';
