@@ -1,4 +1,4 @@
-import {aspects,type Evidence,type Point} from './math.ts';
+import {aspects,normalize,distance,type Evidence,type Point} from './math.ts';
 export type CalendarColor='green'|'yellow'|'red';
 export type AstroCalendarDay={iso:string;year:number;month:number;day:number;weekday:number;monthKey:string};
 export type AstroCalendarRating={
@@ -77,6 +77,7 @@ export type CalendarDayRating=AstroCalendarRating & {
 function bodyMap(c:CalendarChart,required:readonly string[]):Map<string,Point>{
  const byName=new Map<string,Point>();
  for(const pt of c.points){
+  if(!required.includes(pt.id))continue;
   if(byName.has(pt.id))throw Error('Duplicate ephemeris body: '+pt.id);
   if(!Number.isFinite(pt.longitude)||pt.longitude<0||pt.longitude>=360||!Number.isFinite(pt.speed))throw Error('Invalid ephemeris coordinates for '+pt.id);
   byName.set(pt.id,pt);
@@ -102,7 +103,16 @@ export function calendarMomentEvidence(current:CalendarChart,natal:CalendarChart
   }
  }
  const results:Evidence[]=[];
- for(const id of primaryBodies)results.push(...aspects([transit.get(id)!],fixed,at));
+ for(const id of primaryBodies){
+  // A six-hour linear lookahead can jump over the Moon's exact contact and
+  // invert "applying". Use a one-minute derivative at the actual longitude
+  // and keep only the observed orb; no fictitious time-of-exactness.
+  for(const contact of aspects([transit.get(id)!],fixed,at)){
+   const oneMinute=normalize(contact.transit.longitude+contact.transit.speed/1440);
+   const nextOrb=Math.abs(distance(oneMinute,contact.natal.longitude)-contact.angle);
+   results.push({...contact,applying:nextOrb+1e-10<contact.orb,exact:null});
+  }
+ }
  return results;
 }
 /** Mean of verified checkpoints, with the sampled range shown to users.
