@@ -5,7 +5,7 @@ const random=(n:number)=>{const bytes=crypto.getRandomValues(new Uint8Array(n));
 const b64url=(s:string)=>btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 export const createSyncCode=():string=>b64url(JSON.stringify({v:1,slot:b64url(random(16)),secret:b64url(random(32))} satisfies SyncCredentials));
 export function parseSyncCode(value:string):SyncCredentials{
- if(typeof value!=='string'||value.length<140||value.length>350||!/^[\w-]+$/.test(value))throw new SyncError('INVALID_CODE','Invalid sync connection code');
+ if(typeof value!=='string'||value.length<100||value.length>350||!/^[\w-]+$/.test(value))throw new SyncError('INVALID_CODE','Invalid sync connection code');
  try{
   const decoded=JSON.parse(atob(value.replace(/-/g,'+').replace(/_/g,'/'))) as SyncCredentials;
   if(decoded.v!==1||!/^[\w-]{22}$/.test(decoded.slot)||!/^[\w-]{43}$/.test(decoded.secret))throw Error();
