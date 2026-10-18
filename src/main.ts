@@ -9,6 +9,7 @@ import {namedAsteroids,asteroidSourcePath} from './asteroids.ts';
 import {loadNamedAsteroids,mountedAsteroidCount,namedAsteroidPositions} from './asteroidRuntime.ts';
 import {asteroidReading,namedAsteroidContacts} from './asteroidInterpretation.ts';
 import {partnerInsights,gaugeLevel} from './peopleInsights.ts';
+import {decodePrivateSetup} from './privateSetup.ts';
 import {readJournal,writeJournal,checkJournal,parseJournalBackup,summarizeJournal,type JournalEntry,type InteractionKind,type Outcome} from './journal.ts';
 import {reviewEvidence,reviewSignal} from './decision.ts';
 import {calculateHeatmap,heatSummary,type HeatCell} from './heatmap.ts';
@@ -26,6 +27,17 @@ import {loadProfiles,saveProfiles,download,parseBackup} from './storage.ts';
 import {wheel} from './chart.ts';
 const root=document.querySelector<HTMLDivElement>('#app')!;
 let profiles=loadProfiles();
+try{
+ const oneTime=decodePrivateSetup(location.hash);
+ if(oneTime){
+  const existing=profiles.find(p=>p.kind==='self'&&p.name.trim().toLowerCase()===oneTime.name.trim().toLowerCase());
+  const seeded={...oneTime,id:existing?.id??crypto.randomUUID()};
+  profiles=profiles.filter(p=>p.id!==(existing?.id??'')&&p.id!=='demo');
+  profiles.unshift(seeded);saveProfiles(profiles);localStorage.setItem('mx.active',seeded.id);
+  history.replaceState(null,'',location.pathname+location.search+'#settings');
+ }
+}catch(e){console.warn('Invalid private setup link; no profiles were replaced',e)}
+
 // Correct the old sample UTC zone on previously saved Baghdad profiles, without altering birth data.
 if(profiles.some(p=>['baghdad','بغداد'].includes(p.city.toLowerCase().trim())&&p.zone==='Etc/UTC')){profiles=profiles.map(p=>['baghdad','بغداد'].includes(p.city.toLowerCase().trim())&&p.zone==='Etc/UTC'?{...p,zone:'Asia/Baghdad'}:p);saveProfiles(profiles)}
 let active=profiles.find(p=>p.id===localStorage.getItem('mx.active'))??profiles[0];
@@ -108,7 +120,7 @@ function asteroidsPage(){
  for(const contact of contacts)if(!activated.has(contact.transit.id))activated.set(contact.transit.id,contact);
  return '<div class="section-title"><div><span class="eyebrow">MX ASTRO · ASTEROID STORIES</span><h2>'+t('الكويكبات: شنو تعني إلك؟','Asteroids: what do these themes mean?')+'</h2></div></div>'+
  '<section class="panel asteroid-intro"><h2>'+t('تفسير مختلف لكل كويكب','A unique reading for every asteroid')+'</h2><p>'+t('كل كويكب إله معنى مختلف ونصيحة واقعية بسطرين. التفسير يعتمد على دلالته التقليدية، وإذا انحسب اتصال قريب من خارطتك نذكره بصورة مبسطة. مو قراءة لأفكار الغير، وماكو رقم يضمن وقوع حدث.','Each asteroid has its own short symbolic theme and useful action. If a close birth-chart contact is actually calculated, it is explained in plain language. These are not private thoughts or event predictions.')+'</p><div class="button-row"><button class="primary" id="load-named-asteroids" '+(asteroidLoading?'disabled':'')+'>'+(asteroidLoading?t('جار تحميل الحسابات…','Loading calculations…'):count===56?t('حدّث حسابات الكويكبات','Refresh asteroid calculations'):t('فعّل حساباتي للكويكبات الـ56','Calculate my 56 asteroid positions'))+'</button><button class="secondary" data-go="time">'+t('غيّر وقت القراءة','Change reading time')+'</button></div><small id="asteroid-progress" role="status">'+(asteroidProgress?esc(asteroidProgress):count+' / 56 '+t('مواقع فلكية متاحة للحساب','ephemerides currently loaded'))+'</small>'+(asteroidFailures.length?'<details><summary>'+t('بعض البيانات غير متاحة؛ شوف التفاصيل','Some data is unavailable; see details')+'</summary>'+asteroidFailures.map(x=>'<p>'+esc(x.name)+': '+esc(x.reason)+'</p>').join('')+'</details>':'')+'</section>'+
- '<section class="panel"><div class="section-title"><h2>'+t('المعاني والتأثيرات الرمزية','Symbolic meanings and practical takeaways')+'</h2><label class="heat-label">'+t('اختار المجال','Filter by theme')+' <select id="asteroid-category"><option value="all">'+t('الكل','All')+'</option>'+categories.map(c=>'<option value="'+c+'" '+(asteroidCategory===c?'selected':'')+'>'+cat(c)+'</option>').join('')+'</select></label></div><div class="asteroids-grid reading-asteroids">'+filtered.map(a=>{const point=map.get(a.name),near=activated.get(a.name),r=asteroidReading(a,near,lang==='en');return '<article class="asteroid-item meaning-card"><div class="meaning-head"><h3>'+esc(a.name)+'</h3><span class="'+(near?'reading-active':'reading-neutral')+'">'+(near?t('نشط رمزياً بخارطتك','Close natal contact'):t('معنى رمزي','Symbolic theme'))+'</span></div><p>'+esc(r.theme)+'</p><p class="advice-action">'+esc(r.action)+'</p>'+(count?'<small>'+esc(r.emphasis)+'</small>':'')+(point?'<details><summary>'+t('الموضع المحسوب','Actual ephemeris position')+'</summary><small>MPC '+a.number+' · '+signName(point.longitude)+' · '+(point.longitude%30).toFixed(3)+'°</small></details>':'')+'</article>'}).join('')+'</div></section>'+
+ '<section class="panel"><div class="section-title"><h2>'+t('المعاني والتأثيرات الرمزية','Symbolic meanings and practical takeaways')+'</h2><label class="heat-label">'+t('اختار المجال','Filter by theme')+' <select id="asteroid-category"><option value="all">'+t('الكل','All')+'</option>'+categories.map(c=>'<option value="'+c+'" '+(asteroidCategory===c?'selected':'')+'>'+cat(c)+'</option>').join('')+'</select></label></div><div class="asteroids-grid reading-asteroids">'+filtered.map(a=>{const point=map.get(a.name),near=activated.get(a.name),r=asteroidReading(a,near,lang==='en');return '<article class="asteroid-item meaning-card"><div class="meaning-head"><h3>'+esc(a.name)+'</h3><span class="'+(near?'reading-active':'reading-neutral')+'">'+(near?t('نشط رمزياً بخارطتك','Close natal contact'):t('معنى رمزي','Symbolic theme'))+'</span></div><p>'+esc(r.theme)+'</p><p class="advice-action">'+esc(r.action)+'</p>'+(near?'<small>'+esc(r.emphasis)+'</small>':'')+(point?'<details><summary>'+t('الموضع المحسوب','Actual ephemeris position')+'</summary><small>MPC '+a.number+' · '+signName(point.longitude)+' · '+(point.longitude%30).toFixed(3)+'°</small></details>':'')+'</article>'}).join('')+'</div></section>'+
  (contacts.length?'<details class="panel asteroid-technical"><summary>'+t('الاتصالات المحسوبة مع خارطة الميلاد (للتدقيق فقط)','Calculated natal aspects (advanced details)')+' · '+contacts.length+'</summary><div class="eclipse-contacts">'+contacts.slice(0,60).map(e=>'<span><b>'+esc(e.transit.id)+' → '+esc(planet(e.natal.id))+'</b> '+aspect(e.angle)+' · '+e.orb.toFixed(2)+'°</span>').join('')+'</div></details>':'');
 }
 function eclipsesPage(){
