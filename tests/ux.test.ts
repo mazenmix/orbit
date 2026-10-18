@@ -21,8 +21,8 @@ test('Asteroid readings and evidence UI are narrative-first and confidential bir
 });
 
 
-test('main navigation exposes seven primary destinations without redundant sections',()=>{
- assert.match(main,/const primaryRoutes=\['today','chart','people','time','lunar','intel','settings'\]/);
+test('main navigation exposes eight primary destinations without redundant sections',()=>{
+ assert.match(main,/const primaryRoutes=\['today','chart','people','time','lunar','calendar','intel','settings'\]/);
  assert.match(main,/nav\(primaryRoutes\)/);
  assert.match(main,/nav\(primaryRoutes,true\)/);
  assert.ok(!main.includes("nav(['today','signals','people','chart'])"));
@@ -54,3 +54,5 @@ test('automatic Qwen reading resets promptly when active profile or language swi
  assert.ok(main.includes("if(scope!==aiScope){"));
  assert.ok(main.includes("aiRequestId++"));
 });
+
+test('calendar is a dedicated route and MX Ai has 29 indices',()=>{assert.ok(main.includes("case 'calendar':inner=astroCalendarPage()"));assert.ok(main.includes("t('MX Ai','MX Ai')"));assert.ok(main.includes("مصفوفة المؤشرات الـ29"));});

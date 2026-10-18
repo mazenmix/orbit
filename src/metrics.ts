@@ -1,7 +1,7 @@
 import type {Category} from './math.ts';
 /** Transparent derived SYMBOLIC indicators. Not 23 independently measured outcomes. */
 type Inputs=Record<Category,number>;
-export type MetricName='overview'|'career'|'focus'|'productivity'|'money'|'communication'|'social'|'reputation'|'love'|'romance'|'attraction'|'chemistry'|'emotional'|'calm'|'energy'|'motivation'|'recovery'|'sleep'|'timing'|'travel'|'adventure'|'caution'|'luck';
+export type MetricName='overview'|'career'|'focus'|'productivity'|'money'|'communication'|'social'|'reputation'|'love'|'romance'|'attraction'|'chemistry'|'emotional'|'calm'|'energy'|'motivation'|'recovery'|'sleep'|'timing'|'travel'|'adventure'|'caution'|'luck'|'sexuality'|'desire'|'nightlife'|'dating'|'newpeople'|'risk';
 export type MetricSpec={id:MetricName;ar:string;en:string;source:Category[];inverted?:boolean};
 export const metricSpecs:readonly MetricSpec[]=[
  {id:'overview',ar:'الصورة العامة',en:'Overview',source:['overview','timing','energy','emotions']},
@@ -26,7 +26,13 @@ export const metricSpecs:readonly MetricSpec[]=[
  {id:'travel',ar:'التنقل',en:'Travel planning',source:['timing','communication','energy']},
  {id:'adventure',ar:'التجربة',en:'Exploration',source:['timing','energy','love']},
  {id:'caution',ar:'مؤشر التريث',en:'Caution index',source:['timing','emotions','energy'],inverted:true},
- {id:'luck',ar:'الحظ الرمزي',en:'Symbolic luck',source:['overview','timing','love']}
+ {id:'luck',ar:'الحظ الرمزي',en:'Symbolic luck',source:['overview','timing','love']},
+ {id:'sexuality',ar:'الجنس · القرب',en:'Intimacy timing',source:['love','energy','communication']},
+ {id:'desire',ar:'الشهوة · الدافع',en:'Desire (symbolic)',source:['energy','love','emotions']},
+ {id:'nightlife',ar:'طلعة ليلية',en:'Night-out planning',source:['energy','timing','recovery']},
+ {id:'dating',ar:'لقاء بنات · تعارف',en:'Dating initiative',source:['love','communication','timing']},
+ {id:'newpeople',ar:'ناس جدد',en:'Meeting new people',source:['communication','love','energy']},
+ {id:'risk',ar:'الحذر العام · رمزي',en:'General caution (symbolic)',source:['timing','emotions','recovery'],inverted:true}
 ];
 export type MetricResult=MetricSpec & {value:number;formula:string};
 export function derivedMetrics(input:Inputs):MetricResult[]{
