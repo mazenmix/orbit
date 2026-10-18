@@ -11,3 +11,11 @@ test('genuine computed placements survive while fabricated house and precise deg
  assert.ok(detectInventedNatalText(['الزهرة في البيت الثاني عشر'],actual).length);
  assert.ok(detectInventedNatalText(['Venus 23.57° in Taurus'],actual).length);
 });
+
+test('allowed natal signs cannot be assigned to the wrong planet',()=>{
+ const errors=detectInventedNatalText(['الزهرة في السرطان والقمر في الثور.'],actual);
+ assert.ok(errors.some(v=>v==='wrong-planet-sign:Venus:السرطان'));
+ assert.ok(errors.some(v=>v==='wrong-planet-sign:Moon:الثور'));
+ assert.ok(detectInventedNatalText(['Venus in Cancer'],actual).some(v=>v.startsWith('wrong-planet-sign:Venus')));
+ assert.deepEqual(detectInventedNatalText(['الزهرة في الثور والقمر في السرطان.'],actual),[]);
+});
