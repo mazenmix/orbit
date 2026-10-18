@@ -4,7 +4,7 @@ const categories={overview:50,career:70,love:80,communication:60,energy:75,emoti
 test('29 named symbolic indicators use eight source indices without invented probabilities',()=>{
  const result=derivedMetrics(categories);
  assert.equal(metricSpecs.length,29);
- assert.equal(new Set(result.map(x=>x.id)).size,23);
+ assert.equal(new Set(result.map(x=>x.id)).size,29);
  assert.ok(result.every(x=>x.value>=1&&x.value<=99));
  assert.equal(result.find(x=>x.id==='career')?.value,70);
  assert.equal(result.find(x=>x.id==='caution')?.value,40);
