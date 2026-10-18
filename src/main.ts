@@ -5,6 +5,8 @@ import './observatory.css';
 import './security.css';
 import './mychart.css';
 import './premium.css';
+import './astroCalendar.css';
+import {astroCalendarDays,colorizeAstroDay,type AstroCalendarDay,type AstroCalendarRating} from './astroCalendar.ts';
 import {compareContacts,distinctParagraphs} from './reading.ts';
 import {distinctHighlights} from './highlights.ts';
 import {refineNatalTransit} from './precision.ts';
@@ -69,6 +71,9 @@ const readingContext=()=>JSON.stringify([active,selected.toISOString(),lang]);
 const cache=new Map<string,Report>();
 let heatmapCategory:Category|'average'='average';
 let heatmapSpan:30|90|365=30;
+let calendarAnchor='',calendarVersion='',calendarDays:AstroCalendarDay[]=[],calendarCursor=0,calendarGeneration=0,calendarRunning=false,calendarSelected='';
+type CalendarSnapshot=AstroCalendarRating & {at:Date;data:Report};
+const calendarSnapshots=new Map<string,CalendarSnapshot>();
 let asteroidCategory:Category|'all'='all';
 let asteroidLoading=false,asteroidProgress='',asteroidFailures:{name:string;reason:string}[]=[];
 let heatmapCache:{key:string;cells:HeatCell[]}|null=null;
@@ -124,6 +129,7 @@ function render(){
  root.innerHTML=`<div class="shell"><aside class="sidebar"><a class="brand" href="#today"><span class="brand-wordmark"><i>MX</i> Astro</span></a><div class="nav-caption">${t('مرصدك الشخصي','YOUR OBSERVATORY')}</div>${nav(primaryRoutes)}</aside><div class="workspace"><header class="topbar"><a class="mobile-brand" href="#today"><b class="brand-wordmark"><i>MX</i> Astro</b></a><div class="breadcrumb">MX ASTRO <span>/</span> ${labels[primarySection(screen)]?.()??labels.today()}${primarySection(screen)!==screen?` <span>/</span> ${labels[screen]?.()??''}`:''}</div><div class="top-actions"><button class="language" id="language">${lang==='ar'?'EN':'عربي'}</button><button id="tools" class="icon-button mobile-tools" aria-label="${t('أدوات أكثر','More tools')}">⋯</button><button class="avatar" data-go="settings" aria-label="${t('الملف الشخصي','Profile')}">${esc(active.name.slice(0,1))}</button></div></header><main id="main"><div class="page-heading"><div><div class="eyebrow">MX ASTRO · ${labels[primarySection(screen)]?.()??labels.today()}</div><h1>${labels[screen]?.()??labels.today()}</h1><p><span id="live-page-clock">${dateText(selected)}</span> <span class="location">⌖ ${esc(screen==='chart'?chartOwnerProfile().city:active.city)}</span></p></div><div class="heading-actions"><label class="sr-only" for="active-profile">${t('الملف النشط','Active profile')}</label><select id="active-profile">${topProfileOptions()}</select><button class="icon-button" id="refresh" aria-label="${t('تحديث','Refresh')}">↻</button></div></div>${demoNotice()}${error?`<div class="alert">${esc(error)}</div>`:''}<div id="live-view-body">${!ready?`<section class="loading panel"><div class="orbital-loader">◎</div><h2>${t('دا أفتح مرصدك…','Opening your observatory…')}</h2><p>${t('تحميل المحرك والبيانات الفلكية المحلية.','Loading the local engine and ephemeris data.')}</p></section>`:content()}</div></main>${nav(primaryRoutes,true)}</div></div><dialog id="detail"><div id="dialog-content"></div></dialog><div class="toast" role="status" aria-live="polite" id="toast"></div>`;
  bind();
  if(screen==='ai'&&ready)void refreshLiveQwen(false);
+ if(screen==='calendar'&&ready)startCalendarWork();
 }
 function content(){if(!data)return '';let inner:string;switch(screen){case 'today':inner=today();break;case 'signals':inner=signalsPage();break;case 'chart':inner=chartPage();break;case 'time':inner=timePage();break;case 'lunar':inner=lunarPage();break;case 'calendar':inner=astroCalendarPage();break;case 'eclipses':inner=eclipsesPage();break;case 'asteroids':inner=asteroidsPage();break;case 'advanced':inner=advancedPage();break;case 'intel':inner=intelPage();break;case 'people':inner=peoplePage();break;case 'evidence':inner=evidencePage();break;case 'ai':inner=aiPage();break;case 'settings':inner=settingsPage();break;default:screen='today';inner=today()}return sectionTabs()+inner}
 function tag(text:string,cls=''){return `<span class="tag ${cls}">${text}</span>`}
@@ -268,6 +274,106 @@ function lunarPhaseScreen(){
   return `<div class="section-title"><div><span class="eyebrow">LUNATION ROOT SCAN · 90 DAYS</span><h2>${t('المحاق والبدر وفحص مواسم الكسوف','New & full Moon: eclipse-season screening')}</h2></div>${tag(t('حساب أولي فقط','Preliminary screening'),'violet')}</div><section class="panel"><h2>${t('شنو يحسب المحرك؟','What the engine calculates')}</h2><p>${t('يحسب وقت اقتران الشمس والقمر (المحاق) أو مقابلتهما (البدر) من Swiss Ephemeris، ويفحص عرض القمر الكسوفي وقتها. إذا العرض 2° أو أقل نعلّم الموعد قريب من مستوى العقدة، مو نؤكد حدوث كسوف أو خسوف.','Computes geocentric tropical Sun–Moon conjunction (new Moon) and opposition (full Moon) from Swiss Ephemeris, then samples lunar ecliptic latitude. Values within ±2° are flagged as near-node lunations, NOT confirmed eclipses.')}</p><p class="subtle">${t('هاي معلومات عن المحاق والبدر وقرب العقدة فقط، مستقلة عن حساب الكسوف المؤكد المعروض فوق.','This is only phase and node-proximity screening, separate from the verified eclipse calculations above.')}</p><div class="receipt">${tag(items.length+' '+t('اقترانات ومقابلات','lunations'))}${tag(near.length+' '+t('قريبة من العقدة للفحص','near-node candidates'))}</div></section><section class="panel"><h2>${t('التواريخ القادمة خلال 90 يوم','Upcoming 90-day phase events')}</h2><div class="lunation-events">${items.length?items.map(e=>`<div class="lunation-item"><div><b>${e.phase==='new'?t('☀ محاق · اقتران','☀ New Moon · conjunction'):t('☾ بدر · مقابلة','☾ Full Moon · opposition')}</b><p>${dateText(e.at)}</p><small>${t('عرض القمر الكسوفي','Moon ecliptic latitude')}: ${e.moonLatitude.toFixed(3)}° · ${e.nearNode?t('قريب من العقدة (ليس كسوفاً مؤكداً)','Near node (NOT a confirmed eclipse)'):t('بعيد نسبياً عن العقدة','Not near node by this screening')}</small></div><button class="secondary" data-lunation-at="${+e.at}">${t('افتح اللحظة','Inspect moment')} ↗</button></div>`).join(''):`<p>${t('لا توجد لحظات محاق أو بدر ضمن النافذة المختارة.','No new/full Moon roots found in the selected window.')}</p>`}</div></section>`;
  }catch(e){return `<section class="panel"><h2>${t('تعذر فحص المحاق والبدر','Lunation scan unavailable')}</h2><p class="alert">${esc(String(e))}</p></section>`}
 }
+
+/** Today is in the active profile's time zone, not UTC or the PC's arbitrary locale. */
+function astroCalendarToday(){
+ const parts=new Intl.DateTimeFormat('en-US',{timeZone:active.zone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+ const number=(type:string)=>parts.find(p=>p.type===type)?.value??'';
+ return number('year')+'-'+number('month')+'-'+number('day');
+}
+function initializeAstroCalendar(){
+ const today=astroCalendarToday(),version=JSON.stringify([active,today]);
+ if(version===calendarVersion)return;
+ calendarVersion=version;calendarAnchor=today;calendarDays=astroCalendarDays(today);
+ calendarSnapshots.clear();calendarCursor=0;calendarGeneration++;calendarRunning=false;calendarSelected=today;
+}
+function astroCalendarDetail(iso:string){
+ const snap=calendarSnapshots.get(iso);
+ if(!snap)return '<h3>'+esc(iso)+'</h3><p>'+t('جاري حساب المواضع الفلكية لهذا اليوم…','Calculating this day’s sky positions…')+'</p>';
+ const {data:r,value,color,at}=snap;
+ const label=calendarColorLabel(color),noted=[...r.evidence].sort((a,b)=>b.weight-a.weight);
+ const strongestPositive=noted.find(supportive),strongestDifficult=noted.find(difficult);
+ const fact=(e:typeof strongestPositive,kind:'good'|'check')=>e?
+  '<div class="astro-day-factor"><small>'+(kind==='good'?t('زاوية داعمة محسوبة','Calculated supportive aspect'):t('زاوية متوترة محسوبة','Calculated challenging aspect'))+'</small><b>'+esc(planet(e.transit.id))+' · '+aspect(e.angle)+' · '+esc(planet(e.natal.id))+'</b><span>'+t('الفارق الزاوي','Orb')+' '+e.orb.toFixed(2)+'° · '+(e.applying?t('يقترب','Applying'):t('يبتعد','Separating'))+'</span></div>':'';
+ const ranked=Object.entries(r.scores).sort((a,b)=>b[1]-a[1]);
+ return '<div class="astro-day-detail-head"><div><span class="astro-eyebrow">'+t('قراءة هذا اليوم · منتصف النهار','Day reading · local noon')+'</span><h3>'+dateText(at,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</h3><p>'+t('اللون يصف نمطاً تنجيمياً رمزياً؛ لا يضمن نجاح أو إخفاق ولا يكشف خطراً واقعياً.','This color summarizes a symbolic astrology pattern, not real-world danger or a guaranteed outcome.')+'</p></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'</b><span>'+label+'</span></div></div>'+
+ '<div class="astro-day-factors">'+fact(strongestPositive,'good')+fact(strongestDifficult,'check')+'</div>'+
+ '<p class="astro-day-summary">'+(strongestPositive&&strongestDifficult?t('بيوم واحد أكو زوايا داعمة ومتحدية؛ النتيجة مو محسومة من الخارطة، فخلّ قرارك مبني على الظروف الواقعية.','Both supportive and challenging contacts occur; the chart alone cannot settle a real decision.'):strongestPositive?t('أبرز الزوايا المحسوبة داعمة رمزياً؛ هذا مو ضمان لنتيجة فعلية.','The leading calculated contact is symbolically supportive, not a promise of a real outcome.'):strongestDifficult?t('أبرز زاوية محسوبة متوترة رمزياً؛ هذا مو تحذير من خطر فعلي.','The leading calculated aspect is symbolically challenging, not a real-world hazard warning.'):t('الاتصالات المحسوبة ما ترجّح معنى واحد قوي لهذا اليوم.','The calculated aspects do not show a single strong symbolic emphasis.'))+'</p>'+
+ '<div class="astro-day-domain"><span>'+t('المجال الأعلى','Highest area')+': <b>'+cat(ranked[0][0] as Category)+' '+ranked[0][1]+'</b></span><span>'+t('المجال الأقل','Lowest area')+': <b>'+cat(ranked[ranked.length-1][0] as Category)+' '+ranked[ranked.length-1][1]+'</b></span></div><button class="secondary astro-day-open-time" data-calendar-open="'+(+at)+'">'+t('افتح تفاصيل هذا اليوم بآلة الزمن','Explore this moment in Time Machine')+' ↗</button>';
+}
+function calendarColorLabel(color:AstroCalendarRating['color']){
+ return color==='green'?t('دعم رمزي قوي','Strong symbolic support'):color==='yellow'?t('دعم رمزي','Symbolic support'):color==='orange'?t('إشارات مختلطة','Mixed influences'):t('تريّث رمزي','Symbolic caution');
+}
+function astroCalendarPage(){
+ initializeAstroCalendar();
+ const months=new Map<string,AstroCalendarDay[]>();
+ for(const day of calendarDays){const items=months.get(day.monthKey)??[];items.push(day);months.set(day.monthKey,items)}
+ const weekdays=[t('إث','Mo'),t('ثل','Tu'),t('أر','We'),t('خم','Th'),t('جم','Fr'),t('سب','Sa'),t('أح','Su')];
+ const legend=(color:AstroCalendarRating['color'])=>'<span class="astro-legend-item"><i class="astro-legend-dot astro-'+color+'"></i>'+calendarColorLabel(color)+'</span>';
+ const header='<div class="astro-cal-hero"><div class="astro-cal-ornament" aria-hidden="true">☽ <span>✧</span> ☉</div><span class="astro-eyebrow">MX ASTRO · CELESTIAL YEAR</span><h2>'+t('تقويم المدار · السنة القادمة','Celestial calendar · next twelve months')+'</h2><p>'+t('من اليوم إلى 12 شهر جاي. كل يوم يُحسب بمواقع فلكية فعلية عند الساعة 12 ظهراً بتوقيت ملفك؛ الألوان مجرد تقييمات تنجيمية رمزية وليست توقعاً علمياً أو مؤشر أمان.','From today through the next twelve months. Every day is calculated from actual planetary positions at 12:00 in your profile time zone. Colors are symbolic, not scientific predictions or safety assessments.')+'</p><div class="astro-legend">'+(['green','yellow','orange','red'] as const).map(legend).join('')+'</div><div class="astro-cal-meta"><span>✦ '+calendarDays.length+' '+t('يوم','days')+'</span><span>◷ '+esc(active.zone)+'</span><span id="astro-calendar-progress" role="status">'+calendarSnapshots.size+'/'+calendarDays.length+' '+t('محسوب','calculated')+'</span></div></div>';
+ const groups=[...months.entries()].map(([key,days])=>{
+  const initial=days[0],title=new Intl.DateTimeFormat(lang==='ar'?'ar-IQ':'en-US',{timeZone:'UTC',month:'long',year:'numeric'}).format(new Date(Date.UTC(initial.year,initial.month-1,1)));
+  const blanks=Array.from({length:initial.weekday},()=>'<span class="astro-cal-blank" aria-hidden="true"></span>').join('');
+  return '<section class="astro-cal-month panel"><div class="astro-cal-month-head"><span>✦</span><h3>'+esc(title)+'</h3><small>'+String(initial.month).padStart(2,'0')+'/'+initial.year+'</small></div><div class="astro-cal-weekdays">'+weekdays.map(x=>'<span>'+x+'</span>').join('')+'</div><div class="astro-cal-days">'+blanks+days.map(d=>{
+   const v=calendarSnapshots.get(d.iso),color=v?.color??'pending',selected=d.iso===calendarSelected,today=d.iso===calendarAnchor;
+   const text=v?calendarColorLabel(v.color):t('قيد الحساب','Calculating');
+   return '<button class="astro-cal-day astro-'+color+(selected?' is-selected':'')+(today?' is-today':'')+'" type="button" data-calendar-date="'+d.iso+'" aria-pressed="'+(selected?'true':'false')+'" aria-label="'+d.iso+' · '+text+(v?' · '+v.value+'/100':'')+'" title="'+text+'"><span class="astro-cal-number">'+d.day+'</span><small class="astro-cal-index">'+(v?v.value:'·')+'</small></button>'
+  }).join('')+'</div></section>';
+ }).join('');
+ return header+'<section class="panel astro-calendar-detail" id="astro-calendar-detail" aria-live="polite">'+astroCalendarDetail(calendarSelected)+'</section><div class="astro-cal-months">'+groups+'</div>';
+}
+/** Incrementally calculate one local-noon reading per day. DOM cells are patched
+ * in place, so chart navigation, scrolling and month positions are not reset. */
+function startCalendarWork(){
+ if(calendarRunning||!ready||screen!=='calendar'||!calendarDays.length)return;
+ calendarRunning=true;
+ const generation=calendarGeneration;
+ const tick=()=>{
+  if(generation!==calendarGeneration||screen!=='calendar'||document.visibilityState==='hidden'){calendarRunning=false;return}
+  const limit=Math.min(calendarDays.length,calendarCursor+4);
+  for(;calendarCursor<limit;calendarCursor++){
+   const day=calendarDays[calendarCursor];
+   try{
+    const at=zonedInstant(day.iso+'T12:00',active.zone),r=getReport(at);
+    const rating=colorizeAstroDay(r.scores);
+    calendarSnapshots.set(day.iso,{...rating,at,data:r});
+    const el=root.querySelector<HTMLButtonElement>('[data-calendar-date="'+day.iso+'"]');
+    if(el){
+     el.classList.remove('astro-pending');
+     el.classList.add('astro-'+rating.color);
+     el.setAttribute('aria-label',day.iso+' · '+calendarColorLabel(rating.color)+' · '+rating.value+'/100');
+     el.title=calendarColorLabel(rating.color);
+     const index=el.querySelector('.astro-cal-index');if(index)index.textContent=String(rating.value);
+    }
+    if(calendarSelected===day.iso){const area=root.querySelector<HTMLElement>('#astro-calendar-detail');if(area)area.innerHTML=astroCalendarDetail(day.iso);bindCalendarDayButtons()}
+   }catch(e){console.warn('Daily ephemeris unavailable',day.iso,e)}
+  }
+  const progress=root.querySelector('#astro-calendar-progress');
+  if(progress)progress.textContent=calendarCursor+'/'+calendarDays.length+' '+t('محسوب','calculated');
+  if(calendarCursor<calendarDays.length)setTimeout(tick,20);
+  else calendarRunning=false;
+ };
+ setTimeout(tick,10);
+}
+function bindCalendarDayButtons(){
+ root.querySelectorAll<HTMLButtonElement>('[data-calendar-open]').forEach(btn=>btn.onclick=()=>{
+  const at=new Date(Number(btn.dataset.calendarOpen));
+  navigate('time');updateTime(at);
+ });
+}
+function bindAstroCalendar(){
+ root.querySelectorAll<HTMLButtonElement>('[data-calendar-date]').forEach(button=>button.onclick=()=>{
+  calendarSelected=button.dataset.calendarDate!;
+  root.querySelectorAll<HTMLElement>('[data-calendar-date]').forEach(cell=>{
+   cell.classList.toggle('is-selected',cell.dataset.calendarDate===calendarSelected);
+   cell.setAttribute('aria-pressed',String(cell.dataset.calendarDate===calendarSelected));
+  });
+  const details=root.querySelector<HTMLElement>('#astro-calendar-detail');
+  if(details){details.innerHTML=astroCalendarDetail(calendarSelected);bindCalendarDayButtons();details.scrollIntoView({behavior:'smooth',block:'nearest'})}
+ });
+ bindCalendarDayButtons();
+}
+
 function lunarPage(){
  try{
   const w=moonWindow(),last=w.lastAspect,when=w.isVoid?w.ingressAt:w.vocStartsAt;
@@ -429,6 +535,7 @@ function moonPushSchedule():MoonPushEvent[]{
 }
 function settingsPage(){return `<div class="settings-layout"><section class="panel"><div class="section-title"><h2>${t('ملفي الشخصي','My profile')}</h2>${tag(t('محلي فقط','Local only'),'cyan')}</div>${profileForm(active)}</section><div><section class="panel"><h2>${t('اللغة والمظهر','Language & appearance')}</h2><div class="setting-row"><span>${t('لغة الواجهة','Interface language')}</span><button class="secondary" id="settings-language">${lang==='ar'?'English':'العراقي'}</button></div><div class="setting-row"><label for="clock-format">${t('نظام الساعة','Clock format')}</label><select id="clock-format"><option value="24" ${clockFormat==='24'?'selected':''}>24-hour · 23:45</option><option value="12" ${clockFormat==='12'?'selected':''}>12-hour · 11:45 PM</option></select></div><div class="setting-row"><span>${t('المظهر','Appearance')}</span><b>${t('ليلي · MX Astro','Dark · MX Astro')}</b></div></section><section class="panel"><h2>${t('بياناتك تحت سيطرتك','Your data, your control')}</h2><p>${t('الملفات محفوظة بـ localStorage بهذا المتصفح. النسخة الاحتياطية JSON مو مشفرة؛ احتفظ بيها بمكان خاص.','Profiles are stored in this browser’s localStorage. JSON backups are unencrypted; keep them private.')}</p><div class="button-row"><button class="secondary" id="backup">${t('تصدير نسخة احتياطية','Export backup')}</button><label class="secondary file-label">${t('استيراد نسخة','Import backup')}<input type="file" accept="application/json,.json" id="restore"></label></div><div class="secure-backup"><h3>${t("نسخة احتياطية مشفّرة","Encrypted backup")}</h3><p>${t("أدخل كلمة سر قوية من 12 حرف على الأقل. يتشفّر الملف بـAES-256-GCM على جهازك، وكلمة السر ما تنرسل للسيرفر ولا تنحفظ. إذا نسيتها ما نكدر نسترجع النسخة. بيانات المتصفح الاعتيادية تبقى غير مشفّرة.","Enter a strong passphrase of at least 12 characters. The export is AES-256-GCM encrypted on your device; the passphrase is neither uploaded nor saved. A lost passphrase cannot be recovered. Normal browser storage remains unencrypted.")}</p><label class="secure-password">${t("كلمة سر النسخة المشفّرة","Encrypted backup passphrase")}<input id="secure-passphrase" type="password" minlength="12" maxlength="256" autocomplete="new-password" placeholder="${t("12 حرف على الأقل","At least 12 characters")}"></label><div class="button-row"><button class="secondary" id="secure-backup">${t("تصدير مشفّر","Export encrypted")}</button><label class="secondary file-label">${t("استيراد ملف مشفّر","Import encrypted")}<input id="secure-restore" type="file" accept=".json,application/json"></label></div></div><section class="vault-settings"><h3>${t('خزنة محلية مشفّرة · AES-256','Encrypted local vault · AES-256')}</h3><p>${vaultOpened()?t('الخزنة مفعّلة: ملفاتك وسجل علاقاتك محفوظة مشفّرة على هذا الجهاز، وكلمة السر مطلوبة بكل فتح جديد. إذا نسيتها لا يمكن استرجاع البيانات.','Vault enabled: profiles and private journal are stored encrypted at rest on this device. You must unlock on each new page load; losing your password means losing access.'):t('فعّل حماية بيانات هذا المتصفح نفسه، مو بس النسخ الاحتياطية. التفعيل يشفّر الملفات وسجل العلاقات ويتحقق من فكها قبل إزالة النسخ العادية. احتفظ بنسخة احتياطية مشفّرة قبل التفعيل.','Protect the browser data itself, not just exported backups. Migration encrypts and verifies before deleting legacy plaintext. Export an encrypted backup before enabling.')}</p>${!isVaultConfigured()?'<label class="secure-password">'+t('كلمة سر الخزنة · 12 حرف على الأقل','Vault passphrase · minimum 12 characters')+'<input id="vault-password" type="password" minlength="12" maxlength="256" autocomplete="new-password"></label><button class="secondary" id="vault-enable">'+t('فعّل التشفير المحلي','Enable encrypted local storage')+'</button>':'<span class="vault-enabled-indicator">'+t('التشفير المحلي فعّال','At-rest encryption enabled')+'</span>'}</section><section class="mx-sync-panel"><h3>${t('المزامنة المشفّرة بين الآيفون والكمبيوتر','Encrypted iPhone & computer sync')}</h3><p>${t('الملفات والسجل يتشفّرون على جهازك بكلمة سر ما تنرسل للسيرفر. أنشئ رمز مشاركة عشوائي وانسخه للجهاز الثاني، واستعمل نفس كلمة السر هناك. المزامنة تبدأ بإجراء منك، ولا تشتغل تلقائياً بالخلفية.','Profiles and journal are encrypted on your device with a passphrase never sent to the server. Create a random sync code, copy it to your other device and use the same passphrase there. Sync is manual, not automatic background sync.')}</p><label class="secure-password">${t('رمز الاتصال بين الأجهزة، احفظه بمكان خاص','Private cross-device connection code')}<textarea id="sync-code" rows="3" autocomplete="off" spellcheck="false" placeholder="${t('أنشئ رمز أو الصق رمز جهازك الثاني','Create or paste your other device’s code')}">${esc(syncCode)}</textarea></label><div class="button-row"><button class="secondary" id="sync-new">${t('أنشئ رمز جديد','Create new sync code')}</button><button class="secondary" id="sync-copy">${t('انسخ الرمز','Copy code')}</button><button class="secondary" id="sync-test">${t('افحص اتصال السيرفر','Check server connection')}</button></div><label class="secure-password">${t('كلمة سر تشفير النسخة المشتركة · 12 حرف على الأقل','Shared encryption passphrase · at least 12 characters')}<input type="password" id="sync-passphrase" minlength="12" maxlength="256" autocomplete="new-password"></label><div class="button-row"><button class="primary" id="sync-upload">${t('ارفع النسخة المشفّرة','Upload encrypted version')}</button><button class="secondary" id="sync-download">${t('نزّل وادمج النسخة المشفّرة','Download and merge encrypted version')}</button></div><small>${t('مهم: احتفظ بالرمز وكلمة السر منفصلين. فقدانهم يعني عدم القدرة على استرجاع النسخة. قبل رفع تعديل جديد من جهاز ثاني، نزّل آخر نسخة أولاً حتى ما تنمسح تغييراتك.','Important: keep the connection code and passphrase separate. They cannot be recovered. Download and merge the latest version before uploading from another device to prevent overwrites.')}</small></section><button class="text-button danger" id="delete-profile">${t('حذف الملف الحالي','Delete current profile')}</button></section><section class="panel"><h2>${t('نصّب MX Astro','Install MX Astro')}</h2><p>${t('على الآيفون: Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية. بعد أول تحميل كامل، الحسابات تشتغل بدون إنترنت.','On iPhone: Safari → Share → Add to Home Screen. After the first complete load, calculations work offline.')}</p><button id="install" class="secondary">${t('التثبيت على الجهاز','Install on device')}</button></section><section class="panel"><div class="section-title"><h2>${t("MX Eye · تنبيهات المتصفح","MX Eye · Browser alerts")}</h2>${tag(eyeSettings.enabled?t("مفعّل","Enabled"):t("متوقف","Off"))}</div><p>${t("تنبيهات أثناء فتح الموقع فقط: دخول القمر، بداية خلو المسار، مراجعة كل ساعة أو كل يوم. على الآيفون تنبيهات الخلفية تحتاج تثبيت PWA وخدمة Web Push مستقلة. للتنبيه والنظام مغلق، استخدم تصدير الموعد إلى التقويم.","Alerts work while this page is open: Moon ingress/VOC and optional hourly/daily check-ins. Background iPhone alerts require an installed PWA and separate Web Push infrastructure. For reminders with the site closed, export events to your device calendar.")}</p><button class="secondary" id="eye-toggle">${eyeSettings.enabled?t("إيقاف MX Eye","Disable MX Eye"):t("تشغيل MX Eye","Enable MX Eye")}</button><div class="eye-options"><label><input type="checkbox" data-eye="moon" ${eyeSettings.moon?"checked":""}>${t("تنبيه القمر قبل 15 دقيقة","Moon alerts 15 minutes early")}</label><label><input type="checkbox" data-eye="hourly" ${eyeSettings.hourly?"checked":""}>${t("تذكير كل ساعة أثناء فتح الصفحة","Hourly check-in while page is open")}</label><label><input type="checkbox" data-eye="daily" ${eyeSettings.daily?"checked":""}>${t("مراجعة يومية الساعة 8 صباحاً حسب منطقتك الزمنية","Daily 8 AM check-in in your selected time zone")}</label></div><div class="push-settings-panel"><h3>${t('MX Eye · إشعارات الخلفية','MX Eye · Background Web Push')}</h3><p>${t('على الآيفون: ثبّت MX Astro على الشاشة الرئيسية وافتحه من الأيقونة. يحتاج اتصال بالإنترنت، إذن الإشعارات، اشتراك جهازك، وقاعدة D1 ومجدول Cloudflare مفعّلين. يُرسل فقط منطقتك الزمنية وأوقات أحداث القمر، مو اسمك أو تاريخ ميلادك.','On iPhone, install MX Astro on the Home Screen and launch the icon. Requires internet, notification permission, device subscription, and an active D1-backed Cloudflare scheduler. Only your timezone and upcoming Moon event times are stored, never your name or birth date.')}</p><div class="button-row"><button class="secondary" id="push-status">${t('تحقق من خدمة الخلفية','Check push service')}</button><button class="primary" id="push-subscribe">${t('تفعيل / تحديث تنبيهات الخلفية','Enable / update background push')}</button><button class="secondary" id="push-test">${t('إشعار تجريبي','Send test push')}</button><button class="text-button danger" id="push-unsubscribe">${t('إلغاء اشتراك هذا الجهاز','Unsubscribe this device')}</button></div><small>${t('الجدولة الخلفية كل 15 دقيقة تقريباً. إشعارات القمر القادمة تتجدد من الصفحة، لذلك افتحها دورياً لتجديد جدول الأسابيع القادمة.','Background delivery checks every 15 minutes. Upcoming Moon events are refreshed when you open the app and resubscribe; renew them periodically.')}</small></div></section></div></div>`}
 function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=>b.onclick=()=>navigate(b.dataset.go!));
+ if(screen==='calendar')bindAstroCalendar();
  root.querySelectorAll<HTMLButtonElement>('[data-signal]').forEach(b=>b.onclick=()=>showSignal(Number(b.dataset.signal)));
  root.querySelectorAll<HTMLButtonElement>('[data-category]').forEach(b=>b.onclick=()=>{filter=b.dataset.category as Category;navigate('signals')});
  root.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach(b=>b.onclick=()=>{filter=b.dataset.filter as typeof filter;render()});
@@ -587,6 +694,11 @@ function updateLiveVocClock(now:number):boolean{
 }
 function refreshLiveView(force=false){
  if(!ready||document.visibilityState==='hidden')return;
+ if(screen==='calendar'){
+  if(astroCalendarToday()!==calendarAnchor){render();return}
+  if(!calendarRunning&&calendarCursor<calendarDays.length)startCalendarWork();
+  return;
+ }
  if(screen==='ai'){
   void refreshLiveQwen(force);
   const clock=root.querySelector<HTMLElement>('#live-page-clock');if(clock)clock.textContent=dateText(new Date());

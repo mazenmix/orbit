@@ -1,0 +1,57 @@
+
+/* Celestial Calendar · a twelve-month orbital atlas */
+.astro-cal-hero{position:relative;isolation:isolate;overflow:hidden;padding:clamp(24px,3vw,42px);border:1px solid #796399;border-radius:23px;background:radial-gradient(ellipse at 88% 0%,#8e64bb4b,transparent 51%),radial-gradient(ellipse at 4% 84%,#388ea33c,transparent 54%),linear-gradient(128deg,#20223e,#101727 85%);box-shadow:0 23px 60px #01030c50,inset 0 1px 0 #f2d6ff22}
+.astro-cal-hero:before{content:'';position:absolute;inset:0;z-index:-1;opacity:.22;background:radial-gradient(circle at 10% 16%,#fff 0 1px,transparent 2px),radial-gradient(circle at 87% 45%,#fff 0 1px,transparent 2px),radial-gradient(circle at 47% 76%,#fff 0 1px,transparent 2px);background-size:109px 121px,187px 155px,239px 184px}
+.astro-cal-ornament{position:absolute;inset-inline-end:3%;top:6%;font-size:58px;color:#f1c98850;letter-spacing:.45em;pointer-events:none}
+.astro-cal-ornament span{color:#d7b7fc}
+.astro-eyebrow{font:800 10px/1.5 Manrope,'Noto Sans Arabic',sans-serif;letter-spacing:.16em;color:#e9c895;text-transform:uppercase}
+.astro-cal-hero h2{font-size:clamp(24px,3vw,37px);font-weight:830;margin:12px 0;line-height:1.4;letter-spacing:-.035em;color:#fff4ff}
+.astro-cal-hero p{max-width:80ch;font-size:13px;line-height:1.85;color:#cfc8dd;margin-bottom:19px}
+.astro-legend{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0 17px}
+.astro-legend-item{display:inline-flex;align-items:center;gap:8px;border:1px solid #6d58774d;border-radius:12px;background:#0d122476;padding:9px 13px;color:#e0d9e9;font-size:11px}
+.astro-legend-dot{width:11px;height:11px;border-radius:4px;flex:none}
+.astro-legend-dot.astro-green{background:#3ddb9c}.astro-legend-dot.astro-yellow{background:#f7d666}.astro-legend-dot.astro-orange{background:#e99458}.astro-legend-dot.astro-red{background:#ef6575}
+.astro-cal-meta{display:flex;gap:16px;flex-wrap:wrap;color:#d6d7e6;font-size:11px;font-weight:670}
+.astro-cal-months{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:22px 0}
+.astro-cal-month{padding:17px!important;min-width:0;box-shadow:0 14px 36px #01020b3a}
+.astro-cal-month-head{display:flex;align-items:center;gap:9px;padding:0 0 13px;margin-bottom:12px;border-bottom:1px solid #61527a}
+.astro-cal-month-head>span{color:#f0ca88}
+.astro-cal-month-head h3{font-size:16px!important;line-height:1.5;flex:1;color:#f1eafa;margin:0}
+.astro-cal-month-head small{font-size:10px;color:#a899c0;direction:ltr}
+.astro-cal-weekdays,.astro-cal-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.astro-cal-weekdays{margin-bottom:6px}
+.astro-cal-weekdays span{text-align:center;font-size:10px;font-weight:700;color:#c0aaca;padding-bottom:4px}
+.astro-cal-blank{aspect-ratio:1}
+.astro-cal-day{position:relative;aspect-ratio:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;border:1px solid transparent;border-radius:9px;padding:2px 0;color:#f6f0fa;transition:filter .15s,border-color .15s,transform .15s;cursor:pointer;touch-action:manipulation;isolation:isolate}
+.astro-cal-day:hover{transform:translateY(-2px);filter:brightness(1.25);z-index:2}
+.astro-cal-day:focus-visible{outline:2px solid #ffe5af;outline-offset:2px;z-index:2}
+.astro-cal-day.astro-green{background:linear-gradient(150deg,#23855f,#16523d);box-shadow:inset 0 1px 0 #a8ffbd24}
+.astro-cal-day.astro-yellow{background:linear-gradient(150deg,#bc962b,#796018);color:#fff8e7}
+.astro-cal-day.astro-orange{background:linear-gradient(150deg,#9d562f,#73341d)}
+.astro-cal-day.astro-red{background:linear-gradient(150deg,#983545,#681e32)}
+.astro-cal-day.astro-pending{background:#27304b;border:1px dashed #4b5370;color:#8d98b1}
+.astro-cal-day.is-today:before{content:'';position:absolute;inset:-3px;border:1px solid #efd5a0;border-radius:12px;pointer-events:none}
+.astro-cal-day.is-selected{outline:2px solid #edd6ae;outline-offset:2px;z-index:1;box-shadow:0 0 16px #debb7244}
+.astro-cal-number{font-size:13px;line-height:1;font-weight:820;font-variant-numeric:tabular-nums}
+.astro-cal-index{font-size:9px;line-height:1;font-weight:740;opacity:.93;font-variant-numeric:tabular-nums}
+.astro-calendar-detail{border:1px solid #6c5986!important;background:linear-gradient(150deg,#27223a,#15192b 75%)!important;padding:clamp(20px,3vw,32px)!important;margin:20px 0 3px}
+.astro-day-detail-head{display:flex;gap:20px;align-items:center;justify-content:space-between}
+.astro-day-detail-head h3{font-size:clamp(17px,2vw,24px)!important;margin:7px 0;color:#fff2fb}
+.astro-day-detail-head p{max-width:73ch;color:#c9c3d8;font-size:12px;line-height:1.85}
+.astro-day-main-score{flex:none;display:flex;align-items:center;flex-direction:column;gap:4px;min-width:98px;padding:16px;border:1px solid #ffffff24;border-radius:18px;background:#213a3b}
+.astro-day-main-score b{font:800 37px/1 Manrope,system-ui,sans-serif;color:#fff}
+.astro-day-main-score span{font-size:9px;text-align:center;color:#f9f4ff}
+.astro-day-main-score.astro-green{background:#17674d}.astro-day-main-score.astro-yellow{background:#9a7825}.astro-day-main-score.astro-orange{background:#99532a}.astro-day-main-score.astro-red{background:#853148}
+.astro-day-factors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}
+.astro-day-factor{display:flex;flex-direction:column;gap:6px;border:1px solid #675875;border-radius:12px;background:#11152679;padding:14px}
+.astro-day-factor small{color:#e2c594;font-size:10px}
+.astro-day-factor b{color:#f0e8f8;font-size:12px}
+.astro-day-factor span{color:#aea7c4;font-size:10px}
+.astro-day-summary{font-size:12px;line-height:1.9;color:#d7cee5}
+.astro-day-domain{display:flex;gap:12px;flex-wrap:wrap;margin:13px 0;color:#c9c4d6;font-size:12px}
+.astro-day-domain span{padding:8px 12px;border:1px solid #635773;border-radius:10px}
+.astro-day-open-time{margin-top:10px}
+@media(max-width:1300px){.astro-cal-months{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:750px){.astro-cal-months{grid-template-columns:1fr;gap:12px}.astro-cal-hero{padding:23px 18px}.astro-cal-ornament{font-size:36px;top:4%}.astro-cal-month{padding:18px!important}.astro-cal-day{min-height:39px;aspect-ratio:auto}.astro-day-detail-head{align-items:flex-start}.astro-day-main-score{min-width:78px;padding:12px}.astro-day-main-score b{font-size:29px}.astro-day-factors{grid-template-columns:1fr}.astro-cal-hero p{font-size:12px}}
+@media(min-width:751px) and (max-width:1080px){.astro-cal-months{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.astro-cal-day{transition:none}}
