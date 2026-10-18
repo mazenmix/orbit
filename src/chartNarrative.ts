@@ -15,6 +15,7 @@ const signs=[
  ['الدلو','Aquarius','الاستقلال والتجريب','independence and fresh ideas'],
  ['الحوت','Pisces','الخيال والتعاطف','imagination and empathy']
 ] as const;
+const namesAr:Record<string,string>={Sun:'الشمس',Moon:'القمر',Mercury:'عطارد',Venus:'الزهرة',Mars:'المريخ',Jupiter:'المشتري',Saturn:'زحل'};
 const areas=[
  {key:'Sun',ar:'الهوية والقرار',en:'Identity & decisions',themeAr:'طريقة بناء موقفك وإظهار شخصيتك',themeEn:'How your sense of self informs your decisions',actionAr:'حدد أولويتك بنفسك قبل ما ترضي الجميع.',actionEn:'Name your priority before trying to please everyone.'},
  {key:'Moon',ar:'الراحة والمشاعر',en:'Feelings & comfort',themeAr:'ردّة فعلك وقت التعب وحاجتك للأمان',themeEn:'What helps you feel safe and grounded',actionAr:'راجع شعورك واحتياجك الحقيقي قبل الرد.',actionEn:'Check your real emotional need before reacting.'},
@@ -26,7 +27,7 @@ const areas=[
 ] as const;
 export function chartStories(chart:Chart):ChartInsight[]{
  return areas.flatMap(area=>{const p=chart.points.find((p:Point)=>p.id===area.key);if(!p)return [];const sign=signs[Math.floor((((p.longitude%360)+360)%360)/30)];
- return [{titleAr:area.ar,titleEn:area.en,signAr:sign[0],signEn:sign[1],ar:'وجود '+area.key+' ببرج '+sign[0]+' يربط '+area.themeAr+' بموضوع '+sign[2]+'، وفق التفسير الرمزي للخارطة.',en:area.key+' in '+sign[1]+' links '+area.themeEn+' with '+sign[3]+' symbolically.',actionAr:area.actionAr,actionEn:area.actionEn}];
+ return [{titleAr:area.ar,titleEn:area.en,signAr:sign[0],signEn:sign[1],ar:'وجود '+namesAr[area.key]+' ببرج '+sign[0]+' يربط '+area.themeAr+' بموضوع '+sign[2]+'، وفق التفسير الرمزي للخارطة.',en:area.key+' in '+sign[1]+' links '+area.themeEn+' with '+sign[3]+' symbolically.',actionAr:area.actionAr,actionEn:area.actionEn}];
  });
 }
 export function profileAddress(profile:Pick<Profile,'sex'|'name'>,arabic=true){
@@ -40,4 +41,10 @@ export function transitOverview(report:Report){
  const labels:Record<string,[string,string,string,string]>={career:['الشغل والقرارات','work and decisions','اختار مهمة واضحة وقِس نتيجتها.','Choose one measurable task.'],love:['الحب والعلاقات','love and connection','عبّر عن رغبتك بصراحة واحترم رأي الطرف الآخر.','Be honest about your interest and respect the response.'],communication:['التواصل','communication','انطي مساحة للرد قبل افتراض النية.','Make room for a response before assuming intentions.'],energy:['الطاقة','energy','وزع نشاطك ولا تبالغ بالمجهود.','Pace your energy.'],emotions:['المزاج','emotions','لاحظ مشاعرك قبل اتخاذ قرار كبير.','Notice your feelings before a major decision.'],recovery:['الراحة','recovery','رتّب وقت الراحة من البداية.','Schedule meaningful rest.'],timing:['التوقيت','timing','راجع تفاصيل الموعد قبل التنفيذ.','Check timing details before acting.'],overview:['الصورة العامة','overall context','رتب الأولويات بدون استعجال.','Set priorities without rushing.']};
  const text=labels[dominant[0]];
  return {ar:'المجال الأبرز بهذه اللحظة رمزياً هو '+text[0]+'؛ هذا توصيف لحركة الأجرام، مو ضمان لحدث. '+text[2],en:'This moment symbolically emphasizes '+text[1]+'. It is not a forecast of a guaranteed event. '+text[3]};
+}
+
+export function actionForGender(value:string,sex?:'male'|'female'){
+ if(sex!=='female')return value;
+ const alternatives:Record<string,string>={'حدد':'حددي','راجع':'راجعي','اشرح':'اشرحي','صرّح':'صرّحي','اختار':'اختاري','تعلم':'تعلمي','قسّم':'قسّمي','سمِّ':'سمّي','لاحظ':'لاحظي','ركز':'ركّزي','رتب':'رتّبي'};
+ return value.replace(/^[^\s]+/,verb=>alternatives[verb]??verb);
 }
