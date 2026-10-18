@@ -1,4 +1,5 @@
 import type {Category} from './math.ts';
+import {isVaultConfigured,vaultOpened,vaultJournal,replaceVaultJournal} from './vault.ts';
 /** Local-only private relationship log. Its contents are NEVER included in Qwen prompts.
  * This storage is not encrypted at rest; export inside encrypted backup when desired.
  */
@@ -19,12 +20,14 @@ export function checkJournal(entry:JournalEntry){
  return entry;
 }
 export function readJournal():JournalEntry[]{
+ if(vaultOpened())return vaultJournal();if(isVaultConfigured())throw Error('Encrypted vault locked');
  try{const stored=JSON.parse(localStorage.getItem(key)??'[]');if(!Array.isArray(stored))return [];return stored.slice(-250).filter((e:JournalEntry)=>{try{checkJournal(e);return true}catch{return false}})}
  catch{return []}
 }
 export function writeJournal(items:JournalEntry[]){
  if(!Array.isArray(items)||items.length>250)throw Error('Too many journal entries');
  items.forEach(checkJournal);const ids=new Set(items.map(x=>x.id));if(ids.size!==items.length)throw Error('Duplicate journal ID');
+ if(vaultOpened()){replaceVaultJournal(items);return}if(isVaultConfigured())throw Error('Encrypted vault locked');
  localStorage.setItem(key,JSON.stringify(items));
 }
 export type JournalSummary={total:number;positive:number;neutral:number;difficult:number;observedIndexCount:number;positiveMeanIndex:number|null;difficultMeanIndex:number|null};
