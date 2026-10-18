@@ -17,8 +17,9 @@ import {reviewEvidence,reviewSignal} from './decision.ts';
 import {resolveDecisions,decisionExplanation} from './decisionUltra.ts';
 import {calculateHeatmap,sampledHeatmap,heatSummary,type HeatCell} from './heatmap.ts';
 import {annualOutlook} from './annual.ts';
-import {soulRender} from './soulUI.ts';
-import {soulCategories} from './soulData.ts';
+import {soulRender,type SoulAI} from './soulUI.ts';
+import {soulReading} from './soulEngine.ts';
+import {soulCategories,soulTopics} from './soulData.ts';
 import {relationshipWindows,bestWindows} from './relationshipWindows.ts';
 import {lunarWindow,type LunarWindow} from './timing.ts';
 import {calendarEvent,calendarDownload} from './calendar.ts';
@@ -107,6 +108,9 @@ function today(){const r=data!,primary=r.signals[0],text=primary?copy(primary):n
 function trend(hours:number){const rows=Array.from({length:9},(_,i)=>{const at=new Date(Math.min(Date.UTC(2399,11,31,23,59),+selected+i*hours/8*3600000));return {at,value:average(getReport(at))}});const pts=rows.map((r,i)=>`${i*75},${130-r.value}`).join(' ');return `<div class="trend"><svg viewBox="0 0 600 150" role="img" aria-label="${t('مؤشر رمزي محسوب عبر الوقت','Calculated symbolic index over time')}"><defs><linearGradient id="area" x2="0" y2="1"><stop stop-color="#8272df" stop-opacity=".25"/><stop offset="1" stop-color="#8272df" stop-opacity="0"/></linearGradient></defs>${[25,50,75,100].map(v=>`<line x1="0" x2="600" y1="${130-v}" y2="${130-v}" stroke="#292d43" stroke-dasharray="3 5"/><text x="3" y="${126-v}" fill="#727993" font-size="8">${v}</text>`).join('')}<polygon points="0,140 ${pts} 600,140" fill="url(#area)"/><polyline points="${pts}" stroke="#a79aef" stroke-width="2" fill="none"/>${rows.map((r,i)=>`<circle cx="${i*75}" cy="${130-r.value}" r="3" fill="#c6bbff"><title>${dateText(r.at,{hour:'2-digit',minute:'2-digit'})}: ${r.value}/100</title></circle>`).join('')}</svg><div class="trend-labels" dir="ltr">${rows.filter((_,i)=>i%2===0).map(r=>`<span>${dateText(r.at,{hour:'2-digit',minute:'2-digit'})}</span>`).join('')}</div></div>`}
 function signalsPage(){const r=data!;return `<div class="filter-row">${(['all',...categories] as const).map(c=>`<button data-filter="${c}" class="chip ${filter===c?'selected':''}">${c==='all'?t('الكل','All'):cat(c)}</button>`).join('')}</div><div class="signal-list wide">${r.signals.map((s,i)=>filter==='all'||filter===s.category?signalCard(s,i):'').join('')||`<div class="empty panel">${t('ماكو إشارة لهالمجال ضمن الأورب المحدد.','No signal in this category within the configured orbs.')}</div>`}</div><section class="panel rhythm"><h2>${t('تغيّر المؤشر عبر اليوم','Index through the day')}</h2>${trend(24)}</section>`}
 const soulCharts=new Map<string,Chart>();
+const soulAIResults=new Map<string,SoulAI>();
+let soulAIBusy=false,soulAIActive='',soulAIError='';
+const soulAIKey=(person:Profile,topic:number)=>JSON.stringify([person,topic,lang,'soul-v1']);
 function soulViewProfile(){
  const person=profiles.find(p=>p.id===soulPersonId)??active;
  const key=JSON.stringify(person);
@@ -121,7 +125,7 @@ function chartPage(){
    const {person,natal}=soulViewProfile();
    const profileSelect='<div class="soul-owner-picker"><label>'+t('صاحب الخارطة','Chart owner')+' <select id="soul-person-select">'+profiles.map(p=>'<option value="'+esc(p.id)+'" '+(p.id===person.id?'selected':'')+'>'+esc(p.name)+' · '+esc(p.city)+'</option>').join('')+'</select></label></div>';
    const privateNote=person.kind==='self'?sessionStorage.getItem('mx.soul.discovery.v1:'+person.id+':'+soulTopic)??'':undefined;
-   return '<div class="section-title chart-view-tabs"><div class="segmented"><button data-chart="natal">'+t('خارطة الولادة','Natal')+'</button><button data-chart="transit">'+t('العبور','Transits')+'</button><button data-chart="overlay">'+t('مقارنة العبور','Transit overlay')+'</button><button class="selected" data-chart="details">'+t('التفاصيل','Details')+'</button></div></div>'+profileSelect+soulRender({profile:person,chart:natal,categoryId:soulCategory,topicId:soulTopic,query:soulQuery,privateNote});
+   return '<div class="section-title chart-view-tabs"><div class="segmented"><button data-chart="natal">'+t('خارطة الولادة','Natal')+'</button><button data-chart="transit">'+t('العبور','Transits')+'</button><button data-chart="overlay">'+t('مقارنة العبور','Transit overlay')+'</button><button class="selected" data-chart="details">'+t('التفاصيل','Details')+'</button></div></div>'+profileSelect+soulRender({profile:person,chart:natal,categoryId:soulCategory,topicId:soulTopic,query:soulQuery,privateNote,ai:soulAIResults.get(soulAIKey(person,soulTopic)),aiBusy:soulAIBusy&&soulAIActive===soulAIKey(person,soulTopic),aiError:soulAIActive===soulAIKey(person,soulTopic)?soulAIError:''});
   }catch(e){return '<section class="panel"><h2>'+t('تعذر حساب تحليل الشخصية','Unable to calculate personality analysis')+'</h2><p>'+esc(String(e))+'</p></section>'}
  }
  const r=data!,c=chartMode==='transit'?r.current:r.natal;
@@ -318,6 +322,23 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
  root.querySelectorAll<HTMLButtonElement>('[data-soul-scroll]').forEach(b=>b.onclick=()=>root.querySelector('#soul-reading')?.scrollIntoView({behavior:'smooth',block:'start'}));
  const soulPerson=root.querySelector<HTMLSelectElement>('#soul-person-select');if(soulPerson)soulPerson.onchange=()=>{soulPersonId=soulPerson.value;soulCategory=1;soulTopic=1;soulQuery='';render()};
  const searchSoul=root.querySelector<HTMLInputElement>('#soul-search');if(searchSoul)searchSoul.oninput=()=>{const current=searchSoul.value,pos=searchSoul.selectionStart;soulQuery=current;render();const next=root.querySelector<HTMLInputElement>('#soul-search');next?.focus({preventScroll:true});if(next&&pos!==null)next.setSelectionRange(pos,pos)};
+ on('soul-ai',async()=>{
+  let key='';
+  try{
+   const {person,natal}=soulViewProfile(),topic=soulTopics.find(x=>x.id===soulTopic);
+   if(!topic)throw Error('Invalid Soul topic');
+   key=soulAIKey(person,topic.id);soulAIActive=key;soulAIBusy=true;soulAIError='';render();
+   const evidence=soulReading(natal,topic).basis;
+   const response=await fetch('/api/soul',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topicId:topic.id,language:lang,evidence}),signal:AbortSignal.timeout(65000)});
+   const result=await response.json();
+   if(!response.ok)throw Error(result.error||'Qwen3 structured response unavailable');
+   if(result.topicId!==topic.id||typeof result.summary!=='string'||!Array.isArray(result.strengths))throw Error('Invalid Soul AI response');
+   if(key===soulAIKey(person,topic.id)){
+    soulAIResults.set(key,result as SoulAI);if(soulAIResults.size>24)soulAIResults.delete(soulAIResults.keys().next().value!);
+   }
+  }catch(e){if(key===soulAIActive)soulAIError=String(e)}
+  finally{soulAIBusy=false;if(chartMode==='details')render()}
+ });
  root.querySelectorAll<HTMLButtonElement>('[data-soul-save]').forEach(b=>b.onclick=()=>{const p=profiles.find(x=>x.id===soulPersonId)??active;if(p.kind!=='self')return;const text=root.querySelector<HTMLTextAreaElement>('#soul-personal-answer')?.value??'';try{sessionStorage.setItem('mx.soul.discovery.v1:'+p.id+':'+soulTopic,text.slice(0,1500));toast(t('انحفظت ملاحظتك لهالجلسة بس','Your note is saved for this session only'))}catch{toast(t('التخزين الخاص مو متاح بهذا المتصفح','Session storage is unavailable'))}});
  root.querySelectorAll<HTMLButtonElement>('[data-soul-clear]').forEach(b=>b.onclick=()=>{const p=profiles.find(x=>x.id===soulPersonId)??active;try{sessionStorage.removeItem('mx.soul.discovery.v1:'+p.id+':'+soulTopic)}catch{}const ta=root.querySelector<HTMLTextAreaElement>('#soul-personal-answer');if(ta)ta.value=''});
 
