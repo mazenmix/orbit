@@ -84,3 +84,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .lunation-events{display:grid;gap:12px;margin:20px 0}.lunation-item{display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:13px;background:#181b2e;border:1px solid #363950;padding:18px}
 .lunation-item b{font-size:16px}.lunation-item p{font-size:14px;color:#e1dcee;margin:6px 0}.lunation-item small{font-size:12px;line-height:1.8}
 @media(max-width:760px){.lunation-item{align-items:stretch;flex-direction:column}.lunation-item button{width:100%}}
+
+/* Private interaction journal: local-only, no Qwen transfer */
+.journal-panel{margin:24px 0}.journal-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.journal-form label{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.journal-form .journal-text{grid-column:1/-1}.journal-form textarea{border:1px solid #40445d;border-radius:11px;background:#181b2b;color:#f2effa;padding:12px;resize:vertical;font:inherit;font-size:14px}
+.journal-form>button{justify-self:start}.journal-stat{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;padding:14px;background:#171b2d;border-radius:12px}.journal-calibration{font-size:13px;border-inline-start:3px solid #9381b8;padding-inline-start:12px}
+.journal-calibration small{display:block}.journal-rows{display:grid;gap:10px;margin:16px 0}.journal-entry{display:flex;justify-content:space-between;gap:12px;padding:15px;border-radius:12px;border:1px solid #31374d}.journal-entry b{font-size:13px}.journal-entry small{display:block;margin-top:5px}.journal-entry p{margin:8px 0;font-size:14px;overflow-wrap:anywhere}
+@media(max-width:760px){.journal-form{grid-template-columns:1fr}.journal-stat{display:grid;gap:6px}}
