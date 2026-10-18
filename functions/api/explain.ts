@@ -20,15 +20,19 @@ export async function onRequestPost({request,env}:Context){
   input=JSON.parse(text);
  }catch{return json({error:'Invalid JSON payload.'},400)}
  if(!input||!['ar','en'].includes(input.language)||!Array.isArray(input.evidence)||input.evidence.length>12)return json({error:'Invalid evidence packet.'},400);
- const evidence:unknown[]=[];
+ type Factor={transit:string;natal:string;angle:number;orb:number;applying:boolean;weight:number;direction:'supportive'|'challenging'|'neutral'};
+ const evidence:Factor[]=[];
  for(const e of input.evidence){
   if(!e||!bodies.has(e.transit)||!bodies.has(e.natal)||![0,60,90,120,180].includes(e.angle)||typeof e.orb!=='number'||!Number.isFinite(e.orb)||e.orb<0||e.orb>6||typeof e.weight!=='number'||!Number.isFinite(e.weight)||e.weight<0||e.weight>1||typeof e.applying!=='boolean')return json({error:'Invalid numeric evidence.'},400);
-  evidence.push({transit:e.transit,natal:e.natal,angle:e.angle,orb:e.orb,applying:e.applying,weight:e.weight});
+  const direction=[60,120].includes(e.angle)||(e.angle===0&&['Venus','Jupiter'].includes(e.transit))?'supportive':[90,180].includes(e.angle)||(e.angle===0&&['Saturn','Mars','Pluto','Uranus'].includes(e.transit))?'challenging':'neutral';
+  evidence.push({transit:e.transit,natal:e.natal,angle:e.angle,orb:e.orb,applying:e.applying,weight:e.weight,direction});
  }
  const indices:Record<string,number>={};
  for(const c of categories){const v=input.indices?.[c];if(typeof v==='number'&&Number.isFinite(v)&&v>=1&&v<=99)indices[c]=v}
- const system=`You explain calculated astrological evidence in ${input.language==='ar'?'natural Iraqi Arabic, using short clear sentences':'English'}. In each contact, transit is the current transiting body and natal is the birth-chart target. Never label the transiting body as natal. In Arabic use الجرم العابر for transit and جرم الولادة for natal. Explain the strongest supporting factor and strongest counter-factor, then one small reversible practical action. Use only the supplied evidence and symbolic indices. Never change calculations or invent contacts. Indices out of 100 are not measured probabilities, scientific predictions, or guarantees. Never infer another person's private feelings, consent or intentions. If no evidence exists, say there is insufficient evidence. Do not expose internal reasoning or output think tags. Do not include private profile details. /no_think`;
- const messages:Message[]=[{role:'system',content:system},{role:'user',content:JSON.stringify({indices,evidence})+'\n/no_think'}];
+ const strongestSupporting=evidence.filter(e=>e.direction==='supportive').sort((a,b)=>b.weight-a.weight)[0]??null;
+ const strongestChallenging=evidence.filter(e=>e.direction==='challenging').sort((a,b)=>b.weight-a.weight)[0]??null;
+ const system=`You explain calculated astrological evidence in ${input.language==='ar'?'natural Iraqi Arabic, using short clear sentences':'English'}. In each contact, transit is the current transiting body and natal is the birth-chart target. Never label the transiting body as natal. In Arabic use الجرم العابر for transit and جرم الولادة for natal. Explain the strongest supporting factor and strongest counter-factor, then one small reversible practical action. The calculation engine supplies direction, strongestSupporting and strongestChallenging. These classifications are authoritative within this symbolic model: do not reverse them. A square or opposition is never a supporting factor in this model. If strongestSupporting is null, state that no supporting factor appears in this evidence packet; never invent one. If strongestChallenging is null, state no challenging factor appears in this packet. Use only the supplied evidence and symbolic indices. Never change calculations or invent contacts. Indices out of 100 are not measured probabilities, scientific predictions, or guarantees. Never infer another person's private feelings, consent or intentions. If no evidence exists, say there is insufficient evidence. Do not expose internal reasoning or output think tags. Do not include private profile details. /no_think`;
+ const messages:Message[]=[{role:'system',content:system},{role:'user',content:JSON.stringify({indices,strongestSupporting,strongestChallenging,evidence})+'\n/no_think'}];
  try{
   let result:any;
   if(status.provider==='gateway'){
