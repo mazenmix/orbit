@@ -2,13 +2,14 @@ import {Temporal} from '@js-temporal/polyfill';
 import {calculateEclipses,type EclipseAPI} from './realEclipses.ts';
 import type {AsteroidSwiss} from './asteroidRuntime.ts';
 import {bodies,normalize,aspects,signals,scores,houseNumber,synastry,compatibilityScore,type Point,type Dimension} from './math.ts';
-export type Profile={id:string;name:string;date:string;time:string;zone:string;lat:number;lon:number;city:string;known:boolean;kind:'self'|'dating'|'work'|'friend'|'family'};
+export type Profile={id:string;name:string;date:string;time:string;zone:string;lat:number;lon:number;city:string;known:boolean;kind:'self'|'dating'|'work'|'friend'|'family';sex?:'male'|'female'};
 export const defaultProfile:Profile={id:'demo',name:'Demo',date:'2000-01-01',time:'12:00',zone:'Etc/UTC',lat:51.4779,lon:0,city:'Greenwich',known:true,kind:'self'};
 export function birthInstant(p:Profile){return new Date(Temporal.PlainDateTime.from(`${p.date}T${p.known?p.time:'12:00'}`).toZonedDateTime(p.zone,{disambiguation:'reject'}).epochMilliseconds)}
 export function zonedInstant(value:string,zone:string){return new Date(Temporal.PlainDateTime.from(value).toZonedDateTime(zone,{disambiguation:'reject'}).epochMilliseconds)}
 export function localValue(date:Date,zone:string){return Temporal.Instant.fromEpochMilliseconds(+date).toZonedDateTimeISO(zone).toPlainDateTime().toString().slice(0,16)}
 export function validateProfile(p:Profile){
  if(!p||typeof p.id!=='string'||!p.id||p.id.length>100||typeof p.name!=='string'||typeof p.city!=='string'||p.city.length>100||typeof p.zone!=='string'||typeof p.known!=='boolean'||!['self','dating','work','friend','family'].includes(p.kind))throw Error('Invalid profile fields.');
+ if(p.sex!==undefined&&!['male','female'].includes(p.sex))throw Error('Invalid Male/Female profile setting.');
  if(typeof p.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(p.date)||typeof p.time!=='string'||!/^\d{2}:\d{2}$/.test(p.time))throw Error('Invalid birth date or time.');
  if(!p.name.trim()||p.name.length>80)throw Error('Enter a name (1–80 characters).');
  if(!Number.isFinite(p.lat)||!Number.isFinite(p.lon)||Math.abs(p.lat)>90||Math.abs(p.lon)>180)throw Error('Invalid latitude / longitude.');
