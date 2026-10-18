@@ -108,7 +108,8 @@ export function calendarMomentEvidence(current:CalendarChart,natal:CalendarChart
   // invert "applying". Use a one-minute derivative at the actual longitude
   // and keep only the observed orb; no fictitious time-of-exactness.
   for(const contact of aspects([transit.get(id)!],fixed,at)){
-   const oneMinute=normalize(contact.transit.longitude+contact.transit.speed/1440);
+   const step=Math.sign(contact.transit.speed)*Math.min(Math.abs(contact.transit.speed)/1440,contact.orb/3);
+   const oneMinute=normalize(contact.transit.longitude+step);
    const nextOrb=Math.abs(distance(oneMinute,contact.natal.longitude)-contact.angle);
    results.push({...contact,applying:nextOrb+1e-10<contact.orb,exact:null});
   }

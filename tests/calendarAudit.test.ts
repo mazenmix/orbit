@@ -89,7 +89,7 @@ test('DST transition dates retain genuine local sampling on both sides of leap s
  }
 });
 test('no partial multi-sample days or fabricated outcome when any sample is missing',()=>{
- const sample=[{hour:4,evidence:[]},{hour:12,evidence:[]},{hour:20,evidence:[]}];
+ const sample=[{hour:4 as const,evidence:[]},{hour:12 as const,evidence:[]},{hour:20 as const,evidence:[]}];
  const r=calendarDaySynthesis(sample);
  assert.deepEqual(r.sampleScores,[50,50,50]);assert.equal(r.value,50);
  assert.equal(r.minimum,50);assert.equal(r.maximum,50);

@@ -340,14 +340,13 @@ function initializeAstroCalendar(){
 function astroCalendarDetail(iso:string){
  const snap=calendarSnapshots.get(iso);
  if(!snap)return '<div class="astro-day-compact-empty"><b>'+esc(iso)+'</b><span>'+t('دا تنحسب مواضع هذا اليوم…','Calculating this day…')+'</span></div>';
- const {data:r,value,color,at}=snap;
+ const {value,color,at}=snap;
  const date=new Intl.DateTimeFormat('en-US',{timeZone:active.zone,weekday:'short',day:'numeric',month:'short',year:'numeric',numberingSystem:'latn'}).format(at);
  const grade=color==='green'?t('مرتفع','High'):color==='yellow'?t('متوسط','Moderate'):t('منخفض','Low');
- const ranked=Object.entries(r.scores).sort((a,b)=>b[1]-a[1]);
  const factor=(e:typeof snap.strongestSupport,kind:'good'|'check',hour:number|null)=>e?
   '<span class="astro-compact-aspect '+kind+'"><span>'+(kind==='good'?t('✦ داعمة','✦ Favorable'):t('◇ متحدية','◇ Challenging'))+'</span><b>'+esc(planet(e.transit.id))+' '+aspect(e.angle)+' '+esc(planet(e.natal.id))+'</b><small dir="ltr">'+e.orb.toFixed(2)+'° · '+String(hour??12).padStart(2,'0')+':00</small></span>':'';
  const contacts=factor(snap.strongestSupport,'good',snap.strongestSupportHour)+factor(snap.strongestChallenge,'check',snap.strongestChallengeHour);
- return '<div class="astro-day-compact-head"><div class="astro-day-compact-title"><span class="astro-day-kicker">'+t('حظ اليوم · 3 أوقات','Daily fortune · 3 checkpoints')+'</span><h3 dir="ltr">'+esc(date)+'</h3><small>'+t('الأعلى: ','Top: ')+cat(ranked[0][0] as Category)+' '+ranked[0][1]+' · '+t('الأقل: ','Lowest: ')+cat(ranked[ranked.length-1][0] as Category)+' '+ranked[ranked.length-1][1]+'</small></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'<small>/100</small></b><span>'+grade+'</span></div></div>'+
+ return '<div class="astro-day-compact-head"><div class="astro-day-compact-title"><span class="astro-day-kicker">'+t('حظ اليوم · 3 أوقات','Daily fortune · 3 checkpoints')+'</span><h3 dir="ltr">'+esc(date)+'</h3><small>'+t('القراءة من مواضع الكواكب والزوايا على مدار اليوم','Daily score based on three verified sky checkpoints')+'</small></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'<small>/100</small></b><span>'+grade+'</span></div></div>'+
   '<div class="astro-day-compact-aspects">'+(contacts||'<span class="astro-compact-no-aspect">'+t('ماكو زاوية قريبة مهيمنة بهذا الوقت.','No dominant close aspect at this time.')+'</span>')+'</div>'+
   '<div class="astro-day-compact-footer"><small>'+t('الفحص: 04 / 12 / 20 · المدى ','Checks: 04 / 12 / 20 · range ')+snap.minimum+'–'+snap.maximum+' · '+t('مؤشر رمزي مو تنبؤ','Symbolic index, not a forecast')+'</small><button type="button" class="secondary astro-day-open-time" data-calendar-open="'+(+at)+'">'+t('تفاصيل بآلة الزمن','Time Machine details')+' ↗</button></div>';
 }
