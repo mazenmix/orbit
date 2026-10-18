@@ -108,8 +108,8 @@ test('live sky wheel is directly tappable and launches an expanded SVG modal',()
 test('fortune calendar color must come from genuine aspect weights and show transparent proof',()=>{
  assert.ok(main.includes('colorizeAstroDay(r.evidence)'));
  assert.ok(!main.includes('colorizeAstroDay(r.scores)'));
- assert.ok(main.includes('snap.favorableWeight.toFixed(3)'));
- assert.ok(main.includes('snap.challengingWeight.toFixed(3)'));
+ assert.ok(main.includes('snap.strongestSupport'));
+ assert.ok(main.includes('snap.strongestChallenge'));
  assert.ok(main.includes("localValue(at,active.zone).slice(0,16)"));
  assert.ok(main.includes('calendarFailures.set(day.iso'));
 });
