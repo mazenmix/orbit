@@ -48,3 +48,26 @@ export function actionForGender(value:string,sex?:'male'|'female'){
  const alternatives:Record<string,string>={'حدد':'حددي','راجع':'راجعي','اشرح':'اشرحي','صرّح':'صرّحي','اختار':'اختاري','تعلم':'تعلمي','قسّم':'قسّمي','سمِّ':'سمّي','لاحظ':'لاحظي','ركز':'ركّزي','رتب':'رتّبي'};
  return value.replace(/^[^\s]+/,verb=>alternatives[verb]??verb);
 }
+
+/** Respect each stored person's chosen Male/Female setting for grammatical address.
+ * Gender affects Iraqi Arabic wording only, never sky coordinates or probabilities.
+ */
+export function partnerArabic(value:string,sex?:'male'|'female'){
+ if(sex==='female')return value;
+ const masculine:Record<string,string>={
+  'رغبتها':'رغبته','رغباتها':'رغباته','أفكارها':'أفكاره','أحلامها':'أحلامه',
+  'مشاعرها':'مشاعره','خصوصيتها':'خصوصيته','حدودها':'حدوده','رأيها':'رأيه',
+  'راحتها':'راحته','إلها':'إله','عندها':'عنده','تفضيلاتها':'تفضيلاته',
+  'إعجابها':'إعجابه','قرارها':'قراره','شخصيتها':'شخصيته'
+ };
+ const neutral:Record<string,string>={
+  'رغبتها':'الرغبة الشخصية','رغباتها':'الرغبات الخاصة',
+  'أفكارها':'الأفكار الخاصة','أحلامها':'الأحلام الشخصية','مشاعرها':'المشاعر الخاصة',
+  'خصوصيتها':'الخصوصية الشخصية','حدودها':'الحدود الشخصية','رأيها':'الرأي الشخصي',
+  'راحتها':'الراحة الشخصية','إلها':'للطرف المقابل','عندها':'عند الطرف المقابل',
+  'تفضيلاتها':'التفضيلات الخاصة','إعجابها':'الإعجاب','قرارها':'قرار الطرف المقابل',
+  'شخصيتها':'شخصية الطرف المقابل'
+ };
+ const mapping=sex==='male'?masculine:neutral;
+ return value.replace(/رغباتها|تفضيلاتها|خصوصيتها|شخصيتها|رغبتها|أفكارها|أحلامها|مشاعرها|حدودها|إعجابها|قرارها|راحتها|رأيها|إلها|عندها/g,part=>mapping[part]??part);
+}
