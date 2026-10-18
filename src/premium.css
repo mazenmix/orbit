@@ -80,3 +80,6 @@ input:focus,select:focus,textarea:focus{outline:1px solid #bc97ff;border-color:#
 }
 @media(max-width:375px){.mobile-nav .nav-item b{font-size:8px}.mobile-nav .nav-item span{font-size:19px}}
 @media(prefers-reduced-motion:reduce){.mx-section-tab{transition:none}}
+
+/* Dedicated lunar navigation fits alongside the six other main destinations. */
+@media(max-width:760px){.mobile-nav{gap:0}.mobile-nav .nav-item{min-width:0;max-width:none;flex:1 1 0}.mobile-nav .nav-item b{font-size:clamp(7px,1.85vw,9px);letter-spacing:-.035em}.mobile-nav .nav-item span{font-size:20px}}

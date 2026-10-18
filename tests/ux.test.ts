@@ -21,8 +21,8 @@ test('Asteroid readings and evidence UI are narrative-first and confidential bir
 });
 
 
-test('main navigation exposes six primary destinations without redundant sections',()=>{
- assert.match(main,/const primaryRoutes=\['today','chart','people','time','intel','settings'\]/);
+test('main navigation exposes seven primary destinations without redundant sections',()=>{
+ assert.match(main,/const primaryRoutes=\['today','chart','people','time','lunar','intel','settings'\]/);
  assert.match(main,/nav\(primaryRoutes\)/);
  assert.match(main,/nav\(primaryRoutes,true\)/);
  assert.ok(!main.includes("nav(['today','signals','people','chart'])"));
