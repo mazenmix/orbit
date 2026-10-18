@@ -154,7 +154,20 @@ function evidencePage(){
  '<div class="narrative-grid">'+(narrative||'<section class="panel">'+t('الاتصالات الحالية قليلة؛ اختار لحظة ثانية من آلة الزمن لقراءة مختلفة.','Few current contacts; select another moment in Time Machine.')+'</section>')+'</div>'+
  '<details class="panel evidence-technical"><summary>'+t('للمهتمين: الأرقام والزوايا الفلكية التفصيلية','For advanced users: detailed positions and aspect geometry')+'</summary><div class="eclipse-contacts">'+r.evidence.map(e=>'<span><b>'+esc(technical(e))+'</b></span>').join('')+'</div></details>';
 }
-function profileForm(p:Profile,isNew=false){return `<form id="profile-form" class="profile-form"><input name="id" type="hidden" value="${esc(p.id)}"><input name="isNew" type="hidden" value="${isNew}"><div class="form-grid"><label>${t('الاسم','Name')}<input name="name" required maxlength="80" value="${esc(p.name)}"></label><label>${t('نوع الملف','Profile type')}<select name="kind">${(['self','dating','work','friend','family'] as const).map((k,i)=>`<option value="${k}" ${k===p.kind?'selected':''}>${t(['ملفي الشخصي','علاقة عاطفية','عمل','صديق','عائلة'][i],['My profile','Dating','Work','Friend','Family'][i])}</option>`).join('')}</select></label><label>${t('تاريخ الولادة','Birth date')}<input name="date" type="date" required min="1800-01-01" max="2399-12-31" value="${esc(p.date)}"></label><label>${t('وقت الولادة','Birth time')}<input name="time" type="time" required value="${esc(p.time)}"></label><label class="checkbox"><input name="known" type="checkbox" ${p.known?'checked':''}>${t('وقت الولادة معروف','Birth time is known')}</label><label>${t('المنطقة الزمنية التاريخية','Historical time zone')}<input name="zone" required value="${esc(p.zone)}" placeholder="Asia/Baghdad"></label><label>${t('المدينة','City')}<input name="city" required maxlength="100" value="${esc(p.city)}"></label><label>${t('خط العرض','Latitude')}<input name="lat" type="number" step="any" min="-90" max="90" required value="${p.lat}"></label><label>${t('خط الطول','Longitude')}<input name="lon" type="number" step="any" min="-180" max="180" required value="${p.lon}"></label></div><p class="subtle">${t('إذا الوقت مو معروف، ننحّي القمر والزوايا والبيوت من التوافق. معلوماتك تنحفظ بهالمتصفح فقط.','Unknown birth time excludes the Moon, angles and houses from synastry. Your data is stored only in this browser.')}</p><button class="primary">${t('حفظ الملف','Save profile')}</button><p class="form-error" role="alert"></p></form>`}
+function zoneChoices(current:string){
+ const world=typeof Intl.supportedValuesOf==='function'?Intl.supportedValuesOf('timeZone'):[];
+ return [...new Set(['Asia/Baghdad','Asia/Manila','America/Denver','Europe/Istanbul','Asia/Jakarta','Etc/UTC',current,...world])].sort((a,b)=>a.localeCompare(b));
+}
+function profileForm(p:Profile,isNew=false){
+ const choices=zoneChoices(p.zone).map(z=>'<option value="'+esc(z)+'" '+(z===p.zone?'selected':'')+'>'+esc(z.replaceAll('_',' '))+'</option>').join('');
+ return '<form id="profile-form" class="profile-form" data-place-selected="'+(isNew?'no':'yes')+'"><input name="id" type="hidden" value="'+esc(p.id)+'"><input name="isNew" type="hidden" value="'+isNew+'">'+
+ '<div class="form-grid"><label>'+t('الاسم','Name')+'<input name="name" required maxlength="80" value="'+esc(p.name)+'"></label><label>'+t('نوع الملف','Profile type')+'<select name="kind">'+(['self','dating','work','friend','family'] as const).map((k,i)=>'<option value="'+k+'" '+(k===p.kind?'selected':'')+'>'+t(['ملفي الشخصي','علاقة عاطفية','عمل','صديق','عائلة'][i],['My profile','Dating','Work','Friend','Family'][i])+'</option>').join('')+'</select></label>'+
+ '<label>'+t('تاريخ الولادة','Birth date')+'<input name="date" type="date" required min="1800-01-01" max="2399-12-31" value="'+esc(p.date)+'" lang="en"></label><label>'+t('وقت الولادة','Birth time')+'<input name="time" type="time" required value="'+esc(p.time)+'" lang="en"></label>'+
+ '<label class="checkbox"><input name="known" type="checkbox" '+(p.known?'checked':'')+'>'+t('وقت الولادة معروف','Birth time is known')+'</label>'+
+ '<div class="place-picker"><label>'+t('اختار مدينة أو محافظة الولادة من أي مكان بالعالم','Find your birth city or province worldwide')+'<input type="search" id="place-search" autocomplete="off" value="'+esc(p.city)+'" placeholder="'+t('اكتب بغداد، Manila، Denver…','Type Baghdad, Manila, Denver…')+'"></label><p class="subtle">'+t('اختار نتيجة من القائمة؛ المنطقة الزمنية وخطوط الموقع تنحفظ أوتوماتيكياً.','Choose a result below; the timezone and location coordinates are filled automatically.')+'</p><div id="place-results" class="place-results" role="listbox" aria-live="polite"></div><input type="hidden" name="city" value="'+esc(p.city)+'"><input type="hidden" name="lat" value="'+p.lat+'"><input type="hidden" name="lon" value="'+p.lon+'"><div id="chosen-place" class="chosen-place">'+(isNew?t('اختار مدينة حتى تكتمل بيانات المكان.','Select a city to confirm its coordinates.'):esc(p.city))+'</div></div>'+
+ '<label class="timezone-field">'+t('المنطقة الزمنية التاريخية — اختار من القائمة','Historical time zone — select from list')+'<select name="zone" id="timezone-list" required>'+choices+'</select><small>'+t('تتغير تلقائياً لما تختار المدينة، وتكدر تصححها من القائمة.','Automatically set from the chosen city. You can also change it here.')+'</small></label></div>'+
+ '<button class="primary" type="submit">'+t('حفظ الملف','Save profile')+'</button><p class="form-error" role="alert"></p></form>';
+}
 function journalPanel(person:Profile){
  const rows=readJournal().filter(x=>x.personId===person.id).sort((a,b)=>b.at.localeCompare(a.at));
  const summary=summarizeJournal(rows);
@@ -236,7 +249,46 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
  on('install',async()=>{if(installPrompt){await installPrompt.prompt();installPrompt=null}else toast(t('استخدم قائمة المتصفح ← تثبيت التطبيق، أو مشاركة ← إضافة إلى الشاشة الرئيسية على الآيفون.','Use your browser menu → Install app, or Share → Add to Home Screen on iPhone.'))});
 }
 function on(id:string,action:()=>void){const e=root.querySelector<HTMLElement>('#'+id);if(e)e.onclick=action}
-function bindProfileForm(scope:ParentNode){const form=scope.querySelector<HTMLFormElement>('#profile-form');if(!form)return;form.onsubmit=e=>{e.preventDefault();try{const f=new FormData(form);const p=validateProfile({id:String(f.get('id')),name:String(f.get('name')).trim(),date:String(f.get('date')),time:String(f.get('time')),zone:String(f.get('zone')).trim(),lat:Number(f.get('lat')),lon:Number(f.get('lon')),city:String(f.get('city')).trim(),known:f.get('known')==='on',kind:String(f.get('kind')) as Profile['kind']});const next=profiles.some(i=>i.id===p.id)?profiles.map(i=>i.id===p.id?p:i):[...profiles,p];if(!next.some(p=>p.kind==='self'))throw Error(t('لازم يبقى ملف شخصي واحد على الأقل.','Keep at least one My profile.'));saveProfiles(next);profiles=next;if(active.id===p.id)active=p.kind==='self'?p:profiles.find(p=>p.kind==='self')!;cache.clear();closeDialog();recalculate();render();toast(t('انحفظ الملف على جهازك','Profile saved on your device'))}catch(err){form.querySelector('.form-error')!.textContent=String(err)}}}
+function bindProfileForm(scope:ParentNode){
+ const form=scope.querySelector<HTMLFormElement>('#profile-form');if(!form)return;
+ const input=form.querySelector<HTMLInputElement>('#place-search')!,options=form.querySelector<HTMLDivElement>('#place-results')!;
+ const chosen=form.querySelector<HTMLDivElement>('#chosen-place')!,zone=form.querySelector<HTMLSelectElement>('[name=zone]')!;
+ let token=0,searchDelay=0;
+ async function findPlaces(){
+  const query=input.value.trim(),request=++token;
+  options.innerHTML='';if(query.length<2)return;
+  options.textContent=t('دا أدوّر على المدن…','Searching for places…');
+  try{
+   const response=await fetch('/api/places?q='+encodeURIComponent(query),{signal:AbortSignal.timeout(12000)});
+   if(!response.ok)throw Error(t('خدمة المدن غير متاحة حالياً.','City search is temporarily unavailable.'));
+   const payload=await response.json() as {results?:{name:string;label:string;lat:number;lon:number;zone:string}[]};
+   if(request!==token)return;
+   const matches=payload.results??[];
+   options.innerHTML=matches.length?'':t('ما لقيت مكان مطابق، جرّب اسم المحافظة أو الاسم بالإنكليزي.','No matching place. Try the province or English spelling.');
+   for(const city of matches){
+    const item=document.createElement('button');item.type='button';item.className='place-option';item.textContent=city.label+' · '+city.zone;item.setAttribute('role','option');
+    item.onclick=()=>{
+     form.querySelector<HTMLInputElement>('[name=city]')!.value=city.label;
+     form.querySelector<HTMLInputElement>('[name=lat]')!.value=String(city.lat);
+     form.querySelector<HTMLInputElement>('[name=lon]')!.value=String(city.lon);
+     if(![...zone.options].some(o=>o.value===city.zone)){const o=new Option(city.zone,city.zone);zone.add(o)}
+     zone.value=city.zone;form.dataset.placeSelected='yes';input.value=city.label;chosen.textContent=city.label+' · '+city.zone;
+     options.innerHTML='';form.querySelector('.form-error')!.textContent='';
+    };options.appendChild(item);
+   }
+  }catch(e){if(request===token)options.textContent=String(e)}
+ }
+ input.addEventListener('input',()=>{form.dataset.placeSelected='no';chosen.textContent=t('اختار مكان من نتائج البحث','Choose a result to confirm the location');window.clearTimeout(searchDelay);searchDelay=window.setTimeout(findPlaces,350)});
+ input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();window.clearTimeout(searchDelay);void findPlaces()}});
+ form.onsubmit=e=>{e.preventDefault();try{
+  if(form.dataset.placeSelected!=='yes')throw Error(t('اختار المدينة من النتائج حتى تنحط الإحداثيات تلقائياً.','Choose a city from search results so coordinates are set automatically.'));
+  const f=new FormData(form);const p=validateProfile({id:String(f.get('id')),name:String(f.get('name')).trim(),date:String(f.get('date')),time:String(f.get('time')),zone:String(f.get('zone')).trim(),lat:Number(f.get('lat')),lon:Number(f.get('lon')),city:String(f.get('city')).trim(),known:f.get('known')==='on',kind:String(f.get('kind')) as Profile['kind']});
+  const next=profiles.some(i=>i.id===p.id)?profiles.map(i=>i.id===p.id?p:i):[...profiles,p];
+  if(!next.some(p=>p.kind==='self'))throw Error(t('لازم يبقى ملف شخصي واحد على الأقل.','Keep at least one My profile.'));
+  saveProfiles(next);profiles=next;if(active.id===p.id)active=p.kind==='self'?p:profiles.find(p=>p.kind==='self')!;
+  cache.clear();closeDialog();recalculate();render();toast(t('انحفظ الملف والمنطقة الزمنية والموقع','Profile, location and timezone saved'));
+ }catch(err){form.querySelector('.form-error')!.textContent=String(err)}};
+}
 function showDialog(html:string){const d=root.querySelector<HTMLDialogElement>('#detail')!;d.querySelector('#dialog-content')!.innerHTML=`<button id="close-dialog" class="icon-button close" aria-label="${t('إغلاق','Close')}">×</button>${html}`;d.querySelector<HTMLButtonElement>('#close-dialog')!.onclick=closeDialog;d.showModal()}
 function closeDialog(){root.querySelector<HTMLDialogElement>('#detail')?.close()}
 function editProfile(p:Profile,isNew=false){showDialog(`<h2>${isNew?t('إضافة شخص','Add person'):t('تعديل الملف','Edit profile')}</h2>${profileForm(p,isNew)}${!isNew?`<button id="remove-person" class="text-button danger">${t('حذف الملف','Delete profile')}</button>`:''}`);bindProfileForm(root.querySelector('dialog')!);const remove=root.querySelector<HTMLButtonElement>('#remove-person');if(remove)remove.onclick=()=>{if(p.kind==='self'&&profiles.filter(p=>p.kind==='self').length===1)return toast(t('لازم يبقى ملف شخصي واحد.','Keep one My profile.'));showDialog(`<h2>${t('حذف الملف؟','Delete profile?')}</h2><p>${esc(p.name)}</p><button id="confirm-remove" class="primary">${t('حذف من هالمتصفح','Delete from this browser')}</button>`);root.querySelector<HTMLButtonElement>('#confirm-remove')!.onclick=()=>{profiles=profiles.filter(i=>i.id!==p.id);saveProfiles(profiles);if(active.id===p.id)active=profiles.find(p=>p.kind==='self')!;compareId='';cache.clear();closeDialog();recalculate();render();toast(t('انحذف الملف','Profile deleted'))}}}
