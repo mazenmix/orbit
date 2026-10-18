@@ -30,6 +30,11 @@ pnpm preview
 - Iraqi Arabic RTL / English LTR, mobile navigation and desktop sidebar.
 - PWA manifest, install icons, static offline caching, and original repository brand asset.
 - Qwen3 explanation engine through the Cloudflare Workers AI binding; optional custom gateway support. No browser model download or client-side API key.
+- Moon VOC period and sign ingress from a specific classical-aspect convention with ephemeris root refinement, plus .ics calendar alarms.
+- Secondary progressions (one-day-per-year), solar arc directions and exact solar return near/after the selected birthday.
+- MX Intelligence: 23 derived symbolic indices from eight core categories, four Go Mode summaries and evidence-backed WHY NOW.
+- Optional AES-256-GCM password-protected JSON backup export/import.
+- Opt-in MX Eye foreground lunar, hourly, and daily alerts with one-shot deduplication; background Web Push is not included.
 
 ## Calculations and limits
 
@@ -71,13 +76,13 @@ References: [Cloudflare Pages AI bindings](https://developers.cloudflare.com/pag
 | --- | --- |
 | Apple Watch companion | Responsive installable dashboard; no watchOS app |
 | iOS widgets | PWA home-screen icon and quick dashboard; no WidgetKit widgets |
-| Background local alert scheduling | Not implemented; Web Push requires a server, permission and supported installed PWA conditions |
+| Background local alert scheduling | Foreground reminders while the web page is open; no OS-level background Web Push or watch integration |
 | Native on-device llama.cpp Qwen3 | Cloudflare-hosted Qwen3; evidence sent only on explicit explanation request |
-| Native calendar integration | Not implemented; future explicit calendar-file export is feasible |
+| Native calendar integration | Downloadable .ics reminders with a 15-minute alarm; no native EventKit integration |
 
 ## Verification
 
-27 automated tests: direct Swift mathematical vectors, historical timezones, source score/synastry cases, three independent official native Swiss Ephemeris reference snapshots, Time Machine, unknown-time exclusions, polar-house handling and gateway privacy/input checks. The native/WASM reference tolerance is 0.000001° across all 16 bodies' longitude/speed, 12 cusps, ASC and MC at three dates. Native fixture provenance is in `tests/fixtures/native-swiss.json`.
+61 automated tests as of the 2026-10-18 MX Eye foreground update: direct Swift mathematical vectors, historical timezones, source score/synastry cases, three independent official native Swiss Ephemeris reference snapshots, Time Machine, unknown-time exclusions, polar-house handling and gateway privacy/input checks. The native/WASM reference tolerance is 0.000001° across all 16 bodies' longitude/speed, 12 cusps, ASC and MC at three dates. Native fixture provenance is in `tests/fixtures/native-swiss.json`.
 
 This does **not** establish complete Swift-app or v2.3.2 score equivalence: post-processing and advanced source layers remain pending. See the audit and verification notes.
 

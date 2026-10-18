@@ -32,12 +32,12 @@ Vendored Swiss module loading is separated from Vite transformation so its WASM/
 | Core signals | Grouping, top-four factors, supportive/challenging rules, evidence tiers, tone, directional scores, annual-house +5 boost | `SignalResolver` live-asteroid augmentation, `DecisionEngine` humanization/finalization and contradiction/timing refinement not ported |
 | Interpretation copy | Clear Iraqi Arabic/English, based on the source's practical guidance | Curated condensed copy; exact stable-hash variant selection and every original narrative not ported |
 | Synastry | Source aspect orbs/influence, relevance/geometry tables, overlay bonuses, six dimensions, role-aware overall weighting, unknown-time handling | Partner timing/intimacy narrative, relationship history, CRM and notification workflows not ported |
-| Profiles | CRUD, local storage, JSON backup/restore and calculation-receipt export | Native encrypted backup migration and Keychain storage not ported |
+| Profiles | CRUD, local storage, JSON backup/restore, optionally password-encrypted AES-256-GCM backups, and calculation-receipt export | Existing localStorage is still unencrypted; native Keychain, migration and cross-device sync not ported |
 | Charts | Natal/transit/overlay SVG wheels, positions, speeds and cusps | v2.3.2 chart interaction design unknown |
-| Time Machine | Requested moment recalculation and 24-hour symbolic-index chart | Advanced convergence, secondary progressions, solar arcs, solar returns, profection narrative and heatmaps not ported |
-| Astrology extensions | Six minor bodies supported | 56 live/named asteroid augmentation, VOC root search, eclipse/event catalogue and notification schedules not ported |
-| Qwen3 | Actual Cloudflare-hosted Qwen3 through the AI binding, connection status, evidence-packet copy and optional custom gateway; live HTTP 200 Arabic explanation verified | Original v2.3.2 prompt templates and native llama.cpp runtime remain unavailable; hosted inference is not native on-device parity |
-| PWA | Install manifest and same-origin offline shell/assets | Browser/OS push notifications and native widget/watch integrations are not implemented |
+| Time Machine | Moment recalculation, 24-hour trend, secondary progressions (day-for-year), solar arc, exact selected-year and next Solar Return | Advanced convergence beyond Moon/Sun roots, full profection narratives, heatmaps and v2.3.2 parity outstanding |
+| Astrology extensions | Six minor bodies, conventional classical Moon VOC, exact aspect roots, lunar sign ingress and calendar export | 56 further named asteroid resources, eclipse catalogue, alternative VOC systems and backend push schedules not ported |
+| Qwen3 | Actual Cloudflare-hosted Qwen3, evidence-packet copy, 23 explicitly derived symbolic indicators, Go Mode and calculated WHY NOW evidence | Original v2.3.2 prompts and native llama.cpp not recovered; derived values are not 23 independent validated forecasts |
+| PWA | Install manifest, offline shell, optional foreground MX Eye reminders and lunar calendar export | Full Web Push while closed, watchOS, and iOS widgets not implemented |
 
 Core synastry tables preserve the source's pair-key entries exactly. Some source keys are not in the sorted pair-key order used by its lookup; no silent model corrections were introduced. Source score matching therefore must be distinguished from changing the scoring model.
 

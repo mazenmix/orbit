@@ -61,3 +61,14 @@ The public repository's anonymous demo configuration passed all 20 automated tes
 - `GET https://mxastro.pages.dev/api/explain` returned `configured: true`, `provider: cloudflare`, and `model: @cf/qwen/qwen3-30b-a3b-fp8`. That is connection-state evidence, **not** a fresh model-inference success test.
 - The default demo remains Greenwich/UTC by design until the visitor enters their own local profile. This is now made explicit to avoid misrepresenting anonymous readings as a personal natal chart.
 - Native v2.3.2 UI parity, iPhone Safari lifecycle, push scheduling, and advanced event/asteroid engines remain unverified or unimplemented as documented in SOURCE_AUDIT.md.
+
+## Functional continuation — 2026-10-18 09:06 UTC
+
+- Moon VOC/ingress root search, classical five-angle exact scan and 15-minute lead calendar reminder export implemented.
+- Added secondary progressions, solar arc directions, exact Solar Return near the selected birthday and the next future return.
+- Added 23 derived symbolic indicators, WHY NOW evidence, and four Go Mode heuristic summaries. None are event probabilities.
+- Added AES-256-GCM password-protected backup export/import using PBKDF2-SHA256 (310,000 iterations), no password persistence. Browser localStorage itself is not encrypted.
+- Added opt-in foreground Moon, hourly and daily reminders with deduplication. Background push and watchOS are not claimed.
+- GitHub Actions run 39113962881 passed 61/61 tests, production build and artifact upload; later runs cover the follow-up next Solar Return change.
+- Live inspections confirmed /#lunar, /#intel, /#advanced, /#settings and configured Qwen3 server binding on mxastro.pages.dev.
+- Remaining: v2.3.2 source/UI parity, 56 named asteroid resources, eclipse/event catalogue, backend Web Push, native widgets and Apple Watch integration.
