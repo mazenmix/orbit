@@ -51,3 +51,13 @@ The public repository's anonymous demo configuration passed all 20 automated tes
 - This validates the deployed server-side Qwen3 path, not native on-device llama.cpp parity or quality guarantees for every interpretation.
 
 - Follow-up: supporting/challenging classifications and strongest-factor selection are now supplied deterministically by the calculation layer. Qwen3 is instructed to preserve them, and an all-challenging packet is covered by a regression test. Total automated tests: 27.
+
+## Live follow-up — 2026-10-18 08:41 UTC
+
+- Continued **the existing live mxastro project**, backed by `mazenmix/orbit`, rather than creating a separate site.
+- Commit `fef9e90ccf12c7c742c4cb57ae9a874c3860964f` followed the initial presentation patch to normalize Unicode whitespace/punctuation reliably.
+- GitHub Actions run [39112340310](https://github.com/mazenmix/orbit/actions/runs/39112340310) passed `pnpm test`, `pnpm build`, and artifact upload; 39 tests including four distinct-highlight regressions.
+- A fresh fetch of https://mxastro.pages.dev/ after that run returned the anonymous-demo explanation and distinct secondary signal actions, confirming visible live deployment.
+- `GET https://mxastro.pages.dev/api/explain` returned `configured: true`, `provider: cloudflare`, and `model: @cf/qwen/qwen3-30b-a3b-fp8`. That is connection-state evidence, **not** a fresh model-inference success test.
+- The default demo remains Greenwich/UTC by design until the visitor enters their own local profile. This is now made explicit to avoid misrepresenting anonymous readings as a personal natal chart.
+- Native v2.3.2 UI parity, iPhone Safari lifecycle, push scheduling, and advanced event/asteroid engines remain unverified or unimplemented as documented in SOURCE_AUDIT.md.
