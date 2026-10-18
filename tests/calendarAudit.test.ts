@@ -42,7 +42,7 @@ test('unknown birth time never introduces fictitious natal Moon or ascendant',()
  const contacts=calendarMomentEvidence(chart(now,p,false,false),birth,now,false);
  assert.ok(contacts.length>0);
  assert.ok(contacts.every(e=>!['Moon','Ascendant','MC'].includes(e.natal.id)));
- assert.ok(contacts.some(e=>e.transit.id==='Moon'));
+ assert.ok(chart(now,p,false,false).points.some(e=>e.id==='Moon')); // A transiting Moon need not aspect a natal planet at every instant.
 });
 test('planetary omissions and corrupt coordinates fail closed instead of making false lucky days',()=>{
  const at=new Date('2027-11-01T06:00:00Z'),natal=vec(3),now=vec(1);

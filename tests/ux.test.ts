@@ -112,7 +112,7 @@ test('fortune calendar color must come from genuine aspect weights and show tran
  assert.ok(!main.includes('colorizeAstroDay(r.scores)'));
  assert.ok(main.includes('snap.strongestSupport'));
  assert.ok(main.includes('snap.strongestChallenge'));
- assert.ok(main.includes("localValue(at,active.zone).slice(0,16)"));
+ assert.ok(main.includes("localValue(sampledAt,active.zone).slice(0,16)"));
  assert.ok(main.includes('calendarFailures.set(day.iso'));
 });
 
