@@ -1,4 +1,5 @@
 import {namedAsteroids} from '../../src/asteroids.ts';
+import {reviewGeneratedAdvice} from '../../src/aiQuality.ts';
 type Message={role:'system'|'user';content:string};
 type AIInput={messages:Message[];temperature:number;max_tokens:number;stream:false};
 type Env={AI?:{run:(model:string,input:AIInput)=>Promise<unknown>};QWEN_GATEWAY_URL?:string;QWEN_GATEWAY_TOKEN?:string;QWEN_MODEL?:string};
