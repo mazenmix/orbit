@@ -115,3 +115,16 @@
 @media(max-width:680px){.soul-hero{grid-template-columns:108px 1fr;padding:11px;min-height:0}.soul-art{grid-row:1}.soul-identity h2{font-size:19px}.soul-identity strong{font-size:12px}.soul-identity>p{font-size:11px;margin-top:8px}.soul-hero-stats{grid-column:1/-1;grid-row:2}.soul-profile-strip{justify-content:flex-start;gap:8px 13px;padding:9px}.soul-planet-card>b{font-size:11px}.soul-who{padding:16px}.soul-who-title h3{font-size:20px}.soul-library-head{align-items:stretch;flex-direction:column}.soul-search{width:100%;max-width:none}.soul-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.soul-category{min-height:90px}.soul-reading-heading{padding:13px}.soul-reading-heading-main h3{font-size:16px}.soul-reading-heading>b{font-size:10px;padding:5px 7px}.soul-focus-icon{width:50px;height:49px}.soul-detail-grid{grid-template-columns:1fr}.soul-topic-header{align-items:flex-start;flex-direction:column}.soul-topic-content{padding:12px}.soul-owner-picker label{width:100%;justify-content:space-between}.soul-owner-picker select{min-width:0;width:65%}}
 @media(max-width:410px){.soul-category-grid{grid-template-columns:1fr}.soul-category{grid-template-columns:42px 1fr;min-height:76px}.soul-hero{grid-template-columns:92px 1fr}.soul-identity h2{font-size:17px}.soul-identity strong{font-size:11px}.soul-planet-card{padding:5px 3px}.soul-planet-symbol{font-size:22px}.soul-who-traits{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.soul-dashboard button{transition:none}.soul-category:hover{transform:none}}
+
+/* Optional, explicitly user-triggered Qwen3 expansion within one Soul topic. */
+.soul-ai-section{margin-top:17px;border:1px solid #5b477e;border-radius:14px;padding:17px;background:linear-gradient(120deg,#251a3a,#141b2c)}
+.soul-ai-head{display:flex;align-items:center;justify-content:space-between;gap:17px}
+.soul-ai-head h4{color:#e9d4ff;font-size:16px;margin:3px 0}
+.soul-ai-head p{font-size:12px;color:#c3bdd8;line-height:1.8;margin:3px 0}
+.soul-ai-trigger{background:linear-gradient(145deg,#65439b,#3e2c76);border:1px solid #b28ae7;border-radius:10px;color:#fff;flex:none;padding:12px 14px;font-size:12px;min-width:170px;box-shadow:0 0 15px #8959d833}
+.soul-ai-trigger:hover{background:linear-gradient(145deg,#7550b0,#55358a)}
+.soul-ai-trigger:disabled{opacity:.6}
+.soul-ai-result{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:15px}
+.soul-ai-result .soul-detail-box{background:linear-gradient(130deg,#251f3d,#14192b);border-color:#4c426a}
+.soul-ai-error{font-size:12px;color:#f3b6ab;border:1px solid #73484b;background:#4b29302e;padding:11px;border-radius:9px;margin-top:13px}
+@media(max-width:700px){.soul-ai-head{flex-direction:column;align-items:stretch}.soul-ai-result{grid-template-columns:1fr}.soul-ai-trigger{width:100%}}
