@@ -163,3 +163,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .partner-overview .clear-gauges .partner-score{display:grid}
 @media(max-width:930px){.reading-asteroids,.narrative-grid,.partner-insights-grid{grid-template-columns:1fr}.partner-overview .dimension-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.reading-asteroids,.narrative-grid,.partner-insights-grid,.clear-gauges,.partner-overview .dimension-grid{grid-template-columns:1fr}.meaning-card{padding:17px}.partner-insight{padding:16px}.brand-wordmark{font-size:21px}.place-picker .subtle{font-size:11px}}
+
+/* Eight-domain dashboard: a gauge accompanied by a single, concrete interpretation. */
+.rich-scores{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.rich-scores .score-card{min-height:173px;padding:18px;align-content:start;gap:5px}
+.rich-scores .score-card b{font-size:14px;color:#e6e0ef;font-weight:700;margin-top:5px}
+.rich-scores .score-card p{grid-column:1/-1;color:#bfc4d7;font-size:12px;line-height:1.8;min-height:48px;margin:4px 0}
+.rich-scores .score-card .meter{height:4px;margin-top:5px}
+.rich-scores .score-card.strong .meter i{background:#5ae3a3}
+.rich-scores .score-card.steady .meter i{background:#a0d78a}
+.rich-scores .score-card.caution .meter i{background:#edab5b}
+.rich-scores .score-card.low .meter i{background:#eb7c67}
+.rich-scores .score-card.strong .score-number{color:#75ebaf}.rich-scores .score-card.steady .score-number{color:#b4d999}
+.rich-scores .score-card.caution .score-number{color:#eeba7d}.rich-scores .score-card.low .score-number{color:#ee9988}
+@media(max-width:1300px){.rich-scores{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.rich-scores{grid-template-columns:1fr}.rich-scores .score-card{min-height:125px}.rich-scores .score-card p{min-height:0}}
