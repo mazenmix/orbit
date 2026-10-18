@@ -128,3 +128,5 @@
 .soul-ai-result .soul-detail-box{background:linear-gradient(130deg,#251f3d,#14192b);border-color:#4c426a}
 .soul-ai-error{font-size:12px;color:#f3b6ab;border:1px solid #73484b;background:#4b29302e;padding:11px;border-radius:9px;margin-top:13px}
 @media(max-width:700px){.soul-ai-head{flex-direction:column;align-items:stretch}.soul-ai-result{grid-template-columns:1fr}.soul-ai-trigger{width:100%}}
+
+.soul-ai-grounding-note{grid-column:1/-1;margin:0;padding:12px 15px;border:1px solid #b79050;border-radius:10px;color:#e7d9bd;background:#4b3a1e29;font-size:12px;line-height:1.75}
