@@ -49,7 +49,6 @@ function positionTable(points:Report['current']['points']){return `<div class="t
 function intelPage(){
  const indicators=derivedMetrics(data!.scores),go=goModes(indicators),r=data!;
  const names:Record<GoDomain,[string,string]>={work:['العمل','Work'],social:['التواصل الاجتماعي','Social'],relationships:['العلاقات','Relationships'],travel:['السفر','Travel']};
- const ratings={go:[t('مناسب لتجربة صغيرة','Try a small step'),t('Proceed with a small reversible step')],check:[t('راجع التفاصيل أولاً','Review before acting'),t('Review the details first')],hold:[t('تمهّل ولا تستعجل','Slow down and reassess'),t('Slow down and reassess')]};
  const evidence=[...r.evidence].sort((a,b)=>b.weight-a.weight);
  const plus=evidence.find(supportive),minus=evidence.find(difficult);
  const rootCause=(e:typeof r.evidence[number]|undefined,label:string)=>e?`<div class="intel-evidence"><b>${label}</b><p>${technical(e)}</p><small>${e.applying?t('الزاوية تقترب من الدقة','Applying toward exactness'):t('الزاوية تبتعد عن الدقة','Separating from exactness')}</small></div>`:`<div class="intel-evidence"><b>${label}</b><p>${t('ماكو دليل بهذا الاتجاه بين أبرز الاتصالات المحسوبة.','No matching evidence direction among the leading calculated contacts.')}</p></div>`;
