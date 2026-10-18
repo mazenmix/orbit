@@ -188,7 +188,7 @@ function profileForm(p:Profile,isNew=false){
  '<div class="form-grid"><label>'+t('الاسم','Name')+'<input name="name" required maxlength="80" value="'+esc(p.name)+'"></label><label>'+t('نوع الملف','Profile type')+'<select name="kind">'+(['self','dating','work','friend','family'] as const).map((k,i)=>'<option value="'+k+'" '+(k===p.kind?'selected':'')+'>'+t(['ملفي الشخصي','علاقة عاطفية','عمل','صديق','عائلة'][i],['My profile','Dating','Work','Friend','Family'][i])+'</option>').join('')+'</select></label>'+
  '<label>'+t('تاريخ الولادة','Birth date')+'<input name="date" type="date" required min="1800-01-01" max="2399-12-31" value="'+esc(p.date)+'" lang="en"></label><label>'+t('وقت الولادة','Birth time')+'<input name="time" type="time" required value="'+esc(p.time)+'" lang="en"></label>'+
  '<label class="checkbox"><input name="known" type="checkbox" '+(p.known?'checked':'')+'>'+t('وقت الولادة معروف','Birth time is known')+'</label>'+
- '<div class="place-picker"><label>'+t('اختار مدينة أو محافظة الولادة من أي مكان بالعالم','Find your birth city or province worldwide')+'<input type="search" id="place-search" autocomplete="off" value="'+esc(p.city)+'" placeholder="'+t('اكتب بغداد، Manila، Denver…','Type Baghdad, Manila, Denver…')+'"></label><p class="subtle">'+t('اختار نتيجة من القائمة؛ المنطقة الزمنية وخطوط الموقع تنحفظ أوتوماتيكياً.','Choose a result below; the timezone and location coordinates are filled automatically.')+'</p><div id="place-results" class="place-results" role="listbox" aria-live="polite"></div><input type="hidden" name="city" value="'+esc(p.city)+'"><input type="hidden" name="lat" value="'+p.lat+'"><input type="hidden" name="lon" value="'+p.lon+'"><div id="chosen-place" class="chosen-place">'+(isNew?t('اختار مدينة حتى تكتمل بيانات المكان.','Select a city to confirm its coordinates.'):esc(p.city))+'</div></div>'+
+ '<div class="place-picker"><label>'+t('اختار مدينة أو محافظة الولادة من أي مكان بالعالم','Find your birth city or province worldwide')+'<input type="search" id="place-search" autocomplete="off" value="'+esc(p.city)+'" placeholder="'+t('اكتب بغداد، Manila، Denver…','Type Baghdad, Manila, Denver…')+'"></label><p class="subtle">'+t('اختار نتيجة من القائمة؛ المنطقة الزمنية وخطوط الموقع تنحفظ أوتوماتيكياً.','Choose a result below; the timezone and location coordinates are filled automatically.')+'</p><button type="button" class="secondary detailed-search" id="place-detailed">'+t('بحث تفصيلي عن شارع أو مكان أو محافظة','Detailed search: street, landmark or province')+'</button><small class="geocoding-credit">Open-Meteo / © OpenStreetMap contributors</small><div id="place-results" class="place-results" role="listbox" aria-live="polite"></div><input type="hidden" name="city" value="'+esc(p.city)+'"><input type="hidden" name="lat" value="'+p.lat+'"><input type="hidden" name="lon" value="'+p.lon+'"><div id="chosen-place" class="chosen-place">'+(isNew?t('اختار مدينة حتى تكتمل بيانات المكان.','Select a city to confirm its coordinates.'):esc(p.city))+'</div></div>'+
  '<label class="timezone-field">'+t('المنطقة الزمنية التاريخية — اختار من القائمة','Historical time zone — select from list')+'<select name="zone" id="timezone-list" required>'+choices+'</select><small>'+t('تتغير تلقائياً لما تختار المدينة، وتكدر تصححها من القائمة.','Automatically set from the chosen city. You can also change it here.')+'</small></label></div>'+
  '<button class="primary" type="submit">'+t('حفظ الملف','Save profile')+'</button><p class="form-error" role="alert"></p></form>';
 }
@@ -279,12 +279,12 @@ function bindProfileForm(scope:ParentNode){
  const input=form!.querySelector<HTMLInputElement>('#place-search')!,options=form!.querySelector<HTMLDivElement>('#place-results')!;
  const chosen=form!.querySelector<HTMLDivElement>('#chosen-place')!,zone=form!.querySelector<HTMLSelectElement>('[name=zone]')!;
  let token=0,searchDelay=0;
- async function findPlaces(){
+ async function findPlaces(detailed=false){
   const query=input.value.trim(),request=++token;
   options.innerHTML='';if(query.length<2)return;
   options.textContent=t('دا أدوّر على المدن…','Searching for places…');
   try{
-   const response=await fetch('/api/places?q='+encodeURIComponent(query),{signal:AbortSignal.timeout(12000)});
+   const response=await fetch('/api/places?q='+encodeURIComponent(query)+(detailed?'&detailed=1':''),{signal:AbortSignal.timeout(12000)});
    if(!response.ok)throw Error(t('خدمة المدن غير متاحة حالياً.','City search is temporarily unavailable.'));
    const payload=await response.json() as {results?:{name:string;label:string;lat:number;lon:number;zone:string}[]};
    if(request!==token)return;
@@ -305,6 +305,7 @@ function bindProfileForm(scope:ParentNode){
  }
  input.addEventListener('input',()=>{form!.dataset.placeSelected='no';chosen.textContent=t('اختار مكان من نتائج البحث','Choose a result to confirm the location');window.clearTimeout(searchDelay);searchDelay=window.setTimeout(findPlaces,350)});
  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();window.clearTimeout(searchDelay);void findPlaces()}});
+ const detailed=form!.querySelector<HTMLButtonElement>('#place-detailed');if(detailed)detailed.onclick=()=>{window.clearTimeout(searchDelay);void findPlaces(true)};
  form.onsubmit=e=>{e.preventDefault();try{
   if(form!.dataset.placeSelected!=='yes')throw Error(t('اختار المدينة من النتائج حتى تنحط الإحداثيات تلقائياً.','Choose a city from search results so coordinates are set automatically.'));
   const f=new FormData(form);const p=validateProfile({id:String(f.get('id')),name:String(f.get('name')).trim(),date:String(f.get('date')),time:String(f.get('time')),zone:String(f.get('zone')).trim(),lat:Number(f.get('lat')),lon:Number(f.get('lon')),city:String(f.get('city')).trim(),known:f.get('known')==='on',kind:String(f.get('kind')) as Profile['kind']});

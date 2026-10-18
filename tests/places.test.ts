@@ -13,3 +13,21 @@ test('geocoder enforces bounds, returns mapped records and avoids arbitrary outb
  assert.equal((await r.json()).results[0].zone,'Asia/Manila');assert.ok(outgoing.includes('geocoding-api.open-meteo.com'));
  }finally{globalThis.fetch=original}
 });
+
+test('Arabic city and landmark names fall back to OSM Photon with correctly looked-up IANA timezone',async()=>{
+ const prior=globalThis.fetch;
+ try{
+  const paths:string[]=[];
+  globalThis.fetch=async(u)=>{const url=String(u);paths.push(url);
+   if(url.includes('geocoding-api.open-meteo.com'))return new Response(JSON.stringify({results:[]}));
+   if(url.includes('photon.komoot.io'))return new Response(JSON.stringify({features:[{properties:{name:'Baghdad',state:'Baghdad',country:'Iraq'},geometry:{coordinates:[44.387,33.306]}}]}));
+   if(url.includes('api.open-meteo.com'))return new Response(JSON.stringify({timezone:'Asia/Baghdad'}));
+   return new Response('unreachable',{status:500});
+  };
+  const result=await onRequestGet({request:new Request('https://a.test/api/places?q='+encodeURIComponent('بغداد'))});
+  assert.equal(result.status,200);
+  const city=(await result.json()).results[0];
+  assert.equal(city.zone,'Asia/Baghdad');assert.equal(city.name,'Baghdad');
+  assert.ok(paths.some(p=>p.includes('photon.komoot.io')));assert.ok(paths.some(p=>p.includes('timezone=auto')));
+ }finally{globalThis.fetch=prior}
+});
