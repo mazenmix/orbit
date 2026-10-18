@@ -48,3 +48,9 @@ test('Qwen3 has one automatic answer panel without manual controls',()=>{
  assert.ok(main.includes("fetch('/api/explain',{method:'POST'"));
  assert.ok(main.includes('AI_MIN_INTERVAL_MS'));
 });
+
+test('automatic Qwen reading resets promptly when active profile or language switches',()=>{
+ assert.ok(main.includes('minute===aiLastCheckMinute&&liveQwenScope()===aiScope'));
+ assert.ok(main.includes("if(scope!==aiScope){"));
+ assert.ok(main.includes("aiRequestId++"));
+});
