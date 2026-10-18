@@ -82,7 +82,7 @@ References: [Cloudflare Pages AI bindings](https://developers.cloudflare.com/pag
 
 ## Verification
 
-79 automated tests following the 2026-10-18 precision, lunar-screening, asteroid-catalog and journal update: direct Swift mathematical vectors, historical timezones, source score/synastry cases, three independent official native Swiss Ephemeris reference snapshots, Time Machine, unknown-time exclusions, polar-house handling and gateway privacy/input checks. The native/WASM reference tolerance is 0.000001° across all 16 bodies' longitude/speed, 12 cusps, ASC and MC at three dates. Native fixture provenance is in `tests/fixtures/native-swiss.json`.
+92 automated tests passed, one opt-in online test skipped in the default suite; a separate live check successfully calculated all 56 original named asteroids: direct Swift mathematical vectors, historical timezones, source score/synastry cases, three independent official native Swiss Ephemeris reference snapshots, Time Machine, unknown-time exclusions, polar-house handling and gateway privacy/input checks. The native/WASM reference tolerance is 0.000001° across all 16 bodies' longitude/speed, 12 cusps, ASC and MC at three dates. Native fixture provenance is in `tests/fixtures/native-swiss.json`.
 
 This does **not** establish complete Swift-app or v2.3.2 score equivalence: post-processing and advanced source layers remain pending. See the audit and verification notes.
 
@@ -94,4 +94,8 @@ Swiss Ephemeris/WASM distribution includes the wrapper's license in `public/vend
 
 Shipped: bounded exact natal-transit root refinement, 30-day selectable time heatmap, explicit contradictory-evidence audit, geocentric 90-day new/full Moon and near-node *screening* (not confirmed eclipses), private observation journal included in backups, source-matched names/numbers for 56 additional asteroids, and a grounded Qwen3 WHY NOW prompt. The native six main minor bodies remain distinct from the new 56-item source catalogue.
 
-**Not included:** actual 56 named asteroid positions, since the current WASM package has no extra numbered-asteroid `.se1` files; dedicated certified eclipse geometry/timing; persistent backend Web Push; Watch/WidgetKit; exact native v2.3.2 parity and encrypted-at-rest sync. See SOURCE_AUDIT.md and VERIFICATION.md.
+**Now supported on demand:** all 56 original MX Eye named asteroid .se1 files via a strictly allowlisted Cloudflare proxy, persistent browser CacheStorage when allowed, mounting in the existing Swiss WASM filesystem, actual astrological longitudes/speeds and new supplementary natal aspects; Qwen3 receives at most 8 validated optional additional contacts. All 56 returned valid 2026/2027 positions in online production smoke tests. A full OS-level Safari/iPhone lifecycle regression test remains outstanding.
+
+**Certified solar/lunar eclipses:** existing Swiss global and optional birth-location visibility routines now provide event type, UTC maximum, available contact times and greatest-eclipse coordinates. Confirmed 2027 events agree with NASA. The older near-node screen remains separately labeled *preliminary*.
+
+**Still not implemented/verified:** persistent background Web Push service and permissions/device tests, native watchOS/WidgetKit, exact original v2.3.2 UI/component parity, and encrypted-at-rest multi-device synchronization. See SOURCE_AUDIT.md and VERIFICATION.md.
