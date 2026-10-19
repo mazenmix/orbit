@@ -1,0 +1,56 @@
+/* MX Astro Focus UI — information hierarchy only; ephemeris and scoring stay intact. */
+.mx-focused-dashboard{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(265px,.8fr);gap:16px;align-items:start}
+.mx-focus-main,.mx-focus-aside{display:grid;gap:14px;min-width:0}
+.mx-focus-hero{padding:22px!important;border-color:rgba(171,148,247,.35)!important;background:linear-gradient(130deg,rgba(105,73,185,.15),transparent 62%),var(--panel,#141827)!important}
+.mx-focus-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.mx-focus-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#b5a9ee}
+.mx-focus-hero h2{font-size:clamp(1.2rem,2.4vw,1.7rem);line-height:1.45;margin:6px 0 10px}
+.mx-focus-hero p{line-height:1.75;margin:8px 0;color:var(--text,#e9e8f5)}
+.mx-focus-proof{display:flex;gap:9px;align-items:center;flex-wrap:wrap;color:#b6bfda!important;font-size:.86rem;margin-top:10px}
+.mx-focus-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.mx-focus-actions button{min-height:38px}
+.mx-focus-panel{padding:17px!important}
+.mx-focus-panel>h2{font-size:1.04rem;margin:0 0 12px}
+.mx-focus-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mx-focus-metric{padding:13px 9px;border:1px solid rgba(166,173,205,.16);border-radius:13px;background:rgba(127,139,179,.045);min-width:0;text-align:center;color:inherit}
+.mx-focus-metric b{display:block;font-size:.84rem;margin-bottom:6px}
+.mx-focus-metric strong{display:block;font-size:1.15rem;font-variant-numeric:tabular-nums}
+.mx-focus-metric span{display:block;font-size:.68rem;color:#aab4ce;margin-top:4px}
+.mx-focus-metric i{display:block;height:3px;background:#6575a8;border-radius:9px;margin-top:10px;max-width:100%}
+.mx-focus-metric.good i{background:#37b78b}.mx-focus-metric.mid i{background:#ddb55f}.mx-focus-metric.low i{background:#d77779}
+.mx-focus-note{font-size:.77rem;color:#adb5cf;margin:11px 0 0;line-height:1.6}
+.mx-focus-event{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid rgba(175,175,220,.13)}
+.mx-focus-event:first-of-type{border-top:0}
+.mx-focus-event .mx-event-mark{font-size:1.3rem;flex:0 0 28px;text-align:center}
+.mx-focus-event div{flex:1;min-width:0}
+.mx-focus-event strong{display:block;font-size:.9rem}.mx-focus-event small{display:block;color:#aab4cf;margin-top:3px}
+.mx-focus-moon{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mx-focus-moon article{background:rgba(125,126,175,.075);border:1px solid rgba(170,167,218,.16);padding:15px;border-radius:15px;min-width:0}
+.mx-focus-moon small{display:block;color:#adb6d5;font-size:.76rem}
+.mx-focus-moon strong{display:block;margin:8px 0;font-size:1.03rem}
+.mx-focus-moon time{font-size:.8rem;color:#c6c6d9}
+.mx-focus-moon progress{display:block;width:100%;height:8px;margin-top:12px;accent-color:#36b78b}
+.mx-focus-subaction{margin-top:10px}
+.mx-more-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mx-more-grid button{text-align:start;border:1px solid rgba(159,157,195,.22);border-radius:14px;padding:16px;background:rgba(120,115,169,.065);color:inherit;cursor:pointer}
+.mx-more-grid button:hover{border-color:rgba(160,144,235,.65);background:rgba(120,115,169,.12)}
+.mx-more-grid button strong{display:block;font-size:1rem}.mx-more-grid button small{display:block;margin-top:5px;color:#aab3ca;line-height:1.5}
+.mx-mode-choices{display:flex;flex-wrap:wrap;gap:9px}
+.mx-mode-choices button{min-width:110px}
+.mx-mode-choices button[aria-pressed="true"]{border-color:#9687e8;box-shadow:0 0 0 1px rgba(150,135,232,.4) inset;background:rgba(121,104,196,.2)}
+.mx-simple .page-heading .eyebrow{display:none}
+.mx-simple .page-heading{margin-bottom:11px}
+.mx-simple .page-heading h1{font-size:1.25rem}
+.mx-simple .chart-stories,.mx-simple .mx-natal-asteroid-status,.mx-simple .chart-math,.mx-simple .mx-aspect-legend,.mx-simple .wheel-guide{display:none!important}
+.mx-simple .astro-cal-months:not(.is-expanded) .astro-cal-month:nth-child(n+3){display:none}
+.mx-focus-calendar-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.mx-focus-calendar-actions .secondary{min-height:38px}
+.mx-simple .astro-cal-toolbar .astro-eyebrow{display:none}
+.mx-simple .astro-cal-toolbar{gap:9px}
+.mx-simple .astro-cal-meta{flex-wrap:wrap}
+.mx-focus-advanced{margin-top:14px}
+.mx-simple .mx-section-tabs{display:none}
+.mx-simple .settings-layout{max-width:1100px}
+@media(max-width:1100px){.mx-focused-dashboard{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:670px){.mx-focus-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-focus-moon{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-more-grid{grid-template-columns:1fr}.mx-focus-hero{padding:16px!important}}
+@media(max-width:360px){.mx-focus-moon{grid-template-columns:1fr}}
