@@ -1,6 +1,7 @@
 import type {Chart,Profile,Report} from './engine.ts';
 import type {Point} from './math.ts';
 import {interpretableNatalPoints} from './readingBasis.ts';
+import {resolveDecisions,decisionExplanation} from './decisionUltra.ts';
 export type ChartInsight={titleAr:string;titleEn:string;ar:string;en:string;actionAr:string;actionEn:string;signAr:string;signEn:string};
 const signs=[
  ['الحمل','Aries','المبادرة والاندفاع','initiative and drive'],
@@ -39,11 +40,12 @@ export function profileAddress(profile:Pick<Profile,'sex'|'name'>,arabic=true){
 }
 export function transitOverview(report:Report){
  if(!report.evidence.length)return {ar:'ماكو اتصال قريب محسوب يسند تحديد مجال مهيمن بهاللحظة؛ ما نطلع استنتاج شخصي من درجة افتراضية.',en:'No calculated close contact supports a dominant theme at this moment; a default index does not justify a personal conclusion.'};
- const scores=report.scores;
- const dominant=(Object.entries(scores) as [string,number][]).sort((a,b)=>b[1]-a[1])[0];
+ const dominant=resolveDecisions(report.evidence,report.signals).filter(d=>d.quality!=='none')
+  .sort((a,b)=>(b.support+b.challenge)-(a.support+a.challenge)||(b.strongest?.weight??0)-(a.strongest?.weight??0)||a.category.localeCompare(b.category))[0];
+ if(!dominant)return {ar:'الاتصالات المتاحة ضعيفة؛ ما نحدد مجالاً مهيمنًا من درجة افتراضية.',en:'Available contacts are too weak to identify a dominant theme; default scores are not evidence.'};
  const labels:Record<string,[string,string,string,string]>={career:['الشغل والقرارات','work and decisions','اختار مهمة واضحة وقِس نتيجتها.','Choose one measurable task.'],love:['الحب والعلاقات','love and connection','عبّر عن رغبتك بصراحة واحترم رأي الطرف الآخر.','Be honest about your interest and respect the response.'],communication:['التواصل','communication','انطي مساحة للرد قبل افتراض النية.','Make room for a response before assuming intentions.'],energy:['الطاقة','energy','وزع نشاطك ولا تبالغ بالمجهود.','Pace your energy.'],emotions:['المزاج','emotions','لاحظ مشاعرك قبل اتخاذ قرار كبير.','Notice your feelings before a major decision.'],recovery:['الراحة','recovery','رتّب وقت الراحة من البداية.','Schedule meaningful rest.'],timing:['التوقيت','timing','راجع تفاصيل الموعد قبل التنفيذ.','Check timing details before acting.'],overview:['الصورة العامة','overall context','رتب الأولويات بدون استعجال.','Set priorities without rushing.']};
- const text=labels[dominant[0]];
- return {ar:'المجال الأبرز بهذه اللحظة رمزياً هو '+text[0]+'؛ هذا توصيف لحركة الأجرام، مو ضمان لحدث. '+text[2],en:'This moment symbolically emphasizes '+text[1]+'. It is not a forecast of a guaranteed event. '+text[3]};
+ const text=labels[dominant.category];
+ return {ar:'المجال الأبرز بحسب الاتصالات المحسوبة رمزياً هو '+text[0]+'. '+decisionExplanation(dominant,true),en:'The calculated contacts symbolically emphasize '+text[1]+'. '+decisionExplanation(dominant,false)};
 }
 
 export function actionForGender(value:string,sex?:'male'|'female'){

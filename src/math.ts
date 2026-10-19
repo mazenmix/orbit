@@ -1,5 +1,6 @@
-/** Direct ports of AstrologyEngine.swift and InterpretationEngine.swift at 5f9b199.
- * These are symbolic indices. Never interpret them as calibrated probabilities.
+/** Symbolic weights originate in AstrologyEngine.swift / InterpretationEngine.swift
+ * at 5f9b199. Full-set scoring and source-review revisions are versioned in
+ * VERIFICATION.md. These indices are not calibrated probabilities.
  */
 export const normalize=(x:number)=>{const remainder=x%360;return remainder<0?remainder+360:(remainder===0?0:remainder)};
 export const distance=(a:number,b:number)=>{const d=Math.abs(normalize(a)-normalize(b));return Math.min(d,360-d)};
@@ -22,7 +23,7 @@ export type Evidence={id:string;transit:Point;natal:Point;angle:number;orb:numbe
 export type Category='overview'|'career'|'love'|'communication'|'energy'|'emotions'|'recovery'|'timing';
 export const categories:Category[]=['overview','career','love','communication','energy','emotions','recovery','timing'];
 export type Tone='exceptional'|'opportunity'|'supportive'|'neutral'|'watch'|'caution';
-export type Signal={category:Category;score:number;tier:'S'|'A'|'B'|'C';tone:Tone;factors:Evidence[]};
+export type Signal={category:Category;score:number;tier:'S'|'A'|'B'|'C';tone:Tone;factors:Evidence[];allFactors?:Evidence[]};
 /** Instantaneous motion toward a fixed natal point. The step cannot cross the
  * exact contact, even for a fast Moon or a retrograde transit near zero orb. */
 export function applyingToNatal(t:Point,n:Point,angle:number):boolean{
@@ -50,8 +51,23 @@ export const harmonious=(e:Pick<Evidence,'angle'>)=>e.angle===60||e.angle===120;
 export const challenging=(e:Pick<Evidence,'angle'>)=>e.angle===90||e.angle===180;
 export const supportive=(e:Evidence)=>harmonious(e)||(!challenging(e)&&['Jupiter','Venus'].includes(e.transit.id));
 export const difficult=(e:Evidence)=>challenging(e)||(!harmonious(e)&&['Saturn','Mars','Pluto','Uranus'].includes(e.transit.id));
+/** One calculated transit/target/angle is one factor, regardless of aliases or
+ * repeated records. Conflicting copies must not make direction order-dependent. */
+export function rankedFactors(input:readonly Evidence[]):Evidence[]{
+ const unique=new Map<string,Evidence>();
+ for(const e of input){
+  if(!Number.isFinite(e.weight)||e.weight<=0||e.weight>1||!angles.includes(e.angle as 0)||!Number.isFinite(e.orb)||e.orb<0)continue;
+  const key=e.transit.id+':'+e.natal.id+':'+e.angle,prior=unique.get(key);
+  if(prior){
+   if(Math.abs(prior.weight-e.weight)>1e-12||Math.abs(prior.orb-e.orb)>1e-12||prior.applying!==e.applying)throw Error('Conflicting calculated aspect: '+key);
+   if((prior.id??key).localeCompare(e.id??key)<=0)continue;
+  }
+  unique.set(key,e);
+ }
+ return [...unique.values()].sort((a,b)=>b.weight-a.weight||a.orb-b.orb||(a.id??'').localeCompare(b.id??''));
+}
 export function balancedFactors(input:readonly Evidence[],limit:number):Evidence[]{
- const ranked=[...new Map(input.map(e=>[e.id,e])).values()].sort((a,b)=>b.weight-a.weight||a.orb-b.orb||a.id.localeCompare(b.id));
+ const ranked=rankedFactors(input);
  const selected=new Map<string,Evidence>();
  for(const predicate of [supportive,difficult]){const e=ranked.find(predicate);if(e)selected.set(e.id,e)}
  for(const e of ranked){if(selected.size>=limit)break;selected.set(e.id,e)}
@@ -63,12 +79,14 @@ export function category(e:Evidence):Category{
 export function signals(evidence:Evidence[]):Signal[]{
  const out:Signal[]=[];
  for(const c of categories){const factors=balancedFactors(evidence.filter(e=>category(e)===c),4);const e=factors[0];if(!e||e.weight<.30)continue;
-  const net=factors.reduce((v,f)=>v+(supportive(f)?f.weight:0)-(difficult(f)?f.weight:0),0);
-  const tier=e.weight>=.86&&factors.length>=3?'S':e.weight>=.72||(e.weight>=.62&&factors.length>=2)?'A':e.weight>=.46?'B':'C';
-  const tone:Tone=net>=1.35&&tier==='S'?'exceptional':net>=.46?(tier==='A'||tier==='S'?'opportunity':'supportive'):net<=-.72?'caution':net<=-.18?'watch':difficult(e)?'watch':supportive(e)?'supportive':'neutral';
+  const allFactors=rankedFactors(evidence.filter(e=>category(e)===c));
+  const net=allFactors.reduce((v,f)=>v+(supportive(f)?f.weight:0)-(difficult(f)?f.weight:0),0);
+  const sources=new Set(allFactors.map(f=>f.transit.id)).size;
+  const tier=e.weight>=.86&&sources>=3?'S':e.weight>=.72||(e.weight>=.62&&sources>=2)?'A':e.weight>=.46?'B':'C';
+  const tone:Tone=net>=1.35&&tier==='S'?'exceptional':net>=.46?(tier==='A'||tier==='S'?'opportunity':'supportive'):net<=-.72?'caution':net<=-.18?'watch':'neutral';
   const base={exceptional:88,opportunity:76,supportive:64,neutral:52,watch:43,caution:30}[tone];
-  const score=Math.trunc(clamp(base+(Math.min(1,Math.abs(net)/2+e.weight*.55)-.5)*18));
-  out.push({category:c,tier,tone,score,factors});
+  const score=tone==='neutral'?Math.round(clamp(50+net*10)):Math.trunc(clamp(base+(Math.min(1,Math.abs(net)/2+e.weight*.55)-.5)*18));
+  out.push({category:c,tier,tone,score,factors,allFactors});
  }
  const rank={S:4,A:3,B:2,C:1};return out.sort((a,b)=>rank[b.tier]-rank[a.tier]||b.score-a.score);
 }

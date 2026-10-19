@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import SwissEph from 'swisseph-wasm';
-import {aspects,scores,signals,type Evidence,type Point} from '../src/math.ts';
+import {aspects,scores,signals,bodies,category,supportive,difficult,type Evidence,type Point} from '../src/math.ts';
+import {reviewSignal} from '../src/decision.ts';
 import {chart,report,defaultProfile,setEngineForTests,birthInstant,annualHouse} from '../src/engine.ts';
 import {calendarMomentEvidence,astroCalendarDays} from '../src/astroCalendar.ts';
 import {narrativeEvidence} from '../src/narrativeEvidence.ts';
@@ -32,6 +33,20 @@ test('actual ephemeris applying direction agrees between calendar and report at 
   }
  }
 });
+test('real 2027 demo snapshots use the full domain balance, including the observed January career reversal',()=>{
+ for(let month=0;month<12;month++){
+  const r=report(defaultProfile,new Date(Date.UTC(2027,month,15,12)));
+  for(const s of r.signals){
+   const actual=r.evidence.filter(e=>category(e)===s.category);
+   assert.equal(s.allFactors?.length,actual.length);
+   const net=actual.reduce((sum,e)=>sum+(supportive(e)?e.weight:0)-(difficult(e)?e.weight:0),0);
+   assert.ok(Math.abs(reviewSignal(s).dominance-net)<=.00051);
+   if(net<-.18)assert.ok(['watch','caution'].includes(s.tone));
+   if(net<0)assert.ok(s.score<=50);
+  }
+  if(month===0){const work=r.signals.find(s=>s.category==='career')!;assert.equal(work.allFactors?.length,10);assert.ok(work.score<50);assert.notEqual(work.tone,'exceptional');}
+ }
+});
 test('all eligible contacts survive beyond the former global top-48 cutoff',()=>{
  const names=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
  const evidence=aspects(names.map(id=>p(id,.1)),names.map(id=>p(id,0)),at);
@@ -44,7 +59,7 @@ test('calculated contacts reject nonfinite inputs before they can contaminate sc
 });
 const f=(id:string,weight:number,angle=120):Evidence=>({id,transit:p('Venus',0),natal:p('Sun',0),angle,orb:.2,maximumOrb:1.4,weight,applying:true,exact:null});
 test('narrative and domain signals preserve the strongest counter-evidence below many supporting contacts',()=>{
- const support=Array.from({length:15},(_,i)=>f('support-'+i,.99-i*.01));
+ const support=Array.from({length:15},(_,i)=>({...f('support-'+i,.99-i*.01),transit:p(bodies[i][1],119.8)}));
  const challenge={...f('counter',.7,90),transit:p('Saturn',90)};
  const all=[...support,challenge];
  const packet=narrativeEvidence(all);assert.equal(packet.length,12);

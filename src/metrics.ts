@@ -1,4 +1,5 @@
 import type {Category} from './math.ts';
+import type {DecisionDetail} from './decisionUltra.ts';
 /** Transparent derived SYMBOLIC indicators. Not 23 independently measured outcomes. */
 type Inputs=Record<Category,number>;
 export type MetricName='overview'|'career'|'focus'|'productivity'|'money'|'communication'|'social'|'reputation'|'love'|'romance'|'attraction'|'chemistry'|'emotional'|'calm'|'energy'|'motivation'|'recovery'|'sleep'|'timing'|'travel'|'adventure'|'caution'|'luck'|'sexuality'|'desire'|'nightlife'|'dating'|'newpeople'|'risk';
@@ -45,6 +46,23 @@ export function derivedMetrics(input:Inputs):MetricResult[]{
 }
 export type GoDomain='work'|'social'|'relationships'|'travel';
 export type GoDecision={domain:GoDomain;value:number;state:'go'|'check'|'hold';drivers:MetricName[]};
+export type GoReview={state:GoDecision['state'];sourceCategories:Category[];complete:boolean;mixed:boolean;sensitive:boolean;strongest:DecisionDetail['strongest'];supportFactor:DecisionDetail['supportFactor'];challengeFactor:DecisionDetail['challengeFactor']};
+/** Several derived metrics can reuse the same source category. Inspect each
+ * actual category once and never authorize GO from missing or unstable evidence. */
+export function reviewGoMode(mode:GoDecision,metrics:readonly MetricResult[],decisions:readonly DecisionDetail[]):GoReview{
+ const sourceCategories=[...new Set(mode.drivers.flatMap(id=>{
+  const metric=metrics.find(m=>m.id===id);
+  if(!metric)throw Error('Missing Go Mode driver');
+  return metric.source;
+ }))];
+ const relevant=sourceCategories.map(c=>decisions.find(d=>d.category===c));
+ const active=relevant.filter((d):d is DecisionDetail=>!!d&&d.quality!=='none');
+ const complete=active.length===sourceCategories.length,sensitive=active.some(d=>d.sensitive);
+ const strongest=<K extends 'strongest'|'supportFactor'|'challengeFactor'>(key:K)=>active.flatMap(d=>d[key]?[d[key]!]:[]).sort((a,b)=>b.weight-a.weight||a.orb-b.orb)[0]??null;
+ const supportFactor=strongest('supportFactor'),challengeFactor=strongest('challengeFactor'),mixed=!!supportFactor&&!!challengeFactor;
+ const state=!active.length?'check':mode.state==='go'&&(!complete||mixed||sensitive||active.some(d=>d.resolution==='caution'))?'check':mode.state;
+ return {state,sourceCategories,complete,mixed,sensitive,strongest:strongest('strongest'),supportFactor,challengeFactor};
+}
 export function goModes(metrics:readonly MetricResult[]):GoDecision[]{
  const values=new Map(metrics.map(v=>[v.id,v.value]));
  const configurations:[GoDomain,MetricName[]][]=[
@@ -55,7 +73,7 @@ export function goModes(metrics:readonly MetricResult[]):GoDecision[]{
  ];
  return configurations.map(([domain,drivers])=>{
   const list=drivers.map(k=>values.get(k));
-  if(list.some(v=>v===undefined))throw Error('Incomplete indicator set');
+  if(list.some(v=>v===undefined||!Number.isFinite(v)||v<1||v>99))throw Error('Incomplete or invalid indicator set');
   const value=Math.round(list.reduce<number>((a,b)=>a+(b??0),0)/list.length);
   return {domain,value,state:value>=68?'go':value>=45?'check':'hold',drivers};
  });

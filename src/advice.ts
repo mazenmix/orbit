@@ -1,4 +1,6 @@
 import type {Signal,Evidence,Category} from './math.ts';
+import {rankedFactors} from './math.ts';
+import {reviewSignal} from './decision.ts';
 type Pair=[string,string];
 type Guide={title:Pair;good:Pair;careful:Pair;do:Pair;ease:Pair};
 const guides:Record<Category,Guide>={
@@ -14,9 +16,9 @@ timing:{title:['خلّي خطوتك قابلة للتعديل','Keep your next s
 const direction=(e:Evidence)=>[60,120].includes(e.angle)||(e.angle===0&&['Venus','Jupiter'].includes(e.transit.id))?1:[90,180].includes(e.angle)||(e.angle===0&&['Saturn','Mars','Pluto','Uranus'].includes(e.transit.id))?-1:0;
 export function advice(s:Signal,language:'ar'|'en'){
  const pick=(v:Pair)=>v[language==='ar'?0:1],g=guides[s.category];
- const ranked=[...s.factors].sort((a,b)=>b.weight-a.weight);
+ const ranked=rankedFactors(s.allFactors??s.factors),review=reviewSignal(s);
  const positive=ranked.find(e=>direction(e)>0),negative=ranked.find(e=>direction(e)<0),lead=ranked[0];
- if(!lead)return {title:pick(['خلّي واقعك يقود قرارك','Let real circumstances guide your decision']),good:pick(g.good),careful:pick(g.careful),action:pick(g.ease)};
+ if(!lead||lead.weight<.30)return {title:pick(['ماكو أساس كافي لترجيح هالمجال','Insufficient evidence for a direction']),good:pick(['ما نثبت فرصة من عوامل غائبة أو ضعيفة.','Absent or weak factors do not establish an opportunity.']),careful:pick(g.careful),action:pick(g.ease)};
  let title=g.title,good=g.good,careful=g.careful,action=lead.applying?g.do:g.ease;
  if(['career','timing','overview'].includes(s.category)&&negative?.transit.id==='Saturn'){
  title=['لا توعد قبل ما تتأكد','Check before you promise'];careful=['التزام ناقص التفاصيل ممكن يرجع عليك بشغل إضافي.','An unclear commitment can create extra work.'];action=negative.applying?['اسأل عن الشرط الناقص وثبّت حدود مسؤوليتك قبل الموافقة.','Ask about the missing condition and clarify your responsibility before agreeing.']:['راجع التزام قديم وحدد شنو بقى عليك وشنو يحتاج تفاوض.','Review an existing commitment and identify what remains or needs renegotiation.'];
@@ -27,5 +29,11 @@ export function advice(s:Signal,language:'ar'|'en'){
  if(['love','emotions'].includes(s.category)&&positive?.transit.id==='Venus'){title=['خلّي الاهتمام يبين بتصرف','Show care through an action'];good=['لفتة بسيطة أو تقدير صريح يفتح باب للتقارب.','A small gesture or sincere appreciation can invite connection.'];action=['عبّر عن شي محدد تقدّره، بدون اختبار مشاعر الطرف الثاني.','Name something specific you appreciate without testing the other person’s feelings.'];}
  if(positive?.transit.id==='Mars'&&['energy','overview'].includes(s.category)){title=['ابدأ بالشي اللي ظلّ معلّق','Start what has been on hold'];good=['توجيه حماسك لإنجاز ملموس بدل نقاش طويل.','Channel enthusiasm into a tangible result rather than a long debate.'];action=positive.applying?['افتح المهمة المؤجلة وأنجز أول جزء واضح منها.','Open the postponed task and complete its first clear step.']:['كمّل الخطوة اللي بديتها، وراجع النتيجة قبل التوسع.','Finish the step you started and check the result before expanding.'];}
  if(!negative)careful=g.careful;
+ if(review.contradictory){
+  title=[g.title[0]+' · إشارات متعارضة',g.title[1]+' · mixed contacts'];
+  good=[g.good[0]+' يوجد جانب رمزي داعم، ويقابله عامل يحتاج انتباه.',g.good[1]+' A supporting symbolic contact coexists with a challenging factor.'];
+  careful=review.sensitive?['الترجيح يتبدل باستبعاد اتصالات جرم واحد؛ لا تحوّله لحكم نهائي.','Removing one transiting body changes the balance; do not treat the direction as settled.']:[g.careful[0]+' لا تتجاهل الجانب المعاكس.',g.careful[1]+' Keep the counter-evidence in view.'];
+  action=[g.do[0]+' جرّب خطوة محدودة وراجع النتيجة قبل التوسع.',g.do[1]+' Keep the first step small and review the result before expanding.'];
+ }
  return {title:pick(title),good:pick(good),careful:pick(careful),action:pick(action)};
 }

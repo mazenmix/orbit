@@ -47,6 +47,28 @@ test('real model failure: misleading Arabic translations and unsupported time-co
  const text='Venus trine Sun and Saturn square Moon give mixed symbolic themes. No major new shifts are indicated.';
  assert.equal(reviewGeneratedAdvice(text,{...ctx,comparisonAvailable:true}).fallback,false);
 });
+test('correct body and aspect names cannot authorize the opposite symbolic classification',()=>{
+ for(const text of [
+  'Venus trine Sun is challenging. Saturn square Moon is supportive. This symbolic reading is mixed.',
+  'الزهرة تثليث الشمس اتصال متحدي. زحل تربيع القمر اتصال داعم. القراءة الرمزية مختلطة.'
+ ]){
+  const result=reviewGeneratedAdvice(text,ctx);
+  assert.equal(result.fallback,true);
+  assert.ok(result.problems.includes('wrong-contact-interpretation'));
+ }
+ const correct='Venus trine Sun is supportive. Saturn square Moon is challenging. This is a mixed symbolic reading.';
+ assert.deepEqual(unsafeAIGuesses(correct,ctx),[]);
+});
+test('a model cannot name a counter-factor and then deny that any counter-evidence exists',()=>{
+ for(const text of [
+  'Venus trine Sun and Saturn square Moon form a symbolic reading. However, it is entirely favorable with no challenging contacts.',
+  'الزهرة تثليث الشمس وزحل تربيع القمر ضمن القراءة الرمزية، لكن جميع الاتصالات داعمة.'
+ ]){
+  const result=reviewGeneratedAdvice(text,ctx);
+  assert.equal(result.fallback,true);
+  assert.ok(result.problems.includes('denied-counter-evidence'));
+ }
+});
 const req=(evidence:unknown[])=>new Request('https://orbit.example/api/explain',{method:'POST',headers:{origin:'https://orbit.example','content-type':'application/json'},body:JSON.stringify({language:'en',evidence})});
 test('AI endpoint rejects duplicated aspects, impossible per-body orbs and invented transiting angles before inference',async()=>{
  let calls=0;const env={AI:{run:async()=>{calls++;return {response:'unused'}}}};

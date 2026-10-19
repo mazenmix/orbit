@@ -69,6 +69,34 @@ test('time comparison is allowlisted and does not leak arbitrary fields',async()
  assert.equal(sent.comparison.day.stable,true);
  assert.ok(!JSON.stringify(sent).includes('PRIVATE NAME'));
 });
+test('complete-set comparison metadata preserves full counts without inventing stability from a bounded list',async()=>{
+ let sent:any;
+ const env={AI:{run:async(_model:string,input:any)=>{sent=JSON.parse(input.messages[1].content.split('\n/no_think')[0]);return {response:'Symbolic reflection'};}}};
+ const changed=['Sun','Moon','Mercury','Venus'].flatMap(transit=>['Sun','Moon','Venus'].map(natal=>({contact:transit+':'+natal+':120',orbBefore:.3,orbNow:.2,applying:true})));
+ const result=await onRequestPost({request:req({...valid,comparison:{hour:{entered:[],exited:[],changed,totals:{entered:0,exited:0,changed:30},scope:'all-computed-contacts'}}}),env});
+ assert.equal(result.status,200);
+ assert.equal(sent.comparison.hour.scope,'all-computed-contacts');
+ assert.equal(sent.comparison.hour.totals.changed,30);
+ assert.equal(sent.comparison.hour.changed.length,12);
+ assert.equal(sent.comparison.hour.stable,false);
+ assert.equal(sent.comparison.hour.truncated,true);
+});
+test('comparison totals inconsistent with supplied examples are rejected before inference',async()=>{
+ let calls=0;const env={AI:{run:async()=>{calls++;return {response:'unused'}}}};
+ for(const count of [-1,20,NaN]){
+  const response=await onRequestPost({request:req({...valid,comparison:{hour:{entered:[],exited:[],changed:[],totals:{entered:0,exited:0,changed:count},scope:'all-computed-contacts'}}}),env});
+  assert.equal(response.status,400);
+ }
+ assert.equal(calls,0);
+});
+test('malformed historical comparisons cannot be silently converted into a stable observation',async()=>{
+ let calls=0;const env={AI:{run:async()=>{calls++;return {response:'unused'}}}};
+ for(const hour of [true,'not a comparison',{entered:[],exited:[]}]){
+  const result=await onRequestPost({request:req({...valid,comparison:{hour}}),env});
+  assert.equal(result.status,400);
+ }
+ assert.equal(calls,0);
+});
 
 test('Qwen accepts computed source-listed named asteroids only as supplementary evidence',async()=>{
  let seen:any;

@@ -59,6 +59,12 @@ export function unsafeAIGuesses(message:string,ctx:AIAdviceContext):string[]{
    // Bind a clear motion/orb claim to its own pair, rather than accepting an
    // orb or phase merely because it belongs to another supplied contact.
    if(pairKeys.size!==1)continue;
+   const polarityText=clause.replace(/\bnot (?:a )?(?:supportive|supporting|favorable|favourable|challenging|difficult)\b|(?:مو|غير|ليس)\s+(?:داعم|متحدي|صعب)/gu,'');
+   const positive=/\b(?:supportive|supporting|favorable|favourable|harmonious)\b|داعم|ايجابي/u.test(polarityText);
+   const negative=/\b(?:challenging|difficult|unfavorable|unfavourable)\b|متحدي|متحدية|معاكس|صعب|يحتاج انتباه/u.test(polarityText);
+   const supports=(e:AIContact)=>[60,120].includes(e.angle)||(e.angle===0&&['Venus','Jupiter'].includes(e.transit));
+   const challenges=(e:AIContact)=>[90,180].includes(e.angle)||(e.angle===0&&['Saturn','Mars','Pluto','Uranus'].includes(e.transit));
+   if(positive&&!negative&&matching.every(e=>!supports(e))||negative&&!positive&&matching.every(e=>!challenges(e)))problems.push('wrong-contact-interpretation');
    const applying=/\bapplying\b|يقترب|تقترب|باتجاه الدقة|في طور الاقتراب/u.test(clause);
    const separating=/\bseparating\b|يبتعد|تبتعد|لا يقترب|لا تقترب|\bnot (?:currently )?applying\b/u.test(clause);
    if((applying||separating)&&matching.every(e=>e.applying!==!separating))problems.push('wrong-contact-motion');
@@ -82,6 +88,7 @@ export function unsafeAIGuesses(message:string,ctx:AIAdviceContext):string[]{
   if(ctx.strict&&contacts.length&&!contacts.some(e=>mentions(message,e.transit)&&mentions(message,e.natal)))problems.push('missing-calculated-basis');
   if(ctx.strict&&!contacts.length)problems.push('no-calculated-basis');
   if(ctx.strict&&ctx.support&&ctx.challenge&&(![ctx.support,ctx.challenge].every(e=>mentions(message,e.transit)&&mentions(message,e.natal))||!/mixed|challeng|counter|while|but|however|balance|تحدي|متحد|متعارض|متعاكس|مختلط|بالمقابل|لكن|توازن/u.test(message)))problems.push('missing-counter-evidence');
+  if(ctx.challenge&&/\b(?:no|without any)\s+(?:challenging (?:contacts|factors|aspects)|counter-evidence|tension)\b|(?:ماكو|لا توجد|بدون)\s+(?:عوامل|اتصالات|زوايا)\s+(?:متحدية|معاكسة)|\b(?:entirely|purely|fully)\s+(?:favorable|favourable|supportive|positive)\b|(?:كلها|جميع الاتصالات)\s+داعمة/u.test(message))problems.push('denied-counter-evidence');
  }
  return [...new Set(problems)];
 }

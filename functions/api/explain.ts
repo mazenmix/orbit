@@ -53,14 +53,24 @@ export async function onRequestPost({request,env}:Context){
  const contactLabel=(key:string)=>{const [transit,natal,angle]=key.split(':');return {transit:label(transit),natal:label(natal),angle:Number(angle)}};
  const calculatedAt=typeof input.calculatedAt==='string'&&Number.isFinite(Date.parse(input.calculatedAt))?new Date(input.calculatedAt).toISOString():null;
  const safeKey=(v:unknown)=>typeof v==='string'&&v.split(':').length===3&&bodies.has(v.split(':')[0])&&bodies.has(v.split(':')[1])&&['0','60','90','120','180'].includes(v.split(':')[2]);
+ let invalidComparison=false;
  const comparison=Object.fromEntries(['hour','day'].map(period=>{
   const raw=input.comparison?.[period];
   if(!raw)return [period,null];
+  if(typeof raw!=='object'||Array.isArray(raw)||!['entered','exited','changed'].every(key=>Array.isArray(raw[key])&&raw[key].length<=12)){invalidComparison=true;return [period,null]}
   const entered=Array.isArray(raw.entered)?raw.entered.filter(safeKey).slice(0,12):[];
   const exited=Array.isArray(raw.exited)?raw.exited.filter(safeKey).slice(0,12):[];
   const changed=Array.isArray(raw.changed)?raw.changed.filter((v:any)=>safeKey(v?.contact)&&[v.orbBefore,v.orbNow].every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=6)&&typeof v.applying==='boolean').slice(0,12).map((v:any)=>({contact:v.contact,labels:contactLabel(v.contact),orbBefore:v.orbBefore,orbNow:v.orbNow,applying:v.applying})):[];
-  return [period,{entered,exited,changed,stable:!entered.length&&!exited.length&&!changed.length}];
+  let totals={entered:entered.length,exited:exited.length,changed:changed.length};
+  if(raw.totals!==undefined){
+   const expected={entered:entered.length,exited:exited.length,changed:changed.length};
+   if(!raw.totals||!Object.entries(expected).every(([key,count])=>Number.isInteger(raw.totals[key])&&raw.totals[key]>=count&&raw.totals[key]<=512&&count===Math.min(raw.totals[key],12))){invalidComparison=true;return [period,null]}
+   totals={entered:raw.totals.entered,exited:raw.totals.exited,changed:raw.totals.changed};
+  }
+  const scope=raw.scope==='all-computed-contacts'&&raw.totals?'all-computed-contacts':'leading-packet';
+  return [period,{entered,exited,changed,totals,scope,truncated:Object.values(totals).some(n=>n>12),stable:!totals.entered&&!totals.exited&&!totals.changed}];
  }));
+ if(invalidComparison)return json({error:'Inconsistent comparison totals.'},400);
  const eclipseEvents:{kind:'solar'|'lunar';type:'total'|'annular'|'hybrid'|'partial'|'penumbral';maximum:string}[]=[];
  if(input.eclipseEvents!==undefined){
   if(!Array.isArray(input.eclipseEvents)||input.eclipseEvents.length>2)return json({error:'Invalid eclipse list'},400);
