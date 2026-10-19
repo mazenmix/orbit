@@ -22,3 +22,26 @@ test('changing actual natal longitude changes descriptive sign without changing 
  const b=soulReading(change as any,soulTopics[0]);
  assert.notEqual(a.summary.ar,b.summary.ar);
 });
+test('all 200 topics with missing natal indicators return no personality traits or example event',()=>{
+ const empty={...chart,points:[],asc:null,mc:null,cusps:[]};
+ for(const topic of soulTopics){
+  const r=soulReading(empty,topic);
+  assert.equal(r.basisStatus,'unavailable',String(topic.id));
+  assert.deepEqual(r.strengths,{ar:[],en:[]});
+  assert.deepEqual(r.weaknesses,{ar:[],en:[]});
+  assert.deepEqual(r.example,{ar:'',en:''});
+  assert.match(r.summary.en,/Insufficient data/);
+ }
+});
+test('one usable indicator does not authorize personal conclusions when time-sensitive points are excluded',()=>{
+ const unknown=soulReading(chart,soulTopics[0],{knownTime:false});
+ assert.deepEqual(unknown.basis.map(x=>x.planet),['Sun']);
+ assert.equal(unknown.basisStatus,'limited');
+ assert.equal(unknown.basis[0].house,null);
+ assert.deepEqual(unknown.strengths.ar,[]);
+ assert.equal(unknown.example.en,'');
+ const corrupt={...chart,points:[p('Sun',9),p('Moon',110,NaN)],asc:720,mc:-1,cusps:[]};
+ const rejected=soulReading(corrupt,soulTopics[0]);
+ assert.equal(rejected.basisStatus,'limited');
+ assert.deepEqual(rejected.basis.map(x=>x.planet),['Sun']);
+});

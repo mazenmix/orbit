@@ -350,7 +350,7 @@ function astroCalendarDetail(iso:string){
  const factor=(e:typeof snap.strongestSupport,kind:'good'|'check',hour:number|null)=>e?
   '<span class="astro-compact-aspect '+kind+'"><span>'+(kind==='good'?t('✦ داعمة','✦ Favorable'):t('◇ متحدية','◇ Challenging'))+'</span><b>'+esc(planet(e.transit.id))+' '+aspect(e.angle)+' '+esc(planet(e.natal.id))+'</b><small dir="ltr">'+e.orb.toFixed(2)+'° · '+String(hour??12).padStart(2,'0')+':00</small></span>':'';
  const contacts=factor(snap.strongestSupport,'good',snap.strongestSupportHour)+factor(snap.strongestChallenge,'check',snap.strongestChallengeHour);
- return '<div class="astro-day-compact-head"><div class="astro-day-compact-title"><span class="astro-day-kicker">'+t('حظ اليوم · 3 أوقات','Daily fortune · 3 checkpoints')+'</span><h3 dir="ltr">'+esc(date)+'</h3><small>'+t('القراءة من مواضع الكواكب والزوايا على مدار اليوم','Daily score based on three verified sky checkpoints')+'</small></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'<small>/100</small></b><span>'+grade+'</span></div></div>'+
+ return '<div class="astro-day-compact-head"><div class="astro-day-compact-title"><span class="astro-day-kicker">'+t('مؤشر رمزي · 3 أوقات','Symbolic index · 3 checkpoints')+'</span><h3 dir="ltr">'+esc(date)+'</h3><small>'+t('القراءة من مواضع الكواكب والزوايا على مدار اليوم','Daily score based on three verified sky checkpoints')+'</small></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'<small>/100</small></b><span>'+grade+'</span></div></div>'+
   '<div class="astro-day-compact-aspects">'+(contacts||'<span class="astro-compact-no-aspect">'+t('ماكو زاوية قريبة مهيمنة بهذا الوقت.','No dominant close aspect at this time.')+'</span>')+'</div>'+
   '<div class="astro-day-compact-footer"><small>'+t('الفحص: 04 / 12 / 20 · المدى ','Checks: 04 / 12 / 20 · range ')+snap.minimum+'–'+snap.maximum+' · '+t('مؤشر رمزي مو تنبؤ','Symbolic index, not a forecast')+'</small><button type="button" class="secondary astro-day-open-time" data-calendar-open="'+(+at)+'">'+t('لقطة الظهر بآلة الزمن','Noon snapshot in Time Machine')+' ↗</button></div>';
 }
@@ -677,8 +677,10 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
    const {person,natal}=soulViewProfile(),topic=soulTopics.find(x=>x.id===soulTopic);
    if(!topic)throw Error('Invalid Soul topic');
    key=soulAIKey(person,topic.id);soulAIActive=key;soulAIBusy=true;soulAIError='';render();
-   const evidence=soulReading(natal,topic,{knownTime:person.known}).basis;
-   const response=await fetch('/api/soul',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topicId:topic.id,language:lang,evidence}),signal:AbortSignal.timeout(65000)});
+   const reading=soulReading(natal,topic,{knownTime:person.known});
+   if(reading.basisStatus!=='available')throw Error(t('البيانات غير كافية لهالموضوع؛ ما نطلب استنتاج من Ai بلا أساس.','Insufficient evidence for this topic; Ai inference is disabled.'));
+   const evidence=reading.basis;
+   const response=await fetch('/api/soul',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topicId:topic.id,language:lang,birthTimeKnown:person.known,evidence}),signal:AbortSignal.timeout(65000)});
    const result=await response.json();
    if(!response.ok)throw Error(result.error||'Ai structured response unavailable');
    if(result.topicId!==topic.id||typeof result.summary!=='string'||!Array.isArray(result.strengths))throw Error('Invalid Soul AI response');

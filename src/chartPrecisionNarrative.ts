@@ -1,5 +1,6 @@
 import type {Chart,Report} from './engine.ts';
 import {distance,houseNumber,type Point,type Evidence} from './math.ts';
+import {interpretableNatalPoints} from './readingBasis.ts';
 export type PrecisionInsight={id:string;titleAr:string;titleEn:string;signAr:string;signEn:string;ar:string;en:string;actionAr:string;actionEn:string;degree:number;house:number|null;aspect:string|null};
 const planets:Record<string,{ar:string;en:string;roleAr:string;roleEn:string;actionAr:string;actionEn:string}>={
  Sun:{ar:'الشمس · الهوية',en:'Sun · Identity',roleAr:'القرار وطريقة التعبير عن الذات',roleEn:'decision-making and self-expression',actionAr:'دقق وين تقدر تثبت قرارك بالفعل، مو بالتوقع.',actionEn:'Test your priorities against what you actually do.'},
@@ -45,10 +46,11 @@ function nearestNatal(point:Point,points:readonly Point[]):Contact|null{
  return choices.sort((a,b)=>a.orb-b.orb)[0]??null;
 }
 export function precisionChartStories(natal:Chart,current?:Chart,evidence:readonly Evidence[]=[],knownTime=true):PrecisionInsight[]{
- return natal.points.filter(p=>planets[p.id]).map(p=>{
+ const readable=interpretableNatalPoints(natal.points,knownTime);
+ return readable.filter(p=>planets[p.id]).map(p=>{
   const role=planets[p.id],z=signs[Math.floor((((p.longitude%360)+360)%360)/30)],degree=((p.longitude%30)+30)%30;
   const house=knownTime&&natal.cusps.length===12?houseNumber(p.longitude,natal.cusps):null;
-  const match=nearestNatal(p,natal.points),transit=current?evidence.filter(e=>e.natal.id===p.id).sort((a,b)=>a.orb-b.orb)[0]:undefined;
+  const match=nearestNatal(p,readable),transit=current?evidence.filter(e=>e.natal.id===p.id).sort((a,b)=>a.orb-b.orb)[0]:undefined;
   const placementAr=arName[p.id]+' عند '+degree.toFixed(2)+'° من '+z[0]+(house?' بالبيت '+house:'')+(p.speed<0?' وهو متراجع بالخارطة.':'.');
   const placementEn=p.id+' at '+degree.toFixed(2)+'° '+z[1]+(house?' in house '+house:'')+(p.speed<0?' (retrograde).':'.');
   const asAr=match?' أقرب اتصال ولادي: '+(arAspect[match.angle]??match.angle+'°')+' مع '+(arName[match.point.id]??match.point.id)+' بفارق '+match.orb.toFixed(2)+'°. '+angleMeaning[match.angle][0]:

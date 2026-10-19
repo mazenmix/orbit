@@ -1,5 +1,6 @@
 import type {Chart,Profile,Report} from './engine.ts';
 import type {Point} from './math.ts';
+import {interpretableNatalPoints} from './readingBasis.ts';
 export type ChartInsight={titleAr:string;titleEn:string;ar:string;en:string;actionAr:string;actionEn:string;signAr:string;signEn:string};
 const signs=[
  ['الحمل','Aries','المبادرة والاندفاع','initiative and drive'],
@@ -25,8 +26,9 @@ const areas=[
  {key:'Jupiter',ar:'فرص التطوّر',en:'Growth opportunities',themeAr:'الطريقة التي تميل بها إلى توسيع خبرتك',themeEn:'How you approach learning and expansion',actionAr:'تعلم مهارة جديدة بطريقة قابلة للقياس.',actionEn:'Develop one measurable new skill.'},
  {key:'Saturn',ar:'المسؤولية والحدود',en:'Responsibility & limits',themeAr:'المواضيع التي تحتاج منك صبر وخطة',themeEn:'Where patience and steady structure matter',actionAr:'قسّم الالتزام الكبير إلى خطوات أسبوعية صغيرة.',actionEn:'Break a large commitment into weekly steps.'}
 ] as const;
-export function chartStories(chart:Chart):ChartInsight[]{
- return areas.flatMap(area=>{const p=chart.points.find((p:Point)=>p.id===area.key);if(!p)return [];const sign=signs[Math.floor((((p.longitude%360)+360)%360)/30)];
+export function chartStories(chart:Chart,knownTime=true):ChartInsight[]{
+ const readable=interpretableNatalPoints(chart.points,knownTime);
+ return areas.flatMap(area=>{const p=readable.find((p:Point)=>p.id===area.key);if(!p)return [];const sign=signs[Math.floor((((p.longitude%360)+360)%360)/30)];
  return [{titleAr:area.ar,titleEn:area.en,signAr:sign[0],signEn:sign[1],ar:'وجود '+namesAr[area.key]+' ببرج '+sign[0]+' يربط '+area.themeAr+' بموضوع '+sign[2]+'، وفق التفسير الرمزي للخارطة.',en:area.key+' in '+sign[1]+' links '+area.themeEn+' with '+sign[3]+' symbolically.',actionAr:area.actionAr,actionEn:area.actionEn}];
  });
 }
@@ -36,6 +38,7 @@ export function profileAddress(profile:Pick<Profile,'sex'|'name'>,arabic=true){
  return arabic?'الشخص صاحب الخارطة':'Chart owner';
 }
 export function transitOverview(report:Report){
+ if(!report.evidence.length)return {ar:'ماكو اتصال قريب محسوب يسند تحديد مجال مهيمن بهاللحظة؛ ما نطلع استنتاج شخصي من درجة افتراضية.',en:'No calculated close contact supports a dominant theme at this moment; a default index does not justify a personal conclusion.'};
  const scores=report.scores;
  const dominant=(Object.entries(scores) as [string,number][]).sort((a,b)=>b[1]-a[1])[0];
  const labels:Record<string,[string,string,string,string]>={career:['الشغل والقرارات','work and decisions','اختار مهمة واضحة وقِس نتيجتها.','Choose one measurable task.'],love:['الحب والعلاقات','love and connection','عبّر عن رغبتك بصراحة واحترم رأي الطرف الآخر.','Be honest about your interest and respect the response.'],communication:['التواصل','communication','انطي مساحة للرد قبل افتراض النية.','Make room for a response before assuming intentions.'],energy:['الطاقة','energy','وزع نشاطك ولا تبالغ بالمجهود.','Pace your energy.'],emotions:['المزاج','emotions','لاحظ مشاعرك قبل اتخاذ قرار كبير.','Notice your feelings before a major decision.'],recovery:['الراحة','recovery','رتّب وقت الراحة من البداية.','Schedule meaningful rest.'],timing:['التوقيت','timing','راجع تفاصيل الموعد قبل التنفيذ.','Check timing details before acting.'],overview:['الصورة العامة','overall context','رتب الأولويات بدون استعجال.','Set priorities without rushing.']};

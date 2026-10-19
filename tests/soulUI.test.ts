@@ -50,3 +50,13 @@ test('summary appears once and calculation provenance remains visible in the evi
  assert.ok(!fallback.includes('REJECTED MODEL')&&!fallback.includes('REPEATED ACTION'));
  assert.equal(fallback.split(encoded).length-1,1);
 });
+test('insufficient natal evidence disables inference and hides traits, examples and stale Ai text',async()=>{
+ const {soulRender}=await import('../src/soulUI.ts');
+ const {defaultProfile}=await import('../src/engine.ts');
+ const chart={date:new Date('2000-01-01T12:00:00Z'),points:[planet('Sun',280),planet('Moon',NaN)],asc:null,mc:null,cusps:[],missing:[]};
+ const html=soulRender({profile:{...defaultProfile,known:false},chart,categoryId:1,topicId:1,query:'',ai:{summary:'STALE CLAIM',detailedAnalysis:'STALE DETAIL',strengths:['STALE TRAIT'],challenges:[],practicalInsights:[],reflectionQuestions:[]}});
+ assert.match(html,/id="soul-ai" disabled/);
+ assert.ok(html.includes('البيانات غير كافية'));
+ for(const css of ['strengths','weaknesses','example'])assert.ok(!html.includes('class="soul-detail-box '+css+'"'));
+ assert.ok(!html.includes('STALE')&&!html.includes('NaN°')&&!html.includes('undefined'));
+});

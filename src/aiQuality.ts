@@ -18,12 +18,25 @@ export function conciseAI(text:string):string{
  }
  return out.join('\n\n');
 }
+/** Shared by transit and natal explanations. Matching a planet name does not
+ * authorize a probability, diagnosis, private desire or certain future event. */
+export function unsupportedOutcomeClaims(text:string):string[]{
+ const message=normalized(text).replace(/\*\*/g,'');
+ const problems:string[]=[];
+ if(/\d+(?:[.,٫]\d+)?\s*(?:%|٪|percent|بالمية|بالمائة)/iu.test(message))problems.push('unfounded-percentage');
+ // Remove only the negated guarantee itself. A disclaimer elsewhere must not
+ // authorize a second, positive certainty claim in the same sentence.
+ const assertions=message.replace(/\b(?:not guaranteed|no guarantees?|cannot guarantee)\b|(?:مو|غير|ليس|ليست)\s+مضمون(?:ة|ا)?/gu,' ');
+ if(/(?:\bguarantee(?:d|s)?\b|\bcertainly\s+will\b|\bwill\s+(?:definitely|certainly)\b|اكيد\s+(?:راح|حت|يرجع)|مضمون(?:ة)?(?:\s|$))/iu.test(assertions))problems.push('unsupported-certainty');
+ if(/\b(?:will|going to)\s+(?:definitely\s+)?(?:marry|win|contact you|return to you)|(?:راح|سوف)\s+(?:تتزوج|تربح|ترجعلك|يرجعلك|يتصل بيك|تتصل بيك)/u.test(message))problems.push('unsupported-future-outcome');
+ if(/(?:\bshe secretly wants\b|\bhe secretly desires\b|\bknow her private thoughts\b|نعرف\s+افكارها\s+السرية|نقدر\s+نقرا\s+رغباتها|\bshe (?:loves you|wants you sexually)\b|\bhe is sexually attracted to you\b|هي تحبك بالسر|هو يرغب بيك جنسيا)/iu.test(message))problems.push('private-intent-claim');
+ if(/\byou (?:have|suffer from) (?:depression|bipolar disorder|cancer|adhd|ptsd)\b|عندك (?:اكتئاب|سرطان|اضطراب ثنايي|اضطراب ثنائي)|مصاب ب(?:الاكتئاب|السرطان)/u.test(message))problems.push('unsupported-diagnosis');
+ return [...new Set(problems)];
+}
+export function hasSymbolicFraming(text:string):boolean{return /symbolic|symbolism|رمزي|رمزية/u.test(normalized(text))}
 export function unsafeAIGuesses(message:string,ctx:AIAdviceContext):string[]{
  message=normalized(message).replace(/\*\*/g,'');
- const problems:string[]=[];
- if(/\d+(?:[.,٫]\d+)?\s*(?:%|٪|percent)/iu.test(message))problems.push('unfounded-percentage');
- if(/(?:\bguarantee(?:d|s)?\b|\bcertainly\s+will\b|\bwill\s+(?:definitely|certainly)\b|اكيد\s+(?:راح|حت|يرجع)|مضمون(?:ة)?(?:\s|$))/iu.test(message)&&!/(?:not guaranteed|no guarantee|مو مضمونة|مو مضمون|غير مضمون)/u.test(message))problems.push('unsupported-certainty');
- if(/(?:\bshe secretly wants\b|\bhe secretly desires\b|\bknow her private thoughts\b|نعرف\s+افكارها\s+السرية|نقدر\s+نقرا\s+رغباتها)/iu.test(message))problems.push('private-intent-claim');
+ const problems=unsupportedOutcomeClaims(message);
  if(!ctx.events.length&&/(?:eclipse|كسوف|خسوف)/iu.test(message))problems.push('unverified-eclipse');
  const dates=[...message.matchAll(/\b(?:18|19|20|21|22|23)\d\d-\d\d-\d\d\b/g)].map(x=>x[0]);
  const known=new Set(ctx.events.map(e=>e.maximum.slice(0,10)));
@@ -37,7 +50,7 @@ export function unsafeAIGuesses(message:string,ctx:AIAdviceContext):string[]{
  if(/\b(?:in|enters?|entering)\s+(?:the\s+sign\s+of\s+)?(?:aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b|(?:في|ب)\s*(?:برج\s+)(?:الحمل|الثور|الجوزاء|السرطان|الاسد|العذراء|الميزان|العقرب|القوس|الجدي|الدلو|الحوت)|\b(?:house)\s+(?:\d|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth)|البيت\s+(?:\d|الاول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|الحادي|الثاني عشر)/u.test(message))problems.push('unsupplied-placement');
  if(ctx.evidence){
   const contacts=[...ctx.evidence,...(ctx.supplemental??[])];
-  if(ctx.strict&&!/symbolic|symbolism|رمزي|رمزية/u.test(message))problems.push('missing-symbolic-framing');
+  if(ctx.strict&&!hasSymbolicFraming(message))problems.push('missing-symbolic-framing');
   if(ctx.strict&&/تاثير مطبق|تاثيرات مطبقة|مدار\s+\d|يدور باتجاه (?:الدعم|التحدي)/u.test(message))problems.push('misleading-motion-terminology');
   if(ctx.strict&&!ctx.comparisonAvailable&&/no (?:major |meaningful |material )?new (?:shifts?|changes?)|no (?:major |meaningful |material )?changes?|contacts (?:are |remain )?stable|مقارنة (?:يومية|اليومية|الساعة)|لا توجد تغييرات|ماكو تغييرات/u.test(message))problems.push('unsupplied-comparison');
   for(const clause of message.split(/(?:[.!?](?!\d)|\n|;|؛|\bwhile\b|بينما|لكن)/u)){

@@ -4,11 +4,12 @@ import {soulTopics,type SoulTopic} from './soulData.ts';
 import {getSoulTheme} from './soulThemes.ts';
 import {soulDeepFor} from './soulDeep.ts';
 import {soulRule} from './soulTopicRules.ts';
+import {interpretableNatalPoints} from './readingBasis.ts';
 
 export type NatalBasis={planet:string;longitude:number;sign:number;house:number|null;retrograde:boolean;angle:{planet:string;type:number;orb:number;conflict:boolean}|null};
 export type NatalAspect={first:string;second:string;type:number;orb:number};
 export type SoulOptions={knownTime?:boolean};
-export type SoulReading={topic:SoulTopic;basis:NatalBasis[];summary:{ar:string;en:string};deep:{ar:string;en:string};strengths:{ar:string[];en:string[]};weaknesses:{ar:string[];en:string[]};example:{ar:string;en:string};advice:{ar:string;en:string};question:{ar:string;en:string};limitations:{ar:string;en:string};contradictory:boolean};
+export type SoulReading={topic:SoulTopic;basis:NatalBasis[];basisStatus:'available'|'limited'|'unavailable';summary:{ar:string;en:string};deep:{ar:string;en:string};strengths:{ar:string[];en:string[]};weaknesses:{ar:string[];en:string[]};example:{ar:string;en:string};advice:{ar:string;en:string};question:{ar:string;en:string};limitations:{ar:string;en:string};contradictory:boolean};
 const arSigns=['الحمل','الثور','الجوزاء','السرطان','الأسد','العذراء','الميزان','العقرب','القوس','الجدي','الدلو','الحوت'];
 const enSigns=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
 const styleAr=['المبادرة والتعبير المباشر','الثبات وتقدير الملموس','الفضول وتبادل الأفكار','الألفة والرعاية','الإبداع والتعبير الواثق','التدقيق والتحسين العملي','الموازنة والإنصاف','العمق وحماية الثقة','التجربة وتوسيع المنظور','التخطيط وتحمل المسؤولية','الاستقلال وإعادة النظر في المألوف','الخيال والتعاطف'];
@@ -23,7 +24,7 @@ const houseFocusEn=['','identity and first impressions','resources and self-wort
 const sign=(longitude:number)=>Math.floor(((longitude%360)+360)%360/30);
 const name=(id:string,ar:boolean)=>ar?(arPlanets[id]??id):id;
 const role=(id:string,ar:boolean)=>(ar?roleAr:roleEn)[id]??name(id,ar);
-const finitePosition=(p:Point)=>Number.isFinite(p.longitude)&&p.longitude>=0&&p.longitude<360;
+const finitePosition=(p:Point)=>Number.isFinite(p.longitude)&&p.longitude>=0&&p.longitude<360&&Number.isFinite(p.speed);
 
 function canonicalTopic(topic:SoulTopic){
  const selected=soulTopics[topic.id-1];
@@ -48,9 +49,9 @@ export function soulAspectPairs(basis:readonly Pick<NatalBasis,'planet'|'longitu
 
 export function soulBasis(chart:Chart,topic:SoulTopic,{knownTime=true}:SoulOptions={}):NatalBasis[]{
  const rule=soulRule(canonicalTopic(topic).id);
- const planets=new Map(chart.points.filter(finitePosition).filter(p=>knownTime||!['Moon','Ascendant','MC'].includes(p.id)).map(p=>[p.id,p]));
- if(knownTime&&chart.asc!==null&&Number.isFinite(chart.asc))planets.set('Ascendant',{id:'Ascendant',symbol:'ASC',longitude:chart.asc,speed:0});
- if(knownTime&&chart.mc!==null&&Number.isFinite(chart.mc))planets.set('MC',{id:'MC',symbol:'MC',longitude:chart.mc,speed:0});
+ const planets=new Map(interpretableNatalPoints(chart.points,knownTime).map(p=>[p.id,p]));
+ if(knownTime&&chart.asc!==null&&Number.isFinite(chart.asc)&&chart.asc>=0&&chart.asc<360)planets.set('Ascendant',{id:'Ascendant',symbol:'ASC',longitude:chart.asc,speed:0});
+ if(knownTime&&chart.mc!==null&&Number.isFinite(chart.mc)&&chart.mc>=0&&chart.mc<360)planets.set('MC',{id:'MC',symbol:'MC',longitude:chart.mc,speed:0});
  const houses=knownTime&&chart.cusps.length===12&&chart.cusps.every(Number.isFinite);
  const basis:NatalBasis[]=[...new Set(rule.planets)].flatMap(id=>{
   const p=planets.get(id);if(!p)return [];
@@ -95,6 +96,14 @@ function aspectInterpretation(basis:NatalBasis[],ar:boolean){
 export function soulReading(chart:Chart,topic:SoulTopic,options:SoulOptions={}):SoulReading{
  topic=canonicalTopic(topic);
  const theme=getSoulTheme(topic.id),specific=soulDeepFor(topic.id),rule=soulRule(topic.id),basis=soulBasis(chart,topic,options),a=basis[0];
+ if(basis.length<2){
+  const available=basis.length?{ar:'المتاح فقط: '+placementText(basis[0],true)+'.',en:'Only '+placementText(basis[0],false)+' is available.'}:{ar:'لا تتوفر مواضع صالحة من المؤشرات المطلوبة لهذا الموضوع.',en:'No valid placement among this topic’s required indicators is available.'};
+  return {topic,basis,basisStatus:basis.length?'limited':'unavailable',
+   summary:{ar:'البيانات غير كافية لتحليل «'+topic.ar+'».',en:'Insufficient data to interpret “'+topic.en+'”.'},deep:{ar:available.ar+' ما نكمل الفراغ بصفات أو استنتاجات شخصية.',en:available.en+' Missing evidence is not filled with personality claims.'},
+   strengths:{ar:[],en:[]},weaknesses:{ar:[],en:[]},example:{ar:'',en:''},advice:{ar:'راجع بيانات الولادة والمؤشرات المتاحة لهذا الموضوع.',en:'Review the birth inputs and this topic’s available indicators.'},
+   question:{ar:'هل بيانات الولادة كاملة ووقت الولادة معروف؟',en:'Are the birth inputs complete and is the birth time known?'},
+   limitations:{ar:'هذا الموضوع يحتاج مؤشرين ولاديين صالحين على الأقل قبل تقديم قراءة رمزية. وقت الولادة المجهول يستبعد القمر والطالع ووسط السماء والبيوت.',en:'This topic requires at least two valid natal indicators for a symbolic reading. Unknown birth time excludes Moon, angles and houses.'},contradictory:false};
+ }
  const pairs=soulAspectPairs(basis),mixed=pairs.some(p=>[90,180].includes(p.type))&&pairs.some(p=>[60,120].includes(p.type));
  const introAr=a?' في القراءة الرمزية لـ«'+topic.ar+'»، يضيف موضع '+placementText(a,true)+' منظور '+role(a.planet,true)+' عبر '+styleAr[a.sign]+'.':' لا تتوفر بيانات كافية لربط هذا الموضوع بخارطتك.';
  const introEn=a?' For “'+topic.en+'”, '+placementText(a,false)+' adds the symbolic perspective of '+role(a.planet,false)+' through '+styleEn[a.sign]+'.':' The available data are insufficient to connect this topic to your chart.';
@@ -107,7 +116,7 @@ export function soulReading(chart:Chart,topic:SoulTopic,options:SoulOptions={}):
  const retroAr=retro?' يظهر '+retro+' بحركة تراجعية ظاهرية؛ يمكن قراءتها رمزياً كمراجعة لطريقة التعبير، ولا تدل وحدها على ضعف أو فشل.':'';
  const retroTextEn=retroEn?' '+retroEn+' shows apparent retrograde motion, which may be used as a reflection on expression; it does not establish weakness or failure.':'';
  const knownTime=options.knownTime!==false;
- return {topic,basis,
+ return {topic,basis,basisStatus:'available',
   summary:{ar:theme.focusAr+'.'+introAr,en:theme.focusEn+'.'+introEn},
   deep:{ar:['في «'+topic.ar+'»: '+pairInterpretation(basis,true)+thirdAr,housesAr.trim(),(a?aspectInterpretation(basis,true):'')+retroAr].filter(Boolean).join('\n\n'),en:['For “'+topic.en+'”: '+pairInterpretation(basis,false)+thirdEn,housesEn.trim(),(a?aspectInterpretation(basis,false):'')+retroTextEn].filter(Boolean).join('\n\n')},
   strengths:{ar:[rule.resource.ar],en:[rule.resource.en]},weaknesses:{ar:[rule.risk.ar],en:[rule.risk.en]},
