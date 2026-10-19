@@ -23,7 +23,8 @@ import {namedAsteroids,asteroidSourcePath} from './asteroids.ts';
 import {loadNamedAsteroids,mountedAsteroidCount,namedAsteroidPositions} from './asteroidRuntime.ts';
 import {asteroidReading,namedAsteroidContacts} from './asteroidInterpretation.ts';
 import {partnerInsights,gaugeLevel} from './peopleInsights.ts';
-import {synastryPlainReading,personalTransitPlainReading} from './relationshipPlain.ts';
+import {personalTransitPlainReading} from './relationshipPlain.ts';
+import {relationshipBrief} from './relationshipBrief.ts';
 import {decodePrivateSetup} from './privateSetup.ts';
 import {readJournal,writeJournal,checkJournal,parseJournalBackup,summarizeJournal,type JournalEntry,type InteractionKind,type Outcome} from './journal.ts';
 import {reviewEvidence,reviewSignal} from './decision.ts';
@@ -733,40 +734,43 @@ function relationshipWindowUI(person:Profile){
  }catch(e){return '<p class="alert">'+esc(String(e))+'</p>'}
 }
 function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
- const supportiveEvidence=c.evidence.filter(e=>e.angle===60||e.angle===120).sort((a,b)=>b.influence-a.influence);
- const challengingEvidence=c.evidence.filter(e=>e.angle===90||e.angle===180).sort((a,b)=>b.influence-a.influence);
- const harmony=synastryPlainReading(supportiveEvidence[0],'harmony');
- const challenge=synastryPlainReading(challengingEvidence[0],'challenge');
- const explanation=(text:{ar:string;en:string})=>esc(t(text.ar,text.en));
- const aspectProof=(e:typeof c.evidence[number]|undefined)=>{
+ const brief=relationshipBrief(c.evidence);
+ const text=(v:{ar:string;en:string})=>esc(t(v.ar,v.en));
+ const romantic=person.kind==='dating'||person.kind==='friend';
+ const evidenceLine=(labelAr:string,labelEn:string,e:typeof c.evidence[number]|null)=>{
   if(!e)return '';
-  return '<details class="mx-relationship-evidence"><summary>'+t('الزاوية الفلكية المحسوبة','View calculated aspect')+'</summary><p>'+esc(planet(e.first.id))+' · '+aspect(e.angle)+' · '+esc(planet(e.second.id))+' <b dir="ltr">'+e.orb.toFixed(2)+'°</b></p></details>';
+  return '<p><b>'+t(labelAr,labelEn)+':</b> '+esc(planet(e.first.id))+' · '+aspect(e.angle)+' · '+esc(planet(e.second.id))+' · '+e.orb.toFixed(2)+'°</p>';
  };
- const card=(icon:string,labelAr:string,labelEn:string,reading:typeof harmony,e:typeof c.evidence[number]|undefined)=>
-  '<article class="mx-partner-plain-card"><small>'+icon+' '+t(labelAr,labelEn)+'</small>'+
-  '<h3>'+explanation(reading.title)+'</h3>'+
-  '<p class="mx-partner-meaning">'+explanation(reading.meaning)+'</p>'+
-  '<p class="mx-partner-action"><b>'+t('شنو الأفضل تسوون؟','What can help?')+' </b>'+explanation(reading.advice)+'</p>'+aspectProof(e)+'</article>';
+ const card=(icon:string,labelAr:string,labelEn:string,title:string,meaning:string,advice:string)=>
+  '<article class="mx-brief-card"><small>'+icon+' '+t(labelAr,labelEn)+'</small><h3>'+title+'</h3><p>'+meaning+'</p>'+(advice?'<p class="mx-brief-advice">'+advice+'</p>':'')+'</article>';
+ const attraction=romantic?
+  '<article class="mx-brief-card mx-brief-sexual"><small>♥ '+t('الجاذبية والجنس','ATTRACTION & SEX')+'</small>'+
+   '<h3>'+t('الانجذاب والكيمياء الجنسية','Attraction & sexual chemistry')+'</h3>'+
+   '<div class="mx-brief-fact"><b>'+t('الجاذبية','Attraction')+'</b><p>'+text(brief.attraction)+'</p></div>'+
+   '<div class="mx-brief-fact"><b>'+t('الجنس','Sexual chemistry')+'</b><p>'+text(brief.sexual)+'</p></div></article>':'';
+ const harmony=card('✦','أقوى انسجام','MAIN HARMONY',text(brief.harmonyTitle),text(brief.harmony),text(brief.harmonyAction));
+ const challenge=card('◇','أبرز تحدّي','MAIN CHALLENGE',text(brief.challengeTitle),text(brief.challenge),text(brief.challengeAction));
  const partnerReport=report(person,selected);
  const activeTransit=rankPrioritySignals({signals:data!.signals,natal:data!.natal,knownBirthTime:active.known,complete:data!.complete}).find(x=>x.factor.applying);
  const partnerTransit=rankPrioritySignals({signals:partnerReport.signals,natal:partnerReport.natal,knownBirthTime:person.known,complete:partnerReport.complete}).find(x=>x.factor.applying);
- const transitDetail=(name:string,entry:typeof activeTransit)=>{
+ const transit=(profile:Profile,entry:typeof activeTransit)=>{
   const reading=personalTransitPlainReading(entry?.factor,entry?.signal.category);
-  return '<div class="mx-partner-person-timing"><b>'+esc(name)+'</b><h4>'+explanation(reading.title)+'</h4>'+
-   '<p>'+explanation(reading.meaning)+'</p>'+
-   (entry?'<details class="mx-relationship-evidence"><summary>'+t('شوف الاتصال والأورب','View aspect and orb')+'</summary><p>'+esc(planet(entry.factor.transit.id))+' · '+aspect(entry.factor.angle)+' · '+esc(planet(entry.factor.natal.id))+' <b dir="ltr">'+entry.factor.orb.toFixed(2)+'°</b></p></details>':'')+'</div>';
+  const proof=entry?' · '+esc(planet(entry.factor.transit.id))+' / '+aspect(entry.factor.angle)+' / '+esc(planet(entry.factor.natal.id))+' ('+entry.factor.orb.toFixed(2)+'°)'):'';
+  return '<p><b>'+esc(profile.name)+':</b> '+text(reading.title)+proof+'</p>';
  };
- return '<section class="panel mx-partner-focus"><h2>'+t('الخلاصة بثلاث نقاط','Three-point relationship overview')+'</h2><div class="mx-partner-focus-grid">'+
- card('✦','أقوى انسجام','Strongest harmony',harmony,supportiveEvidence[0])+
- card('◇','أبرز تحدّي','Main challenge',challenge,challengingEvidence[0])+
- '<article class="mx-partner-plain-card mx-partner-transit-card"><small>◷ '+t('العبور الحالي للخارطتين','Current transits for both charts')+'</small>'+
- '<h3>'+t('شنو يبرز بهالفترة؟','What stands out now?')+'</h3>'+
- '<p class="mx-partner-intro">'+t('هاي الحركة الفلكية الحالية لكل شخص، مو تأكيد شنو راح يصير بينكم.','These are current personal sky contacts, not a forecast of what will happen between you.')+'</p>'+
- transitDetail(active.name,activeTransit)+transitDetail(person.name,partnerTransit)+
- '<p class="mx-partner-observed">'+t('وقت الرصد: ','Calculated at: ')+dateText(selected,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</p>'+
- '<button class="secondary mx-focus-subaction" data-partner-peak="'+esc(person.id)+'">'+t('تحقق من موعد الذروة الدقيقة','Verify exact transit peaks')+' ↗</button><div class="mx-partner-peaks" role="status"></div></article></div>'+
- '<p class="mx-focus-note">'+(!active.known||!person.known?t('وقت ميلاد واحد على الأقل غير معروف؛ تم استبعاد الاتصالات والبيوت التي تحتاجه.','One or more birth times are unknown; time-dependent points and houses are excluded.')+' ':'')+
- t('هذي قراءات تنجيمية رمزية وليست إثباتاً للمشاعر أو التوافق الواقعي.','These are symbolic astrological readings, not evidence of real feelings or relationship compatibility.')+'</p></section>';
+ return '<section class="panel mx-partner-focus mx-relationship-brief"><div class="mx-brief-head"><h2>'+t('خلاصة العلاقة','Relationship snapshot')+'</h2>'+
+  '<small>'+esc(active.name)+' × '+esc(person.name)+'</small></div>'+
+  '<div class="mx-brief-grid'+(romantic?'':' mx-brief-nonromantic')+'">'+attraction+harmony+challenge+'</div>'+
+  '<div class="mx-brief-bottom"><span>'+t('◷ العبور الحالي','◷ Current transits')+'</span><details class="mx-brief-details"><summary>'+t('التوقيت ودليل الزوايا','Timing & aspect evidence')+'</summary>'+
+  transit(active,activeTransit)+transit(person,partnerTransit)+
+  evidenceLine('الجاذبية','Attraction',brief.attractionContact)+evidenceLine('الجنس','Sexual chemistry',brief.sexualContact)+
+  evidenceLine('الانسجام','Harmony',brief.harmonyContact)+evidenceLine('التحدي','Challenge',brief.challengeContact)+
+  '<small>'+t('وقت الحساب: ','Calculated at: ')+dateText(selected,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</small>'+
+  '<button class="secondary" data-partner-peak="'+esc(person.id)+'">'+t('تحقق من ذروة العبور','Verify exact transit peaks')+'</button><div class="mx-partner-peaks" role="status"></div></details></div>'+
+  '<p class="mx-brief-footnote">'+
+  (romantic?t('التفسير الجنسي والجاذبية دلالات فلكية، مو قياس لرغبة الشخص أو موافقته.','Sexual chemistry and attraction here are astrological symbols, not a measurement of desire or consent.') :
+    t('قراءة رمزية للاتصالات الفلكية بين الخارطتين.','A symbolic reading of calculated chart contacts.'))+
+  (!active.known||!person.known?' '+t('وقت الولادة ناقص لبعض الحسابات.','Some birth-time details are unavailable.'):'')+'</p></section>';
 }
 function peoplePage(){
  const others=profiles.filter(p=>p.id!==active.id),partner=others.find(p=>p.id===compareId);
