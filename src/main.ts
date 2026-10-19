@@ -755,7 +755,7 @@ function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
  const partnerTransit=rankPrioritySignals({signals:partnerReport.signals,natal:partnerReport.natal,knownBirthTime:person.known,complete:partnerReport.complete}).find(x=>x.factor.applying);
  const transit=(profile:Profile,entry:typeof activeTransit)=>{
   const reading=personalTransitPlainReading(entry?.factor,entry?.signal.category);
-  const proof=entry?' · '+esc(planet(entry.factor.transit.id))+' / '+aspect(entry.factor.angle)+' / '+esc(planet(entry.factor.natal.id))+' ('+entry.factor.orb.toFixed(2)+'°)'):'';
+  const proof=entry?' · '+esc(planet(entry.factor.transit.id))+' / '+aspect(entry.factor.angle)+' / '+esc(planet(entry.factor.natal.id))+' ('+entry.factor.orb.toFixed(2)+'°)':'';
   return '<p><b>'+esc(profile.name)+':</b> '+text(reading.title)+proof+'</p>';
  };
  return '<section class="panel mx-partner-focus mx-relationship-brief"><div class="mx-brief-head"><h2>'+t('خلاصة العلاقة','Relationship snapshot')+'</h2>'+
