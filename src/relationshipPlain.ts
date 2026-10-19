@@ -68,6 +68,25 @@ export function synastryPlainReading(e:SynastryEvidence|undefined,kind:'harmony'
    {ar:'الحساب الحالي ما وجد تربيع أو مقابلة قريبة. هذا مو ضمان لخلو العلاقة من المشاكل.',en:'No close square or opposition was calculated. This does not guarantee an absence of relationship challenges.'},
   advice:{ar:'خلّ تقييم العلاقة مبني على الحوار والاحترام والتجارب الفعلية.',en:'Assess the relationship through communication, respect and actual experience.'}
  };
+ const bodies=new Set([e.first.id,e.second.id]);
+ if(kind==='harmony'&&(e.angle===120||e.angle===60)&&bodies.has('Venus')&&bodies.has('Mars')){
+  return {
+   title:{ar:'المودة والمبادرة بينكم',en:'Affection meets initiative'},
+   meaning:{ar:'اتصال الزهرة بالمريخ هنا يربط أسلوب التعبير عن الاهتمام عند واحد منكم بطريقة المبادرة عند الثاني. بالتثليث أو التسديس يُقرأ رمزياً كسهولة محتملة بالتقارب إذا الاهتمام متبادل فعلاً، مو كدليل أكيد على انجذاب الشخص الآخر.',
+            en:'The Venus–Mars contact links how one person expresses affection with the other person’s initiative. A trine or sextile traditionally suggests smoother interaction if interest is genuinely mutual, not proof of anyone’s attraction.'},
+   advice:{ar:'إذا التواصل مريح للطرفين، جرّبوا خطوة بسيطة وواضحة وخلي المبادرة بدون ضغط.',
+           en:'If communication feels good to both, try one clear, low-pressure next step.'}
+  };
+ }
+ if(kind==='challenge'&&(e.angle===90||e.angle===180)&&bodies.has('Sun')&&bodies.has('Neptune')){
+  return {
+   title:{ar:'الوضوح مقابل التوقعات',en:'Clarity versus expectations'},
+   meaning:{ar:'اتصال الشمس ونبتون المتحدّي يرمز لاحتمال اختلاف بين الصورة اللي يتخيلها كل واحد والواقع اللي يصير بينكم. مو اتهام بالكذب ولا دليل على نية مخفية، لكنه يلفت النظر لسوء الفهم إذا التوقعات ما تنحچي بصراحة.',
+            en:'A challenging Sun–Neptune contact symbolically highlights a gap between imagined expectations and what each person actually communicates. It is not evidence of lies or hidden motives; unclear expectations may create misunderstandings.'},
+   advice:{ar:'وضحوا شنو تريدون من التواصل، واعتمدوا على الكلام والأفعال الواضحة بدل التخمين.',
+           en:'Say what each of you expects and rely on clear words and behavior rather than guesswork.'}
+  };
+ }
  const topic=pairTitle(e.first.id,e.second.id);
  const first=planetThemes[e.first.id]??{ar:'جانب من شخصية الأول',en:'one person\'s tendencies'};
  const second=planetThemes[e.second.id]??{ar:'جانب من شخصية الثاني',en:'the other person\'s tendencies'};
