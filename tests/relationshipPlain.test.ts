@@ -43,5 +43,5 @@ test('three point UI puts narrative and practical action first and hides mathema
  const ui=main.slice(start,end);
  for(const fragment of ['synastryPlainReading(supportiveEvidence[0]','synastryPlainReading(challengingEvidence[0]','personalTransitPlainReading(','mx-partner-meaning','mx-partner-action','mx-relationship-evidence','<details'])assert.ok(ui.includes(fragment),fragment);
  assert.ok(ui.indexOf('mx-partner-meaning')<ui.indexOf('mx-relationship-evidence'));
- assert.ok(!ui.includes('<strong>\'+label('));
+ assert.ok(!ui.includes('const label=(e:'));
 });
