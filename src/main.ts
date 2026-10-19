@@ -729,6 +729,22 @@ function relationshipWindowUI(person:Profile){
   return '<section class="panel relationship-calendar"><span class="eyebrow">MX ASTRO · 21 DAYS</span><h2>'+t('نوافذ التواصل واللقاءات لهذا الشخص','Communication and meeting planning windows')+'</h2><p>'+t('هاي الأيام من حركة كواكبك ومؤشر التوافق الرمزي. مو قراءة لمشاعر الطرف الثاني أو توفره أو موافقته. أي خطوة تحتاج تواصل مباشر واحترام الرد.','These days combine your transits and symbolic compatibility, not the other person’s wishes, availability or consent.')+'</p><h3>'+t('أيام تراسل بيها','Days to consider a message')+'</h3><div class="relation-window-grid">'+cards('message')+'</div>'+(match.romantic?'<h3>'+t('أيام تقترح موعد','Days to propose a date')+'</h3><div class="relation-window-grid">'+cards('date')+'</div>':'')+'</section>';
  }catch(e){return '<p class="alert">'+esc(String(e))+'</p>'}
 }
+function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
+ const supportiveEvidence=c.evidence.filter(e=>e.angle===60||e.angle===120).sort((a,b)=>b.influence-a.influence);
+ const challengingEvidence=c.evidence.filter(e=>e.angle===90||e.angle===180).sort((a,b)=>b.influence-a.influence);
+ const label=(e:typeof c.evidence[number]|undefined)=>e?planet(e.first.id)+' '+aspect(e.angle)+' '+planet(e.second.id)+' · '+e.orb.toFixed(2)+'°':t('ماكو اتصال قريب بهذا التصنيف','No close contact of this type');
+ const pReport=report(person,selected);
+ const activeTransit=rankPrioritySignals({signals:data!.signals,natal:data!.natal,knownBirthTime:active.known,complete:data!.complete}).find(x=>x.factor.applying);
+ const otherTransit=rankPrioritySignals({signals:pReport.signals,natal:pReport.natal,knownBirthTime:person.known,complete:pReport.complete}).find(x=>x.factor.applying);
+ const transitDesc=(name:string,entry:typeof activeTransit)=>'<small>'+esc(name)+': '+(entry?planet(entry.factor.transit.id)+' '+aspect(entry.factor.angle)+' '+planet(entry.factor.natal.id)+' · '+entry.factor.orb.toFixed(2)+'°':t('لا يوجد اتصال مقترب ضمن الأورب','No applying contact within configured orb'))+'</small>';
+ return '<section class="panel mx-partner-focus"><h2>'+t('الخلاصة بثلاث نقاط','Three-point relationship overview')+'</h2><div class="mx-partner-focus-grid">'+
+ '<article><small>✦ '+t('أقوى انسجام','Strongest harmony')+'</small><strong>'+label(supportiveEvidence[0])+'</strong></article>'+
+ '<article><small>◇ '+t('أبرز تحدّي','Main challenge')+'</small><strong>'+label(challengingEvidence[0])+'</strong></article>'+
+ '<article><small>◷ '+t('توقيت العبور للخارطتين','Transits for both charts')+'</small><strong>'+dateText(selected,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+' · '+t('وقت الرصد','Observed at')+'</strong>'+transitDesc(active.name,activeTransit)+transitDesc(person.name,otherTransit)+
+ '<button class="secondary mx-focus-subaction" data-partner-peak="'+esc(person.id)+'">'+t('تحقق من أقرب ذروة دقيقة','Verify exact transit peaks')+' ↗</button><div class="mx-partner-peaks" role="status"></div></article></div>'+
+ '<p class="mx-focus-note">'+(!active.known||!person.known?t('وقت ميلاد واحد على الأقل غير معروف؛ تم استبعاد البيوت والاتصالات التي تحتاجه.','One or more birth times are unknown; time-dependent contacts and houses are excluded.')+' ':'')+
+ t('الانسجام والتحدّي تفسيرات رمزية لاتصالات الخارطتين، مو معرفة بمشاعر أو قرارات أحد.','Harmony and challenge are symbolic chart contacts, not access to anyone’s actual intentions.')+'</p></section>';
+}
 function peoplePage(){
  const others=profiles.filter(p=>p.id!==active.id),partner=others.find(p=>p.id===compareId);
  let analysis='';
@@ -742,7 +758,12 @@ function peoplePage(){
  (c.romantic?'<section class="panel intimacy-section"><div class="section-title"><div><span class="eyebrow">LOVE · DATING · CHEMISTRY</span><h2>'+t('تفاصيل القرب والمواعيد والانسجام','Dating, intimacy and communication insights')+'</h2></div></div><p>'+t('كل بطاقة تحچي عن ناحية محددة وشنو تسوي عملياً، واللون يوضح قوة المؤشر الرمزي فقط. ما نكدر نعرف الأفكار والرغبات السرية للطرف المقابل من تاريخ الميلاد.','Each card explains a separate symbolic theme and an actionable suggestion. Its color describes the symbolic score, not another person’s private wishes.')+'</p><div class="partner-insights-grid">'+extended+'</div></section>':'')+
  '<details class="panel synastry-technical"><summary>'+t('التفاصيل الحسابية الفلكية للمتخصصين','Advanced mathematical aspect details')+' · '+c.evidence.length+'</summary>'+c.evidence.map(e=>'<p class="technical">'+planet(e.first.id)+' · '+aspect(e.angle)+' · '+planet(e.second.id)+' — '+e.orb.toFixed(3)+'°</p>').join('')+'</details>';
  }
- return '<div class="section-title"><p>'+t('أشخاصك وعلاقاتك؛ قراءات شخصية واضحة وملاحظات واقعية.','Your people and relationships, with useful interpretations and a real interaction log.')+'</p><button class="primary" id="add-person">＋ '+t('إضافة شخص','Add person')+'</button></div><div class="people-grid">'+(others.map(p=>'<section class="panel person-card"><span class="person-avatar">'+esc(p.name.slice(0,1))+'</span><h3>'+esc(p.name)+'</h3><p>'+esc(p.city)+' · '+esc(p.date)+' · '+(p.sex==='female'?'Female':p.sex==='male'?'Male':t('غير محدد','Unspecified'))+'</p><small>'+ (p.known?t('وقت ولادة معروف','Known birth time'):t('وقت الولادة مو معروف','Birth time unknown')) +'</small><div><button class="secondary" data-compare="'+esc(p.id)+'">'+t('قراءة العلاقة','Relationship insights')+' ↗</button><button class="text-button" data-edit="'+esc(p.id)+'">'+t('تعديل','Edit')+'</button></div></section>').join('')||'<section class="panel empty"><h2>'+t('أضف شخصاً لقراءة العلاقة','Add someone to explore your compatibility')+'</h2><button class="secondary" id="add-first">＋ '+t('إضافة شخص','Add person')+'</button></section>')+'</div>'+analysis+(partner?relationshipWindowUI(partner)+journalPanel(partner):'');
+ if(partner&&uiMode==='simple'){
+  const c=compatibility(active,partner);
+  analysis=relationshipFocus(partner,c)+
+   '<details class="panel mx-partner-deep"><summary>'+t('شوف مؤشرات التوافق والتفاصيل المتقدمة','Expand all compatibility indicators and technical details')+'</summary>'+analysis+'</details>';
+ }
+ return '<div class="section-title"><p>'+t('أشخاصك وعلاقاتك؛ قراءات شخصية واضحة وملاحظات واقعية.','Your people and relationships, with useful interpretations and a real interaction log.')+'</p><button class="primary" id="add-person">＋ '+t('إضافة شخص','Add person')+'</button></div><div class="people-grid">'+(others.map(p=>'<section class="panel person-card"><span class="person-avatar">'+esc(p.name.slice(0,1))+'</span><h3>'+esc(p.name)+'</h3><p>'+esc(p.city)+' · '+esc(p.date)+' · '+(p.sex==='female'?'Female':p.sex==='male'?'Male':t('غير محدد','Unspecified'))+'</p><small>'+ (p.known?t('وقت ولادة معروف','Known birth time'):t('وقت الولادة مو معروف','Birth time unknown')) +'</small><div><button class="secondary" data-compare="'+esc(p.id)+'">'+t('قراءة العلاقة','Relationship insights')+' ↗</button><button class="text-button" data-edit="'+esc(p.id)+'">'+t('تعديل','Edit')+'</button></div></section>').join('')||'<section class="panel empty"><h2>'+t('أضف شخصاً لقراءة العلاقة','Add someone to explore your compatibility')+'</h2><button class="secondary" id="add-first">＋ '+t('إضافة شخص','Add person')+'</button></section>')+'</div>'+analysis+(partner?(uiMode==='simple'?'<details class="panel mx-partner-deep"><summary>'+t('التوقيت والسجل الشخصي','Timing windows and private journal')+'</summary>'+relationshipWindowUI(partner)+journalPanel(partner)+'</details>':relationshipWindowUI(partner)+journalPanel(partner)):'');
 }
 
 function aiPayload(){const contacts=(r:Report)=>r.evidence.map(e=>({transit:e.transit.id,natal:e.natal.id,angle:e.angle,orb:e.orb,applying:e.applying}));const current=contacts(data!);const asteroidContacts=mountedAsteroidCount()>0?namedAsteroidContacts(namedAsteroidPositions(asteroidSwissRuntime(),selected),targets(data!.natal).filter(p=>active.known||!['Moon','Ascendant','MC'].includes(p.id)),selected).slice(0,8).map(e=>({transit:e.transit.id,natal:e.natal.id,angle:e.angle,orb:e.orb,applying:e.applying})):[];const eclipseEvents=(()=>{try{return getRealEclipses().filter(e=>e.type!=='unknown'&&+e.maximum>=+selected&&+e.maximum<=+selected+100*86400000).slice(0,2).map(e=>({kind:e.kind,type:e.type,maximum:e.maximum.toISOString()}))}catch{return []}})();return {eclipseEvents,grammaticalGender:active.sex??null,extendedEvidence:asteroidContacts,comparison:{hour:optionalComparison(current,()=>contacts(getReport(new Date(+selected-3600000)))),day:optionalComparison(current,()=>contacts(getReport(new Date(+selected-86400000))))},language:lang,model:'qwen3',question:t('بثلاث أو أربع جمل فقط: اشرح أقوى اتصال محسوب وعامله المعاكس وخطوة عملية واحدة. بلا تكرار أو وعود.','In only three or four sentences explain the strongest calculated contact, its counter-factor and one practical action. No repetition or promises.'),calculatedAt:selected.toISOString(),indices:data!.scores,evidence:narrativeEvidence(data!.evidence).map(e=>({id:e.id,transit:e.transit.id,natal:e.natal.id,angle:e.angle,orb:e.orb,applying:e.applying,weight:e.weight})),rules:'Give 3-4 short factual sentences with one actual strong contact, a counter-signal when available, and one action. Explain only supplied evidence. Avoid repeating categories, claims or advice. Do not invent calculations, houses, exact dates or events. Scores are symbolic, never probabilities. No private feelings or guaranteed predictions. State missing data and uncertainty. Return Iraqi Arabic for ar, English for en.'}}
@@ -841,6 +862,29 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
  });
 
  root.querySelectorAll<HTMLButtonElement>('[data-ui-mode]').forEach(b=>b.onclick=()=>{uiMode=b.dataset.uiMode==='pro'?'pro':'simple';localStorage.setItem('mx.uiMode',uiMode);render()});
+ root.querySelectorAll<HTMLButtonElement>('[data-partner-peak]').forEach(button=>button.onclick=()=>{
+ const person=profiles.find(p=>p.id===button.dataset.partnerPeak);
+ const area=button.nextElementSibling as HTMLElement|null;
+ if(!person||!area||!ready)return;
+ const instant=new Date(+selected),profilesToCheck=[active,person];
+ button.disabled=true;area.textContent=t('دا أتحقق من زوايا دقيقة لكل خارطة…','Verifying exact contacts against both natal charts…');
+ setTimeout(()=>{
+  const lines:string[]=[];
+  for(const owner of profilesToCheck){
+   try{
+    const r=report(owner,instant),entry=rankPrioritySignals({signals:r.signals,natal:r.natal,knownBirthTime:owner.known,complete:r.complete}).find(x=>x.factor.applying);
+    if(!entry){lines.push(esc(owner.name)+': '+t('لا يوجد اتصال مقترب محسوب','No calculated applying contact'));continue}
+    const result=refineNatalTransit(entry.factor,instant,at=>chart(at,owner,true,false).points,21);
+    const first=result.events.filter(e=>+e.time>=+instant).sort((a,b)=>+a.time-+b.time)[0];
+    lines.push(esc(owner.name)+': '+(first?dateText(first.time):t('ماكو ذروة دقيقة قادمة ضمن 21 يوم','No exact future peak in 21 days')));
+   }catch(e){lines.push(esc(owner.name)+': '+t('التحقق غير متاح','Verification unavailable'))}
+  }
+  if(!root.contains(button)||button.dataset.partnerPeak!==person.id)return;
+  area.innerHTML=lines.map(line=>'<p>'+line+'</p>').join('');
+  button.disabled=false;
+ },30);
+});
+ 
  on('calendar-expand',()=>{calendarExpanded=!calendarExpanded;root.querySelector('.mx-calendar-compact')?.classList.toggle('is-expanded',calendarExpanded);const button=root.querySelector<HTMLButtonElement>('#calendar-expand');if(button)button.textContent=calendarExpanded?t('إظهار شهرين','Show two months'):t('إظهار كل الأشهر','Show all months');const p=root.querySelector('#astro-calendar-progress');if(p)p.textContent=calendarSnapshots.size+'/'+calendarTargetDays()+' '+t('محسوب فعلياً','verified');if(calendarExpanded&&!calendarRunning)startCalendarWork()});
  const expandSky=()=>{if(!data)return;showDialog('<div class="mx-expanded-sky"><span class="eyebrow">✦ MX ASTRO · LIVE SKY</span><h2>'+t('سماء اللحظة · الدائرة المكبرة','Current sky · Expanded wheel')+'</h2><p class="mx-expanded-sky-time">'+dateText(selected)+'</p><div class="mx-expanded-wheel">'+wheel(data.current)+'</div><div class="mx-expanded-sky-notes">'+t('مواضع فلكية محسوبة بالزودياك الاستوائي. معانيها تنجيمية رمزية.','Calculated tropical zodiac positions; interpretations are astrological symbolism.')+'</div></div>');};
  on('expand-sky-wheel',expandSky);on('expand-sky-wheel-link',expandSky);
