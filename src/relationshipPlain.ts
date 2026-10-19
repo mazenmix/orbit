@@ -83,7 +83,7 @@ export function synastryPlainReading(e:SynastryEvidence|undefined,kind:'harmony'
    title:{ar:'الوضوح مقابل التوقعات',en:'Clarity versus expectations'},
    meaning:{ar:'هذا التربيع بين الشمس ونبتون يرمز لاحتمال اختلاف بين الصورة اللي يتخيلها كل واحد والواقع اللي يصير بينكم. مو اتهام بالكذب ولا دليل على نية مخفية، لكنه يلفت النظر لسوء الفهم إذا التوقعات ما تنحچي بصراحة.',
             en:'A challenging Sun–Neptune contact symbolically highlights a gap between imagined expectations and what each person actually communicates. It is not evidence of lies or hidden motives; unclear expectations may create misunderstandings.'},
-   advice:{ar:'وضحوا شنو تريدون من التواصل، واعتمدوا على الكلام والأفعال الواضحة بدل التخمين.',
+   advice:{ar:'وضحوا التوقعات: شنو يريد كل واحد من التواصل؟ واعتمدوا على الكلام والأفعال الواضحة بدل التخمين.',
            en:'Say what each of you expects and rely on clear words and behavior rather than guesswork.'}
   };
  }
