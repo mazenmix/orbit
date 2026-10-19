@@ -749,9 +749,10 @@ function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
 }
 function peoplePage(){
  const others=profiles.filter(p=>p.id!==active.id),partner=others.find(p=>p.id===compareId);
- let analysis='';
+ let analysis='',focusSummary='';
  if(partner){
   const c=compatibility(active,partner),indices=getReport(selected).scores,insights=partnerInsights(c.dimensions,{love:indices.love,communication:indices.communication,energy:indices.energy},c.romantic);
+  focusSummary=uiMode==='simple'?relationshipFocus(partner,c):'';
   const title=(k:string)=>t(({attraction:'الجاذبية',sexual:'الكيمياء الحميمية',emotional:'القرب العاطفي',communication:'التفاهم بالكلام',stability:'الاستمرارية',conflict:'هدوء الخلافات'} as Record<string,string>)[k],({attraction:'Attraction',sexual:'Intimate chemistry',emotional:'Emotional closeness',communication:'Communication',stability:'Steadiness',conflict:'Conflict resilience'} as Record<string,string>)[k]);
   const gauge=(value:number)=>'<span class="gauge '+gaugeLevel(value)+'"><b>'+value+'</b><small>/100</small><i style="width:'+value+'%"></i></span>';
   const classic=Object.entries(c.dimensions).filter(([k])=>c.romantic||!['attraction','sexual'].includes(k)).map(([k,v])=>{const n=k==='conflict'?100-v:v;return '<div class="partner-score"><span>'+title(k)+'</span>'+gauge(n)+'</div>'}).join('');
@@ -761,8 +762,7 @@ function peoplePage(){
  '<details class="panel synastry-technical"><summary>'+t('التفاصيل الحسابية الفلكية للمتخصصين','Advanced mathematical aspect details')+' · '+c.evidence.length+'</summary>'+c.evidence.map(e=>'<p class="technical">'+planet(e.first.id)+' · '+aspect(e.angle)+' · '+planet(e.second.id)+' — '+e.orb.toFixed(3)+'°</p>').join('')+'</details>';
  }
  if(partner&&uiMode==='simple'){
-  const c=compatibility(active,partner);
-  analysis=relationshipFocus(partner,c)+
+  analysis=focusSummary+
    '<details class="panel mx-partner-deep"><summary>'+t('شوف مؤشرات التوافق والتفاصيل المتقدمة','Expand all compatibility indicators and technical details')+'</summary>'+analysis+'</details>';
  }
  return '<div class="section-title"><p>'+t('أشخاصك وعلاقاتك؛ قراءات شخصية واضحة وملاحظات واقعية.','Your people and relationships, with useful interpretations and a real interaction log.')+'</p><button class="primary" id="add-person">＋ '+t('إضافة شخص','Add person')+'</button></div><div class="people-grid">'+(others.map(p=>'<section class="panel person-card"><span class="person-avatar">'+esc(p.name.slice(0,1))+'</span><h3>'+esc(p.name)+'</h3><p>'+esc(p.city)+' · '+esc(p.date)+' · '+(p.sex==='female'?'Female':p.sex==='male'?'Male':t('غير محدد','Unspecified'))+'</p><small>'+ (p.known?t('وقت ولادة معروف','Known birth time'):t('وقت الولادة مو معروف','Birth time unknown')) +'</small><div><button class="secondary" data-compare="'+esc(p.id)+'">'+t('قراءة العلاقة','Relationship insights')+' ↗</button><button class="text-button" data-edit="'+esc(p.id)+'">'+t('تعديل','Edit')+'</button></div></section>').join('')||'<section class="panel empty"><h2>'+t('أضف شخصاً لقراءة العلاقة','Add someone to explore your compatibility')+'</h2><button class="secondary" id="add-first">＋ '+t('إضافة شخص','Add person')+'</button></section>')+'</div>'+analysis+(partner?(uiMode==='simple'?'<details class="panel mx-partner-deep"><summary>'+t('التوقيت والسجل الشخصي','Timing windows and private journal')+'</summary>'+relationshipWindowUI(partner)+journalPanel(partner)+'</details>':relationshipWindowUI(partner)+journalPanel(partner)):'');
