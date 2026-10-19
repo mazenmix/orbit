@@ -267,18 +267,20 @@ function focusedTime(){
 }
 function morePage(){
  const card=(route:string,ar:string,en:string,descAr:string,descEn:string)=>'<button type="button" data-go="'+route+'"><strong>'+icon(route)+' '+t(ar,en)+'</strong><small>'+t(descAr,descEn)+'</small></button>';
- return '<section class="panel mx-focus-panel"><h2>'+t('طريقة العرض','Display mode')+'</h2><p>'+t('الوضع البسيط للقراءة اليومية، ووضع المحترفين يفتح التفاصيل الموجودة بدون تغيير المحرك.','Simple is for daily use; Professional reveals the existing detailed tools without changing calculations.')+'</p><div class="mx-mode-choices"><button class="secondary" data-ui-mode="simple" aria-pressed="'+(uiMode==='simple')+'">✦ '+t('بسيط','Simple')+'</button><button class="secondary" data-ui-mode="pro" aria-pressed="'+(uiMode==='pro')+'">◎ '+t('محترفين','Professional')+'</button></div></section>'+
- '<section class="panel mx-focus-panel"><h2>'+t('الأدوات والتفاصيل','Tools & details')+'</h2><div class="mx-more-grid">'+
- card('lunar','توقيت القمر','Moon timing','خلو المسار والاتصالات الدقيقة','Void of course and exact lunar contacts')+
- card('time','آلة الزمن','Time Machine','أي تاريخ ووقت وحساب جديد','Recalculate any selected moment')+
- card('eclipses','الكسوف والخسوف','Eclipses','أحداث وبيانات الكسوف المؤكدة','Confirmed astronomical eclipse events')+
- card('intel','MX Ai','MX Ai','المؤشرات الرمزية والتحليل الموسع','Extended symbolic model and categories')+
- card('ai','شرح Ai','Ai explanations','شرح الحسابات الحالية عند الطلب','Explanation of current calculated evidence')+
- card('evidence','الدليل الحسابي','Calculation evidence','المصدر الدقيق لكل استنتاج','The actual contacts behind readings')+
- card('asteroids','الكويكبات','Asteroids','تفاصيل الأجرام الثانوية','Supplementary asteroid positions')+
- card('advanced','التوقيت المتقدم','Advanced timing','التقدمات والعودة الشمسية','Progressions and solar return')+
- card('settings','الإعدادات','Settings','بيانات الميلاد، الخصوصية والمزامنة','Birth profile, privacy and synchronization')+
- '</div></section>';
+ const group=(ar:string,en:string,cards:string)=>'<section class="panel mx-focus-panel"><h2>'+t(ar,en)+'</h2><div class="mx-more-grid">'+cards+'</div></section>';
+ return '<section class="panel mx-focus-panel"><h2>'+t('طريقة العرض','Display mode')+'</h2><p>'+t('قراءة سريعة افتراضياً، وكل الحسابات والتفاصيل موجودة بوضع المحترفين.','A concise default reading; every calculation remains available in Professional mode.')+'</p><div class="mx-mode-choices"><button class="secondary" data-ui-mode="simple" aria-pressed="'+(uiMode==='simple')+'">✦ '+t('بسيط','Simple')+'</button><button class="secondary" data-ui-mode="pro" aria-pressed="'+(uiMode==='pro')+'">◎ '+t('محترفين','Professional')+'</button></div></section>'+
+ group('الرصد والتوقيت','Sky & timing',
+  card('lunar','توقيت القمر','Moon timing','خلو المسار والاتصالات الدقيقة','VOC and exact Moon aspects')+
+  card('time','آلة الزمن','Time Machine','تاريخ ووقت تختاره','Calculate a chosen moment')+
+  card('eclipses','الكسوف والخسوف','Eclipses','الأحداث الفلكية المؤكدة','Certified astronomical events'))+
+ group('القراءة والشرح','Reading & explanation',
+  card('ai','شرح Ai','Ai explanation','مختصر موثق والتفاصيل عند الطلب','Short grounded reading with optional detail')+
+  card('evidence','الدليل الحسابي','Calculation evidence','درجة وزاوية ووزن الاتصال','Source contacts, orbs and weights')+
+  card('intel','MX Ai','MX Ai metrics','المؤشرات المتقدمة الرمزية','Extended symbolic indices'))+
+ group('أدوات المحترفين والإعدادات','Professional tools & settings',
+  card('asteroids','الكويكبات','Asteroids','التحليل الموسع للأجرام الثانوية','Supplementary body calculations')+
+  card('advanced','التوقيت المتقدم','Advanced timing','التقدّمات والعودة الشمسية','Progressions and solar return')+
+  card('settings','الإعدادات','Settings','بيانات الميلاد والخصوصية والمزامنة','Birth profile, privacy and sync'));
 }
 function scoresHTML(r:Report){
  const fallback:Record<Category,[string,string]>={
