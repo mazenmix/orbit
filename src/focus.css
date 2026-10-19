@@ -76,3 +76,21 @@
 .mx-ai-expanded>summary{font-size:.88rem;cursor:pointer;color:#c4b5f5}
 .mx-more-section-heading{margin:14px 0 10px;font-size:1rem;color:#cad1eb}
 @media(max-width:920px){.mx-partner-focus-grid{grid-template-columns:1fr}}
+
+/* Explain the relationship first. Numeric synastry evidence is a disclosure, not a headline. */
+.mx-partner-plain-card{display:flex;flex-direction:column;gap:9px;align-items:stretch}
+.mx-partner-plain-card h3{font-size:1.08rem;line-height:1.48;margin:0;color:#e8e3fc}
+.mx-partner-plain-card .mx-partner-meaning{line-height:1.85;color:#dae0ee;font-size:.91rem;margin:0}
+.mx-partner-plain-card .mx-partner-action{padding:10px 12px;border-radius:11px;background:rgba(85,138,132,.11);font-size:.85rem;line-height:1.78;color:#c1e0d4;margin:4px 0 0}
+.mx-partner-plain-card .mx-partner-action b{color:#e0f1e8}
+.mx-relationship-evidence{margin-top:auto;padding-top:10px;border-top:1px solid rgba(164,162,200,.15)}
+.mx-relationship-evidence>summary{font-size:.77rem;color:#acb9d2;cursor:pointer;line-height:1.5}
+.mx-relationship-evidence>p{font-size:.79rem;color:#aeb5c9;line-height:1.6;margin:8px 0 0;unicode-bidi:plaintext}
+.mx-partner-plain-card .mx-partner-intro{line-height:1.7;font-size:.86rem;margin:0;color:#b9c3db}
+.mx-partner-person-timing{border-top:1px solid rgba(158,158,194,.18);padding-top:10px;margin-top:7px}
+.mx-partner-person-timing>b{color:#e4d9ff;font-size:.87rem;display:block}
+.mx-partner-person-timing h4{font-size:.88rem;margin:5px 0;color:#e4e9f8}
+.mx-partner-person-timing p{font-size:.83rem;line-height:1.75;color:#bbc7df;margin:0}
+.mx-partner-observed{font-size:.72rem;color:#9faec9;line-height:1.5;margin:4px 0}
+.mx-partner-transit-card .mx-focus-subaction{align-self:flex-start}
+@media(max-width:1100px){.mx-partner-focus-grid{grid-template-columns:1fr}}
