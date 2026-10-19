@@ -71,6 +71,9 @@ let aiConnection={checked:false,configured:false,provider:'none',model:'Qwen3'};
 async function refreshAIConnection(){try{const response=await fetch('/api/explain',{cache:'no-store',signal:AbortSignal.timeout(8000)});const result=await response.json();aiConnection={checked:true,configured:result.configured===true,provider:String(result.provider??'none'),model:String(result.model??'Qwen3')};}catch{aiConnection={checked:true,configured:false,provider:'none',model:'Qwen3'}}if(screen==='ai'){updateLiveQwenCard();void refreshLiveQwen(true)}}
 let uiMode:'simple'|'pro'=localStorage.getItem('mx.uiMode')==='pro'?'pro':'simple';
 let calendarExpanded=false;
+type FocusEvent={name:string;at:Date;mark:string;personal:boolean};
+let focusScan:{key:string;events:FocusEvent[];running:boolean;done:boolean}|null=null;
+let focusMoonEvents:FocusEvent[]=[];
 let compareId='',chartMode='natal',soulPersonId='',soulCategory=1,soulTopic=1,soulQuery='',filter:Category|'all'='all',aiAnswer='',aiBusy=false;
 let aiAnswerAt='',aiResponseSignature='',aiScope='',aiNextRequestAt=0,aiLastCheckMinute=-1,aiErrorMessage='',aiRequestId=0;
 const AI_MIN_INTERVAL_MS=5*60_000;
@@ -141,6 +144,7 @@ function render(){
  document.documentElement.dataset.uiMode=uiMode;
  root.innerHTML=`<div class="shell ${uiMode==='simple'?'mx-simple':'mx-professional'}"><aside class="sidebar"><a class="brand" href="#today"><span class="brand-wordmark"><i>MX</i> Astro</span></a><div class="nav-caption">${t('مرصدك الشخصي','YOUR OBSERVATORY')}</div>${nav(primaryRoutes)}</aside><div class="workspace"><header class="topbar"><a class="mobile-brand" href="#today"><b class="brand-wordmark"><i>MX</i> Astro</b></a><div class="breadcrumb">MX ASTRO <span>/</span> ${labels[primarySection(screen)]?.()??labels.today()}${primarySection(screen)!==screen?` <span>/</span> ${labels[screen]?.()??''}`:''}</div><div class="top-actions"><button class="language" id="language">${lang==='ar'?'EN':'عربي'}</button><button id="tools" class="icon-button mobile-tools" aria-label="${t('أدوات أكثر','More tools')}">⋯</button><button class="avatar" data-go="settings" aria-label="${t('الملف الشخصي','Profile')}">${esc(active.name.slice(0,1))}</button></div></header><main id="main"><div class="page-heading"><div><div class="eyebrow">MX ASTRO · ${labels[primarySection(screen)]?.()??labels.today()}</div>${screen==='chart'||screen==='evidence'?'':`<h1>${labels[screen]?.()??labels.today()}</h1>`}<p><span id="live-page-clock">${dateText(selected)}</span> <span class="location">⌖ ${esc(screen==='chart'?chartOwnerProfile().city:active.city)}</span></p></div><div class="heading-actions"><label class="sr-only" for="active-profile">${t('الملف النشط','Active profile')}</label><select id="active-profile">${topProfileOptions()}</select><button class="icon-button" id="refresh" aria-label="${t('تحديث','Refresh')}">↻</button></div></div>${demoNotice()}${error?`<div class="alert">${esc(error)}</div>`:''}<div id="live-view-body">${!ready?`<section class="loading panel"><div class="orbital-loader">◎</div><h2>${t('دا أفتح مرصدك…','Opening your observatory…')}</h2><p>${t('تحميل المحرك والبيانات الفلكية المحلية.','Loading the local engine and ephemeris data.')}</p></section>`:content()}</div></main>${nav(primaryRoutes,true)}</div></div><dialog id="detail"><div id="dialog-content"></div></dialog><div class="toast" role="status" aria-live="polite" id="toast"></div>`;
  bind();
+ if(screen==='today'&&uiMode==='simple'&&ready)startFocusEventScan();
  if(screen==='lunar'&&ready)updateLiveVocClock(+selected);
  if(screen==='ai'&&ready)void refreshLiveQwen(false);
  if(screen==='calendar'&&ready)startCalendarWork();
@@ -156,25 +160,20 @@ function focusedToday(){
  const phase=factor?(factor.applying?t('يقترب من الدقة','Applying'):t('يبتعد عن الدقة','Separating')):'';
  const time=(at:Date)=>dateText(at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
  let moon='<p class="mx-focus-note">'+t('توقيت القمر غير متاح حالياً.','Moon calculation unavailable.')+'</p>';
- let futureEvents:Array<{name:string;at:Date;mark:string}>=[];
+ let futureEvents:FocusEvent[]=[];
  try{
   const w=moonWindow(),now=+selected;
   const percent=(from:Date,to:Date)=>Math.max(0,Math.min(100,Math.round(100*(+to-now)/Math.max(1,+to-(+from)))));
   const vocEnd=w.isVoid?w.ingressAt:w.vocStartsAt,vocStart=w.isVoid?w.vocStartsAt:w.enteredAt;
   moon='<div class="mx-focus-moon"><article><small>☾ '+t('القمر الآن','Current Moon')+'</small><strong>'+signName(w.sign*30)+'</strong><small>'+t('الانتقال القادم','Next ingress')+'</small><time datetime="'+w.ingressAt.toISOString()+'">'+time(w.ingressAt)+'</time><progress max="100" value="'+percent(w.enteredAt,w.ingressAt)+'"></progress></article>'+
    '<article><small>◌ VOID OF COURSE</small><strong>'+(w.isVoid?t('خالي المسار','VOC active'):t('خارج خلو المسار','Not VOC'))+'</strong><small>'+(w.isVoid?t('نهاية الفترة','Period ends'):t('بداية الفترة','Period begins'))+'</small><time datetime="'+vocEnd.toISOString()+'">'+time(vocEnd)+'</time><progress max="100" value="'+percent(vocStart,vocEnd)+'"></progress></article></div>';
-  const moonIngress={name:t('انتقال القمر للبرج التالي','Moon ingress'),at:w.ingressAt,mark:'☾'};
-  const voc={name:w.isVoid?t('نهاية خلو المسار','VOC ends'):t('بداية خلو المسار','VOC begins'),at:w.isVoid?w.ingressAt:w.vocStartsAt,mark:'◌'};
-  futureEvents=[moonIngress,voc,...w.events.filter(e=>+e.time>now).map(e=>({name:planet(e.transit)+' '+aspect(e.angle)+' '+planet(e.target),at:e.time,mark:'✧'}))].filter(e=>+e.at>now);
+  const moonIngress:FocusEvent={name:t('انتقال القمر للبرج التالي','Moon ingress'),at:w.ingressAt,mark:'☾',personal:false};
+  const voc:FocusEvent={name:w.isVoid?t('نهاية خلو المسار','VOC ends'):t('بداية خلو المسار','VOC begins'),at:w.isVoid?w.ingressAt:w.vocStartsAt,mark:'◌',personal:false};
+  futureEvents=[moonIngress,voc,...w.events.filter(e=>+e.time>now).map(e=>({name:planet(e.transit)+' '+aspect(e.angle)+' '+planet(e.target),at:e.time,mark:'✧',personal:false}))].filter(e=>+e.at>now);
  }catch(e){futureEvents=[];moon='<p class="mx-focus-note">'+t('تعذر التحقق من بيانات القمر: ','Moon ephemeris unavailable: ')+esc(String(e))+'</p>'}
- // Each unique exact sky instant appears at most once; ingress and VOC end can coincide.
- const uniqueEvents:Array<{name:string;at:Date;mark:string}>=[];
- for(const e of futureEvents.sort((a,b)=>+a.at-+b.at)){
-  const existing=uniqueEvents.find(x=>Math.abs(+x.at-+e.at)<60000);
-  if(existing){if(!existing.name.includes(e.name))existing.name+=' · '+e.name;continue}
-  uniqueEvents.push({...e});
- }
- const eventMarkup=uniqueEvents.slice(0,3).map(e=>'<div class="mx-focus-event"><span class="mx-event-mark">'+e.mark+'</span><div><strong>'+esc(e.name)+'</strong><small>'+time(e.at)+' · '+esc(active.zone)+'</small></div></div>').join('');
+ focusMoonEvents=futureEvents;
+ const personal=focusScan?.done&&focusScan.key===focusEventKey()?focusScan.events:[];
+ const eventMarkup=focusEventMarkup([...personal,...futureEvents]);
  const matchedAi=aiAnswer&&aiScope===liveQwenScope()&&aiAnswerAt&&Math.abs(+new Date(aiAnswerAt)-+selected)<15*60000;
  const aiSnippet=matchedAi?esc(aiAnswer.replace(/\*\*/g,'').replace(/\s+/g,' ').slice(0,340))+(aiAnswer.length>340?'…':''):
    t('اضغط «تحليل Ai» حتى تحصل على شرح مبني على الاتصالات المحسوبة، بدون استنتاجات مخمّنة.','Select Ai analysis for an explanation grounded in calculated contacts, without invented conclusions.');
@@ -183,7 +182,70 @@ function focusedToday(){
  '<div class="mx-focus-actions"><button class="primary" data-go="evidence">'+t('ليش هاي القراءة؟','Why this reading?')+' ↗</button>'+(factor?'<button class="secondary" id="focus-refine-peak">'+t('احسب وقت الذروة','Verify exact peak')+' ⏱</button>':'')+'</div><div class="mx-focus-peak" id="focus-peak-result" aria-live="polite"></div></section>'+
  '<section class="panel mx-focus-panel mx-focus-ai"><h2>✧ MX Ai · '+t('قراءة قصيرة','Short explanation')+'</h2><p>'+aiSnippet+'</p><button class="secondary mx-focus-subaction" data-go="ai">'+t('تحليل Ai','Ai analysis')+' ↗</button></section></div>'+
  '<aside class="mx-focus-aside"><section class="panel mx-focus-panel"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+'<button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
- '<section class="panel mx-focus-panel"><h2>'+t('أقرب 3 أحداث فلكية دقيقة','Next 3 exact sky events')+'</h2>'+(eventMarkup||'<p>'+t('ماكو أحداث دقيقة قادمة ضمن النافذة المتاحة.','No upcoming exact events in the available window.')+'</p>')+'<small class="mx-focus-note">'+t('أحداث قمرية محسوبة. الاتصالات الشخصية تفحصها من زر الذروة، وموعدها ما يُخمن.','Calculated lunar events; personal transit peaks are verified on request, never guessed.')+'</small><button class="secondary mx-focus-subaction" data-go="calendar">'+t('فتح التقويم','Open calendar')+' ↗</button></section></aside></div>';
+ '<section class="panel mx-focus-panel"><h2>'+t('أقرب 3 أحداث فلكية دقيقة','Next 3 exact sky events')+'</h2><div id="focus-events">'+eventMarkup+'</div><small class="mx-focus-note">'+t('اتصالات شخصية وقمرية محسوبة؛ ما نعرض تواريخ مستقبلية بلا تحقق.','Verified natal-transit and lunar events only; never inferred event dates.')+'</small><button class="secondary mx-focus-subaction" data-go="calendar">'+t('فتح التقويم','Open calendar')+' ↗</button></section></aside></div>';
+}
+
+/** A stable daily scan, deferred until the home view is painted. Bounded to the
+ * three strongest eligible contacts, never predicting exact times from orb/speed.
+ * Missing ephemeris roots are omitted, not replaced by synthetic timings. */
+function focusCandidates(){
+ const report=data;
+ if(!report)return [];
+ const chosen:typeof report.evidence=[];
+ const seen=new Set<string>();
+ for(const e of report.evidence){
+  if(!e.applying||e.orb>3.5||chosen.length>=3)continue;
+  const id=e.transit.id+':'+e.natal.id+':'+e.angle;
+  if(seen.has(id))continue;
+  if(e.transit.id==='Moon'&&chosen.some(p=>p.transit.id==='Moon'))continue;
+  seen.add(id);chosen.push(e);
+ }
+ return chosen;
+}
+function focusEventKey(){
+ const candidates=focusCandidates();
+ return JSON.stringify([active.id,active.date,active.time,active.zone,localValue(selected,active.zone).slice(0,10),candidates.map(e=>e.id)]);
+}
+function focusEventMarkup(events:FocusEvent[]){
+ const unique:FocusEvent[]=[];
+ for(const e of events.filter(e=>+e.at>+selected).sort((a,b)=>+a.at-+b.at||Number(b.personal)-Number(a.personal))){
+  const existing=unique.find(x=>Math.abs(+x.at-+e.at)<60000);
+  if(existing){if(!existing.name.includes(e.name))existing.name+=' · '+e.name;existing.personal=existing.personal||e.personal;continue}
+  unique.push({...e});
+ }
+ const three=unique.slice(0,3);
+ return three.length?three.map(e=>'<div class="mx-focus-event"><span class="mx-event-mark">'+e.mark+'</span><div><strong>'+esc(e.name)+'</strong><small>'+dateText(e.at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+' · '+esc(active.zone)+(e.personal?' · '+t('شخصي','Personal'):'')+'</small></div></div>').join(''):
+  '<p>'+t('لا توجد لحظات دقيقة مثبتة ضمن البحث الحالي.','No verified exact events in this search window.')+'</p>';
+}
+function startFocusEventScan(){
+ if(!ready||!data||screen!=='today'||uiMode!=='simple')return;
+ const key=focusEventKey();
+ if(focusScan?.key===key)return;
+ const items=focusCandidates(),at=new Date(+selected);
+ focusScan={key,events:[],running:true,done:false};
+ if(!items.length){focusScan.running=false;focusScan.done=true;return}
+ let idx=0;
+ const step=()=>{
+  if(focusScan?.key!==key)return;
+  if(idx>=items.length){
+   focusScan.running=false;focusScan.done=true;
+   if(screen==='today'&&uiMode==='simple'&&focusEventKey()===key){
+    const display=root.querySelector<HTMLElement>('#focus-events');
+    if(display)display.innerHTML=focusEventMarkup([...focusScan.events,...focusMoonEvents]);
+   }
+   return;
+  }
+  const e=items[idx++];
+  try{
+   const window=refineNatalTransit(e,at,d=>chart(d,active,true,false).points,e.transit.id==='Moon'?3:21);
+   const future=window.events.filter(event=>+event.time>=+at);
+   for(const peak of future){
+    focusScan.events.push({name:planet(e.transit.id)+' '+aspect(e.angle)+' '+planet(e.natal.id),at:peak.time,mark:'✧',personal:true});
+   }
+  }catch(err){console.warn('Cannot verify personal transit peak',e.id,err)}
+  setTimeout(step,60);
+ };
+ setTimeout(step,350);
 }
 function focusedCalendar(){
  const title=t('التقويم الفلكي','Astrological calendar');
