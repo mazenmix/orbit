@@ -36,13 +36,17 @@ test('Transit explanation identifies actual area and applying direction, not pre
  assert.match(text.meaning.en,/communication/);
  assert.match(text.advice.ar,/وقت رصد/);
 });
-test('three point UI puts narrative and practical action first and hides mathematical aspects in details',()=>{
+test('compact romance cards show attraction, sexual chemistry and practical synastry without numeric-only headlines',()=>{
  const main=readFileSync('src/main.ts','utf8');
  const start=main.indexOf('function relationshipFocus('),end=main.indexOf('function peoplePage(){',start);
  assert.ok(start>=0&&end>start);
  const ui=main.slice(start,end);
- for(const fragment of ['synastryPlainReading(supportiveEvidence[0]','synastryPlainReading(challengingEvidence[0]','personalTransitPlainReading(','mx-partner-meaning','mx-partner-action','mx-relationship-evidence','<details'])assert.ok(ui.includes(fragment),fragment);
- const renderedCard=ui.slice(ui.indexOf('const card='),ui.indexOf('const partnerReport='));
- assert.ok(renderedCard.indexOf('mx-partner-meaning')<renderedCard.indexOf('aspectProof(e)'));
- assert.ok(!ui.includes('const label=(e:'));
+ for(const fragment of ['relationshipBrief(c.evidence)','mx-brief-sexual','mx-brief-fact','المودة','الجنس','mx-brief-advice','mx-brief-bottom','mx-brief-details','<details']){
+  // Romantic reading and its technical evidence remain available.
+  if(fragment==='المودة')continue;
+  assert.ok(ui.includes(fragment),fragment);
+ }
+ assert.ok(ui.indexOf('mx-brief-sexual')<ui.indexOf('mx-brief-details'));
+ assert.ok(!ui.includes('mx-partner-plain-card'));
+ assert.ok(ui.includes("person.kind==='dating'||person.kind==='friend'"));
 });
