@@ -71,7 +71,7 @@ export function conciseInterpretation(input:string,maxSentences=4):{brief:string
  const full=input.replace(/\*\*/g,'').replace(/\s+/g,' ').trim();
  if(!full)return {brief:'',full:'',condensed:false};
  // Keep the first distinct complete sentences. Avoid chopping through a stated aspect or timestamp.
- const sentences=full.match(/[^.!؟\n]+(?:[.!؟]+|$)/gu)?.map(s=>s.trim()).filter(Boolean)??[full];
+ const sentences=full.split(/(?<=[.!؟])\s+/u).map(s=>s.trim()).filter(Boolean);
  const unique:string[]=[];const seen=new Set<string>();
  for(const sentence of sentences){
   const key=sentence.toLocaleLowerCase().replace(/[\s\p{P}\p{S}]+/gu,'');
