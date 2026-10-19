@@ -61,3 +61,11 @@ test('short AI summary stops at four distinct complete sentences without alterin
  assert.ok(result.condensed);
  assert.equal(result.full,input);
 });
+
+test('AI summary preserves angular orb decimal values and does not hallucinate omitted sentences',()=>{
+ const input='Venus aspect orb is 0.36° near exactness. Opposing Saturn factor exists. One practical action. More context later. Extra detail.';
+ const out=conciseInterpretation(input,4);
+ assert.match(out.brief,/0\.36°/);
+ assert.equal(out.brief,'Venus aspect orb is 0.36° near exactness. Opposing Saturn factor exists. One practical action. More context later.');
+ assert.ok(!out.brief.includes('Extra detail.'));
+});
