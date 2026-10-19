@@ -34,7 +34,7 @@ const aspectKind=(e:SynastryEvidence):TwoLanguage=>e.angle===120?
 const find=(evidence:readonly SynastryEvidence[],kind:ContactKind):SynastryEvidence|null=>{
  const ranked=evidence.filter(e=>weights[kind][joined(e)]&&Number.isFinite(e.influence)&&Number.isFinite(e.orb)).slice()
  .sort((a,b)=>{
-  const magnitude=(e:SynastryEvidence)=>weights[kind][joined(e)]*e.influence*(e.angle===90||e.angle===180?.87:1);
+  const magnitude=(e:SynastryEvidence)=>weights[kind][joined(e)]*e.influence*((e.angle===90||e.angle===180)?.87:1);
   return magnitude(b)-magnitude(a)||a.orb-b.orb;
  });
  return ranked[0]??null;
