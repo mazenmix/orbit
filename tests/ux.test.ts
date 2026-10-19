@@ -21,8 +21,11 @@ test('Asteroid readings and evidence UI are narrative-first and confidential bir
 });
 
 
-test('main navigation exposes eight primary destinations without redundant sections',()=>{
- assert.match(main,/const primaryRoutes=\['today','chart','people','time','lunar','calendar','intel','settings'\]/);
+test('main navigation exposes five primary destinations and preserves professional deep links',()=>{
+ assert.match(main,/const primaryRoutes=\['today','chart','people','calendar','more'\]/);
+ assert.ok(main.includes("if(uiMode==='simple')return ''"));
+ assert.ok(main.includes("function morePage()"));
+ assert.ok(main.includes("localStorage.setItem('mx.uiMode',uiMode)"));
  assert.match(main,/nav\(primaryRoutes\)/);
  assert.match(main,/nav\(primaryRoutes,true\)/);
  assert.ok(!main.includes("nav(['today','signals','people','chart'])"));
@@ -55,7 +58,7 @@ test('automatic Qwen reading resets promptly when active profile or language swi
  assert.ok(main.includes("aiRequestId++"));
 });
 
-test('calendar is a dedicated route and MX Ai has 29 indices',()=>{assert.ok(main.includes("case 'calendar':inner=astroCalendarPage()"));assert.ok(main.includes("t('MX Ai','MX Ai')"));assert.ok(main.includes("مصفوفة المؤشرات الـ29"));});
+test('calendar is a focused route and MX Ai retains all original indices',()=>{assert.ok(main.includes("case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage()"));assert.ok(main.includes("t('MX Ai','MX Ai')"));assert.ok(main.includes("مصفوفة المؤشرات الـ29"));});
 
 test('lunar explanations are anchored to actual aspect events, not raw angles alone',()=>{
  assert.ok(main.includes('function moonMomentNarrative('));
@@ -201,4 +204,15 @@ test('Moon timing status and four milestones use matching inline SVG pictograms'
  const styles=readFileSync('src/typography.css','utf8');
  assert.ok(styles.includes('.lunar-emblem .mx-lunar-icon'));
  assert.ok(styles.includes('.mx-lunar-tile-icon .mx-lunar-icon'));
+});
+
+test('focus dashboard derives four symbolic areas, actual lunar events and inspectable evidence',()=>{
+ assert.ok(main.includes("function focusedToday()"));
+ assert.ok(main.includes("const keys:Category[]=['love','career','communication','energy']"));
+ assert.ok(main.includes("const w=moonWindow()"));
+ assert.ok(main.includes("factor.orb.toFixed(2)"));
+ assert.ok(main.includes("function focusedCalendar()"));
+ assert.ok(main.includes("function focusedTime()"));
+ assert.ok(main.includes("function morePage()"));
+ assert.ok(main.includes("case 'today':inner=uiMode==='simple'?focusedToday():today()"));
 });
