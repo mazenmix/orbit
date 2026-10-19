@@ -74,14 +74,14 @@ export function synastryPlainReading(e:SynastryEvidence|undefined,kind:'harmony'
    title:{ar:'المودة والمبادرة بينكم',en:'Affection meets initiative'},
    meaning:{ar:'اتصال الزهرة بالمريخ هنا يربط أسلوب التعبير عن الاهتمام عند واحد منكم بطريقة المبادرة عند الثاني. '+(e.angle===120?'التثليث':'التسديس')+' يُقرأ رمزياً كسهولة محتملة بالتقارب إذا الاهتمام متبادل فعلاً، مو كدليل أكيد على انجذاب الشخص الآخر.',
             en:'The Venus–Mars contact links how one person expresses affection with the other person’s initiative. '+(e.angle===120?'A trine':'A sextile')+' traditionally suggests smoother interaction if interest is genuinely mutual, not proof of anyone’s attraction.'},
-   advice:{ar:'إذا التواصل مريح للطرفين، جرّبوا خطوة بسيطة وواضحة وخلي المبادرة بدون ضغط.',
+   advice:{ar:'إذا الاهتمام متبادل والتواصل مريح للطرفين، جرّبوا خطوة بسيطة وواضحة وخلي المبادرة بدون ضغط.',
            en:'If communication feels good to both, try one clear, low-pressure next step.'}
   };
  }
  if(kind==='challenge'&&e.angle===90&&bodies.has('Sun')&&bodies.has('Neptune')){
   return {
    title:{ar:'الوضوح مقابل التوقعات',en:'Clarity versus expectations'},
-   meaning:{ar:'تربيع الشمس ونبتون يرمز لاحتمال اختلاف بين الصورة اللي يتخيلها كل واحد والواقع اللي يصير بينكم. مو اتهام بالكذب ولا دليل على نية مخفية، لكنه يلفت النظر لسوء الفهم إذا التوقعات ما تنحچي بصراحة.',
+   meaning:{ar:'هذا التربيع بين الشمس ونبتون يرمز لاحتمال اختلاف بين الصورة اللي يتخيلها كل واحد والواقع اللي يصير بينكم. مو اتهام بالكذب ولا دليل على نية مخفية، لكنه يلفت النظر لسوء الفهم إذا التوقعات ما تنحچي بصراحة.',
             en:'A challenging Sun–Neptune contact symbolically highlights a gap between imagined expectations and what each person actually communicates. It is not evidence of lies or hidden motives; unclear expectations may create misunderstandings.'},
    advice:{ar:'وضحوا شنو تريدون من التواصل، واعتمدوا على الكلام والأفعال الواضحة بدل التخمين.',
            en:'Say what each of you expects and rely on clear words and behavior rather than guesswork.'}
