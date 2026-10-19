@@ -42,7 +42,7 @@
 .mx-simple .page-heading{margin-bottom:11px}
 .mx-simple .page-heading h1{font-size:1.25rem}
 .mx-simple .chart-stories,.mx-simple .mx-natal-asteroid-status,.mx-simple .chart-math,.mx-simple .mx-aspect-legend,.mx-simple .wheel-guide{display:none!important}
-.mx-simple .astro-cal-months:not(.is-expanded) .astro-cal-month:nth-child(n+3){display:none}
+.mx-simple .mx-calendar-compact:not(.is-expanded) .astro-cal-months .astro-cal-month:nth-child(n+3){display:none}
 .mx-focus-calendar-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .mx-focus-calendar-actions .secondary{min-height:38px}
 .mx-simple .astro-cal-toolbar .astro-eyebrow{display:none}
