@@ -52,14 +52,14 @@ export function relationshipBrief(evidence:readonly SynastryEvidence[]):Relation
  const challenge=synastryPlainReading(challengeContact??undefined,'challenge');
  const attraction=attractionContact?(()=>{
   const subject=pairSubject(attractionContact),aspect=aspectKind(attractionContact);
-  return {ar:subject.ar+' '+aspect.ar+': إشارة فلكية للجاذبية والإعجاب بين الخارطتين؛ مو تأكيد لمشاعر الطرف الثاني.',
-   en:subject.en+' '+aspect.en+': a symbolic indicator of attraction between the charts, not proof of anyone’s feelings.'};
+  return {ar:subject.ar+' '+aspect.ar+': دلالة رمزية على الجاذبية والإعجاب بين الخارطتين.',
+   en:subject.en+' '+aspect.en+': a symbolic indicator of attraction between the charts.'};
  })():initial;
  const sexual=sexualContact?(()=>{
   const subject=pairSubject(sexualContact),aspect=aspectKind(sexualContact);
   const stress=sexualContact.angle===90||sexualContact.angle===180;
-  return {ar:subject.ar+' '+aspect.ar+': '+(stress?'كيمياء جنسية مع شدّ واختلاف محتمل.':'دلالة على شرارة جنسية وانجذاب جسدي محتمل.')+' ما تكشف الرغبة الفعلية أو الموافقة.',
-   en:subject.en+' '+aspect.en+': '+(stress?'symbolic sexual chemistry with possible friction.':'a symbolic indication of sexual chemistry and physical attraction.')+' This cannot establish actual desire or consent.'};
+  return {ar:subject.ar+' '+aspect.ar+': '+(stress?'كيمياء جنسية مع شدّ واختلاف محتمل.':'دلالة على شرارة جنسية وانجذاب جسدي محتمل.')+' ',
+   en:subject.en+' '+aspect.en+': '+(stress?'symbolic sexual chemistry with possible friction.':'a symbolic indication of sexual chemistry and physical attraction.')+''};
  })():initial;
  const focusedMeaning=(full:TwoLanguage):TwoLanguage=>{
   const trim=(s:string)=>s.replace(/\s+/g,' ').trim().split(/(?<=[.!؟])\s+/u)[0]||s;
