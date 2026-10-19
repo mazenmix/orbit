@@ -206,13 +206,22 @@ test('Moon timing status and four milestones use matching inline SVG pictograms'
  assert.ok(styles.includes('.mx-lunar-tile-icon .mx-lunar-icon'));
 });
 
-test('focus dashboard derives four symbolic areas, actual lunar events and inspectable evidence',()=>{
- assert.ok(main.includes("function focusedToday()"));
- assert.ok(main.includes("const keys:Category[]=['love','career','communication','energy']"));
- assert.ok(main.includes("const w=moonWindow()"));
- assert.ok(main.includes("factor.orb.toFixed(2)"));
- assert.ok(main.includes("function focusedCalendar()"));
- assert.ok(main.includes("function focusedTime()"));
- assert.ok(main.includes("function morePage()"));
+test('simple home keeps four evidence-first cards, no repeated score tiles, and refines exact peaks on demand',()=>{
+ const start=main.indexOf('function focusedToday()'),end=main.indexOf('function focusedCalendar()',start);
+ const focus=main.slice(start,end);
+ assert.ok(start>=0&&end>start);
+ assert.ok(focus.includes('mx-focus-hero'));
+ assert.ok(focus.includes('mx-focus-ai'));
+ assert.ok(focus.includes('mx-focus-moon'));
+ assert.ok(focus.includes('Next 3 exact sky events'));
+ assert.ok(!focus.includes('mx-focus-metrics')&&!focus.includes('Two additional signals'));
+ assert.ok(focus.includes('uniqueEvents.find('));
+ assert.ok(focus.includes('factor.orb.toFixed(2)'));
+ assert.ok(main.includes('refineNatalTransit(f,selected,'));
+ assert.ok(main.includes('calendarTargetDays():number'));
+ assert.ok(main.includes('calendarCursor<calendarTargetDays()'));
+ assert.ok(main.includes('function focusedCalendar()'));
+ assert.ok(main.includes('function focusedTime()'));
+ assert.ok(main.includes('function morePage()'));
  assert.ok(main.includes("case 'today':inner=uiMode==='simple'?focusedToday():today()"));
 });
