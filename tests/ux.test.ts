@@ -218,6 +218,9 @@ test('simple home keeps four evidence-first cards, no repeated score tiles, and 
  assert.ok(focus.includes('uniqueEvents.find('));
  assert.ok(focus.includes('factor.orb.toFixed(2)'));
  assert.ok(main.includes('refineNatalTransit(f,selected,'));
+ assert.ok(main.includes('function startFocusEventScan()'));
+ assert.ok(main.includes('function focusEventMarkup(events:FocusEvent[])'));
+ assert.ok(main.includes("e.transit.id==='Moon'?3:21"));
  assert.ok(main.includes('calendarTargetDays():number'));
  assert.ok(main.includes('calendarCursor<calendarTargetDays()'));
  assert.ok(main.includes('function focusedCalendar()'));
