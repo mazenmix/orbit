@@ -1020,7 +1020,7 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
 });
  
  on('calendar-expand',()=>{calendarExpanded=!calendarExpanded;root.querySelector('.mx-calendar-compact')?.classList.toggle('is-expanded',calendarExpanded);const button=root.querySelector<HTMLButtonElement>('#calendar-expand');if(button)button.textContent=calendarExpanded?t('إظهار شهرين','Show two months'):t('إظهار كل الأشهر','Show all months');const p=root.querySelector('#astro-calendar-progress');if(p)p.textContent=calendarSnapshots.size+'/'+calendarTargetDays()+' '+t('محسوب فعلياً','verified');if(calendarExpanded&&!calendarRunning)startCalendarWork()});
- const expandSky=()=>{if(!data)return;showDialog('<div class="mx-expanded-sky"><span class="eyebrow">✦ MX ASTRO · LIVE SKY</span><h2>'+t('سماء اللحظة · الدائرة المكبرة','Current sky · Expanded wheel')+'</h2><p class="mx-expanded-sky-time">'+dateText(selected)+'</p><div class="mx-expanded-wheel">'+wheel(data.current)+'</div><div class="mx-expanded-sky-notes">'+t('مواضع فلكية محسوبة بالزودياك الاستوائي. معانيها تنجيمية رمزية.','Calculated tropical zodiac positions; interpretations are astrological symbolism.')+'</div></div>');};
+ const expandSky=()=>{if(!data)return;showDialog('<div class="mx-expanded-sky"><span class="eyebrow">✦ MX ASTRO · LIVE SKY</span><h2>'+t('سماء اللحظة · الدائرة المكبرة','Current sky · Expanded wheel')+'</h2><time class="mx-expanded-sky-time" datetime="'+new Date().toISOString()+'">'+dateText(new Date(),{dateStyle:'full',timeStyle:'medium'})+'</time><div class="mx-expanded-wheel">'+wheel(data.current)+'</div><div class="mx-expanded-sky-notes">'+t('مواضع فلكية محسوبة بالزودياك الاستوائي. معانيها تنجيمية رمزية.','Calculated tropical zodiac positions; interpretations are astrological symbolism.')+'</div></div>');liveSkyLastTick=Date.now();updateLiveSkyWheel(liveSkyLastTick);tickLiveClocks(liveSkyLastTick);};
  on('expand-sky-wheel',expandSky);on('expand-sky-wheel-link',expandSky);
  if(screen==='calendar')bindAstroCalendar();
  root.querySelectorAll<HTMLButtonElement>('[data-signal]').forEach(b=>b.onclick=()=>showSignal(Number(b.dataset.signal)));
@@ -1209,7 +1209,7 @@ function updateLiveVocClock(now:number):boolean{
 
 /** Reconcile live markup without replacing stable wheels, expanded details,
  * scroll containers or touched controls. Replacing innerHTML would reset zoom. */
-function reconcileLiveNode(current:Node,incoming:Node):void{
+function reconcileLiveNode(current:Node,incoming:Node,preserveLiveWheels=false):void{
  if(current.nodeType!==incoming.nodeType||current.nodeName!==incoming.nodeName){
   current.parentNode?.replaceChild(incoming.cloneNode(true),current);return;
  }
@@ -1219,6 +1219,9 @@ function reconcileLiveNode(current:Node,incoming:Node):void{
  }
  if(current.nodeType!==Node.ELEMENT_NODE)return;
  const element=current as Element,next=incoming as Element;
+ // Only the ephemeris ticker updates SVGs; keep the last computed live
+ // position through slower narrative ticks to prevent visual rewind.
+ if(preserveLiveWheels&&element.matches('svg.chart-wheel'))return;
  const keepOpen=element.tagName==='DETAILS'&&element.hasAttribute('open');
  const keepWheelStyle=element.matches('svg.chart-wheel')?element.getAttribute('style'):null;
  for(const attr of Array.from(element.attributes)){
@@ -1234,14 +1237,14 @@ function reconcileLiveNode(current:Node,incoming:Node):void{
   const oldChild=currentChildren[i],newChild=nextChildren[i];
   if(!oldChild){if(newChild)element.appendChild(newChild.cloneNode(true));continue}
   if(!newChild){oldChild.parentNode?.removeChild(oldChild);continue}
-  reconcileLiveNode(oldChild,newChild);
+  reconcileLiveNode(oldChild,newChild,preserveLiveWheels);
  }
 }
-function reconcileLiveHTML(current:Element,html:string){
+function reconcileLiveHTML(current:Element,html:string,preserveLiveWheels=false){
  const template=document.createElement('template');
  template.innerHTML=html;
  const next=template.content.firstElementChild;
- if(next)reconcileLiveNode(current,next);
+ if(next)reconcileLiveNode(current,next,preserveLiveWheels);
 }
 /** Exact Swiss-Ephemeris positions are recalculated frequently even while a
  * sky wheel is enlarged. The existing SVG element is retained during updates. */
@@ -1261,8 +1264,6 @@ function updateLiveSkyWheel(now:number){
    if(todayWheel)reconcileLiveHTML(todayWheel,html);
    if(enlarged)reconcileLiveHTML(enlarged,html);
   }
-  const todayTime=root.querySelector<HTMLTimeElement>('.mx-today-sky-time');
-  if(todayTime){todayTime.dateTime=new Date(now).toISOString();todayTime.textContent=dateText(new Date(now),{dateStyle:'full',timeStyle:'medium'})}
   if(chartWheel){
    const owner=chartOwnerProfile();
    const current=owner.id===active.id?sky:chart(at,owner,true);
@@ -1274,20 +1275,32 @@ function updateLiveSkyWheel(now:number){
   for(const element of [small,todayWheel,enlarged,chartWheel]){
    if(element)element.setAttribute('data-sky-calculated-at',at.toISOString());
   }
-  const time=root.querySelector<HTMLElement>('#detail[open] .mx-expanded-sky-time');
-  if(time)time.textContent=dateText(at,{dateStyle:'full',timeStyle:'medium'});
  }catch(e){console.warn('Live sky wheel update unavailable',e)}
+}
+/** A seconds clock independent of the Swiss Ephemeris and narrative DOM update.
+ * Continue while the sky is enlarged on any visible tab; no fake ephemeris. */
+function tickLiveClocks(now:number){
+ if(liveTimePinned||document.visibilityState==='hidden')return;
+ const at=new Date(now),display=dateText(at,{dateStyle:'full',timeStyle:'medium'});
+ const header=root.querySelector<HTMLElement>('#live-page-clock');
+ if(header&&header.textContent!==display)header.textContent=display;
+ for(const el of root.querySelectorAll<HTMLTimeElement>('.mx-today-sky-time,#detail[open] .mx-expanded-sky-time')){
+  if(el.textContent!==display)el.textContent=display;
+  const iso=at.toISOString();
+  if(el.dateTime!==iso)el.dateTime=iso;
+ }
 }
 function refreshLiveBody(now:number){
  const focused=document.activeElement as HTMLElement|null;
  const editing=focused&&root.contains(focused)&&(focused.matches('input,textarea,select,[contenteditable="true"]')||focused.isContentEditable);
- // Keep the user in control of an open dialog or an unfinished form.
- if(editing||root.querySelector<HTMLDialogElement>('#detail[open]'))return false;
+ // Keep unfinished inputs intact. Viewing the sky enlarged must not
+ // pause calculations and indicators on the underlying dashboard.
+ if(editing)return false;
  const region=root.querySelector<HTMLElement>('#live-view-body');
  if(!region||error){render();return true}
  const scrollX=window.scrollX,scrollY=window.scrollY;
  const html=content();
- reconcileLiveHTML(region,'<div id="live-view-body">'+html+'</div>');
+ reconcileLiveHTML(region,'<div id="live-view-body">'+html+'</div>',true);
  bind();
  liveLastRender=now;
  if(screen==='lunar')updateLiveVocClock(now);
@@ -1297,11 +1310,8 @@ function refreshLiveBody(now:number){
 function refreshLiveView(force=false){
  if(!ready||!data||document.visibilityState==='hidden')return;
  const now=Date.now(),minute=Math.floor(now/60000);
- // The heading is a real ticking clock, even when the content below changes slowly.
- if(!liveTimePinned){
-  const clock=root.querySelector<HTMLElement>('#live-page-clock');
-  if(clock)clock.textContent=dateText(new Date(now),{dateStyle:'full',timeStyle:'medium'});
- }
+ // Lightweight seconds ticker always runs first, including with sky enlarged.
+ tickLiveClocks(now);
  liveMinute=minute;
  if(screen==='calendar'){
   if(astroCalendarToday()!==calendarAnchor){
@@ -1321,8 +1331,7 @@ function refreshLiveView(force=false){
  if(screen==='settings')return;
  if(!(force||boundary||now-liveLastRender>=cadence))return;
  const focused=document.activeElement as HTMLElement|null;
- if(root.querySelector<HTMLDialogElement>('#detail[open]')||
-  (focused&&root.contains(focused)&&(focused.matches('input,textarea,select,[contenteditable="true"]')||focused.isContentEditable)))return;
+ if(focused&&root.contains(focused)&&(focused.matches('input,textarea,select,[contenteditable="true"]')||focused.isContentEditable))return;
  try{
   const at=new Date(now),fresh=getReport(at);
   selected=at;data=fresh;error='';
