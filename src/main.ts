@@ -112,12 +112,26 @@ function getLunations(){const key=readingContext();if(!lunationCache||lunationCa
 let moonCache:{key:string;value:LunarWindow}|null=null;
 let syncCode='',syncRevisions=new Map<string,number>();
 let eyeSettings=loadEyeSettings(),eyeCached:{checked:number;result:LunarWindow}|null=null;
-function moonWindow(){const key=readingContext();if(!moonCache||moonCache.key!==key)moonCache={key,value:lunarWindow(selected,d=>chart(d,active,false,false).points)};return moonCache.value}
+function moonWindow(){
+ const key=JSON.stringify(active);
+ // An exact Moon sign interval has stable ingress/aspect roots. Only the current
+ // instant and VOC state change within it, so avoid hundreds of WASM scans per tick.
+ const existing=moonCache?.key===key?moonCache.value:null;
+ if(existing&&+selected>=+existing.enteredAt&&+selected<+existing.ingressAt){
+  return {...existing,at:selected,isVoid:+selected>=+existing.vocStartsAt};
+ }
+ const value=lunarWindow(selected,d=>chart(d,active,false,false).points);
+ moonCache={key,value};
+ return value;
+}
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const icon=(name:string)=>({today:'✦',signals:'⌁',people:'♧',chart:'◎',settings:'⚙',time:'◷',lunar:'☾',eclipses:'◑',asteroids:'✧',advanced:'◈',intel:'✦',go:'➤',travelmode:'✈',calendar:'▦',more:'☷',ai:'✧',evidence:'⎔'}[name]??'·');
 const labels:Record<string,()=>string>={today:()=>t('اليوم','Today'),signals:()=>t('الإشارات','Signals'),people:()=>t('الناس','People'),chart:()=>t('خارطتي','My chart'),settings:()=>t('الإعدادات','Settings'),time:()=>t('آلة الزمن','Time Machine'),lunar:()=>t('توقيت القمر','Moon timing'),eclipses:()=>t('الكسوف والخسوف','Eclipses'),asteroids:()=>t('الكويكبات','Named asteroids'),advanced:()=>t('التوقيت المتقدم','Advanced timing'),calendar:()=>t('التقويم','Calendar'),more:()=>t('المزيد','More'),go:()=>t('Go Mode','Go Mode'),travelmode:()=>t('Travel Mode','Travel Mode'),intel:()=>t('Go Mode','Go Mode'),ai:()=>t('شرح Ai','Ai explanations'),evidence:()=>t('الدليل الفلكي','Astrological evidence')};
 let clockFormat: '24'|'12'=localStorage.getItem('mx.clockFormat')==='12'?'12':'24';
-let liveTimePinned=false,liveLastRender=0,liveMinute=-1,moonNarrativeLastMinute=-1;
+let liveTimePinned=false,liveLastRender=0,liveMinute=-1,moonNarrativeLastMinute=-1,liveSkyLastTick=0;
+const LIVE_SKY_INTERVAL_MS=5000;
+const LIVE_CONTENT_INTERVAL_MS:Record<string,number>={today:15000,signals:20000,go:15000,intel:15000,travelmode:15000,lunar:15000,chart:20000,people:30000,time:30000,eclipses:60000,asteroids:45000,advanced:60000,evidence:25000,ai:30000,more:60000};
+
 const natalAsteroidHtmlCache=new Map<string,string>();
 const dateText=(d:Date,options:Intl.DateTimeFormatOptions={dateStyle:'full',timeStyle:'short'})=>new Intl.DateTimeFormat('en-GB',{...options,timeZone:active.zone,numberingSystem:'latn',hour12:clockFormat==='12'}).format(d);
 function getReport(at=selected){const key=active.id+JSON.stringify(active)+at.toISOString();let r=cache.get(key);if(!r){r=report(active,at);cache.set(key,r);if(cache.size>150)cache.delete(cache.keys().next().value!)}return r}
@@ -218,7 +232,7 @@ function focusedToday(){
   const percent=(from:Date,to:Date)=>Math.max(0,Math.min(100,Math.round(100*(+to-now)/Math.max(1,+to-(+from)))));
   const vocEnd=w.isVoid?w.ingressAt:w.vocStartsAt,vocStart=w.isVoid?w.vocStartsAt:w.enteredAt;
   moon='<div class="mx-focus-moon"><article><small>☾ '+t('القمر الآن','Current Moon')+'</small><strong>'+signName(w.sign*30)+'</strong><small>'+t('الانتقال القادم','Next ingress')+'</small><time datetime="'+w.ingressAt.toISOString()+'">'+time(w.ingressAt)+'</time><progress max="100" value="'+percent(w.enteredAt,w.ingressAt)+'"></progress></article>'+
-   '<article><small>◌ VOID OF COURSE</small><strong>'+(w.isVoid?t('خالي المسار','VOC active'):t('خارج خلو المسار','Not VOC'))+'</strong><small>'+(w.isVoid?t('نهاية الفترة','Period ends'):t('بداية الفترة','Period begins'))+'</small><time datetime="'+vocEnd.toISOString()+'">'+time(vocEnd)+'</time><progress max="100" value="'+percent(vocStart,vocEnd)+'"></progress></article></div>';
+   '<article><small>◌ VOID OF COURSE</small><strong>'+(w.isVoid?t('خالي المسار','VOC active'):t('ماشي عدل','Moon on course'))+'</strong><small>'+(w.isVoid?t('نهاية الفترة','Period ends'):t('بداية الفترة','Period begins'))+'</small><time datetime="'+vocEnd.toISOString()+'">'+time(vocEnd)+'</time><progress max="100" value="'+percent(vocStart,vocEnd)+'"></progress></article></div>';
   const moonIngress:FocusEvent={name:t('انتقال القمر للبرج التالي','Moon ingress'),at:w.ingressAt,mark:'☾',personal:false};
   const voc:FocusEvent={name:w.isVoid?t('نهاية خلو المسار','VOC ends'):t('بداية خلو المسار','VOC begins'),at:w.isVoid?w.ingressAt:w.vocStartsAt,mark:'◌',personal:false};
   futureEvents=[moonIngress,voc,...w.events.filter(e=>+e.time>now).map(e=>({name:planet(e.transit)+' '+aspect(e.angle)+' '+planet(e.target),at:e.time,mark:'✧',personal:false}))].filter(e=>+e.at>now);
@@ -773,7 +787,7 @@ function lunarPage(){
   const tile=(label:string,at:Date,cls:string,symbol:'entered'|'next'|'voc-start'|'voc-end')=>'<div class="premium-time-tile '+cls+'"><div class="time-tile-top"><span class="mx-lunar-tile-icon">'+lunarUiIcon(symbol)+'</span><small>'+label+'</small></div><time datetime="'+at.toISOString()+'">'+date(at)+'</time><span class="time-tile-zone">'+esc(active.zone)+'</span></div>';
   const lastLabel=last?moonAspectNarrative(last):t('ماكو موضوع إضافي مهيمن بهالفترة.','No additional dominant theme in this interval.');
   return '<div class="lunar-premium-grid"><section class="panel lunar-premium-card"><div class="lunar-card-heading"><span class="lunar-emblem" aria-hidden="true">'+lunarUiIcon('moon')+'</span><div><small>'+t('موقع القمر الحالي · بث حي','CURRENT MOON SIGN · LIVE')+'</small><h2>'+signName(w.sign*30)+'</h2></div></div>'+lunarGaugeMarkup('moon',w.enteredAt,w.ingressAt)+'<div class="mx-moon-sign-reading" id="mx-moon-sign-reading" data-moon-sign="'+w.sign+'">'+moonSignLiveHtml(w.sign,data!)+'</div><div class="premium-time-pair">'+tile(t('دخل البرج الحالي','Entered current sign'),w.enteredAt,'lunar-muted','entered')+tile(t('يدخل البرج القادم','Next sign ingress'),w.ingressAt,'lunar-teal','next')+'</div></section>'+
-   '<section class="panel lunar-premium-card mx-voc-status '+(w.isVoid?'is-voc':'is-clear')+'" data-voc-start="'+(+w.vocStartsAt)+'" data-voc-end="'+(+w.ingressAt)+'"><div class="lunar-card-heading"><span class="lunar-emblem violet" aria-hidden="true">'+lunarUiIcon('void')+'</span><div><small>VOID OF COURSE</small><h2>'+ (w.isVoid?t('القمر خالي المسار الآن','Moon is void-of-course'):t('القمر خارج خلو المسار','Moon is not VOC'))+'</h2></div><span class="lunar-state">'+(w.isVoid?t('فعّال','Active'):t('غير فعّال','Not active'))+'</span></div><div class="mx-lunar-live-row"><span class="mx-lunar-live-indicator"><i></i>'+(liveTimePinned?t('وقت مختار','SELECTED TIME'):'LIVE')+'</span><span class="mx-lunar-countdown" data-voc-countdown></span></div>'+lunarGaugeMarkup('voc',w.vocStartsAt,w.ingressAt,w.enteredAt)+'<p>'+t('إذا عندك قرار مهم، راجع ظروفه ومعلوماته الفعلية. التوقيت يساعدك ترتب، مو يقرر عنك.','For important decisions, check the actual facts first. Timing helps with planning, not predicting results.')+'</p><div class="premium-time-pair">'+tile(t('بداية خلو المسار','VOC begins'),w.vocStartsAt,'lunar-violet','voc-start')+tile(t('نهاية خلو المسار','VOC ends'),w.ingressAt,'lunar-gold','voc-end')+'</div></section></div>'+
+   '<section class="panel lunar-premium-card mx-voc-status '+(w.isVoid?'is-voc':'is-clear')+'" data-voc-start="'+(+w.vocStartsAt)+'" data-voc-end="'+(+w.ingressAt)+'"><div class="lunar-card-heading"><span class="lunar-emblem violet" aria-hidden="true">'+lunarUiIcon('void')+'</span><div><small>VOID OF COURSE</small><h2>'+ (w.isVoid?t('القمر خالي المسار الآن','Moon is void-of-course'):t('القمر ماشي عدل','Moon is on course'))+'</h2></div><span class="lunar-state">'+(w.isVoid?t('فعّال','Active'):t('غير فعّال','Not active'))+'</span></div><div class="mx-lunar-live-row"><span class="mx-lunar-live-indicator"><i></i>'+(liveTimePinned?t('وقت مختار','SELECTED TIME'):'LIVE')+'</span><span class="mx-lunar-countdown" data-voc-countdown></span></div>'+lunarGaugeMarkup('voc',w.vocStartsAt,w.ingressAt,w.enteredAt)+'<p>'+t('إذا عندك قرار مهم، راجع ظروفه ومعلوماته الفعلية. التوقيت يساعدك ترتب، مو يقرر عنك.','For important decisions, check the actual facts first. Timing helps with planning, not predicting results.')+'</p><div class="premium-time-pair">'+tile(t('بداية خلو المسار','VOC begins'),w.vocStartsAt,'lunar-violet','voc-start')+tile(t('نهاية خلو المسار','VOC ends'),w.ingressAt,'lunar-gold','voc-end')+'</div></section></div>'+
    '<section class="panel lunar-advice-card"><div class="lunar-advice-head"><div><span class="eyebrow">MX EYE · EXPLAINED TIMING</span><h2>'+t('شنو معناه بهاللحظة؟','How to use this timing')+'</h2></div><span class="lunar-advice-badge">'+(w.isVoid?t('خلو المسار فعّال','Void-of-course active'):t('القمر يتحرك باتجاه اتصالاته','Moon approaching aspects'))+'</span></div><p class="mx-lunar-explained">'+moonMomentNarrative(w)+'</p><div class="lunar-last-aspect"><small>'+t('آخر اتصال دقيق قبل الانتقال','Last exact major aspect')+'</small><strong>'+lastLabel+'</strong>'+(last?'<time datetime="'+last.time.toISOString()+'">'+date(last.time)+'</time>':'')+'</div><div class="button-row"><button id="export-lunar-calendar" class="primary">'+(w.isVoid?t('أضف موعد انتقال القمر للتقويم','Add next ingress to calendar'):t('أضف بداية خلو المسار للتقويم','Add VOC start to calendar'))+'</button><button class="secondary" data-go="time">'+t('افتح آلة الزمن','Open Time Machine')+'</button></div><small>'+t('تذكير التقويم: ','Calendar reminder: ')+date(when)+'</small></section>'+
    '<section class="panel lunar-timeline"><div class="section-title"><div><span class="eyebrow">EXACT EPHEMERIS · MEANING</span><h2>'+t('شنو يتغير خلال هالفترة؟','How the timing themes change')+'</h2></div></div><p class="mx-lunar-timeline-lead">'+t('الأوقات أدناه لحظات فلكية دقيقة محسوبة، والنص يشرح معناها الرمزي بلغة سهلة. الأحداث الماضية مكتوب عليها «صار»، والقادمة «قادم».','Times below are calculated exact astronomical contacts with a plain-language symbolic explanation. Past and upcoming events are marked.')+'</p><div class="premium-timeline">'+(w.events.length?w.events.map(e=>'<div class="timeline-entry '+(+e.time<=+selected?'mx-aspect-past':'mx-aspect-upcoming')+'"><span class="timeline-dot"></span><div><b>'+moonAspectNarrative(e)+'</b><span class="mx-aspect-phase">'+(+e.time<=+selected?t('صار بالفعل','Already exact'):t('قادم','Upcoming'))+'</span><time datetime="'+e.time.toISOString()+'">'+date(e.time)+'</time><details class="mx-lunar-aspect-story"><summary>'+t('الدليل الحسابي','Calculation details')+'</summary>'+planet(e.transit)+' · '+aspect(e.angle)+' · '+planet(e.target)+'</details></div></div>').join(''):'<p>'+t('ماكو زاوية كلاسيكية دقيقة ضمن التعريف المحدد.','No exact classical aspects under the chosen convention.')+'</p>')+'</div><details><summary>'+t('طريقة الحساب الفلكي','Astronomical calculation convention')+'</summary><p>'+t('يستخدم آخر زاوية رئيسية دقيقة للقمر مع الشمس أو عطارد أو الزهرة أو المريخ أو المشتري أو زحل، حتى لحظة دخوله البرج التالي.','Uses the last exact major aspect of the Moon to the Sun, Mercury, Venus, Mars, Jupiter or Saturn until its next sign ingress.')+'</p></details></section>';
  }catch(e){return '<section class="panel"><h2>'+t('تعذر حساب القمر','Moon calculation unavailable')+'</h2><p class="alert">'+esc(String(e))+'</p></section>'}
@@ -1182,41 +1196,123 @@ function updateLiveVocClock(now:number):boolean{
  return false;
 }
 
+/** Reconcile live markup without replacing stable wheels, expanded details,
+ * scroll containers or touched controls. Replacing innerHTML would reset zoom. */
+function reconcileLiveNode(current:Node,incoming:Node):void{
+ if(current.nodeType!==incoming.nodeType||current.nodeName!==incoming.nodeName){
+  current.parentNode?.replaceChild(incoming.cloneNode(true),current);return;
+ }
+ if(current.nodeType===Node.TEXT_NODE||current.nodeType===Node.COMMENT_NODE){
+  if(current.nodeValue!==incoming.nodeValue)current.nodeValue=incoming.nodeValue;
+  return;
+ }
+ if(current.nodeType!==Node.ELEMENT_NODE)return;
+ const element=current as Element,next=incoming as Element;
+ const keepOpen=element.tagName==='DETAILS'&&element.hasAttribute('open');
+ const keepWheelStyle=element.matches('svg.chart-wheel')?element.getAttribute('style'):null;
+ for(const attr of Array.from(element.attributes)){
+  if(!next.hasAttribute(attr.name)&&!(attr.name==='style'&&keepWheelStyle!==null))element.removeAttribute(attr.name);
+ }
+ for(const attr of Array.from(next.attributes)){
+  if(attr.name==='style'&&keepWheelStyle!==null)continue;
+  if(element.getAttribute(attr.name)!==attr.value)element.setAttribute(attr.name,attr.value);
+ }
+ if(keepOpen)element.setAttribute('open','');
+ const currentChildren=Array.from(element.childNodes),nextChildren=Array.from(next.childNodes);
+ for(let i=0;i<Math.max(currentChildren.length,nextChildren.length);i++){
+  const oldChild=currentChildren[i],newChild=nextChildren[i];
+  if(!oldChild){if(newChild)element.appendChild(newChild.cloneNode(true));continue}
+  if(!newChild){oldChild.parentNode?.removeChild(oldChild);continue}
+  reconcileLiveNode(oldChild,newChild);
+ }
+}
+function reconcileLiveHTML(current:Element,html:string){
+ const template=document.createElement('template');
+ template.innerHTML=html;
+ const next=template.content.firstElementChild;
+ if(next)reconcileLiveNode(current,next);
+}
+/** Exact Swiss-Ephemeris positions are recalculated frequently even while a
+ * sky wheel is enlarged. The existing SVG element is retained during updates. */
+function updateLiveSkyWheel(now:number){
+ if(!ready||liveTimePinned||document.visibilityState==='hidden')return;
+ const small=root.querySelector<SVGElement>('.sky-card svg.chart-wheel');
+ const enlarged=root.querySelector<SVGElement>('#detail[open] .mx-expanded-wheel svg.chart-wheel');
+ const chartWheel=screen==='chart'&&chartMode!=='natal'&&chartMode!=='details'
+  ?root.querySelector<SVGElement>('.chart-layout svg.chart-wheel'):null;
+ if(!small&&!enlarged&&!chartWheel)return;
+ try{
+  const at=new Date(now),sky=chart(at,active,true);
+  if(small||enlarged){
+   const html=wheel(sky);
+   if(small)reconcileLiveHTML(small,html);
+   if(enlarged)reconcileLiveHTML(enlarged,html);
+  }
+  if(chartWheel){
+   const owner=chartOwnerProfile();
+   const current=owner.id===active.id?sky:chart(at,owner,true);
+   const natal=chartMode==='overlay'?chart(birthInstant(owner),owner,true):null;
+   reconcileLiveHTML(chartWheel,chartMode==='overlay'&&natal?wheel(natal,current):wheel(current));
+  }
+  const time=root.querySelector<HTMLElement>('#detail[open] .mx-expanded-sky-time');
+  if(time)time.textContent=dateText(at,{dateStyle:'full',timeStyle:'medium'});
+ }catch(e){console.warn('Live sky wheel update unavailable',e)}
+}
 function refreshLiveBody(now:number){
  const focused=document.activeElement as HTMLElement|null;
  const editing=focused&&root.contains(focused)&&(focused.matches('input,textarea,select,[contenteditable="true"]')||focused.isContentEditable);
- if(editing)return;
+ // Keep the user in control of an open dialog or an unfinished form.
+ if(editing||root.querySelector<HTMLDialogElement>('#detail[open]'))return false;
  const region=root.querySelector<HTMLElement>('#live-view-body');
- if(!region||error){render();return}
- const preserved=Array.from(region.querySelectorAll<HTMLDetailsElement>('details')).map((el,index)=>el.open?index:-1).filter(index=>index>=0);
+ if(!region||error){render();return true}
  const scrollX=window.scrollX,scrollY=window.scrollY;
- region.innerHTML=content();
- const details=region.querySelectorAll<HTMLDetailsElement>('details');
- for(const index of preserved)if(details[index])details[index].open=true;
+ const html=content();
+ reconcileLiveHTML(region,'<div id="live-view-body">'+html+'</div>');
  bind();
  liveLastRender=now;
  if(screen==='lunar')updateLiveVocClock(now);
  if(Math.abs(scrollY-window.scrollY)>4)window.scrollTo({left:scrollX,top:scrollY,behavior:'instant'});
+ return true;
 }
-
 function refreshLiveView(force=false){
  if(!ready||!data||document.visibilityState==='hidden')return;
  const now=Date.now(),minute=Math.floor(now/60000);
- if(minute!==liveMinute){liveMinute=minute;const el=root.querySelector<HTMLElement>('#live-page-clock');if(el&&!liveTimePinned)el.textContent=dateText(new Date(now))}
+ // The heading is a real ticking clock, even when the content below changes slowly.
+ if(!liveTimePinned){
+  const clock=root.querySelector<HTMLElement>('#live-page-clock');
+  if(clock)clock.textContent=dateText(new Date(now),{dateStyle:'full',timeStyle:'medium'});
+ }
+ liveMinute=minute;
  if(screen==='calendar'){
-  if(astroCalendarToday()!==calendarAnchor){render();return}
+  if(astroCalendarToday()!==calendarAnchor){
+   selected=new Date(now);recalculate();render();return;
+  }
   if(!calendarRunning&&calendarCursor<calendarTargetDays())startCalendarWork();
   return;
  }
- if(screen==='ai'){void refreshLiveQwen(force);return}
- if(liveTimePinned)return; // A user-selected time remains intentionally fixed.
+ if(!liveTimePinned&&(force||now-liveSkyLastTick>=LIVE_SKY_INTERVAL_MS)){
+  liveSkyLastTick=now;updateLiveSkyWheel(now);
+ }
+ if(liveTimePinned)return; // Explicit Time Machine instants stay fixed.
  const boundary=screen==='lunar'&&updateLiveVocClock(now);
  if(screen==='lunar'&&!boundary)updateLiveMoonSign(now);
- const canUpdate=!['settings','people','time'].includes(screen);
- const cadence=screen==='lunar'?60000:screen==='chart'?120000:90000;
- if(canUpdate&&(force||boundary||now-liveLastRender>=cadence)){
-  selected=new Date(now);recalculate();refreshLiveBody(now);
- }
+ const cadence=LIVE_CONTENT_INTERVAL_MS[screen]??30000;
+ // Settings fields are user-owned state, not an ephemeral sky calculation.
+ if(screen==='settings')return;
+ if(!(force||boundary||now-liveLastRender>=cadence))return;
+ const focused=document.activeElement as HTMLElement|null;
+ if(root.querySelector<HTMLDialogElement>('#detail[open]')||
+  (focused&&root.contains(focused)&&(focused.matches('input,textarea,select,[contenteditable="true"]')||focused.isContentEditable)))return;
+ try{
+  const at=new Date(now),fresh=getReport(at);
+  selected=at;data=fresh;error='';
+  if(screen==='ai'){
+   void refreshLiveQwen(force);
+   liveLastRender=now;
+   return;
+  }
+  refreshLiveBody(now);
+ }catch(e){console.warn('Live calculations unavailable; keeping last valid view',e)}
 }
 
 function navigate(value:string){screen=labels[value]?value:'today';if(screen==='today'||screen==='ai'){liveTimePinned=false;selected=new Date();recalculate()}location.hash=screen;render();if(screen==='ai'&&!aiConnection.checked)void refreshAIConnection();window.scrollTo({top:0,behavior:'instant'})}
