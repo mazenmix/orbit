@@ -120,7 +120,7 @@ test('fortune calendar color must come from genuine aspect weights and show tran
 });
 
 test('MX Ai no longer renders the WHY NOW audit box',()=>{
- const block=main.slice(main.indexOf('function intelPage(){'),main.indexOf('function asteroidsPage(){'));
+ const block=main.slice(main.indexOf('function goModePage(){'),main.indexOf('function asteroidsPage(){'));
  for(const word of ['WHY NOW','ليش هسه؟','intel-audit','مجموع أوزان الإشارات الداعمة'])assert.ok(!block.includes(word),word);
  assert.ok(block.includes('وين تركز هسّه؟')&&block.includes('مصفوفة المؤشرات الـ29'));
 });
