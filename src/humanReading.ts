@@ -108,8 +108,10 @@ export function humanPlanet(insight:PrecisionInsight):{title:Both;summary:Both;a
  const hsAr=house(insight.house,'ar'),hsEn=house(insight.house,'en');
  const scene=scenes[insight.id]??{ar:insight.actionAr,en:insight.actionEn};
  const linked=insight.aspect?planetAreas[insight.aspect]:undefined;
- const linkedAr=linked?'هذا الجانب يلتقي أيضاً ويا '+linked.ar+'؛ لذلك راقب شلون تتعامل ويا الاحتياجين بنفس الموقف. ':'';
- const linkedEn=linked?'It also interacts with '+linked.en+'; notice how both needs feature in the same situation. ':'';
+ const hard=insight.aspectAngle===90||insight.aspectAngle===180;
+ const united=insight.aspectAngle===0;
+ const linkedAr=linked?(hard?'أكو شدّ بين هذا الأسلوب وبين '+linked.ar+'؛ فاختبر وين تحتاج حدود أو توازن، مو قرار سريع. ':united?'هالأسلوب يرتبط بقوة ويا '+linked.ar+'؛ حاول تميّز بين حاجتك الأولى والثانية. ':'ممكن يساعدك تجمع هالأسلوب ويا '+linked.ar+'، بشرط تتأكد أن التصرفات الواقعية تدعمه. '):'';
+ const linkedEn=linked?(hard?'This approach may compete with '+linked.en+'; explore what needs balancing. ':united?'This approach is closely tied to '+linked.en+'; distinguish the two needs. ':'This approach may complement '+linked.en+' when practical circumstances support it. '):'';
  return {
   title:d,
   summary:{ar:'بموضوع '+d.ar+'، ممكن يفيدك أسلوب '+ar+'. '+(hsAr?'جرّب تلاحظ هالشي خصوصاً بموضوع '+hsAr+'. ':'')+linkedAr+'مثال: '+scene.ar,
