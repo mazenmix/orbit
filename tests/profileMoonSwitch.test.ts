@@ -51,8 +51,8 @@ test('Moon summary changes when current sign changes while natal chart stays con
 });
 test('Moon summary is transparent about missing time and never guesses houses',()=>{
  const natal=chart(63,false),report=r(natal,chart(110),'Venus',120),text=moonPersonalSummary(report,false,'ar');
- assert.match(text,/وقت ولادتك مو مؤكد/);
- assert.doesNotMatch(text,/بيت\s+\d+|البيت\s+\d+/);
+ assert.match(text,/خطوة|تگدر|موقف|معلومة|علاقتك|التقارب|راحتك/);
+ assert.doesNotMatch(text,/وقت ولادتك|البيت\s*\d+|الدرجات|°|house\s*\d+/iu);
 });
 test('user profile selection drives selected chart not active profile',()=>{
  const main=readFileSync('src/main.ts','utf8');
@@ -64,33 +64,48 @@ test('user profile selection drives selected chart not active profile',()=>{
  assert.match(main,/moonPersonalSummary\(r,active\.known,lang\)/);
 });
 
-test('Moon house labels distinguish natal house 11, current sky house 10 and transit over natal house 4',()=>{
+test('Moon card talks directly to the person rather than listing three technical house placements',()=>{
  const natal=chart(0);
  natal.cusps=Array.from({length:12},(_,i)=>i*30);
- natal.points.find(p=>p.id==='Moon')!.longitude=315; // Natal 11th.
+ natal.points.find(p=>p.id==='Moon')!.longitude=315; // Natal friends/social need.
  const sky=chart(0);
  sky.cusps=Array.from({length:12},(_,i)=>(170+i*30)%360);
- sky.points.find(p=>p.id==='Moon')!.longitude=95; // Transit sky 10th, natal overlay 4th.
+ sky.points.find(p=>p.id==='Moon')!.longitude=95; // Natal overlay is home; transit sky chart would be 10.
  const value=r(natal,sky,'Venus',120);
  const ar=moonPersonalSummary(value,true,'ar');
  const en=moonPersonalSummary(value,true,'en');
- assert.match(ar,/خارطة العبور الحالية القمر بالبيت 10/);
- assert.match(ar,/قمرك الولادي بالبيت 11/);
- assert.match(ar,/القمر العابر.*بيوت ميلادك.*البيت 4/);
- assert.match(ar,/بيت العبور الحالي يختلف/);
- assert.match(en,/current transit chart the Moon is in house 10/);
- assert.match(en,/natal Moon is in house 11/);
- assert.match(en,/natal house cusps.*house 4/);
+ assert.match(ar,/رتّب مساحة الراحة/);
+ assert.match(ar,/صديق قريب/);
+ assert.match(en,/Make some room for comfort/);
+ assert.match(en,/trusted friend/);
+ assert.doesNotMatch(ar,/خارطة العبور|قمرك الولادي|البيت\s*\d+|درجات|°|الموقع الفلكي|\/100/iu);
+ assert.doesNotMatch(en,/transit chart|natal Moon|house\s*\d+|degrees|°|\/100/iu);
+ // The temporary transit-sky house must not replace the calculated natal overlay.
+ assert.doesNotMatch(ar,/بالشغل، خلّ أولويتك/);
 });
-test('Moon summary never invents family from a natal Moon in house 11 or a transit Moon in house 10',()=>{
+test('Moon card gives career and friend guidance rather than inventing family focus',()=>{
  const natal=chart(0),sky=chart(0);
  natal.cusps=Array.from({length:12},(_,i)=>i*30);
  sky.cusps=[...natal.cusps];
- natal.points.find(p=>p.id==='Moon')!.longitude=315; // Natal 11th.
- sky.points.find(p=>p.id==='Moon')!.longitude=285; // Current 10th, overlay 10th.
+ natal.points.find(p=>p.id==='Moon')!.longitude=315; // Natal friend networks.
+ sky.points.find(p=>p.id==='Moon')!.longitude=285; // Current Moon overlays career.
  const ar=moonPersonalSummary(r(natal,sky,'Venus',120),true,'ar');
- assert.match(ar,/القمر بالبيت 10/);
- assert.match(ar,/قمرك الولادي بالبيت 11/);
- assert.match(ar,/على بيوت ميلادك، فيقع بالبيت 10/);
- assert.doesNotMatch(ar,/البيت والعائلة/);
+ assert.match(ar,/بالشغل/);
+ assert.match(ar,/صديق قريب/);
+ assert.doesNotMatch(ar,/البيت والعائلة|البيت\s*\d+|°|\d+\/100/);
+});
+test('Moon card changes practical advice with a different natal overlay and does not invent houses without reliable birth time',()=>{
+ const natal=chart(0),sky=chart(0);
+ natal.cusps=Array.from({length:12},(_,i)=>i*30);
+ natal.points.find(p=>p.id==='Moon')!.longitude=315;
+ sky.points.find(p=>p.id==='Moon')!.longitude=95; // Personal area: home.
+ const atHome=moonPersonalSummary(r(natal,sky,'Venus',120),true,'ar');
+ sky.points.find(p=>p.id==='Moon')!.longitude=285; // Personal area: career.
+ const atWork=moonPersonalSummary(r(natal,sky,'Venus',120),true,'ar');
+ const unknown=moonPersonalSummary(r(natal,sky,'Venus',120),false,'ar');
+ assert.notEqual(atHome,atWork);
+ assert.match(atHome,/رتّب مساحة الراحة/);
+ assert.match(atWork,/بالشغل/);
+ assert.doesNotMatch(unknown,/بالشغل، خلّ أولويتك|صديق قريب/);
+ for(const text of [atHome,atWork,unknown])assert.doesNotMatch(text,/البيت\s*\d+|درجات|°|\d+\/100/);
 });
