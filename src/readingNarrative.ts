@@ -14,6 +14,14 @@ const names:Record<string,Bi>={
  Ceres:['سيريس','Ceres'],Pallas:['بالاس','Pallas'],Juno:['جونو','Juno'],
  Vesta:['فيستا','Vesta'],Pholus:['فولوس','Pholus']
 };
+const headings:Record<string,Bi>={
+ Sun:['القرار والهوية','decisions and identity'],Moon:['المشاعر والراحة','feelings and comfort'],Mercury:['وضوح الكلام','clear communication'],
+ Venus:['القرب والتقدير','affection and appreciation'],Mars:['المبادرة والاندفاع','action and impulse'],
+ Jupiter:['الفرص والتوسع','opportunity and growth'],Saturn:['الالتزام والحدود','duty and boundaries'],
+ Uranus:['الحرية والتغيير','freedom and change'],Neptune:['التوقعات والواقع','expectations and reality'],
+ Pluto:['التحوّل والسيطرة','change and control'],Ascendant:['الانطباع والحضور','presence and first impressions'],
+ MC:['المسار المهني','career direction']
+};
 const causes:Record<string,Bi>={
  Sun:['رغبتك باتخاذ قرار يمثّلك بدل إرضاء الجميع','your need to choose a direction that reflects your priorities'],
  Moon:['حاجتك للراحة والاطمئنان قبل ردّة الفعل','your need for security before responding'],
@@ -102,8 +110,8 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
    ' In contrast, '+name(tension.transit.id,language)+' '+(aspects[tension.angle]?.[1]??'aspect')+' natal '+name(tension.natal.id,language)+' adds a counter-theme; this is a mixed reading.'):'';
  const unique=e.transit.id===e.natal.id;
  const title=language==='ar'?
-  (unique?'مراجعة '+focus(e.natal.id,language):'بين '+focus(e.transit.id,language)+' و'+focus(e.natal.id,language)):
-  (unique?'Revisiting '+focus(e.natal.id,language):'Between '+focus(e.transit.id,language)+' and '+focus(e.natal.id,language));
+  (unique?'مراجعة '+(headings[e.natal.id]?.[0]??area):'بين '+(headings[e.transit.id]?.[0]??area)+' و'+(headings[e.natal.id]?.[0]??area)):
+  (unique?'Revisiting '+(headings[e.natal.id]?.[1]??area):'Between '+(headings[e.transit.id]?.[1]??area)+' and '+(headings[e.natal.id]?.[1]??area));
  const good=language==='ar'?
   'بهذا الوقت، '+first+' العابر يعمل '+angle+' ويا '+second+' بميلادك، فالتنجيم يربط '+focus(e.transit.id,language)+' بـ'+focus(e.natal.id,language)+'. '+a+houseText+' '+stage+other:
   'At this moment, transiting '+first+' forms a '+angle+' to natal '+second+', symbolically linking '+focus(e.transit.id,language)+' with '+focus(e.natal.id,language)+'. '+a+houseText+' '+stage+other;
