@@ -78,7 +78,7 @@ test('Moon sign has live five-line calculation tied to owner natal data',()=>{
  assert.ok(main.includes('function updateLiveMoonSign('));
 });
 test('chart interpretation is calculated per person, not generic repeated boilerplate',()=>{
- assert.ok(main.includes('precisionChartStories(r.natal'));
+ assert.ok(main.includes('natalPortrait(r.natal,person.known,lang)')); // Personal natal portrait remains
  assert.ok(main.includes('natalAsteroidDetails(person,r.natal)'));
  assert.ok(main.includes('chartSpecificFingerprint(person,natal)'));
  assert.ok(!main.includes('<summary>'+ "'+t('طريقة القراءة'" ));
@@ -105,7 +105,7 @@ test('live ephemeris updates main, chart, and enlarged sky wheels independently 
  assert.ok(main.includes('reconcileLiveHTML(chartWheel,'));
  assert.ok(main.includes("screen==='chart'"));
  assert.ok(main.includes("screen==='lunar'&&!boundary"));
- assert.ok(main.includes('const fresh=getReport(at)'));
+ assert.ok(main.includes('const at=new Date(now),fresh=getReport(at)'));
  assert.ok(main.includes('people:30000'));
  assert.ok(main.includes('time:30000'));
  assert.ok(main.includes("document.addEventListener('visibilitychange'"));
