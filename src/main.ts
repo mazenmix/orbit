@@ -25,6 +25,7 @@ import {asteroidReading,namedAsteroidContacts} from './asteroidInterpretation.ts
 import {partnerInsights,gaugeLevel} from './peopleInsights.ts';
 import {personalTransitPlainReading} from './relationshipPlain.ts';
 import {relationshipBrief} from './relationshipBrief.ts';
+import {signalStory} from './readingNarrative.ts';
 import {decodePrivateSetup} from './privateSetup.ts';
 import {readJournal,writeJournal,checkJournal,parseJournalBackup,summarizeJournal,type JournalEntry,type InteractionKind,type Outcome} from './journal.ts';
 import {reviewEvidence,reviewSignal} from './decision.ts';
@@ -80,7 +81,13 @@ let focusMoonEvents:FocusEvent[]=[];
 let compareId='',chartMode='natal',soulPersonId='',soulCategory=1,soulTopic=1,soulQuery='',filter:Category|'all'='all',aiAnswer='',aiBusy=false;
 let aiAnswerAt='',aiResponseSignature='',aiScope='',aiNextRequestAt=0,aiLastCheckMinute=-1,aiErrorMessage='',aiRequestId=0;
 const AI_MIN_INTERVAL_MS=5*60_000;
-const copy=(signal:Signal)=>{const result=sourceCopy(signal);if(lang!=='ar'||active.sex!=='female')return result;return {...result,good:actionForGender(result.good,'female'),careful:actionForGender(result.careful,'female'),action:actionForGender(result.action,'female')};};
+const copy=(signal:Signal)=>{
+ const source=sourceCopy(signal);
+ const story=signalStory(signal,data?.natal,active.known,lang);
+ const result=story?{...source,...story}:source;
+ if(lang!=='ar'||active.sex!=='female')return result;
+ return {...result,good:actionForGender(result.good,'female'),careful:actionForGender(result.careful,'female'),action:actionForGender(result.action,'female')};
+};
 const readingContext=()=>JSON.stringify([active,selected.toISOString(),lang]);
 const cache=new Map<string,Report>();
 let heatmapCategory:Category|'average'='average';
@@ -183,10 +190,10 @@ function focusedToday(){
  const eventMarkup=focusEventMarkup([...personal,...futureEvents]);
  const matchedAi=aiAnswer&&aiScope===liveQwenScope()&&aiAnswerAt&&Math.abs(+new Date(aiAnswerAt)-+selected)<15*60000;
  const aiSnippet=matchedAi?esc(conciseInterpretation(aiAnswer).brief):
-   reading?esc(reading.good):
+   reading?esc(reading.action):
    t('ماكو اتصال شخصي قوي حالياً حتى ننسب إله قصة من خيالنا. تابع بياناتك الفعلية، وافتح تحليل Ai لما تتوفر دلائل محسوبة.','There is no strong personal contact to justify a made-up narrative. Review real circumstances and use Ai when calculated evidence is available.');
  return '<div class="mx-focused-dashboard"><div class="mx-focus-main">'+
- '<section class="panel mx-focus-hero"><div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('أهم اتصال شخصي','MAIN PERSONAL TRANSIT')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'): 'LIVE')+'</span></div><h2>'+esc(reading?.title??t('ماكو اتصال مهيمن الآن','No dominant aspect at this moment'))+'</h2><p>'+esc(reading?.action??t('تابع الواقع قبل اتخاذ قراراتك.','Use real-world information before deciding.'))+'</p>'+(quality?'<p class="mx-focus-quality">'+quality+'</p>':'')+'<div class="mx-focus-proof"><b>'+t('الدليل','EVIDENCE')+'</b><span>'+esc(evidence)+'</span></div><div class="mx-focus-proof"><b>'+t('وقت الرصد','OBSERVED AT')+'</b><span>'+dateText(selected,{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+(phase?' · '+phase:'')+'</span></div>'+
+ '<section class="panel mx-focus-hero"><div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('أهم اتصال شخصي','MAIN PERSONAL TRANSIT')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'): 'LIVE')+'</span></div><h2>'+esc(reading?.title??t('ماكو اتصال مهيمن الآن','No dominant aspect at this moment'))+'</h2><p>'+esc(reading?.good??t('ماكو اتصال فلكي قوي يدعم قراءة شخصية بهذه اللحظة.','No strong astrological contact supports a personal reading at this moment.'))+'</p>'+(reading?'<p class="mx-focus-story-example">'+esc(reading.careful)+'</p><p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(reading.action)+'</p>':'')+(quality?'<p class="mx-focus-quality">'+quality+'</p>':'')+'<div class="mx-focus-proof"><b>'+t('الدليل','EVIDENCE')+'</b><span>'+esc(evidence)+'</span></div><div class="mx-focus-proof"><b>'+t('وقت الرصد','OBSERVED AT')+'</b><span>'+dateText(selected,{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+(phase?' · '+phase:'')+'</span></div>'+
  '<div class="mx-focus-actions"><button class="primary" data-go="evidence">'+t('ليش هاي القراءة؟','Why this reading?')+' ↗</button>'+(factor?'<button class="secondary" id="focus-refine-peak">'+t('احسب وقت الذروة','Verify exact peak')+' ⏱</button>':'')+'</div><div class="mx-focus-peak" id="focus-peak-result" aria-live="polite"></div></section>'+
  '<section class="panel mx-focus-panel mx-focus-ai"><h2>✧ MX Ai · '+t('قراءة قصيرة','Short explanation')+'</h2><p>'+aiSnippet+'</p><button class="secondary mx-focus-subaction" data-go="ai">'+t('تحليل Ai','Ai analysis')+' ↗</button></section></div>'+
  '<aside class="mx-focus-aside"><section class="panel mx-focus-panel"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+'<button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
