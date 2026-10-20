@@ -33,7 +33,7 @@ jobs:
       - name: Compare Mazen and Jillyanne text in browser
         run: |
           pnpm exec vite preview --host 127.0.0.1 --port 4173 > /tmp/astro-preview.log 2>&1 &
-          /tmp/astro-qa/node_modules/.bin/playwright test --config scripts/playwright.config.cjs --project=chromium --grep "saved People owner switches"
+          /tmp/astro-qa/node_modules/.bin/playwright test --config scripts/playwright.config.cjs --project=chromium --grep "saved People owner switches|Today Moon prose"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
