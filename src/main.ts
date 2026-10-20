@@ -438,7 +438,10 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:GoReview){
  const factors=memo.supportFactor&&memo.challengeFactor?[memo.supportFactor,memo.challengeFactor]:[top];
  const basis=t('العوامل الرمزية: ','Symbolic factors: ')+factors.map(e=>planet(e.transit.id)+' · '+aspect(e.angle)+' · '+planet(e.natal.id)+' ('+e.orb.toFixed(2)+'°)').join(t('؛ وبالمقابل ','; against '));
  const limit=!memo.complete?t(' بعض مصادر المؤشر غير متاحة.',' Some source categories lack evidence.'):memo.sensitive?t(' الترجيح حساس لاستبعاد جرم واحد.',' The balance is sensitive to removing one transiting body.'):'';
- return lead+' '+basis+limit;
+ const story=signalStory({category:evidenceCategory(top),score:50,tier:'C',tone:'neutral',factors:[top]},data?.natal,active.known,lang);
+ // The Go card first explains the actual factor in human terms. Mathematical proof remains visible,
+ // but a derived index alone must never be mistaken for measured success or another person's desire.
+ return lead+' '+(story?story.careful+' '+story.title+'. ':'')+basis+limit;
 }
 function intelPage(){
  const indicators=derivedMetrics(data!.scores),go=goModes(indicators),r=data!,decisions=resolveDecisions(r.evidence,r.signals);
