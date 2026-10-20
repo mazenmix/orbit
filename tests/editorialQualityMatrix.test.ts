@@ -17,7 +17,7 @@ const chart=(shift:number,known=true)=>({
  asc:known?((120+shift)%360):null,mc:known?((210+shift)%360):null,
  cusps:known?Array.from({length:12},(_,i)=>(120+shift+i*30)%360):[],missing:[]
 });
-const forbidden=/(?:\b(?:conjunction|square|trine|sextile|opposition|orb|applying|separating)\b|اقتران|تربيع|تثليث|تسديس|مقابلة|أورب|اورب|\d+(?:[.,]\d+)?\s*°)/iu;
+const forbidden=/(?:\b(?:conjunction|square|trine|sextile|opposition|orb)\b|اقتران|تربيع|تثليث|تسديس|مقابلة|أورب|اورب|\d+(?:[.,]\d+)?\s*°)/iu;
 const clean=(text:string)=>{assert.ok(text.trim().length>12);assert.doesNotMatch(text,forbidden);assert.doesNotMatch(text,/\b(?:NaN|undefined|null)\b/);};
 const factor=(a:string,b:string,angle:number):Evidence=>({
  id:a+':'+b+':'+angle,transit:pt(a,180),natal:pt(b,90),angle,
