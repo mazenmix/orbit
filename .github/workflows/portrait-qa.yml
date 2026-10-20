@@ -9,6 +9,9 @@ on:
       - 'src/natalPortrait.ts'
       - 'scripts/visual-qa.spec.cjs'
       - 'tests/profileMoonSwitch.test.ts'
+      - 'tests/intelGoMode.test.ts'
+      - 'tests/ux.test.ts'
+      - 'src/focus.css'
       - 'pnpm-lock.yaml'
   workflow_dispatch:
 permissions:
