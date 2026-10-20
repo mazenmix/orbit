@@ -108,10 +108,17 @@ const nextSteps:Record<string,Bi>={
  MC:['اختصر النقاش المهني بمطلوب واحد ومؤشر واضح تعرف بيه إن المهمة انجزت.','Define one work deliverable and a clear test of completion.']
 };
 const action=(e:Evidence,c:Category,lang:Language)=>{
- const direct=(nextSteps[e.natal.id]??nextSteps[e.transit.id]??categories[c])[index(lang)];
- return direct+(e.applying?
-  (lang==='ar'?' اختبر الخطوة قبل ما تكبّرها.':'Test that step before expanding it.'):
-  (lang==='ar'?' إذا جربتها قبل، راجع النتيجة وعدّل أسلوبك.':'If you have tried it already, review the outcome and adjust.'));
+ const p=index(lang),tension=e.angle===90||e.angle===180;
+ // Category is the topic the reader opened; the individual natal factor
+ // modulates that topic. Do not answer a romance question with work advice.
+ const direct=c==='overview'?(nextSteps[e.natal.id]??nextSteps[e.transit.id]??categories[c])[p]:categories[c][p];
+ const focused=focus(e.natal.id,lang);
+ const nuance=lang==='ar'?
+  (tension?' إذا حسّيت الموضوع معقّد، راقب هل '+focused+' ديدفعك للتسرع بالحكم.':' بعد التجربة، راقب شلون '+focused+' أثّر على قرارك الحقيقي.'):
+  (tension?' If the situation feels tense, notice whether '+focused+' pushes you toward a rushed judgment.':' After trying it, notice how '+focused+' affected your real decision.');
+ return direct+nuance+(e.applying?
+  (lang==='ar'?' خلّ خطوتك قابلة للتعديل.':' Keep the action reversible.'):
+  (lang==='ar'?' إذا جربتها قبل، عدّلها على ضوء النتيجة.':' If you tried it already, adjust based on the result.'));
 };
 function houseOf(e:Evidence,natal:Chart|undefined,known:boolean):number{
  if(!known||!natal||natal.cusps.length!==12||['Ascendant','MC'].includes(e.natal.id))return 0;
