@@ -465,3 +465,45 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await context.close();
  });
 }
+
+\n// Actual browser checks, not just DOM-string assertions. Runs on Chromium and
+// WebKit (Safari engine) at desktop, tablet and iPhone-sized viewports.
+for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['iphone',390,844]]){
+ test(device+' compact Today Moon and VOC green gauges with a genuinely refreshing enlarged sky wheel',async({browser})=>{
+  const context=await browser.newContext({
+   viewport:{width,height},deviceScaleFactor:1,
+   isMobile:device==='iphone',hasTouch:device==='iphone'
+  });
+  const page=await context.newPage(),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/#today',{waitUntil:'domcontentloaded'});
+  const wheel=page.locator('#live-view-body .mx-today-sky svg.chart-wheel');
+  await wheel.waitFor({state:'visible',timeout:80000});
+  await expect(page.locator('#live-view-body .mx-today-sky')).toBeVisible();
+  await expect(page.locator('#live-view-body .mx-today-gauges')).toHaveCount(0);
+  const panel=await page.locator('.mx-today-sky').boundingBox();
+  expect(panel.width,'Today sky should be a compact panel').toBeLessThanOrEqual(500);
+  const progress=page.locator('.mx-focus-moon progress');
+  await expect(progress).toHaveCount(2);
+  const green=await page.locator('.mx-focus-moon article').first().evaluate(el=>{
+   const color=getComputedStyle(el).backgroundImage;
+   return color.includes('linear-gradient')&&color.includes('19, 100, 76');
+  });
+  expect(green,'The moon and VOC panels use emerald backgrounds').toBe(true);
+  await expect.poll(()=>wheel.getAttribute('data-sky-calculated-at'),{timeout:16000}).not.toBeNull();
+  const first=await wheel.getAttribute('data-sky-calculated-at');
+  await expect.poll(()=>wheel.getAttribute('data-sky-calculated-at'),{timeout:16000}).not.toBe(first);
+  await page.locator('#expand-sky-wheel').click();
+  const dialog=page.locator('#detail[open]');
+  await expect(dialog).toBeVisible();
+  const enlarged=dialog.locator('.mx-expanded-wheel svg.chart-wheel');
+  await expect(enlarged).toBeVisible();
+  const handle=await enlarged.elementHandle(),old=await enlarged.getAttribute('data-sky-calculated-at');
+  await expect.poll(()=>enlarged.getAttribute('data-sky-calculated-at'),{timeout:16000}).not.toBe(old);
+  expect(await handle.evaluate(node=>node.isConnected),'Zoomed wheel element survives real sky refresh').toBe(true);
+  await expect(dialog.locator('.mx-expanded-sky-time')).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth),'Horizontal overflow').toBeLessThan(9);
+  expect(errors,'Browser exceptions during live updates').toEqual([]);
+  await context.close();
+ });
+}
