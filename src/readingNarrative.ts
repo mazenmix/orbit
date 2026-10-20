@@ -143,10 +143,10 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
   'The pattern symbolically favors coordinating '+roleA+' and '+roleB+', provided real circumstances support it.';
  const place=home?(language==='ar'?' أقرب مجال حتى تراجع هذا الموضوع هو '+home+'.':' The area to reflect on is '+home+'.'):'';
  const balance=contrast?(language==='ar'?' وأكو جانب معاكس بنفس القراءة؛ لذلك لا تعتبر الصورة كلها سهلة أو كلها صعبة.':' A competing theme is present, so avoid treating the whole situation as either easy or difficult.'):'';
- const good=(language==='ar'?'بموضوع '+area+'، ':'Regarding '+area+', ')+takeaway+place+balance;
+ const good=(language==='ar'?'على صعيد '+area+'، ':'In '+area+', ')+takeaway+place+balance;
  const caution=language==='ar'?
-  'مثلاً، إذا صار هالموقف: '+everydayCases[s.category][0] :
-  'For instance, if this comes up: '+everydayCases[s.category][1];
+  'مثال عملي: '+everydayCases[s.category][0] :
+  'A practical example: '+everydayCases[s.category][1];
  const practical=action(e,s.category,language);
  const basis=first+' '+angle+' '+second+' · '+e.orb.toFixed(2)+'°';
  return {title,good,careful:caution,action:practical,basis};
