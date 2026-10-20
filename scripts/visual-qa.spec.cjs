@@ -333,7 +333,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await card.waitFor({state:'visible',timeout:75000});
   await expect(page.locator('#active-profile option')).toHaveCount(2);
   const first=(await card.innerText()).trim();
-  const banned=/\\b(?:orb|aspects?|houses?|natal moon)\\b|(?:البيت|بيوت|تربيع|تثليث|تسديس|مقابلة|اقتران)\\s*\\d*|°|\\d+\\s*\\/\\s*100/iu;
+  const banned=/\b(?:orb|aspects?|houses?|natal moon)\b|(?:البيت|بيوت|تربيع|تثليث|تسديس|مقابلة|اقتران)\s*\d*|°|\d+\s*\/\s*100/iu;
   expect(first.length).toBeGreaterThan(80);
   expect(first).not.toMatch(banned);
   await page.locator('#active-profile').selectOption('moon-qa-b');
