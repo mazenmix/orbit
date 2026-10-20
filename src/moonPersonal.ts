@@ -84,10 +84,18 @@ export function moonPersonalSummary(report:Report,knownTime:boolean,lang:Lang):s
  const relevant=report.evidence
   .filter(e=>e.transit.id==='Moon'&&(knownTime||!['Moon','Ascendant','MC'].includes(e.natal.id)))
   .sort((a,b)=>b.weight-a.weight||a.orb-b.orb)[0];
- const advice=relevant&&contactAdvice[relevant.natal.id]?.[lang];
- // The natal emotional need stays visible; an aspect is only added if the card
- // has room, never at the expense of a calculated personal natal context.
- if(advice&&lines.length<3)lines.push(advice);
+ const advice=relevant&&relevant.weight>=.35&&contactAdvice[relevant.natal.id]?.[lang];
+ // Never discard the strongest calculated personal contact just because two
+ // natal-house themes already occupy the first paragraphs. Without this,
+ // different people's readings can misleadingly collapse to the same prose.
+ if(advice){
+  const challenging=relevant!.angle===90||relevant!.angle===180;
+  const joining=relevant!.angle===0;
+  const intro=lang==='ar'?
+   (challenging?'وانتبه لموضوع إضافي ممكن يحتاج تروّي: ':joining?'وموضوع إضافي يستحق تركيزك: ':'وموضوع إضافي ممكن تتعامل وياه بسهولة نسبية: '):
+   (challenging?'A second theme may need care: ':joining?'A second theme deserves attention: ':'A second theme may be easier to work with: ');
+  lines.push(intro+advice);
+ }
  if(lines.length===1){
   // No birth-house assumptions if the birth time or cusps are absent.
   lines.push(lang==='ar'
