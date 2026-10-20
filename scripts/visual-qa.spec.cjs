@@ -359,8 +359,8 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/#today',{waitUntil:'domcontentloaded'});
-  await expect(page.locator('[data-today-gauge]')).toHaveCount(4,{timeout:75000});
-  const fromToday=Object.fromEntries(await page.locator('[data-today-gauge]').evaluateAll(rows=>rows.map(n=>[n.getAttribute('data-today-gauge'),Number(n.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'))])));
+  await expect(page.locator('.mx-today-sky svg.chart-wheel')).toBeVisible({timeout:75000});
+  await expect(page.locator('[data-today-gauge]')).toHaveCount(0);
   const nav=device==='iphone'?page.locator('.mobile-nav'):page.locator('.sidebar .nav');
   await expect(nav.locator('[data-go]')).toHaveCount(7);
   const routes=await nav.locator('[data-go]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-go')));
@@ -373,7 +373,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('.mx-go-mode-page [data-today-gauge]')).toHaveCount(4);
   await expect(page.locator('[data-intel-tab]')).toHaveCount(0);
   const fromGo=Object.fromEntries(await page.locator('.mx-go-mode-page [data-today-gauge]').evaluateAll(rows=>rows.map(n=>[n.getAttribute('data-today-gauge'),Number(n.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'))])));
-  expect(fromGo).toEqual(fromToday);
+  expect(Object.keys(fromGo).sort()).toEqual(['career','emotional','love','sexuality']);
   for(const id of ['sexuality','love','emotional','career']){
    expect(Number.isFinite(fromGo[id]),'Gauge not calculated: '+id).toBe(true);
    expect(fromGo[id]).toBeGreaterThanOrEqual(1);
