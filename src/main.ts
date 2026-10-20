@@ -195,7 +195,7 @@ function focusedToday(){
    secondReading?esc(secondReading.title+' — '+secondReading.good):
    t('ماكو اتصال شخصي قوي حالياً حتى ننسب إله قصة من خيالنا. تابع بياناتك الفعلية، وافتح تحليل Ai لما تتوفر دلائل محسوبة.','There is no strong personal contact to justify a made-up narrative. Review real circumstances and use Ai when calculated evidence is available.');
  return '<div class="mx-focused-dashboard"><div class="mx-focus-main">'+
- '<section class="panel mx-focus-hero"><div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('أهم اتصال شخصي','MAIN PERSONAL TRANSIT')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'): 'LIVE')+'</span></div><h2>'+esc(reading?.title??t('ماكو اتصال مهيمن الآن','No dominant aspect at this moment'))+'</h2><p>'+esc(reading?.good??t('ماكو اتصال فلكي قوي يدعم قراءة شخصية بهذه اللحظة.','No strong astrological contact supports a personal reading at this moment.'))+'</p>'+(reading?'<p class="mx-focus-story-example">'+esc(reading.careful)+'</p><p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(reading.action)+'</p>':'')+(quality?'<p class="mx-focus-quality">'+quality+'</p>':'')+'<div class="mx-focus-proof"><b>'+t('الدليل','EVIDENCE')+'</b><span>'+esc(evidence)+'</span></div><div class="mx-focus-proof"><b>'+t('وقت الرصد','OBSERVED AT')+'</b><span>'+dateText(selected,{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+(phase?' · '+phase:'')+'</span></div>'+
+ '<section class="panel mx-focus-hero"><div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('أهم اتصال شخصي','MAIN PERSONAL TRANSIT')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'): 'LIVE')+'</span></div><h2>'+esc(reading?.title??t('ماكو اتصال مهيمن الآن','No dominant aspect at this moment'))+'</h2><p>'+esc(reading?.good??t('ماكو اتصال فلكي قوي يدعم قراءة شخصية بهذه اللحظة.','No strong astrological contact supports a personal reading at this moment.'))+'</p>'+(reading?'<p class="mx-focus-story-example">'+esc(reading.careful)+'</p><p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(reading.action)+'</p>':'')+(quality?'<p class="mx-focus-quality">'+quality+'</p>':'')+'<details class="mx-focus-technical"><summary>'+t('أساس الحساب (اختياري)','Calculation basis (optional)')+'</summary><p>'+esc(evidence)+'</p><small>'+dateText(selected,{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+(phase?' · '+phase:'')+'</small></details>'+
  '<div class="mx-focus-actions"><button class="primary" data-go="evidence">'+t('ليش هاي القراءة؟','Why this reading?')+' ↗</button>'+(factor?'<button class="secondary" id="focus-refine-peak">'+t('احسب وقت الذروة','Verify exact peak')+' ⏱</button>':'')+'</div><div class="mx-focus-peak" id="focus-peak-result" aria-live="polite"></div></section>'+
  '<section class="panel mx-focus-panel mx-focus-ai"><h2>✧ MX Ai · '+t('قراءة قصيرة','Short explanation')+'</h2><p>'+aiSnippet+'</p><button class="secondary mx-focus-subaction" data-go="ai">'+t('تحليل Ai','Ai analysis')+' ↗</button></section></div>'+
  '<aside class="mx-focus-aside"><section class="panel mx-focus-panel"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+'<button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
@@ -439,12 +439,12 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:GoReview){
  const top=memo.strongest;
  if(!top)return t('ماكو عوامل محسوبة كافية لمصادر هذا المؤشر؛ ما نطلع توصية من المتوسط الافتراضي.','The source categories lack calculated evidence; default averages do not justify a recommendation.');
  const factors=memo.supportFactor&&memo.challengeFactor?[memo.supportFactor,memo.challengeFactor]:[top];
- const basis=t('العوامل الرمزية: ','Symbolic factors: ')+factors.map(e=>planet(e.transit.id)+' · '+aspect(e.angle)+' · '+planet(e.natal.id)+' ('+e.orb.toFixed(2)+'°)').join(t('؛ وبالمقابل ','; against '));
+ const basis=''; // Exact contacts are available in the calculation-evidence section, never in this decision summary.
  const limit=!memo.complete?t(' بعض مصادر المؤشر غير متاحة.',' Some source categories lack evidence.'):memo.sensitive?t(' الترجيح حساس لاستبعاد جرم واحد.',' The balance is sensitive to removing one transiting body.'):'';
  const story=signalStory({category:evidenceCategory(top),score:50,tier:'C',tone:'neutral',factors:[top]},data?.natal,active.known,lang);
  // The Go card first explains the actual factor in human terms. Mathematical proof remains visible,
  // but a derived index alone must never be mistaken for measured success or another person's desire.
- return lead+' '+(story?story.careful+' '+story.title+'. ':'')+basis+limit;
+ return lead+' '+(story?story.good+' '+story.action+' ':'')+limit;
 }
 function intelPage(){
  const indicators=derivedMetrics(data!.scores),go=goModes(indicators),r=data!,decisions=resolveDecisions(r.evidence,r.signals);
@@ -528,13 +528,13 @@ function astroCalendarDetail(iso:string){
  };
  const easier=theme(snap.strongestSupport),challenging=theme(snap.strongestChallenge);
  const dayMeaning=easier&&challenging?
-  t('حسابات هاليوم تبرز '+easier+' كموضوع أيسر رمزياً، وبالمقابل '+challenging+' يحتاج تروّي. انتبه للأفعال الواقعية مو بس لون اليوم.',
+  t('بموضوع '+easier+' عندك مجال للتعامل بهدوء وبخطوة واضحة، لكن '+challenging+' يحتاج مراجعة التفاصيل قبل الحسم. مثال: إذا تنتظر جواب أو قرار، جهّز البديل وتأكد من المعطيات بدل الاستعجال.',
     'The sky samples emphasize '+easier+' as an easier symbolic theme, while '+challenging+' calls for care. Real actions matter more than the color.'):
   easier?t('الجانب الأبرز رمزياً يخص '+easier+'. جرّب خطوة صغيرة وقيّم نتيجتها بالواقع.','The strongest symbolic theme involves '+easier+'. Try a small step and evaluate the result in real life.'):
   challenging?t('الحساب يركز على '+challenging+'. راجع التفاصيل؛ هذا مو معناه اليوم كله سيّئ.','The chart highlights '+challenging+'. Review the details; this does not make the whole day bad.'):
   t('ماكو اتصال قوي يبرر قصة شخصية لهاليوم، والرقم وحده ما يخبرك شنو راح يصير.','No strong aspect justifies a personal story; the index alone cannot predict what will happen.');
  return '<div class="astro-day-compact-head"><div class="astro-day-compact-title"><span class="astro-day-kicker">'+t('مؤشر رمزي · 3 أوقات','Symbolic index · 3 checkpoints')+'</span><h3 dir="ltr">'+esc(date)+'</h3><small>'+t('القراءة من مواضع الكواكب والزوايا على مدار اليوم','Daily score based on three verified sky checkpoints')+'</small></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'<small>/100</small></b><span>'+grade+'</span></div></div>'+
-  '<div class="astro-day-compact-aspects">'+(contacts||'<span class="astro-compact-no-aspect">'+t('ماكو زاوية قريبة مهيمنة بهذا الوقت.','No dominant close aspect at this time.')+'</span>')+'</div><p class="astro-day-context">'+esc(dayMeaning)+'</p>'+
+  '<p class="astro-day-context">'+esc(dayMeaning)+'</p><details class="astro-day-compact-aspects"><summary>'+t('التفاصيل الحسابية','Calculation details')+'</summary>'+(contacts||'<span class="astro-compact-no-aspect">'+t('ماكو عامل قريب مهيمن بهالوقت.','No dominant nearby factor.')+'</span>')+'</details>'+
   '<div class="astro-day-compact-footer"><small>'+t('الفحص: 04 / 12 / 20 · المدى ','Checks: 04 / 12 / 20 · range ')+snap.minimum+'–'+snap.maximum+' · '+t('مؤشر رمزي مو تنبؤ','Symbolic index, not a forecast')+'</small><button type="button" class="secondary astro-day-open-time" data-calendar-open="'+(+at)+'">'+t('لقطة الظهر بآلة الزمن','Noon snapshot in Time Machine')+' ↗</button></div>';
 }
 function calendarColorLabel(color:AstroCalendarRating['color']){
@@ -792,9 +792,9 @@ function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
  const activeTransit=rankPrioritySignals({signals:data!.signals,natal:data!.natal,knownBirthTime:active.known,complete:data!.complete}).find(x=>x.factor.applying);
  const partnerTransit=rankPrioritySignals({signals:partnerReport.signals,natal:partnerReport.natal,knownBirthTime:person.known,complete:partnerReport.complete}).find(x=>x.factor.applying);
  const transit=(profile:Profile,entry:typeof activeTransit)=>{
-  const reading=personalTransitPlainReading(entry?.factor,entry?.signal.category);
-  const proof=entry?' · '+esc(planet(entry.factor.transit.id))+' / '+aspect(entry.factor.angle)+' / '+esc(planet(entry.factor.natal.id))+' ('+entry.factor.orb.toFixed(2)+'°)':'';
-  return '<p><b>'+esc(profile.name)+':</b> '+text(reading.title)+' — '+text(reading.meaning)+proof+'</p>';
+  if(!entry)return '<p><b>'+esc(profile.name)+':</b> '+t('ماكو مؤشر كافي حتى ننسب إلك حدث محدد.','Not enough to infer a specific event.')+'</p>';
+  const story=signalStory(entry.signal,profile.id===active.id?data?.natal:partnerReport.natal,profile.known,lang);
+  return '<p><b>'+esc(profile.name)+':</b> '+esc(story?story.good+' '+story.action:t('القراءة غير كافية حتى نحكم بهالوقت.','Not enough evidence for a reading.'))+'</p>';
  };
  return '<section class="panel mx-partner-focus mx-relationship-brief"><div class="mx-brief-head"><h2>'+t('خلاصة العلاقة','Relationship snapshot')+'</h2>'+
   '<small>'+esc(active.name)+' × '+esc(person.name)+'</small></div>'+
