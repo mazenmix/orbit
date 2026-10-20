@@ -1,88 +1,100 @@
 import type {Chart,Report} from './engine.ts';
-import {houseNumber,distance} from './math.ts';
+import {houseNumber} from './math.ts';
 
-/** Personal, symbolic reflection grounded in calculated current Moon and one natal chart.
- * No prediction of personal events, no claims about another person's intentions. */
+/** Plain-language Moon reflection for the selected person's calculated chart.
+ * The calculations remain available on detailed screens, never in this card.
+ * Moon-over-natal houses control the immediate PERSONAL topic. Natal Moon's
+ * own house adds a secondary personal need. Neither is confused with the
+ * momentary location-based sky chart's houses.
+ */
 type Lang='ar'|'en';
 type Text={ar:string;en:string};
-const signStyle:readonly Text[]=[
- {ar:'المبادرة السريعة',en:'taking initiative'}, {ar:'البحث عن الاستقرار',en:'seeking steadiness'},
- {ar:'الحوار والفضول',en:'conversation and curiosity'}, {ar:'الألفة والطمأنينة',en:'belonging and reassurance'},
- {ar:'التعبير بثقة',en:'confident self-expression'}, {ar:'الترتيب والاهتمام بالتفاصيل',en:'organization and detail'},
- {ar:'التفاهم والعدل',en:'balance and fairness'}, {ar:'العمق وحماية الخصوصية',en:'depth and privacy'},
- {ar:'التجربة وتوسيع الأفق',en:'exploration and broader perspective'}, {ar:'الالتزام والتخطيط',en:'structure and planning'},
- {ar:'الاستقلال والتجديد',en:'independence and novelty'}, {ar:'الخيال والتعاطف',en:'imagination and sensitivity'}
+const signGuidance:readonly Text[]=[
+ {ar:'هسه إذا عندك فكرة جديدة، ابدي بخطوة صغيرة وخلي حماسك يساعدك مو يستعجلك.',en:'If a new idea appeals to you, try one small step without rushing into a commitment.'},
+ {ar:'هسه اختار الشي اللي يريحك ويثبّت يومك، ولا تغيّر خططك فقط بسبب ضغط لحظي.',en:'Choose what gives your day stability, and avoid changing plans because of momentary pressure.'},
+ {ar:'عندك مجال تستفيد من حوار أو معلومة جديدة؛ اسأل بوضوح قبل ما تستنتج.',en:'A conversation or new information may be useful; ask clearly before drawing conclusions.'},
+ {ar:'خلّ احتياجاتك العاطفية واضحة إلك وللناس القريبين منك، ولا تتوقع يفهمون السكوت.',en:'Be clear about your emotional needs with yourself and people close to you; do not expect silence to explain them.'},
+ {ar:'لا تخفي الفكرة اللي تعبت عليها، بس خلي ثقتك بمجهودك مو بردّة فعل الآخرين.',en:'Share work you care about, but let your confidence rest on your effort, not only on others’ reactions.'},
+ {ar:'إذا يومك مزدحم، رتّب أولوياتك وخلّص مهمة وحدة زين بدل ما تتشتت.',en:'If your day feels crowded, order your priorities and complete one task well.'},
+ {ar:'بأي نقاش اليوم، حاول تسمع الطرف الثاني وتوضح موقفك بدون ما تتنازل عن اللي يهمك.',en:'In a conversation, hear the other side while stating what matters to you.'},
+ {ar:'إذا شي مضايقك، اطلب الوضوح بصورة مباشرة بدل ما تقعد تحلل نوايا الآخرين.',en:'If something bothers you, seek clarity directly rather than guessing hidden motives.'},
+ {ar:'إذا بالك بسفرة أو تجربة جديدة، شوف الخطوة العملية والكلفة قبل الحسم.',en:'If you are considering travel or something new, check the practical details before committing.'},
+ {ar:'ركّز على مسؤولية واحدة تگدر تنجزها اليوم، ولا تحمل نفسك أكثر من اللازم.',en:'Focus on one responsibility you can realistically complete; do not take on everything at once.'},
+ {ar:'هسه يمكن يفيدك تبدّل روتينك أو تجرب فكرة مختلفة، بس بدون قرارات مفاجئة أو قطع علاقات.',en:'A fresh approach could help right now; try it without sudden decisions or cutting people off.'},
+ {ar:'خذ مساحة للراحة وصفاء البال، وافصل إحساسك عن الوقائع قبل أي قرار.',en:'Make room for rest and separate what you feel from what you know before deciding.'}
 ];
-const areas:readonly Text[]=[
+const personalFocus:readonly Text[]=[
  {ar:'',en:''},
- {ar:'صورتك عن نفسك وبداياتك',en:'identity and starting fresh'},
- {ar:'المصاريف والأمان الشخصي',en:'resources and financial security'},
- {ar:'الرسائل والتفاهم والتعلّم',en:'messages, learning and understanding'},
- {ar:'البيت والعائلة',en:'home and family'},
- {ar:'التعارف والعاطفة والمتعة',en:'dating, affection and creativity'},
- {ar:'عاداتك وشغلك اليومي',en:'routines and everyday work'},
- {ar:'الشراكات والعلاقات الثنائية',en:'partnerships and one-to-one relationships'},
- {ar:'الثقة والحدود والالتزامات المشتركة',en:'trust and shared responsibilities'},
- {ar:'السفر والقناعات والتعلّم',en:'travel, beliefs and learning'},
- {ar:'المسار المهني والسمعة',en:'career direction and reputation'},
- {ar:'الأصدقاء والتعارف الاجتماعي',en:'friendships and social circles'},
- {ar:'الراحة والخصوصية والتأمل',en:'rest and private reflection'}
+ {ar:'اهتم بنفسك وطريقة حضورك؛ لا تخلي رأي أحد يحدد قيمتك أو قرارك.',en:'Pay attention to how you carry yourself, without letting someone else define your worth.'},
+ {ar:'راجع مصاريفك وشنو تحتاج فعلاً؛ اشترِ أو التزم بس بالشي اللي يخدمك.',en:'Review your spending and actual needs before buying or making a commitment.'},
+ {ar:'إذا عندك رسالة أو موضوع معلق، وضّح المقصود بكلام مباشر بدل التخمين.',en:'If a message or conversation is unresolved, ask plainly instead of guessing.'},
+ {ar:'رتّب مساحة الراحة إلك، وإذا أكو موضوع ويا المقرّبين احچي عن احتياجك بهدوء.',en:'Make some room for comfort; if something with loved ones needs attention, say what you need calmly.'},
+ {ar:'إذا تريد تتقرب من شخص أو تطلع وتستانس، بادر بشي خفيف وشوف التجاوب الحقيقي.',en:'If you want to connect or enjoy yourself, make a low-pressure invitation and follow the actual response.'},
+ {ar:'خفف زحمة المهام وراجع روتينك؛ خطوة منظمة تفيدك أكثر من الاستنزاف.',en:'Ease your workload where possible; one organized step beats pushing yourself to exhaustion.'},
+ {ar:'بعلاقة أو شراكة مهمة، وضّح توقعاتك واسمع جواب الطرف الثاني بدل افتراض نيّته.',en:'In a close relationship or partnership, explain expectations and listen instead of assuming intentions.'},
+ {ar:'إذا موضوع الثقة أو الالتزامات المشتركة مشغلك، ثبّت الحدود والاتفاقات قبل الحسم.',en:'If trust or shared obligations concern you, clarify boundaries and agreements first.'},
+ {ar:'إذا بالك بخطة سفر أو تعلّم، حوّل الفكرة إلى خطوة واضحة بدل ما تبقى مجرد احتمال.',en:'If travel or learning is on your mind, turn the idea into one concrete step.'},
+ {ar:'بالشغل، خلّ أولويتك واضحة وبيّن شنو تگدر تسلّم فعلاً؛ لا تعد بأكثر من طاقتك.',en:'At work, set one clear priority and be realistic about what you can deliver.'},
+ {ar:'التواصل ويا صديق أو معارف يفيدك أكثر من الانتظار؛ بادر بكلام بسيط وخلي ردّهم يوضح الصورة.',en:'Reach out to a friend or contact simply, and let their actual response guide you.'},
+ {ar:'خلي عندك وقت هدوء بعيد عن الضوضاء؛ مو لازم تجاوب على كلشي فوراً.',en:'Give yourself some quiet time; not everything needs an immediate response.'}
 ];
-const themes:Record<string,Text>={
- Sun:{ar:'ثقتك بنفسك واتجاه قرارك',en:'self-confidence and your decisions'},
- Moon:{ar:'احتياجك للراحة والتطمين',en:'emotional security and comfort'},
- Mercury:{ar:'الكلام والتواصل وفهم المقصود',en:'communication and understanding'},
- Venus:{ar:'الاهتمام والتقارب والتقدير',en:'affection and appreciation'},
- Mars:{ar:'المبادرة وحدود الاندفاع',en:'initiative and managing impulses'},
- Jupiter:{ar:'التجربة والتوسع',en:'exploration and growth'},
- Saturn:{ar:'الواجبات والحدود',en:'obligations and boundaries'},
- Uranus:{ar:'التغيير والاستقلال',en:'change and independence'},
- Neptune:{ar:'الخيال والتوقعات',en:'imagination and expectations'},
- Pluto:{ar:'العمق والتغيير التدريجي',en:'depth and gradual change'}
+const emotionalSupport:readonly Text[]=[
+ {ar:'',en:''},
+ {ar:'من تحس بضغط، رجّع تركيزك لشنو تريد إنت قبل ما تستجيب لتوقعات غيرك.',en:'Under pressure, check what you want before reacting to others’ expectations.'},
+ {ar:'إذا القلق زاد، راجع احتياجاتك الأساسية وخططك المالية بهدوء.',en:'When anxious, check your practical needs and financial plans calmly.'},
+ {ar:'الحچي الواضح ويا شخص تثق بيه ممكن يساعدك ترتب أفكارك.',en:'A clear conversation with someone you trust can help you sort your thoughts.'},
+ {ar:'خذ وقت بمكان ترتاح بيه، ولا تكتم الاحتياج اللي تريد توضحه.',en:'Spend time somewhere comfortable, and speak up about what you need.'},
+ {ar:'لا تربط مزاجك بكمية الاهتمام اللي يجيك؛ سوِّ شي تستمتع بيه لنفسك.',en:'Do something you enjoy without making your mood depend on attention from others.'},
+ {ar:'الروتين الخفيف والراحة يساعدنك ترتّب أفكارك بدل الضغط المستمر.',en:'A gentler routine and rest can help you think clearly.'},
+ {ar:'إذا موضوع عاطفي محيّرك، الحوار الصريح أحسن من اختبار ردود الناس.',en:'If a relationship worries you, direct conversation beats testing someone’s reaction.'},
+ {ar:'لا تخلي القلق عن نية الآخرين ياخذ مكان الكلام الواضح والحدود.',en:'Do not let worry about others’ motives replace clear boundaries and conversation.'},
+ {ar:'من تضيع بين احتمالات، ارجع لهدف واضح تگدر تتحرك باتجاهه.',en:'When possibilities overwhelm you, return to one achievable goal.'},
+ {ar:'لا تعتبر تقييم الآخرين لشغلك مقياساً لقيمتك الشخصية.',en:'Do not confuse how others evaluate your work with your personal worth.'},
+ {ar:'وإذا تحتاج أحد يسمعك، اختار صديق قريب واحچي وياه بصراحة.',en:'If you need to talk things through, choose a trusted friend and be straightforward.'},
+ {ar:'لا تضغط على نفسك حتى تبين دائماً متماسك؛ الراحة هم جزء من التوازن.',en:'You do not need to appear strong every moment; rest is part of balance.'}
+];
+const contactAdvice:Record<string,Text>={
+ Sun:{ar:'إذا تعارضت راحتك ويا رغبتك تثبت نفسك، اختار الأولوية اللي تعني إلك أكثر.',en:'If comfort and proving yourself pull in different directions, choose what matters most.'},
+ Moon:{ar:'إذا انزعجت من موقف، سمِّ احتياجك قبل ما ترد.',en:'If something upsets you, name your need before responding.'},
+ Mercury:{ar:'إذا وصلتك رسالة مبهمة، اسأل عن معناها ولا تعتبر السكوت جواب.',en:'If a message is unclear, ask rather than treating silence as an answer.'},
+ Venus:{ar:'بالتقارب، عبّر عن اهتمامك بدون ضغط وخلي تصرّف الطرف الثاني يوضح موقفه.',en:'When showing affection, keep it low-pressure and trust the other person’s actual response.'},
+ Mars:{ar:'إذا استفزك موقف، اصرف اندفاعك بخطوة مفيدة بدل رد سريع.',en:'If something provokes you, take one useful action rather than reacting impulsively.'},
+ Jupiter:{ar:'إذا فرصة شدت بالك، تحقق من تفاصيلها قبل ما توعد بشي كبير.',en:'If an opportunity excites you, check its details before making big promises.'},
+ Saturn:{ar:'اسأل نفسك شنو مسؤوليتك فعلاً وشنو حمل زايد تگدر تخففه.',en:'Separate your real responsibilities from unnecessary pressure.'},
+ Uranus:{ar:'جرّب تغيير بسيط وخلي لنفسك مجال ترجع إذا ما ناسبك.',en:'Try a small change and leave yourself room to adjust.'},
+ Neptune:{ar:'إذا إحساسك قوي والمعلومات قليلة، انتظر الوقائع قبل ما تقرر.',en:'If feelings are strong but facts are scarce, wait for evidence before deciding.'},
+ Pluto:{ar:'لا تحاول تفرض نتيجة على شخص أو موقف؛ ركّز على حدودك وخطوتك الجاية.',en:'Do not try to force a person or situation; focus on your boundaries and next step.'}
 };
-const signOf=(lon:number)=>Math.floor((((lon%360)+360)%360)/30);
-const get=(point:Chart['points'][number]|undefined,lang:Lang)=>point?signStyle[signOf(point.longitude)][lang]:'';
-const of=(points:Chart['points'],id:string)=>points.find(p=>p.id===id);
+const point=(chart:Chart,id:string)=>chart.points.find(p=>p.id===id);
+const moonSign=(longitude:number)=>Math.floor(((longitude%360+360)%360)/30);
 export function moonPersonalSummary(report:Report,knownTime:boolean,lang:Lang):string{
- const currentMoon=of(report.current.points,'Moon');
- if(!currentMoon)return lang==='ar'?'معلومات القمر الحالية غير متوفرة؛ ما أگدر أطلع تفسير شخصي من دون حساب.':'Current Moon data is unavailable; a personal interpretation needs a real calculation.';
- const natal=report.natal;
- const natalMoon=knownTime?of(natal.points,'Moon'):undefined;
- const natalVenus=of(natal.points,'Venus');
- const natalMercury=of(natal.points,'Mercury');
- const naturalStyle=signStyle[signOf(currentMoon.longitude)][lang];
- const birthStyle=get(natalMoon??natalVenus??natalMercury,lang);
- // Three different house frames must never be conflated:
- // 1. Moon's house in the current sky chart (transit houses).
- // 2. Natal Moon's house at birth (fixed natal position).
- // 3. Transiting Moon over the natal house cusps (personal overlay).
- // Placidus cusps are required; no house is inferred for unknown birth times.
- const skyHouse=knownTime&&report.current.cusps.length===12?houseNumber(currentMoon.longitude,report.current.cusps):0;
- const natalMoonHouse=knownTime&&natalMoon&&natal.cusps.length===12?houseNumber(natalMoon.longitude,natal.cusps):0;
- const overlayHouse=knownTime&&natal.cusps.length===12?houseNumber(currentMoon.longitude,natal.cusps):0;
- const contact=report.evidence.filter(e=>e.transit.id==='Moon'&&(knownTime||!['Moon','Ascendant','MC'].includes(e.natal.id))).sort((a,b)=>b.weight-a.weight||a.orb-b.orb)[0];
- const target=contact?themes[contact.natal.id]?.[lang]:null;
- const challenged=contact&&(contact.angle===90||contact.angle===180);
- const shared=contact&&(contact.angle===0||contact.angle===60||contact.angle===120);
- const practicalHouse=skyHouse||overlayHouse;
- if(lang==='ar'){
-  const sky=skyHouse?'بخارطة العبور الحالية القمر بالبيت '+skyHouse+' ('+areas[skyHouse].ar+'). ':'';
-  const birth=natalMoonHouse?'قمرك الولادي بالبيت '+natalMoonHouse+' ('+areas[natalMoonHouse].ar+'). ':
-   knownTime?'بيت قمرك الولادي غير متاح للحساب. ':'وقت ولادتك مو مؤكد، لذلك ما أگدر أحدد بيتاً خاصاً إلك. ';
-  const overlay=overlayHouse?'أما القمر العابر من نسقطه على بيوت ميلادك، فيقع بالبيت '+overlayHouse+' ('+areas[overlayHouse].ar+'). ':'';
-  const distinct=skyHouse&&overlayHouse&&skyHouse!==overlayHouse?'بيت العبور الحالي يختلف عن البيت اللي يمر بيه القمر ضمن خارطتك الولادية؛ لا نخلط بينهن. ':'';
-  const personal=birthStyle?'أسلوبك الولادي يميل إلى '+birthStyle+'؛ قارن بين الاحتياجين قبل ما تتصرف. ':'';
-  const transit=target?(challenged?'أكو شدّ محتمل يخص '+target+'، فالأفضل ما تستعجل الحسم. ':shared?'أكو مجال أسهل نسبياً لترتيب '+target+' إذا الظروف تساعد. ':'أكو تركيز إضافي على '+target+'، لكن هذا مو ضمان لحدث. '):'ماكو اتصال شخصي قريب كافي أستنتج منه حدثاً بعينه. ';
-  const practical=practicalHouse===5||practicalHouse===7?'مثلاً، إذا تريد تبادر عاطفياً، عبّر بوضوح وخلي ردّ الطرف الثاني يحدد خطوتك. ':practicalHouse===10||practicalHouse===6?'مثلاً، إذا عندك قرار بالشغل، ثبّت المطلوب والموعد قبل الموافقة. ':practicalHouse===3||contact?.natal.id==='Mercury'?'مثلاً، إذا رسالة تحتمل أكثر من معنى، اسأل عن المقصود بدل التخمين. ':practicalHouse===11?'مثلاً، إذا تفكر ترجع تتواصل ويا صديق، ابدي بكلام بسيط وراقب تجاوبه. ':practicalHouse===4?'مثلاً، إذا موضوع بالبيت مأثر عليك، احچي عن احتياجك بدل ما تفترض الآخرين يعرفوه. ':'مثلاً، إذا محتار بخطوة، افصل رغبتك عن الوقائع وخذ قراراً قابلاً للتعديل. ';
-  return 'القمر حالياً يرمز إلى '+naturalStyle+'. '+sky+birth+overlay+distinct+personal+transit+practical;
+ const moon=point(report.current,'Moon');
+ if(!moon)return lang==='ar'?'حالياً ما عندي معلومات كافية حتى أعطيك قراءة موجهة إلك.':'There is not enough current information for a personal reflection.';
+ const lines:string[]=[];
+ // Sign supplies only the tone, never an invented event.
+ lines.push(signGuidance[moonSign(moon.longitude)][lang]);
+ const natalMoon=knownTime?point(report.natal,'Moon'):undefined;
+ // Only calculated natal cusps can personalize the immediate area of life.
+ const hasHouses=knownTime&&report.natal.cusps.length===12;
+ const currentPersonalArea=hasHouses?houseNumber(moon.longitude,report.natal.cusps):0;
+ const natalEmotionalArea=hasHouses&&natalMoon?houseNumber(natalMoon.longitude,report.natal.cusps):0;
+ if(currentPersonalArea)lines.push(personalFocus[currentPersonalArea][lang]);
+ // Secondary emotional context: don't echo the exact same domain twice.
+ if(natalEmotionalArea&&natalEmotionalArea!==currentPersonalArea)lines.push(emotionalSupport[natalEmotionalArea][lang]);
+ const relevant=report.evidence
+  .filter(e=>e.transit.id==='Moon'&&(knownTime||!['Moon','Ascendant','MC'].includes(e.natal.id)))
+  .sort((a,b)=>b.weight-a.weight||a.orb-b.orb)[0];
+ const advice=relevant&&contactAdvice[relevant.natal.id]?.[lang];
+ if(advice){
+  // Avoid burying the short reading in repetitive advice: limit to three sentences.
+  if(lines.length>=3)lines.pop();
+  lines.push(advice);
  }
- const sky=skyHouse?'In the current transit chart the Moon is in house '+skyHouse+' ('+areas[skyHouse].en+'). ':'';
- const birth=natalMoonHouse?'Your natal Moon is in house '+natalMoonHouse+' ('+areas[natalMoonHouse].en+'). ':
-  knownTime?'Your natal Moon house is unavailable. ':'Your birth time is uncertain, so no personal house is inferred. ';
- const overlay=overlayHouse?'When the transiting Moon is placed against your natal house cusps, it falls in house '+overlayHouse+' ('+areas[overlayHouse].en+'). ':'';
- const distinct=skyHouse&&overlayHouse&&skyHouse!==overlayHouse?'Transit-chart houses and natal-overlay houses use different reference frames; they must not be confused. ':'';
- const personal=birthStyle?'Your natal pattern emphasizes '+birthStyle+'; notice how these two needs interact. ':'';
- const transit=target?(challenged?'A possible tension around '+target+' calls for care. ':shared?'There may be an easier opportunity to work with '+target+' if circumstances support it. ':'Another theme involves '+target+', without predicting an event. '):'No close personal contact supports predicting a specific event. ';
- const practical=practicalHouse===5||practicalHouse===7?'For example, in romance, communicate interest clearly and respect the actual response. ':practicalHouse===10||practicalHouse===6?'For example, clarify work expectations before committing. ':practicalHouse===3||contact?.natal.id==='Mercury'?'For example, clarify an ambiguous message rather than assuming intent. ':practicalHouse===11?'For example, approach a friend with an open question and observe their actual response. ':practicalHouse===4?'For example, communicate a home or family need directly rather than expecting others to guess. ':'For example, separate your hopes from confirmed facts and choose a reversible step. ';
- return 'The current Moon symbolizes '+naturalStyle+'. '+sky+birth+overlay+distinct+personal+transit+practical;
+ if(lines.length===1){
+  // No birth-house assumptions if the birth time or cusps are absent.
+  lines.push(lang==='ar'
+   ?'خلّ حكمك على الموقف من اللي صار فعلاً، وخذ خطوة بسيطة تناسبك بدل انتظار إشارة أكيدة.'
+   :'Judge the situation by what actually happens, and take one small practical step.');
+ }
+ return lines.join(' ');
 }
