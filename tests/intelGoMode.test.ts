@@ -23,7 +23,7 @@ test('calculated quick gauges track chart score changes rather than hard-coded n
 });
 
 test('Go Mode is a standalone top-level destination immediately after People',()=>{
- assert.match(main,/const primaryRoutes=\['today','chart','people','go','calendar','more'\]/);
+ assert.match(main,/const primaryRoutes=\['today','chart','people','go','travelmode','calendar','more'\]/);
  assert.match(main,/go:\(\)=>t\('Go Mode','Go Mode'\)/);
  assert.match(main,/case 'intel':case 'go':inner=goModePage\(\)/);
  assert.match(main,/if\(route==='intel'\)return 'go'/);
