@@ -45,7 +45,7 @@ test('Travel Mode is a main navigation option immediately below Go Mode, not a s
 test('Travel Mode does not replace all-29 Go Mode',()=>{
  const travel=src.slice(src.indexOf('function travelModePage(){'),src.indexOf('function asteroidsPage(){'));
  const go=src.slice(src.indexOf('function goModePage(){'),src.indexOf('function travelModePage(){'));
- assert.match(travel,/metrics-grid mx-travel-grid/);
+ assert.match(travel,/mx-focus-metrics mx-travel-grid/);
  assert.match(travel,/travelMetricsByGroup/);
  assert.match(travel,/group\.rows\.map/);
  assert.match(src,/aria-valuenow/);
@@ -53,30 +53,26 @@ test('Travel Mode does not replace all-29 Go Mode',()=>{
  assert.match(go,/go\.map/);
 });
 
-test('Go Mode and Travel Mode share markup and dimensions while Travel uniformly takes Attraction palette',()=>{
+test('Travel cards reuse the exact Sex/Love/Emotions/Work quick gauge component, not the 29-index design',()=>{
  const main=readFileSync('src/main.ts','utf8');
  const css=readFileSync('src/focus.css','utf8');
- const go=main.slice(main.indexOf('function goModePage(){'),main.indexOf('function travelModePage(){'));
+ const today=main.slice(main.indexOf('function todayQuickGauges('),main.indexOf('/** A single, source-grounded view'));
  const travel=main.slice(main.indexOf('function travelModePage(){'),main.indexOf('function asteroidsPage(){'));
- assert.match(main,/function indicatorGaugeCard\(m:MetricResult,travelId\?:string\)/);
+ const go=main.slice(main.indexOf('function goModePage(){'),main.indexOf('function travelSymbol('));
+ assert.match(main,/function quickGaugeCard\(m:MetricResult,symbol:string/);
+ assert.match(today,/quickGaugeCard\(found,item.symbol,\[item.ar,item.en\]\)/);
+ assert.match(travel,/group\.rows\.map\(\(\{id,metric\}\)=>quickGaugeCard\(metric,travelSymbol\(id\),undefined,id\)\)/);
+ assert.match(travel,/class="mx-focus-metrics mx-travel-grid"/);
+ assert.match(travel,/mx-quick-gauges/);
  assert.match(go,/indicators\.map\(m=>indicatorGaugeCard\(m\)\)/);
- assert.match(travel,/group\.rows\.map\(\(\{id,metric\}\)=>indicatorGaugeCard\(metric,id\)\)/);
- assert.match(travel,/class="metrics-grid mx-travel-grid"/);
- assert.match(main,/data-indicator-id/);
  assert.match(main,/data-travel-metric/);
- assert.ok(!css.includes('#live-view-body .mx-travel-mode-page .mx-travel-metric{'),
-  'Travel cards must not have a separate visual theme or dimensions');
- assert.ok(!css.includes('grid-template-columns:repeat(3,minmax(0,1fr));gap:10px'),
-  'Travel cannot override Go grid columns');
- for(const level of ['strong','steady','caution','low']){
-  assert.match(css,new RegExp('\\.metric-card\\.'+level+'\\{'),'shared '+level+' color');
+ assert.match(main,/data-today-gauge/);
+ assert.match(main,/mx-today-gauge-track/);
+ assert.ok(!travel.includes('indicatorGaugeCard(metric,id)'), 'Travel must not use the 29 metric-card layout');
+ for(const part of ['.mx-focus-metrics','.mx-focus-metric','.mx-today-gauge-icon','.mx-today-gauge-track']){
+  assert.ok(css.includes('.mx-quick-gauges '+part), 'Shared quick card style missing: '+part);
  }
- assert.match(css,/\.metric-card>b\{/);
- assert.match(css,/\.metric-card \.meter>i\{/);
- const turquoise=css.match(/#live-view-body \.mx-travel-mode-page \.metric-card\.mx-travel-metric\s*\{([^}]+)\}/);
- assert.ok(turquoise,'Uniform Travel Mode palette must be isolated from Go Mode');
- assert.match(turquoise[1],/--metric-accent:#68e0a6/);
- assert.match(turquoise[1],/--metric-tint:rgba\(68,192,131,\.12\)/);
- assert.match(turquoise[1],/--metric-glow:rgba\(68,192,131,\.19\)/);
- assert.equal(css.match(/#live-view-body \.mx-travel-mode-page \.metric-card\.mx-travel-metric\s*\{/g)?.length,1);
+ assert.match(css,/\.mx-travel-group\{padding:15px 18px!important/);
+ assert.match(css,/\.mx-travel-group\{padding:12px!important/);
+ assert.ok(!css.includes('Travel Mode uniform turquoise'),'Superseded color-only patch should be removed');
 });
