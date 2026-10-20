@@ -126,21 +126,21 @@
 .mx-today-gauge-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 11px}
 .mx-today-gauge-header h2{font-size:1rem;margin:0;color:#e8e0ff;font-weight:750}
 .mx-today-gauge-header .text-button{min-height:30px!important;font-size:12px!important}
-.mx-today-gauges .mx-focus-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
-.mx-today-gauges .mx-focus-metric{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:4px 8px;text-align:start;padding:13px 14px;border-radius:13px;background:rgba(115,103,175,.09);border:1px solid rgba(180,167,232,.22)}
-.mx-today-gauges .mx-today-gauge-icon{grid-row:1/3;font-size:1.24rem;color:#c9b7f5;text-align:center}
-.mx-today-gauges .mx-focus-metric b{font-size:.85rem;line-height:1.3;margin:0;white-space:nowrap;color:#e6e2f5}
-.mx-today-gauges .mx-focus-metric strong{grid-column:3;grid-row:1/3;font-size:1.4rem;line-height:1.1;font-variant-numeric:tabular-nums;color:#f0f1fa}
-.mx-today-gauges .mx-focus-metric strong small{font-size:.7rem;font-weight:500;color:#9fa9cc;margin-inline-start:1px}
-.mx-today-gauges .mx-today-gauge-track{grid-column:1/-1;background:rgba(152,153,184,.18);height:7px;border-radius:50px;overflow:hidden;margin-top:7px}
-.mx-today-gauges .mx-focus-metric .mx-today-gauge-track i{display:block;height:100%;margin:0;border-radius:50px;background:#d77f81}
-.mx-today-gauges .mx-focus-metric.strong .mx-today-gauge-track i{background:#46c99a}
-.mx-today-gauges .mx-focus-metric.steady .mx-today-gauge-track i{background:#8dccb0}
-.mx-today-gauges .mx-focus-metric.caution .mx-today-gauge-track i{background:#dbb55e}
-.mx-today-gauges .mx-focus-metric.low .mx-today-gauge-track i{background:#d98286}
+.mx-quick-gauges .mx-focus-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.mx-quick-gauges .mx-focus-metric{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:4px 8px;text-align:start;padding:13px 14px;border-radius:13px;background:rgba(115,103,175,.09);border:1px solid rgba(180,167,232,.22)}
+.mx-quick-gauges .mx-today-gauge-icon{grid-row:1/3;font-size:1.24rem;color:#c9b7f5;text-align:center}
+.mx-quick-gauges .mx-focus-metric b{font-size:.85rem;line-height:1.3;margin:0;white-space:nowrap;color:#e6e2f5}
+.mx-quick-gauges .mx-focus-metric strong{grid-column:3;grid-row:1/3;font-size:1.4rem;line-height:1.1;font-variant-numeric:tabular-nums;color:#f0f1fa}
+.mx-quick-gauges .mx-focus-metric strong small{font-size:.7rem;font-weight:500;color:#9fa9cc;margin-inline-start:1px}
+.mx-quick-gauges .mx-today-gauge-track{grid-column:1/-1;background:rgba(152,153,184,.18);height:7px;border-radius:50px;overflow:hidden;margin-top:7px}
+.mx-quick-gauges .mx-focus-metric .mx-today-gauge-track i{display:block;height:100%;margin:0;border-radius:50px;background:#d77f81}
+.mx-quick-gauges .mx-focus-metric.strong .mx-today-gauge-track i{background:#46c99a}
+.mx-quick-gauges .mx-focus-metric.steady .mx-today-gauge-track i{background:#8dccb0}
+.mx-quick-gauges .mx-focus-metric.caution .mx-today-gauge-track i{background:#dbb55e}
+.mx-quick-gauges .mx-focus-metric.low .mx-today-gauge-track i{background:#d98286}
 .mx-today-gauge-caption{font-size:.72rem!important;line-height:1.6!important;color:#aeb6d0!important;margin:10px 0 0!important}
-@media(max-width:880px){.mx-today-gauges .mx-focus-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:420px){.mx-today-gauges{padding:12px!important}.mx-today-gauges .mx-focus-metric{padding:10px 9px;grid-template-columns:20px 1fr auto;column-gap:5px}.mx-today-gauges .mx-focus-metric strong{font-size:1.18rem}.mx-today-gauges .mx-today-gauge-header h2{font-size:.9rem}.mx-today-gauges .mx-focus-metric b{font-size:.77rem}}
+@media(max-width:880px){.mx-quick-gauges .mx-focus-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.mx-today-gauges{padding:12px!important}.mx-quick-gauges .mx-focus-metric{padding:10px 9px;grid-template-columns:20px 1fr auto;column-gap:5px}.mx-quick-gauges .mx-focus-metric strong{font-size:1.18rem}.mx-quick-gauges .mx-today-gauge-header h2{font-size:.9rem}.mx-quick-gauges .mx-focus-metric b{font-size:.77rem}}
 
 /* MX Intelligence: separate indicators and Go Mode without duplicating the matrix. */
 .mx-intel-tabs{display:flex;align-items:center;gap:9px;margin:2px 0 16px;flex-wrap:wrap}
@@ -192,9 +192,8 @@
  .mx-travel-intro{font-size:12px}
 }
 
-/* Shared Go Mode / Travel Mode indicator palette.
-   Both pages use the very same .metric-card HTML, .metrics-grid
-   layout, typography and value-level styles. */
+/* Detailed Go Mode 29-indicator palette. Travel Mode intentionally uses
+   the compact quick-gauge component shown above instead. */
 #live-view-body .metric-card{
  --metric-accent:#b6a6ed;
  --metric-tint:rgba(118,102,166,.08);
@@ -239,11 +238,3 @@
  border-radius:999px;
 }
 
-/* Travel Mode uniform turquoise: same emerald/teal palette as the
-   Attraction card in the user's reference. Keep levels and values
-   computed, but do not vary their *visual* accent in Travel Mode. */
-#live-view-body .mx-travel-mode-page .metric-card.mx-travel-metric{
- --metric-accent:#68e0a6;
- --metric-tint:rgba(68,192,131,.12);
- --metric-glow:rgba(68,192,131,.19);
-}
