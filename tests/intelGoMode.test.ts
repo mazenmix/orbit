@@ -9,47 +9,58 @@ const css=readFileSync('src/focus.css','utf8');
 const indicatorIds=['sexuality','love','emotional','career'] as const;
 const inputs:Record<Category,number>={overview:56,career:74,love:83,communication:65,energy:38,emotions:47,recovery:55,timing:61};
 
-test('all four restored gauges are drawn from real category indices, not fixed sample scores',()=>{
- const metrics=derivedMetrics(inputs);
- const values=new Map(metrics.map(m=>[m.id,m.value]));
+test('calculated quick gauges track chart score changes rather than hard-coded numbers',()=>{
+ const original=derivedMetrics(inputs);
+ const values=new Map(original.map(m=>[m.id,m.value]));
  for(const id of indicatorIds){assert.ok(values.has(id),id);assert.ok(Number.isFinite(values.get(id)));}
- assert.equal(values.get('sexuality'),62); // love 83, energy 38, communication 65
+ assert.equal(values.get('sexuality'),62);
  assert.equal(values.get('love'),83);
  assert.equal(values.get('emotional'),47);
  assert.equal(values.get('career'),74);
- const changed=derivedMetrics({...inputs,love:19});
- assert.notEqual(changed.find(x=>x.id==='sexuality')?.value,values.get('sexuality'));
- assert.notEqual(changed.find(x=>x.id==='love')?.value,values.get('love'));
+ const modified=derivedMetrics({...inputs,love:19});
+ assert.notEqual(modified.find(x=>x.id==='sexuality')?.value,values.get('sexuality'));
+ assert.notEqual(modified.find(x=>x.id==='love')?.value,values.get('love'));
 });
 
-test('Go Mode is a new, accessible and working tab of MX Intelligence',()=>{
- const start=main.indexOf('function intelPage(){');
+test('Go Mode is a standalone top-level destination immediately after People',()=>{
+ assert.match(main,/const primaryRoutes=\['today','chart','people','go','calendar','more'\]/);
+ assert.match(main,/go:\(\)=>t\('Go Mode','Go Mode'\)/);
+ assert.match(main,/case 'intel':case 'go':inner=goModePage\(\)/);
+ assert.match(main,/if\(route==='intel'\)return 'go'/);
+ assert.match(main,/nav\(primaryRoutes\)/);
+ assert.match(main,/nav\(primaryRoutes,true\)/);
+ const group=main.slice(main.indexOf('function morePage(){'),main.indexOf('function scoresHTML('));
+ assert.ok(!group.includes("card('intel'"),'Go Mode should not live under More');
+ assert.ok(!main.includes("data-intel-tab"),'No internal indicators/Go tabs should remain');
+});
+
+test('Go Mode contains all 29 metrics, all four daily gauges and all four decision cards on one screen',()=>{
+ const start=main.indexOf('function goModePage(){');
  const end=main.indexOf('function asteroidsPage(){',start);
  const view=main.slice(start,end);
  assert.ok(start>0&&end>start);
- assert.match(view,/role="tablist"/);
- assert.match(view,/data-intel-tab="go"/);
- assert.match(view,/data-intel-tab="indicators"/);
- assert.match(view,/role="tabpanel"/);
+ assert.match(view,/data-section="go"/);
  assert.match(view,/todayQuickGauges\(r,true\)/);
- assert.match(view,/intelTab==='go'\?goMarkup:indicatorsMarkup/);
+ assert.match(view,/derivedMetrics\(data!\.scores\)/);
  assert.match(view,/goModes\(indicators\)/);
- assert.match(main,/\[data-intel-tab\]/);
- assert.match(main,/intelTab=next/);
- assert.match(main,/body.innerHTML=content\(\);bind\(\)/);
+ assert.match(view,/mx-go-mode-decisions/);
+ assert.match(view,/mx-go-mode-indicators/);
+ assert.match(view,/go-grid/);
+ assert.match(view,/metrics-grid/);
+ assert.match(view,/indicators\.map\(m=>/);
+ assert.match(view,/go\.map\(d=>/);
+ assert.match(view,/mxGoNarrative/);
+ assert.match(view,/goCards\+allIndicators/);
  for(const id of indicatorIds)assert.ok(main.includes("id:'"+id+"'"),id);
- assert.match(css,/\.mx-intel-tabs/);
- assert.match(css,/@media\(max-width:440px\)/);
+ const metrics=derivedMetrics(inputs);
+ assert.equal(metrics.length,29,'All 29 computed indices are available');
 });
 
-test('Today keeps existing four gauges while Go Mode also houses them and leaves original matrix intact',()=>{
+test('Today gauges and the independent Go Mode page coexist without any duplicate menu items',()=>{
  const focused=main.slice(main.indexOf('function focusedToday()'),main.indexOf('function focusedCalendar()'));
  const classic=main.slice(main.indexOf('function today(){'),main.indexOf('function trend(',main.indexOf('function today(){')));
- const intel=main.slice(main.indexOf('function intelPage(){'),main.indexOf('function asteroidsPage(){'));
  assert.match(focused,/todayQuickGauges\(r\)/);
  assert.match(classic,/todayQuickGauges\(r\)/);
- assert.match(intel,/29-indicator matrix/);
- assert.match(intel,/go-grid/);
- assert.match(intel,/mxGoNarrative/);
- assert.match(intel,/todayQuickGauges\(r,true\)/);
+ assert.match(css,/\.mx-today-gauges/);
+ assert.match(css,/@media\(max-width:420px\)/);
 });
