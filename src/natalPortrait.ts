@@ -47,7 +47,7 @@ export function natalPortrait(chart:Chart,knownTime:boolean,language:Lang):strin
  const mercury=p('Mercury'),saturn=p('Saturn');
  if(!sun||!venus||!mars||!mercury)return [language==='ar'?'بيانات الميلاد غير كافية حتى أطلع بصمة شخصية مرتبطة بهالشخص.':'Insufficient birth data for a personal chart overview.'];
  const style=(point:typeof sun)=>signStyles[sign(point!.longitude)];
- const location=(point:typeof sun)=>knownTime&&chart.cusps.length===12?houses[houseNumber(point!.longitude,chart.cusps)]?.[language]:null;
+ const location=(point:Chart['points'][number]|undefined)=>point&&knownTime&&chart.cusps.length===12?houses[houseNumber(point.longitude,chart.cusps)]?.[language]:null;
  const link=(a:string,b:string)=>natalLink(chart,a,b);
  const bound=link('Sun','Saturn'),intimacy=link('Venus','Mars');
  const restricted=bound===90||bound===180;
