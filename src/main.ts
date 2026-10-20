@@ -49,6 +49,7 @@ import {subscribeBackgroundPush,unsubscribeBackgroundPush,sendBackgroundPushTest
 import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './progressions.ts';
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
 import {derivedMetrics,goModes,reviewGoMode,type GoDomain,type GoReview} from './metrics.ts';
+import {travelMetricsByGroup} from './travelMode.ts';
 import {supportive,difficult} from './math.ts';
 import {initEngine,report,defaultProfile,compatibility,chart,sunMoonState,confirmedEclipses,asteroidSwissRuntime,birthInstant,targets,localValue,zonedInstant,validateProfile,type Profile,type Report,type Chart} from './engine.ts';
 import {categories,category as evidenceCategory,aspects,angles,aspectNames,type Category,type Signal} from './math.ts';
@@ -113,8 +114,8 @@ let syncCode='',syncRevisions=new Map<string,number>();
 let eyeSettings=loadEyeSettings(),eyeCached:{checked:number;result:LunarWindow}|null=null;
 function moonWindow(){const key=readingContext();if(!moonCache||moonCache.key!==key)moonCache={key,value:lunarWindow(selected,d=>chart(d,active,false,false).points)};return moonCache.value}
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
-const icon=(name:string)=>({today:'✦',signals:'⌁',people:'♧',chart:'◎',settings:'⚙',time:'◷',lunar:'☾',eclipses:'◑',asteroids:'✧',advanced:'◈',intel:'✦',go:'➤',calendar:'▦',more:'☷',ai:'✧',evidence:'⎔'}[name]??'·');
-const labels:Record<string,()=>string>={today:()=>t('اليوم','Today'),signals:()=>t('الإشارات','Signals'),people:()=>t('الناس','People'),chart:()=>t('خارطتي','My chart'),settings:()=>t('الإعدادات','Settings'),time:()=>t('آلة الزمن','Time Machine'),lunar:()=>t('توقيت القمر','Moon timing'),eclipses:()=>t('الكسوف والخسوف','Eclipses'),asteroids:()=>t('الكويكبات','Named asteroids'),advanced:()=>t('التوقيت المتقدم','Advanced timing'),calendar:()=>t('التقويم','Calendar'),more:()=>t('المزيد','More'),go:()=>t('Go Mode','Go Mode'),intel:()=>t('Go Mode','Go Mode'),ai:()=>t('شرح Ai','Ai explanations'),evidence:()=>t('الدليل الفلكي','Astrological evidence')};
+const icon=(name:string)=>({today:'✦',signals:'⌁',people:'♧',chart:'◎',settings:'⚙',time:'◷',lunar:'☾',eclipses:'◑',asteroids:'✧',advanced:'◈',intel:'✦',go:'➤',travelmode:'✈',calendar:'▦',more:'☷',ai:'✧',evidence:'⎔'}[name]??'·');
+const labels:Record<string,()=>string>={today:()=>t('اليوم','Today'),signals:()=>t('الإشارات','Signals'),people:()=>t('الناس','People'),chart:()=>t('خارطتي','My chart'),settings:()=>t('الإعدادات','Settings'),time:()=>t('آلة الزمن','Time Machine'),lunar:()=>t('توقيت القمر','Moon timing'),eclipses:()=>t('الكسوف والخسوف','Eclipses'),asteroids:()=>t('الكويكبات','Named asteroids'),advanced:()=>t('التوقيت المتقدم','Advanced timing'),calendar:()=>t('التقويم','Calendar'),more:()=>t('المزيد','More'),go:()=>t('Go Mode','Go Mode'),travelmode:()=>t('Travel Mode','Travel Mode'),intel:()=>t('Go Mode','Go Mode'),ai:()=>t('شرح Ai','Ai explanations'),evidence:()=>t('الدليل الفلكي','Astrological evidence')};
 let clockFormat: '24'|'12'=localStorage.getItem('mx.clockFormat')==='12'?'12':'24';
 let liveTimePinned=false,liveLastRender=0,liveMinute=-1,moonNarrativeLastMinute=-1;
 const natalAsteroidHtmlCache=new Map<string,string>();
@@ -125,7 +126,7 @@ function getHeatmap(){const key=readingContext()+heatmapSpan;if(!heatmapCache||h
 function heatmapUI(){try{const cells=getHeatmap(),key=heatmapCategory,summary=heatSummary(cells,key);const score=(c:HeatCell)=>key==='average'?c.average:c.indices[key];const label=key==='average'?t('المعدل الرمزي','Symbolic average'):cat(key);return `<section class="panel heatmap-panel"><div class="section-title"><div><span class="eyebrow">TIME MACHINE · 30 / 90 / 365 DAYS</span><h2>${t('خارطة المؤشرات خلال شهر أو سنة','Month and year symbolic heatmaps')}</h2></div>${tag(t('مؤشرات رمزية','Symbolic indices'))}</div><p>${t('كل مربع مبني على موضع فلكي محسوب فعلاً. شهر واحد يومياً؛ ثلاثة أشهر كل 3 أيام؛ سنة كاملة بعينة أسبوعية. ما ندّعي أننا حسبنا الأيام اللي ما عليها مربعات، ولا نحسب احتمال أحداث.','Every cell uses real recalculated positions: daily for a month, every three days for 90 days, and weekly for a year. Unsampled dates are not inferred. Select a day to inspect it.')}</p><label class="heat-label">${t('المجال','Category')} <select id="heat-category"><option value="average" ${key==='average'?'selected':''}>${t('معدل كل المجالات','All-category average')}</option>${categories.map(c=>`<option value="${c}" ${key===c?'selected':''}>${cat(c)}</option>`).join('')}</select></label><label class="heat-label">${t('المدة','Period')} <select id="heat-span"><option value="30" ${heatmapSpan===30?'selected':''}>30 ${t('يوم','days')}</option><option value="90" ${heatmapSpan===90?'selected':''}>90 ${t('يوم','days')}</option><option value="365" ${heatmapSpan===365?'selected':''}>365 ${t('يوم','days')}</option></select></label><div class="heatmap-grid">${cells.map(c=>{const v=score(c),d=dateText(c.instant,{day:'2-digit',month:'short'});return `<button class="heatmap-cell" data-heat-at="${+c.instant}" style="background:hsl(${Math.round(12+v*1.35)} 38% 29%)" aria-label="${esc(d+' '+label+' '+v+'/100')}" title="${esc(d+' · '+label+' · '+v+'/100')}"><small>${esc(d)}</small><b>${v}</b></button>`}).join('')}</div><div class="heatmap-summary"><span>${t('المعدل','Mean')}: <b>${summary.mean}/100</b></span><span>${t('الأعلى','Highest')}: <b>${dateText(summary.highest.instant,{day:'2-digit',month:'short'})} · ${score(summary.highest)}</b></span><span>${t('الأقل','Lowest')}: <b>${dateText(summary.lowest.instant,{day:'2-digit',month:'short'})} · ${score(summary.lowest)}</b></span></div></section>`}catch(e){return `<p class="alert">${t('تعذر حساب الـHeatmap: ','Could not calculate heatmap: ')}${esc(String(e))}</p>`}}
 
 /** Six destinations; Go Mode is its own first-class page directly after People. */
-const primaryRoutes=['today','chart','people','go','calendar','more'];
+const primaryRoutes=['today','chart','people','go','travelmode','calendar','more'];
 function primarySection(route:string):string{
  if(route==='signals')return 'today';
  if(route==='asteroids')return 'chart';
@@ -164,7 +165,7 @@ function render(){
  if(screen==='ai'&&ready)void refreshLiveQwen(false);
  if(screen==='calendar'&&ready)startCalendarWork();
 }
-function content(){if(!data)return screen==='settings'?settingsPage():screen==='more'?morePage():'<section class="panel"><p>'+t('الحساب غير متاح لهذي البيانات. راجع الملف قبل عرض نتائج جديدة.','Calculation unavailable for these inputs. Review the profile before showing new results.')+'</p><button class="secondary" data-go="settings">'+t('مراجعة بيانات الميلاد','Review birth details')+'</button></section>';let inner:string;switch(screen){case 'today':inner=uiMode==='simple'?focusedToday():today();break;case 'signals':inner=signalsPage();break;case 'chart':inner=chartPage();break;case 'time':inner=uiMode==='simple'?focusedTime():timePage();break;case 'lunar':inner=lunarPage();break;case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage();break;case 'eclipses':inner=eclipsesPage();break;case 'asteroids':inner=asteroidsPage();break;case 'advanced':inner=advancedPage();break;case 'intel':case 'go':inner=goModePage();break;case 'people':inner=peoplePage();break;case 'evidence':inner=evidencePage();break;case 'ai':inner=aiPage();break;case 'settings':inner=settingsPage();break;case 'more':inner=morePage();break;default:screen='today';inner=today()}return sectionTabs()+(data.current.missing.length&&screen!=='settings'?'<p class="subtle" role="status">'+t('بيانات إضافية غير متاحة وتم استبعادها: ','Unavailable supplementary bodies omitted: ')+data.current.missing.map(id=>esc(planet(id))).join(' · ')+'</p>':'')+inner}
+function content(){if(!data)return screen==='settings'?settingsPage():screen==='more'?morePage():'<section class="panel"><p>'+t('الحساب غير متاح لهذي البيانات. راجع الملف قبل عرض نتائج جديدة.','Calculation unavailable for these inputs. Review the profile before showing new results.')+'</p><button class="secondary" data-go="settings">'+t('مراجعة بيانات الميلاد','Review birth details')+'</button></section>';let inner:string;switch(screen){case 'today':inner=uiMode==='simple'?focusedToday():today();break;case 'signals':inner=signalsPage();break;case 'chart':inner=chartPage();break;case 'time':inner=uiMode==='simple'?focusedTime():timePage();break;case 'lunar':inner=lunarPage();break;case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage();break;case 'eclipses':inner=eclipsesPage();break;case 'asteroids':inner=asteroidsPage();break;case 'advanced':inner=advancedPage();break;case 'intel':case 'go':inner=goModePage();break;case 'travelmode':inner=travelModePage();break;case 'people':inner=peoplePage();break;case 'evidence':inner=evidencePage();break;case 'ai':inner=aiPage();break;case 'settings':inner=settingsPage();break;case 'more':inner=morePage();break;default:screen='today';inner=today()}return sectionTabs()+(data.current.missing.length&&screen!=='settings'?'<p class="subtle" role="status">'+t('بيانات إضافية غير متاحة وتم استبعادها: ','Unavailable supplementary bodies omitted: ')+data.current.missing.map(id=>esc(planet(id))).join(' · ')+'</p>':'')+inner}
 function tag(text:string,cls=''){return `<span class="tag ${cls}">${text}</span>`}
 
 /** Restore the four daily gauges from existing calculated symbolic indices.
@@ -487,6 +488,31 @@ function goModePage(){
   indicators.map(m=>'<div class="metric-card '+gaugeLevel(m.value)+'"><small>'+t(m.ar,m.en)+'</small><b>'+m.value+'<em>/100</em></b><div class="meter"><i style="width:'+m.value+'%"></i></div><details><summary>'+t('طريقة الحساب','Derivation')+'</summary><code>'+esc(m.formula)+'</code></details></div>').join('')+
   '</div><p class="subtle">'+t('كل هاي أرقام رمزية مشتقة من ثمانية مجالات محسوبة؛ مو قياس حقيقي للرغبة ولا احتمال وقوع حدث.','These symbolic indices derive from eight calculated areas, not actual measures of desire or event probabilities.')+'</p></section>';
  return '<div class="mx-go-mode-page" data-section="go"><div class="section-title"><div><span class="eyebrow">MX ASTRO · GO MODE</span><h2>'+t('مؤشراتك كلها بمكان واحد','All your indicators in one place')+'</h2></div></div>'+gauges+goCards+allIndicators+'</div>';
+}
+/** Travel Mode is a concise Philippines-focused selection of the same live
+ * twelve calculated indicators, not a new probability model. */
+function travelModePage(){
+ const groups=travelMetricsByGroup(derivedMetrics(data!.scores));
+ const sections=groups.map(group=>
+  '<section class="panel mx-travel-group" data-travel-group="'+group.id+'">'+
+  '<div class="section-title"><h2>'+t(group.titleAr,group.titleEn)+'</h2>'+tag(group.rows.length+' '+t('مؤشرات','indicators'))+'</div>'+
+  '<p class="mx-travel-description">'+t(group.descriptionAr,group.descriptionEn)+'</p>'+
+  '<div class="mx-travel-grid">'+group.rows.map(({id,metric})=>
+   '<article class="metric-card mx-travel-metric '+gaugeLevel(metric.value)+'" data-travel-metric="'+id+'">'+
+   '<small>'+t(metric.ar,metric.en)+'</small>'+
+   '<b>'+metric.value+'<em>/100</em></b>'+
+   '<div class="meter" role="progressbar" aria-label="'+esc(t(metric.ar,metric.en))+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+metric.value+'"><i style="width:'+metric.value+'%"></i></div>'+
+   '</article>').join('')+'</div></section>'
+ ).join('');
+ return '<div class="mx-travel-mode-page" data-section="travelmode">'+
+  '<div class="section-title"><div><span class="eyebrow">🇵🇭 PHILIPPINES · TRAVEL MODE</span><h2>'+t('مؤشرات سفرتك المهمة','Your essential travel indicators')+'</h2></div>'+
+  '<button type="button" class="secondary mx-travel-all" data-go="go">'+t('كل المؤشرات الـ29','All 29 indicators')+' ↗</button></div>'+
+  '<p class="mx-travel-intro">'+t('هنا أهم 12 مؤشر من Go Mode، مرتبة للتعارف والمواعيد والسهر والتنقل. الأرقام تتحدث حسب خارطتك والوقت المختار، مو قيم ثابتة.','Here are the 12 travel-focused Go Mode indicators for meeting people, dating, nightlife and getting around. They change with the selected chart and time.')+'</p>'+
+  sections+
+  '<section class="panel mx-travel-note"><h3>'+t('شلون تستخدمها؟','When to check')+'</h3>'+
+   '<p>'+t('بالصباح راجع التعارف وناس جدد. قبل موعد راجع الجاذبية والانسجام. قبل السهر راجع القرب والدافع والطلعة الليلية. قبل التنقل راجع السفر والراحة والحذر.','Morning: meeting people. Before a date: attraction and chemistry. Before a night out: intimacy, desire and nightlife. Before travel: transportation, rest and caution.')+'</p>'+
+   '<small>'+t('مؤشرات فلكية رمزية مو تقييم واقعي للأمان أو احتمال النجاح. الموافقة المتبادلة والسلامة الفعلية والظروف الواقعية أهم من أي رقم.','These are symbolic astrological indices, not objective safety scores or success probabilities. Mutual consent, practical safety and real circumstances come first.')+'</small></section>'+
+  '</div>';
 }
 function asteroidsPage(){
  const count=mountedAsteroidCount(),positions=count?namedAsteroidPositions(asteroidSwissRuntime(),selected):[];
