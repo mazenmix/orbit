@@ -496,8 +496,32 @@ function astroCalendarDetail(iso:string){
  const factor=(e:typeof snap.strongestSupport,kind:'good'|'check',hour:number|null)=>e?
   '<span class="astro-compact-aspect '+kind+'"><span>'+(kind==='good'?t('✦ داعمة','✦ Favorable'):t('◇ متحدية','◇ Challenging'))+'</span><b>'+esc(planet(e.transit.id))+' '+aspect(e.angle)+' '+esc(planet(e.natal.id))+'</b><small dir="ltr">'+e.orb.toFixed(2)+'° · '+String(hour??12).padStart(2,'0')+':00</small></span>':'';
  const contacts=factor(snap.strongestSupport,'good',snap.strongestSupportHour)+factor(snap.strongestChallenge,'check',snap.strongestChallengeHour);
+ const theme=(e:typeof snap.strongestSupport):string=>{
+  if(!e)return '';
+  const topics:Record<string,[string,string]>={
+   Sun:['ثقتك بنفسك وقراراتك','identity and priorities'],
+   Moon:['راحتك وردّة فعلك','comfort and emotional reactions'],
+   Mercury:['الحچي والرسائل والتفاهم','conversation and communication'],
+   Venus:['التقارب والتقدير','affection and values'],
+   Mars:['المبادرة والجهد','initiative and effort'],
+   Jupiter:['التوسع وتعلّم الجديد','learning and expansion'],
+   Saturn:['المسؤولية والالتزام','responsibility and commitments'],
+   Uranus:['التغيير والتجربة','change and experimentation'],
+   Neptune:['التوقعات والوضوح','expectations and clarity'],
+   Pluto:['الحدود والتغيير العميق','boundaries and deliberate change']
+  };
+  const topic=topics[e.natal.id]??['أولوياتك','personal priorities'];
+  return lang==='ar'?topic[0]:topic[1];
+ };
+ const easier=theme(snap.strongestSupport),challenging=theme(snap.strongestChallenge);
+ const dayMeaning=easier&&challenging?
+  t('حسابات هاليوم تبرز '+easier+' كموضوع أيسر رمزياً، وبالمقابل '+challenging+' يحتاج تروّي. انتبه للأفعال الواقعية مو بس لون اليوم.',
+    'The sky samples emphasize '+easier+' as an easier symbolic theme, while '+challenging+' calls for care. Real actions matter more than the color.'):
+  easier?t('الجانب الأبرز رمزياً يخص '+easier+'. جرّب خطوة صغيرة وقيّم نتيجتها بالواقع.','The strongest symbolic theme involves '+easier+'. Try a small step and evaluate the result in real life.'):
+  challenging?t('الحساب يركز على '+challenging+'. راجع التفاصيل؛ هذا مو معناه اليوم كله سيّئ.','The chart highlights '+challenging+'. Review the details; this does not make the whole day bad.'):
+  t('ماكو اتصال قوي يبرر قصة شخصية لهاليوم، والرقم وحده ما يخبرك شنو راح يصير.','No strong aspect justifies a personal story; the index alone cannot predict what will happen.');
  return '<div class="astro-day-compact-head"><div class="astro-day-compact-title"><span class="astro-day-kicker">'+t('مؤشر رمزي · 3 أوقات','Symbolic index · 3 checkpoints')+'</span><h3 dir="ltr">'+esc(date)+'</h3><small>'+t('القراءة من مواضع الكواكب والزوايا على مدار اليوم','Daily score based on three verified sky checkpoints')+'</small></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'<small>/100</small></b><span>'+grade+'</span></div></div>'+
-  '<div class="astro-day-compact-aspects">'+(contacts||'<span class="astro-compact-no-aspect">'+t('ماكو زاوية قريبة مهيمنة بهذا الوقت.','No dominant close aspect at this time.')+'</span>')+'</div>'+
+  '<div class="astro-day-compact-aspects">'+(contacts||'<span class="astro-compact-no-aspect">'+t('ماكو زاوية قريبة مهيمنة بهذا الوقت.','No dominant close aspect at this time.')+'</span>')+'</div><p class="astro-day-summary">'+esc(dayMeaning)+'</p>'+
   '<div class="astro-day-compact-footer"><small>'+t('الفحص: 04 / 12 / 20 · المدى ','Checks: 04 / 12 / 20 · range ')+snap.minimum+'–'+snap.maximum+' · '+t('مؤشر رمزي مو تنبؤ','Symbolic index, not a forecast')+'</small><button type="button" class="secondary astro-day-open-time" data-calendar-open="'+(+at)+'">'+t('لقطة الظهر بآلة الزمن','Noon snapshot in Time Machine')+' ↗</button></div>';
 }
 function calendarColorLabel(color:AstroCalendarRating['color']){
