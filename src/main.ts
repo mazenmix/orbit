@@ -481,7 +481,7 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:GoReview){
  * and optional calculation details must remain identical by construction. */
 function indicatorGaugeCard(m:MetricResult,travelId?:string){
  const label=t(m.ar,m.en);
- return '<div class="metric-card '+(travelId?'mx-travel-metric ':'')+gaugeLevel(m.value)+'"'+
+ return '<div class="metric-card '+(travelId?'mx-travel-metric ':'')+gaugeLevel(m.value)+'" data-indicator-id="'+m.id+'"'+
   (travelId?' data-travel-metric="'+travelId+'"':'')+'>'+
   '<small>'+label+'</small>'+
   '<b>'+m.value+'<em>/100</em></b>'+
