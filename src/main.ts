@@ -196,8 +196,7 @@ function todayQuickGauges(r:Report,insideGo=false){
   return quickGaugeCard(found,item.symbol,[item.ar,item.en]);
  }).join('');
  return '<section class="panel mx-today-gauges mx-quick-gauges" aria-label="'+t('مؤشرات اليوم المختصرة','Today quick indicators')+'">'+
-  '<div class="mx-today-gauge-header"><h2>'+(insideGo?t('مؤشرات الجنس والحب والعاطفة والعمل','Sex, Love, Emotions & Work'):t('مؤشرات اليوم','Today at a glance'))+'</h2>'+
-  (insideGo?'':'<button type="button" class="text-button" data-go="intel">'+t('كل المؤشرات','All indicators')+' ↗</button>')+'</div>'+
+  (insideGo?'':'<div class="mx-today-gauge-header"><h2>'+t('مؤشرات اليوم','Today at a glance')+'</h2><button type="button" class="text-button" data-go="intel">'+t('كل المؤشرات','All indicators')+' ↗</button></div>')+
   '<div class="mx-focus-metrics">'+gauges+'</div>'+
   '<p class="mx-today-gauge-caption">'+t('مؤشرات تنجيمية رمزية محسوبة لخارطتك والوقت المختار؛ مو قياس فعلي للرغبة أو ضمان لحدث.','Calculated symbolic astrology indices for the selected chart and time—not measured desire or event probabilities.')+'</p></section>';
 }
@@ -500,13 +499,13 @@ function goModePage(){
  const indicators=derivedMetrics(data!.scores),go=goModes(indicators),r=data!,decisions=resolveDecisions(r.evidence,r.signals);
  const names:Record<GoDomain,[string,string]>={work:['العمل','Work'],social:['التواصل الاجتماعي','Social'],relationships:['العلاقات','Relationships'],travel:['السفر','Travel']};
  const gauges=todayQuickGauges(r,true);
- const goCards='<section class="panel mx-go-mode-decisions"><div class="section-title"><div><span class="eyebrow">GO MODE</span><h2>'+t('وين تركز هسّه؟','Where to focus now')+'</h2></div>'+tag(t('قراءة رمزية','Symbolic reading'),'violet')+'</div>'+
+ const goCards='<section class="panel mx-go-mode-decisions">'+
   '<div class="go-grid">'+go.map(d=>{const memo=reviewGoMode(d,indicators,decisions),state=memo.state;return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><p class="go-decision">'+mxGoNarrative(d.domain,state,memo)+'</p></div>'}).join('')+'</div>'+
-  '<p class="subtle">'+t('هاي إشارات رمزية للتفكير بالتوقيت، مو قرار مضمون ولا قياس فعلي للجنس أو المشاعر.','Symbolic planning prompts only—not guarantees or measurements of sex, feelings, or outcomes.')+'</p></section>';
- const allIndicators='<section class="panel mx-go-mode-indicators"><div class="section-title"><h2>'+t('المؤشرات الـ29 كلها','All 29 indicators')+'</h2>'+tag(t('من 1 إلى 99','1–99 index'))+'</div><div class="metrics-grid">'+
+  '</section>';
+ const allIndicators='<section class="panel mx-go-mode-indicators"><div class="metrics-grid">'+
   indicators.map(m=>indicatorGaugeCard(m)).join('')+
-  '</div><p class="subtle">'+t('كل هاي أرقام رمزية مشتقة من ثمانية مجالات محسوبة؛ مو قياس حقيقي للرغبة ولا احتمال وقوع حدث.','These symbolic indices derive from eight calculated areas, not actual measures of desire or event probabilities.')+'</p></section>';
- return '<div class="mx-go-mode-page" data-section="go"><div class="section-title"><div><span class="eyebrow">MX ASTRO · GO MODE</span><h2>'+t('مؤشراتك كلها بمكان واحد','All your indicators in one place')+'</h2></div></div>'+gauges+goCards+allIndicators+'</div>';
+  '</div></section>';
+ return '<div class="mx-go-mode-page" data-section="go">'+gauges+goCards+allIndicators+'</div>';
 }
 /** Simple glyphs that correspond to the exact travel domains and keep the
  * same single-icon layout as the four quick Go Mode gauges. */
