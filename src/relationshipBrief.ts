@@ -78,7 +78,7 @@ const meaningFor=(e:SynastryEvidence,kind:ContactKind):TwoLanguage=>{
   {ar:'هذا الرابط يوضح نوع التفاعل الرمزي بين المودة والمبادرة، مو إثبات أن شخصاً منكما معجب بالآخر.',en:'This aspect describes symbolic interaction, not proof of either person’s feelings.'}:
   {ar:'هنا يتقاطع التعبير الجسدي ويا الحاجة للارتياح، وما ممكن نستنتج رغبات خاصة أو موافقة من الخارطة.',en:'Physical expression and personal comfort meet symbolically; private desires and consent cannot be inferred.'});
  return {
-  ar:prefix+base.ar+(challenging?' الزاوية المتحدية تشير لاختلاف بالإيقاع يحتاج تفاهم، مو حكم بفشل العلاقة.':conj?' الاقتران يزيد التركيز على الموضوع، من دون اتجاه مضمون.':''),
+  ar:prefix+(kind==='attraction'?'الجاذبية هنا تتعلق بطبيعة التفاعل، مو بضمان مشاعر متبادلة. ':'')+base.ar+(challenging?' الزاوية المتحدية تضيف شدّ واختلاف بالإيقاع يحتاج تفاهم، مو حكم بفشل العلاقة.':conj?' الاقتران يزيد التركيز على الموضوع، من دون اتجاه مضمون.':''),
   en:prefixEn+base.en+(challenging?' The challenging aspect suggests pacing differences to discuss, not a failed relationship.':conj?' The conjunction intensifies the theme without predicting an outcome.':'')
  };
 };
