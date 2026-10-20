@@ -46,7 +46,7 @@
 .astro-day-factor small{color:#e2c594;font-size:10px}
 .astro-day-factor b{color:#f0e8f8;font-size:12px}
 .astro-day-factor span{color:#aea7c4;font-size:10px}
-.astro-day-summary{font-size:12px;line-height:1.9;color:#d7cee5}
+.astro-day-summary,.astro-day-context{font-size:12px;line-height:1.65;color:#d7cee5;margin:3px 0 8px}
 .astro-day-domain{display:flex;gap:12px;flex-wrap:wrap;margin:13px 0;color:#c9c4d6;font-size:12px}
 .astro-day-domain span{padding:8px 12px;border:1px solid #635773;border-radius:10px}
 .astro-day-open-time{margin-top:10px}
