@@ -42,7 +42,7 @@ const find=(evidence:readonly SynastryEvidence[],kind:ContactKind):SynastryEvide
 const chemistryDetails:Record<string,{attraction:TwoLanguage;sexual:TwoLanguage}>={
  'Mars|Venus':{
   attraction:{ar:'أسلوب إظهار المودة عند طرف يلتقي ويا جرأة المبادرة عند الثاني؛ ممكن يصير التقارب سريع إذا الاهتمام متبادل، بس سرعة واحد مو بالضرورة سرعة الثاني.',en:'One person’s affectionate style meets the other’s initiative. Attraction may feel lively if it is mutual, though the two may move at different speeds.'},
-  sexual:{ar:'الزهرة والمريخ يرمزان لكيمياء جنسية تجمع الحنان والمبادرة؛ اسألوا عن الإيقاع والحدود بدل افتراض إن الشرارة تكفي.',en:'Venus and Mars link affection with physical initiative; discuss pace and boundaries rather than assuming chemistry is sufficient.'}
+  sexual:{ar:'الزهرة والمريخ يرمزان لكيمياء جنسية تجمع الحنان والمبادرة؛ اسألوا عن الإيقاع والحدود بدل افتراض إن الشرارة تكفي.',en:'Venus and Mars symbolize sexual chemistry through affection and physical initiative; discuss pace and boundaries rather than assuming attraction is sufficient.'}
  },
  'Pluto|Venus':{
   attraction:{ar:'الزهرة وبلوتو يركزان على قوة الانشداد وحساسية الثقة؛ الانبهار وحده ما يكشف نوايا الطرف الثاني.',en:'Venus and Pluto highlight magnetism and trust. Intensity does not disclose the other person’s intentions.'},
