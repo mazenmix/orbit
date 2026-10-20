@@ -423,14 +423,14 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   }
   // Color is a semantic level, not a decorative hard-coded single shade.
   const spectrum=await page.locator('[data-travel-metric]').evaluateAll(rows=>rows.map(row=>{
-   const fill=getComputedStyle(row.querySelector('.meter i')).backgroundColor;
+   const fill=getComputedStyle(row.querySelector('.meter i')).backgroundImage;
    const number=getComputedStyle(row.querySelector('b')).color;
    const level=['low','caution','steady','strong'].find(cls=>row.classList.contains(cls));
    return {level,fill,number};
   }));
   for(const item of spectrum){
    expect(item.level).toBeTruthy();
-   expect(item.fill).not.toBe('rgba(0, 0, 0, 0)');
+   expect(item.fill).toContain('linear-gradient');
    expect(item.number).not.toBe('rgb(255, 255, 255)');
   }
   expect(new Set(spectrum.map(x=>x.level)).size).toBeGreaterThanOrEqual(2);
