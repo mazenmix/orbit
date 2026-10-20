@@ -52,3 +52,12 @@ test('Travel Mode does not replace all-29 Go Mode',()=>{
  assert.match(go,/indicators\.map/);
  assert.match(go,/go\.map/);
 });
+
+test('Travel Mode gauge colors use the same four value levels, including numbers and progress bars',()=>{
+ const focus=readFileSync('src/focus.css','utf8');
+ for(const level of ['strong','steady','caution','low']){
+  assert.ok(focus.includes('.mx-travel-metric.'+level),level+' style must exist');
+ }
+ assert.match(focus,/\.mx-travel-metric>b\s*\{[\s\S]*?color:var\(--travel-accent\)!important/);
+ assert.match(focus,/\.mx-travel-metric \.meter>i\s*\{[\s\S]*?--travel-accent/);
+});
