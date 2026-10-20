@@ -73,7 +73,7 @@ test('Go-mode uses unique domain-specific recommendations rather than repetitive
 });
 
 test('Moon sign has live five-line calculation tied to owner natal data',()=>{
- assert.ok(main.includes('moonSignReading(sign,r.current,r.natal,active.known'));
+ assert.ok(main.includes('moonHumanReading(sign,r,active.known,lang)'));
  assert.ok(main.includes('id="mx-moon-sign-reading"'));
  assert.ok(main.includes('function updateLiveMoonSign('));
 });
