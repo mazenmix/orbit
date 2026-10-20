@@ -523,8 +523,8 @@ function travelModePage(){
  const groups=travelMetricsByGroup(derivedMetrics(data!.scores));
  const sections=groups.map(group=>
   '<section class="panel mx-travel-group" data-travel-group="'+group.id+'">'+
-  '<div class="section-title"><h2>'+t(group.titleAr,group.titleEn)+'</h2>'+tag(group.rows.length+' '+t('مؤشرات','indicators'))+'</div>'+
-  '<p class="mx-travel-description">'+t(group.descriptionAr,group.descriptionEn)+'</p>'+
+  (group.id==='social'?'':'<div class="section-title"><h2>'+t(group.titleAr,group.titleEn)+'</h2>'+tag(group.rows.length+' '+t('مؤشرات','indicators'))+'</div>')+
+  (group.id==='social'?'':'<p class="mx-travel-description">'+t(group.descriptionAr,group.descriptionEn)+'</p>')+
   '<div class="mx-focus-metrics mx-travel-grid">'+group.rows.map(({id,metric})=>quickGaugeCard(metric,travelSymbol(id),undefined,id)).join('')+'</div></section>'
  ).join('');
  return '<div class="mx-travel-mode-page mx-quick-gauges" data-section="travelmode">'+
