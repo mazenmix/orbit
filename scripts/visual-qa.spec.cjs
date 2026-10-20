@@ -424,11 +424,18 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('[data-travel-group]')).toHaveCount(3);
   await expect(page.locator('[data-travel-metric]')).toHaveCount(12);
   const travelStyle=Object.fromEntries(await page.locator('[data-travel-metric]').evaluateAll(metricStyle));
+  const attraction=travelStyle.attraction;
+  expect(attraction,'Attraction must be present as the style reference').toBeTruthy();
   for(const [id,seen] of Object.entries(travelStyle)){
    const expected=goStyle[id];
    expect(expected,'Missing same indicator '+id+' in Go Mode').toBeTruthy();
-   for(const property of ['value','padding','borderRadius','borderColor','background','numberFont','numberColor','barHeight','barFill']){
-    expect(seen[property],'Style mismatch for '+id+' property '+property).toEqual(expected[property]);
+   // Identical layout and values to Go Mode; color is intentionally
+   // attraction's turquoise for every Travel Mode card.
+   for(const property of ['value','padding','borderRadius','numberFont','barHeight']){
+    expect(seen[property],'Layout mismatch for '+id+' property '+property).toEqual(expected[property]);
+   }
+   for(const property of ['borderColor','background','numberColor','barFill']){
+    expect(seen[property],'Travel gauge must match attraction '+id+' '+property).toEqual(attraction[property]);
    }
    expect(Math.abs(seen.width-expected.width),'Gauge width mismatch: '+id).toBeLessThanOrEqual(1);
   }
@@ -454,7 +461,9 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
    expect(item.number).not.toBe('rgb(255, 255, 255)');
   }
   expect(new Set(spectrum.map(x=>x.level)).size).toBeGreaterThanOrEqual(2);
-  expect(new Set(spectrum.map(x=>x.fill)).size).toBeGreaterThanOrEqual(2);
+  expect(new Set(spectrum.map(x=>x.fill)).size).toBe(1);
+  expect(new Set(spectrum.map(x=>x.number)).size).toBe(1);
+  expect(spectrum[0].number).toBe('rgb(104, 224, 166)');
   await page.screenshot({path:'artifacts/ui-qa/travelmode-'+device+'-'+testInfo.project.name+'.png',fullPage:true});
   const over=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   expect(over,'No horizontal overflow').toBeLessThan(8);
