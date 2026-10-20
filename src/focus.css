@@ -238,3 +238,12 @@
  background:linear-gradient(90deg,color-mix(in srgb,var(--metric-accent) 66%,#3c456c),var(--metric-accent))!important;
  border-radius:999px;
 }
+
+/* Travel Mode uniform turquoise: same emerald/teal palette as the
+   Attraction card in the user's reference. Keep levels and values
+   computed, but do not vary their *visual* accent in Travel Mode. */
+#live-view-body .mx-travel-mode-page .metric-card.mx-travel-metric{
+ --metric-accent:#68e0a6;
+ --metric-tint:rgba(68,192,131,.12);
+ --metric-glow:rgba(68,192,131,.19);
+}
