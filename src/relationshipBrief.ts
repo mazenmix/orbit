@@ -39,6 +39,49 @@ const find=(evidence:readonly SynastryEvidence[],kind:ContactKind):SynastryEvide
  });
  return ranked[0]??null;
 };
+const chemistryDetails:Record<string,{attraction:TwoLanguage;sexual:TwoLanguage}>={
+ 'Mars|Venus':{
+  attraction:{ar:'أسلوب إظهار المودة عند طرف يلتقي ويا جرأة المبادرة عند الثاني؛ ممكن يصير التقارب سريع إذا الاهتمام متبادل، بس سرعة واحد مو بالضرورة سرعة الثاني.',en:'One person’s affectionate style meets the other’s initiative. Attraction may feel lively if it is mutual, though the two may move at different speeds.'},
+  sexual:{ar:'الزهرة والمريخ يرمزان للتوافق بين الحنان والرغبة الجسدية؛ اسألوا عن الإيقاع والحدود بدل افتراض إن الشرارة تكفي.',en:'Venus and Mars link affection with physical initiative; discuss pace and boundaries rather than assuming chemistry is sufficient.'}
+ },
+ 'Pluto|Venus':{
+  attraction:{ar:'الزهرة وبلوتو يركزان على قوة الانشداد وحساسية الثقة؛ الانبهار وحده ما يكشف نوايا الطرف الثاني.',en:'Venus and Pluto highlight magnetism and trust. Intensity does not disclose the other person’s intentions.'},
+  sexual:{ar:'الدلالة الحميمية تميل للعمق والتعلّق، لكن تحتاج وضوح حتى ما تتحول الغيرة أو السيطرة إلى جزء من القرب.',en:'Symbolic intimacy can feel intense; clarity matters so jealousy or control is not confused with closeness.'}
+ },
+ 'Mars|Pluto':{
+  attraction:{ar:'الاندفاع يلتقي ويا رغبة السيطرة على الاتجاه؛ ممكن يكون حضور قوي، ويصير متعب إذا كل واحد يريد يفرض إيقاعه.',en:'Initiative meets control. There may be a strong dynamic, but competing attempts to set the pace can create friction.'},
+  sexual:{ar:'إشارة لرغبة قوية بالتعبير والمبادرة، بس أي قرب حميمي يحتاج رغبة متبادلة وحدود واضحة، مو صراع قوة.',en:'The symbolism emphasizes strong initiative; intimacy still requires mutual desire, boundaries and no power struggle.'}
+ },
+ 'Mars|Mars':{
+  attraction:{ar:'أسلوبا المبادرة عندكما يتفاعلان؛ الانسجام يتحسن إذا كل واحد يعرف شنو يحفز الثاني وشنو يستفزه.',en:'Two styles of initiative interact. Understanding what motivates or frustrates each person helps more than competing.'},
+  sexual:{ar:'الحماس الجسدي ممكن يكون سريع، لكن اختلاف الإيقاع أو الطباع يحتاج حچي صريح وراحة للطرفين.',en:'Physical pace may be energetic in the symbolism; differences call for direct conversation and mutual comfort.'}
+ },
+ 'Uranus|Venus':{
+  attraction:{ar:'الاهتمام بالجديد والاستقلال يلتقي بالمودة؛ عنصر المفاجأة ممكن يجذب، بس الاستمرارية ما تنعرف من زاوية فلكية.',en:'Novelty meets affection. The unpredictable can be exciting, but consistency cannot be calculated.'},
+  sexual:{ar:'الانفتاح على التجربة رمزياً حاضر، لكن ميول أو تفضيلات الشخص الحميمة ما تنكشف من الخارطة.',en:'Experimentation is a symbolic theme, not access to anyone’s private sexual preferences.'}
+ },
+ 'Moon|Venus':{
+  attraction:{ar:'الحاجة للاطمئنان تلتقي بأسلوب الاهتمام؛ ممكن تشعرون بألفة إذا التقدير واضح ومتبادل.',en:'Emotional comfort meets affection; mutual care could make closeness feel easier.'},
+  sexual:{ar:'الأمان العاطفي جزء من قراءة التقارب هنا، مو مجرد شغف جسدي؛ احچوا عن الراحة والثقة.',en:'Emotional safety is part of the symbolic chemistry, not only physical attraction; discuss comfort and trust.'}
+ },
+ 'Ascendant|Venus':{
+  attraction:{ar:'طريقة الظهور والانطباع الأول ترتبط بالذوق والمودة؛ انجذاب المظهر وحده ما يحدد عمق العلاقة.',en:'First impressions meet preferences and affection; initial attraction does not determine relationship depth.'},
+  sexual:{ar:'تناسق الانطباع والحضور ممكن يزيد جاذبية اللقاء الأول رمزياً؛ الباقي يعتمد على التواصل الحقيقي.',en:'Presence and first impressions may symbolically support chemistry; actual connection depends on communication.'}
+ }
+};
+const meaningFor=(e:SynastryEvidence,kind:ContactKind):TwoLanguage=>{
+ const pair=joined(e),lens=chemistryDetails[pair]?.[kind];
+ const challenging=e.angle===90||e.angle===180,conj=e.angle===0;
+ const subject=pairSubject(e),contact=aspectKind(e);
+ const prefix=subject.ar+' '+contact.ar+'؛ ',prefixEn=subject.en+' '+contact.en+': ';
+ const base=lens??(kind==='attraction'?
+  {ar:'هذا الرابط يوضح نوع التفاعل الرمزي بين المودة والمبادرة، مو إثبات أن شخصاً منكما معجب بالآخر.',en:'This aspect describes symbolic interaction, not proof of either person’s feelings.'}:
+  {ar:'هنا يتقاطع التعبير الجسدي ويا الحاجة للارتياح، وما ممكن نستنتج رغبات خاصة أو موافقة من الخارطة.',en:'Physical expression and personal comfort meet symbolically; private desires and consent cannot be inferred.'});
+ return {
+  ar:prefix+base.ar+(challenging?' الزاوية المتحدية تشير لاختلاف بالإيقاع يحتاج تفاهم، مو حكم بفشل العلاقة.':conj?' الاقتران يزيد التركيز على الموضوع، من دون اتجاه مضمون.':''),
+  en:prefixEn+base.en+(challenging?' The challenging aspect suggests pacing differences to discuss, not a failed relationship.':conj?' The conjunction intensifies the theme without predicting an outcome.':'')
+ };
+};
 const initial:TwoLanguage={ar:'ماكو اتصال قريب يدعم تقييم هالجانب فلكياً.',en:'No close calculated aspect supports a reading of this area.'};
 export function relationshipBrief(evidence:readonly SynastryEvidence[]):RelationshipBrief{
  const attractionContact=find(evidence,'attraction'),sexualContact=find(evidence,'sexual');
@@ -50,19 +93,10 @@ export function relationshipBrief(evidence:readonly SynastryEvidence[]):Relation
  const challengeContact=challenging.find(e=>!selected.has(e))??challenging[0]??null;
  const harmony=synastryPlainReading(harmonyContact??undefined,'harmony');
  const challenge=synastryPlainReading(challengeContact??undefined,'challenge');
- const attraction=attractionContact?(()=>{
-  const subject=pairSubject(attractionContact),aspect=aspectKind(attractionContact);
-  return {ar:subject.ar+' '+aspect.ar+': دلالة رمزية على الجاذبية والإعجاب بين الخارطتين.',
-   en:subject.en+' '+aspect.en+': a symbolic indicator of attraction between the charts.'};
- })():initial;
- const sexual=sexualContact?(()=>{
-  const subject=pairSubject(sexualContact),aspect=aspectKind(sexualContact);
-  const stress=sexualContact.angle===90||sexualContact.angle===180;
-  return {ar:subject.ar+' '+aspect.ar+': '+(stress?'كيمياء جنسية مع شدّ واختلاف محتمل.':'دلالة على شرارة جنسية وانجذاب جسدي محتمل.')+' ',
-   en:subject.en+' '+aspect.en+': '+(stress?'symbolic sexual chemistry with possible friction.':'a symbolic indication of sexual chemistry and physical attraction.')+''};
- })():initial;
+ const attraction=attractionContact?meaningFor(attractionContact,'attraction'):initial;
+ const sexual=sexualContact?meaningFor(sexualContact,'sexual'):initial;
  const focusedMeaning=(full:TwoLanguage):TwoLanguage=>{
-  const trim=(s:string)=>s.replace(/\s+/g,' ').trim().split(/(?<=[.!؟])\s+/u)[0]||s;
+  const trim=(s:string)=>s.replace(/\s+/g,' ').trim();
   return {ar:trim(full.ar),en:trim(full.en)};
  };
  return {attraction,sexual,attractionContact,sexualContact,
