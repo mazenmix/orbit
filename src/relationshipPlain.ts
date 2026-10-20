@@ -114,16 +114,27 @@ const transitAreas:Record<Category,TwoLanguage>={
  recovery:{ar:'الراحة واستعادة التوازن',en:'rest and recuperation'},
  timing:{ar:'تنظيم الوقت والتوقيت',en:'planning and timing'}
 };
+const transitScenes:Record<Category,TwoLanguage>={
+ overview:{ar:'مثلاً: قرر شنو تسوي اليوم بنفسك، وشنو يحتاج جواب أو موافقة من غيرك.',en:'For example, separate what you can decide today from what needs another person\'s input.'},
+ career:{ar:'مثلاً: قبل ما تقبل مهمة، تأكد من المطلوب والموعد حتى ما تدخل بالتزام غامض.',en:'Before accepting work, clarify the scope and deadline.'},
+ love:{ar:'مثلاً: رسالة اهتمام واضحة تنفع أكثر من قراءة كل تأخير بالرد كإشارة عاطفية.',en:'A clear expression of interest helps more than treating response delays as emotional signals.'},
+ communication:{ar:'مثلاً: اسأل شنو المقصود من رسالة مبهمة قبل ما تجاوب على افتراض.',en:'Clarify an ambiguous message before responding to an assumption.'},
+ energy:{ar:'مثلاً: ابدي جزء واحد من مهمة أو تمرين؛ لا تخلي الحماس يسحبك لالتزام أكبر.',en:'Start one manageable task or workout step instead of overcommitting.'},
+ emotions:{ar:'مثلاً: إذا تضايقت من موقف، افصل الحدث عن القصة اللي رسمها بالك.',en:'If upset by a situation, separate the event from the story you constructed around it.'},
+ recovery:{ar:'مثلاً: أخر التزام ثانوي حتى ترجع لإيقاع مريح، من دون شعور بالذنب.',en:'Defer one secondary commitment to make space for meaningful rest.'},
+ timing:{ar:'مثلاً: خلي خطة بديلة لموعد يعتمد على ظروف أو رد شخص ثاني.',en:'Have an alternative plan for appointments dependent on someone else.'}
+};
 export function personalTransitPlainReading(e:Pick<Evidence,'transit'|'natal'|'angle'|'orb'|'applying'>|undefined,category:Category|undefined):PlainReading{
  if(!e||!category)return {title:{ar:'ماكو عبور شخصي مهيمن',en:'No dominant personal transit'},meaning:{ar:'ماكو اتصال مقترب قريب كافي حتى نحدد موضوع بارز لهاللحظة.',en:'No sufficiently close applying contact establishes a leading theme for this moment.'},advice:{ar:'لا تبني قرارك على مؤشر فلكي وحده.',en:'Do not base a decision on an astrological index alone.'}};
  const area=transitAreas[category],transit=planetThemes[e.transit.id]??{ar:'حركة الكوكب',en:'the transiting planet'},natal=planetThemes[e.natal.id]??{ar:'موضوع من خارطة الميلاد',en:'a natal theme'};
  const challenge=e.angle===90||e.angle===180;
+ const link=e.angle===0?{ar:'الاقتران يركز الموضوعين بقوة، لكنه وحده مو فرصة ولا تهديد.',en:'A conjunction concentrates both themes, without making it inherently good or bad.'}:challenge?{ar:'زاوية شدّ تحتاج موازنة بين الاحتياجين بدل الاستعجال بالحكم.',en:'A challenging angle asks for balancing competing needs rather than rushing to a verdict.'}:{ar:'الزاوية تتيح مساحة تعاون رمزي، مو ضمان نجاح.',en:'The angle suggests symbolic cooperation, not guaranteed success.'};
  return {
   title:{ar:'عبور مرتبط بـ'+area.ar,en:'Transit involving '+area.en},
   meaning:{
-   ar:'حركة '+transit.ar+' تتصل رمزياً بـ'+natal.ar+' في موضوع '+area.ar+'. '+(challenge?'الزاوية تطرح احتمال اختلاف أو ضغط يستحق التريث.':'الزاوية تطرح فرصة رمزية للانتباه لهذا الجانب.')+' '+(e.applying?'الاتصال يقترب من الدقة.':'الاتصال يبتعد حالياً عن الدقة.'),
-   en:'A transit associated with '+transit.en+' meets natal '+natal.en+' around '+area.en+'. '+(challenge?'Symbolically this may highlight friction worth handling carefully.':'Symbolically this may draw attention to this area.')+' '+(e.applying?'The aspect is applying.':'The aspect is separating.')
+   ar:'ضمن '+area.ar+'، اتصال '+transit.ar+' بـ'+natal.ar+' يلفت النظر رمزياً إلى طريقة تعاملك مع هالموضوع. '+link.ar+' '+(e.applying?'زاويته تقترب من الدقة.':'زاويته تبتعد عن الدقة.')+' '+transitScenes[category].ar,
+   en:'Within '+area.en+', '+transit.en+' meets natal '+natal.en+' symbolically. '+link.en+' '+(e.applying?'The aspect is applying.':'The aspect is separating.')+' '+transitScenes[category].en
   },
-  advice:{ar:'الموعد المعروض وقت رصد الحساب، مو موعد وقوع حدث؛ راجع التفاصيل الواقعية قبل أي خطوة.',en:'The displayed time is the calculation timestamp, not the time of an event. Check real-world details before acting.'}
+  advice:{ar:'خلّ الموقف الحقيقي وردّ الطرف الثاني يحدد الخطوة الجاية؛ الحساب يفسّر رمز، مو يحدد وقوع حدث.',en:'Let actual circumstances and the other person\'s response guide your next step; the calculation is symbolic, not a predicted event.'}
  };
 }
