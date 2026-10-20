@@ -93,6 +93,40 @@ function aspectInterpretation(basis:NatalBasis[],ar:boolean){
  return lead+(contrasting?(ar?' ويوجد أيضاً '+describe(contrasting)+'؛ لذلك تضم القراءة جانباً داعماً وآخر يحتاج موازنة.':' There is also '+describe(contrasting)+', so the reading includes both ease and a need for adjustment.'):'');
 }
 
+/** Interpret the actual combination of two natal indicators in each of the
+ * 200 individually authored topics. No claim about private desires or observed behaviour. */
+function livedNatalTheme(topic:SoulTopic,basis:NatalBasis[],specific:{ar:string;en:string},rule:{resource:{ar:string;en:string};risk:{ar:string;en:string}}){
+ const [a,b]=basis;
+ const relations=soulAspectPairs(basis);
+ const lead=relations[0];
+ const firstAr=placementText(a,true),secondAr=placementText(b,true);
+ const firstEn=placementText(a,false),secondEn=placementText(b,false);
+ const different=a.sign!==b.sign;
+ const bridgeAr=different?
+  'الأول يميل رمزياً لأسلوب '+styleAr[a.sign]+'، والثاني يضيف '+styleAr[b.sign]+'. مو لازم تختار واحد دائماً؛ السؤال شوقت تستخدم كل أسلوب.':
+  'الاثنين يشتركون بأسلوب '+styleAr[a.sign]+'، لكن كل واحد يخص احتياج مختلف: '+role(a.planet,true)+' مقابل '+role(b.planet,true)+'.';
+ const bridgeEn=different?
+  'The first symbolizes '+styleEn[a.sign]+'; the second adds '+styleEn[b.sign]+'. These are different lenses, not a fixed personality verdict.':
+  'Both share the style of '+styleEn[a.sign]+', but serve distinct needs: '+role(a.planet,false)+' and '+role(b.planet,false)+'.';
+ const meetingAr=lead?(lead.type===90||lead.type===180?
+  'وأكو '+aspectNamesAr[lead.type]+' بين '+name(lead.first,true)+' و'+name(lead.second,true)+'؛ بالتفسير يشير لشدّ بين رغبتين. حاول تلاحظ متى يتحول الاختلاف لحيرة أو عناد.':
+  lead.type===0?'وأكو اقتران يحط هالموضوعين بمساحة واحدة؛ جرب تميّز بين احتياجاتهما قبل قرار مهم.':
+  'وأكو '+aspectNamesAr[lead.type]+' بين '+name(lead.first,true)+' و'+name(lead.second,true)+'؛ هذا يرمز لقابلية تنسيق، لكنه ما يثبت أن المهارة موجودة فعلاً.') :
+  'ماكو اتصال رئيسي قريب بين المؤشرين ضمن الأورب المعتمد؛ لذلك ما ننسب إلهم شدّ أو انسجام غير محسوب.';
+ const meetingEn=lead?(lead.type===90||lead.type===180?
+  'A calculated '+aspectNamesEn[lead.type]+' between '+lead.first+' and '+lead.second+' suggests competing needs; notice where they might clash in decisions.':
+  lead.type===0?'A conjunction unites the themes; check whether you are treating two different needs as one.':
+  'A calculated '+aspectNamesEn[lead.type]+' between '+lead.first+' and '+lead.second+' suggests room for coordination, not evidence of acquired ability.'):
+  'No close major aspect connects these selected indicators, so no fabricated harmony or tension is assigned.';
+ const settingAr=a.house?'وبحسب البيت '+a.house+'، ممكن تختبر هالسؤال بموضوع '+houseFocusAr[a.house]+'.':'';
+ const settingEn=a.house?'House '+a.house+' places the reflection around '+houseFocusEn[a.house]+'.':'';
+ return {
+  summaryAr:'بموضوع «'+topic.ar+'»، '+firstAr+' يسلّط الضوء على '+role(a.planet,true)+'، بينما '+secondAr+' يضيف '+role(b.planet,true)+'. '+bridgeAr,
+  summaryEn:'For “'+topic.en+'”, '+firstEn+' symbolizes '+role(a.planet,false)+', while '+secondEn+' adds '+role(b.planet,false)+'. '+bridgeEn,
+  deepAr:meetingAr+' '+settingAr+' مثال واقعي حتى تختبر القراءة: '+specific.ar+'. إذا شفت هالنمط عندك، قوّي جانب '+rule.resource.ar+'، وانتبه من '+rule.risk.ar+'.',
+  deepEn:meetingEn+' '+settingEn+' A concrete situation to test the interpretation: '+specific.en+'. If it matches your actual experience, develop '+rule.resource.en+' while watching for '+rule.risk.en+'.'
+ };
+}
 export function soulReading(chart:Chart,topic:SoulTopic,options:SoulOptions={}):SoulReading{
  topic=canonicalTopic(topic);
  const theme=getSoulTheme(topic.id),specific=soulDeepFor(topic.id),rule=soulRule(topic.id),basis=soulBasis(chart,topic,options),a=basis[0];
@@ -116,9 +150,10 @@ export function soulReading(chart:Chart,topic:SoulTopic,options:SoulOptions={}):
  const retroAr=retro?' يظهر '+retro+' بحركة تراجعية ظاهرية؛ يمكن قراءتها رمزياً كمراجعة لطريقة التعبير، ولا تدل وحدها على ضعف أو فشل.':'';
  const retroTextEn=retroEn?' '+retroEn+' shows apparent retrograde motion, which may be used as a reflection on expression; it does not establish weakness or failure.':'';
  const knownTime=options.knownTime!==false;
+ const lived=livedNatalTheme(topic,basis,specific,rule);
  return {topic,basis,basisStatus:'available',
-  summary:{ar:theme.focusAr+'.'+introAr,en:theme.focusEn+'.'+introEn},
-  deep:{ar:['في «'+topic.ar+'»: '+pairInterpretation(basis,true)+thirdAr,housesAr.trim(),(a?aspectInterpretation(basis,true):'')+retroAr].filter(Boolean).join('\n\n'),en:['For “'+topic.en+'”: '+pairInterpretation(basis,false)+thirdEn,housesEn.trim(),(a?aspectInterpretation(basis,false):'')+retroTextEn].filter(Boolean).join('\n\n')},
+  summary:{ar:lived.summaryAr,en:lived.summaryEn},
+  deep:{ar:lived.deepAr+(mixed?' أكو جوانب داعمة وجوانب متعارضة؛ لا تستخلص صفة ثابتة من جانب واحد.':'')+(retroAr?' '+retroAr:''),en:lived.deepEn+(mixed?' Both harmonious and challenging aspects exist, so avoid a one-sided conclusion.':'')+(retroTextEn?' '+retroTextEn:'')},
   strengths:{ar:[rule.resource.ar],en:[rule.resource.en]},weaknesses:{ar:[rule.risk.ar],en:[rule.risk.en]},
   example:{ar:specific.ar+'.',en:specific.en+'.'},advice:{ar:theme.actionAr,en:theme.actionEn},
   question:{ar:'بموضوع «'+topic.ar+'»، تذكّر موقف حقيقي من آخر فترة: شنو تصرفك بالضبط؟ وأي جزء من التفسير يشبهك، وأي جزء ما ينطبق عليك؟',en:'For “'+topic.en+'”, recall one recent real situation: what did you actually do? Which part of this reading fits, and which does not?'},
