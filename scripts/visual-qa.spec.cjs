@@ -421,10 +421,24 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
    expect(number).toBeGreaterThanOrEqual(1);
    expect(number).toBeLessThanOrEqual(99);
   }
+  // Color is a semantic level, not a decorative hard-coded single shade.
+  const spectrum=await page.locator('[data-travel-metric]').evaluateAll(rows=>rows.map(row=>{
+   const fill=getComputedStyle(row.querySelector('.meter i')).backgroundColor;
+   const number=getComputedStyle(row.querySelector('b')).color;
+   const level=['low','caution','steady','strong'].find(cls=>row.classList.contains(cls));
+   return {level,fill,number};
+  }));
+  for(const item of spectrum){
+   expect(item.level).toBeTruthy();
+   expect(item.fill).not.toBe('rgba(0, 0, 0, 0)');
+   expect(item.number).not.toBe('rgb(255, 255, 255)');
+  }
+  expect(new Set(spectrum.map(x=>x.level)).size).toBeGreaterThanOrEqual(2);
+  expect(new Set(spectrum.map(x=>x.fill)).size).toBeGreaterThanOrEqual(2);
   await page.screenshot({path:'artifacts/ui-qa/travelmode-'+device+'-'+testInfo.project.name+'.png',fullPage:true});
   const over=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   expect(over,'No horizontal overflow').toBeLessThan(8);
-  await page.locator('[data-go="go"]').first().click();
+  await nav.locator('[data-go="go"]').click();
   await expect(page.locator('.metric-card')).toHaveCount(29);
   await expect(page.locator('.go-card')).toHaveCount(4);
   expect(errors).toEqual([]);
