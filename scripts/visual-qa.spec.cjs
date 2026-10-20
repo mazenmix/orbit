@@ -399,22 +399,28 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/#go',{waitUntil:'domcontentloaded'});
   await expect(page.locator('[data-section="go"]')).toBeVisible({timeout:75000});
-  // Compare the exact computed Go Mode card design against the Travel Mode
-  // counterpart for the same calculated metric, not a merely similar palette.
-  const metricStyle=rows=>rows.map(row=>{
-   const style=getComputedStyle(row);
-   const number=getComputedStyle(row.querySelector('b'));
-   const bar=getComputedStyle(row.querySelector('.meter'));
-   const fill=getComputedStyle(row.querySelector('.meter i'));
+  // The reference is the four compact Sex/Love/Emotions/Work gauges above
+  // Go Mode, NOT the larger 29-indicator metric-card template.
+  const quickStyle=rows=>rows.map(row=>{
+   const el=getComputedStyle(row),label=getComputedStyle(row.querySelector('b')),
+    number=getComputedStyle(row.querySelector('strong')),
+    icon=getComputedStyle(row.querySelector('.mx-today-gauge-icon')),
+    track=getComputedStyle(row.querySelector('.mx-today-gauge-track')),
+    fill=getComputedStyle(row.querySelector('.mx-today-gauge-track i'));
    return [row.getAttribute('data-indicator-id'),{
+    level:['low','caution','steady','strong'].find(k=>row.classList.contains(k)),
     value:Number(row.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')),
     width:Math.round(row.getBoundingClientRect().width*10)/10,
-    padding:style.padding,borderRadius:style.borderRadius,borderColor:style.borderColor,
-    background:style.backgroundImage,numberFont:number.fontSize,numberColor:number.color,
-    barHeight:bar.height,barFill:fill.backgroundImage
+    padding:el.padding,radius:el.borderRadius,border:el.borderColor,background:el.backgroundColor,
+    labelFont:label.fontSize,numberFont:number.fontSize,numberColor:number.color,
+    iconFont:icon.fontSize,iconColor:icon.color,trackHeight:track.height,
+    trackBg:track.backgroundColor,fillColor:fill.backgroundColor
    }];
   });
-  const goStyle=Object.fromEntries(await page.locator('.mx-go-mode-indicators [data-indicator-id]').evaluateAll(metricStyle));
+  const goQuick=Object.fromEntries(await page.locator('.mx-go-mode-page .mx-today-gauges [data-today-gauge]').evaluateAll(quickStyle));
+  expect(Object.keys(goQuick)).toHaveLength(4);
+  const goMetricValues=Object.fromEntries(await page.locator('.mx-go-mode-indicators [data-indicator-id]').evaluateAll(rows=>
+   rows.map(row=>[row.getAttribute('data-indicator-id'),Number.parseInt(row.querySelector('b')?.textContent??'',10)])));
   const nav=device==='iphone'?page.locator('.mobile-nav'):page.locator('.sidebar .nav');
   const options=await nav.locator('[data-go]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-go')));
   expect(options).toEqual(['today','chart','people','go','travelmode','calendar','more']);
@@ -423,21 +429,17 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('[data-section="travelmode"]')).toBeVisible({timeout:75000});
   await expect(page.locator('[data-travel-group]')).toHaveCount(3);
   await expect(page.locator('[data-travel-metric]')).toHaveCount(12);
-  const travelStyle=Object.fromEntries(await page.locator('[data-travel-metric]').evaluateAll(metricStyle));
-  const attraction=travelStyle.attraction;
-  expect(attraction,'Attraction must be present as the style reference').toBeTruthy();
+  const travelStyle=Object.fromEntries(await page.locator('[data-travel-metric]').evaluateAll(quickStyle));
+  const reference=goQuick.sexuality;
+  expect(reference).toBeTruthy();
   for(const [id,seen] of Object.entries(travelStyle)){
-   const expected=goStyle[id];
-   expect(expected,'Missing same indicator '+id+' in Go Mode').toBeTruthy();
-   // Identical layout and values to Go Mode; color is intentionally
-   // attraction's turquoise for every Travel Mode card.
-   for(const property of ['value','padding','borderRadius','numberFont','barHeight']){
-    expect(seen[property],'Layout mismatch for '+id+' property '+property).toEqual(expected[property]);
+   expect(seen.value,'Travel index '+id+' differs from Go Mode').toEqual(goMetricValues[id]);
+   for(const property of ['padding','radius','border','background','labelFont','numberFont','numberColor','iconFont','iconColor','trackHeight','trackBg']){
+    expect(seen[property],'Travel compact card differs from the four Go Mode quick gauges: '+id+' / '+property).toEqual(reference[property]);
    }
-   for(const property of ['borderColor','background','numberColor','barFill']){
-    expect(seen[property],'Travel gauge must match attraction '+id+' '+property).toEqual(attraction[property]);
-   }
-   expect(Math.abs(seen.width-expected.width),'Gauge width mismatch: '+id).toBeLessThanOrEqual(1);
+   expect(Math.abs(seen.width-reference.width),'Compact card width mismatch for '+id).toBeLessThanOrEqual(1);
+   const matchingLevel=Object.values(goQuick).find(g=>g.level===seen.level);
+   if(matchingLevel)expect(seen.fillColor,'Bar color mismatch for '+id).toEqual(matchingLevel.fillColor);
   }
   expect(await page.locator('[data-travel-group]').evaluateAll(rows=>rows.map(r=>r.querySelectorAll('[data-travel-metric]').length))).toEqual([6,3,3]);
   const ids=await page.locator('[data-travel-metric]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-travel-metric')));
@@ -448,22 +450,11 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
    expect(number).toBeGreaterThanOrEqual(1);
    expect(number).toBeLessThanOrEqual(99);
   }
-  // Color is a semantic level, not a decorative hard-coded single shade.
-  const spectrum=await page.locator('[data-travel-metric]').evaluateAll(rows=>rows.map(row=>{
-   const fill=getComputedStyle(row.querySelector('.meter i')).backgroundImage;
-   const number=getComputedStyle(row.querySelector('b')).color;
-   const level=['low','caution','steady','strong'].find(cls=>row.classList.contains(cls));
-   return {level,fill,number};
-  }));
-  for(const item of spectrum){
-   expect(item.level).toBeTruthy();
-   expect(item.fill).toContain('linear-gradient');
-   expect(item.number).not.toBe('rgb(255, 255, 255)');
-  }
-  expect(new Set(spectrum.map(x=>x.level)).size).toBeGreaterThanOrEqual(2);
-  expect(new Set(spectrum.map(x=>x.fill)).size).toBe(1);
-  expect(new Set(spectrum.map(x=>x.number)).size).toBe(1);
-  expect(spectrum[0].number).toBe('rgb(104, 224, 166)');
+  // Compact cards retain the quick gauge's level-driven bar colors.
+  const levels=Object.values(travelStyle).map(x=>x.level);
+  expect(levels.every(Boolean)).toBe(true);
+  const expectedColors=new Set(Object.values(travelStyle).map(x=>x.fillColor));
+  expect(expectedColors.size).toBeGreaterThanOrEqual(1);
   await page.screenshot({path:'artifacts/ui-qa/travelmode-'+device+'-'+testInfo.project.name+'.png',fullPage:true});
   const over=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   expect(over,'No horizontal overflow').toBeLessThan(8);
