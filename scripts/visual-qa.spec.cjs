@@ -353,3 +353,37 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await context.close();
  });
 }
+for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
+ test(device+' new Go Mode tab keeps four calculated gauges and switches without errors',async({browser},testInfo)=>{
+  const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,isMobile:device==='iphone',hasTouch:device==='iphone'});
+  const page=await context.newPage(),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/#today',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('[data-today-gauge]')).toHaveCount(4,{timeout:75000});
+  const fromToday=Object.fromEntries(await page.locator('[data-today-gauge]').evaluateAll(rows=>rows.map(n=>[n.getAttribute('data-today-gauge'),Number(n.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'))])));
+  await page.goto('/#intel',{waitUntil:'domcontentloaded'});
+  await expect(page.getByRole('tab',{name:/29 Indicators|المؤشرات الـ29/})).toHaveAttribute('aria-selected','true',{timeout:75000});
+  await expect(page.locator('.metric-card')).toHaveCount(29);
+  await page.locator('[data-intel-tab="go"]').click();
+  await expect(page.locator('[data-intel-tab="go"]')).toHaveAttribute('aria-selected','true');
+  await expect(page.locator('#intel-view [data-today-gauge]')).toHaveCount(4);
+  await expect(page.locator('#intel-view .go-card')).toHaveCount(4);
+  const fromGo=Object.fromEntries(await page.locator('#intel-view [data-today-gauge]').evaluateAll(rows=>rows.map(n=>[n.getAttribute('data-today-gauge'),Number(n.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'))])));
+  expect(fromGo).toEqual(fromToday);
+  for(const id of ['sexuality','love','emotional','career']){
+   expect(Number.isFinite(fromGo[id]),'Gauge not calculated: '+id).toBe(true);
+   expect(fromGo[id]).toBeGreaterThanOrEqual(1);
+   expect(fromGo[id]).toBeLessThanOrEqual(99);
+  }
+  await expect(page.locator('.metric-card')).toHaveCount(0);
+  await page.screenshot({path:'artifacts/ui-qa/gomode-'+device+'-'+testInfo.project.name+'.png',fullPage:true});
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+  expect(overflow,'horizontal overflow').toBeLessThan(8);
+  await page.locator('[data-intel-tab="indicators"]').click();
+  await expect(page.locator('.metric-card')).toHaveCount(29);
+  await expect(page.locator('#intel-view [data-today-gauge]')).toHaveCount(0);
+  expect(errors).toEqual([]);
+  await context.close();
+ });
+}
+
