@@ -194,3 +194,68 @@
  .mx-travel-mode-page>.section-title h2{font-size:1.15rem}
  .mx-travel-intro{font-size:12px}
 }
+
+/* Travel Mode — the same value-dependent color language as the indicator gauges. */
+#live-view-body .mx-travel-mode-page .mx-travel-metric{
+ --travel-accent:#b0a2ef;
+ --travel-glow:rgba(176,162,239,.18);
+ --travel-tint:rgba(176,162,239,.085);
+ position:relative;
+ overflow:hidden;
+ border:1px solid color-mix(in srgb,var(--travel-accent) 40%,#3b365a);
+ background:linear-gradient(145deg,var(--travel-tint),rgba(20,23,40,.96) 72%);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 3px 18px rgba(0,0,0,.08);
+ transition:border-color .2s ease,background .2s ease;
+}
+#live-view-body .mx-travel-mode-page .mx-travel-metric.strong{
+ --travel-accent:#62e9ac;--travel-glow:rgba(69,207,146,.28);--travel-tint:rgba(53,192,129,.15);
+}
+#live-view-body .mx-travel-mode-page .mx-travel-metric.steady{
+ --travel-accent:#a6d887;--travel-glow:rgba(157,208,115,.22);--travel-tint:rgba(140,190,93,.12);
+}
+#live-view-body .mx-travel-mode-page .mx-travel-metric.caution{
+ --travel-accent:#f0be73;--travel-glow:rgba(239,174,88,.24);--travel-tint:rgba(220,157,61,.13);
+}
+#live-view-body .mx-travel-mode-page .mx-travel-metric.low{
+ --travel-accent:#f18e83;--travel-glow:rgba(239,123,111,.25);--travel-tint:rgba(215,96,94,.14);
+}
+#live-view-body .mx-travel-mode-page .mx-travel-metric>b{
+ color:var(--travel-accent)!important;
+ font-size:clamp(22px,2vw,29px)!important;
+ font-weight:850;
+ letter-spacing:-.04em;
+ font-variant-numeric:tabular-nums;
+ text-shadow:0 0 17px var(--travel-glow);
+}
+#live-view-body .mx-travel-mode-page .mx-travel-metric>b em{
+ color:#aeb4ca;
+ font-size:11px;
+ font-weight:500;
+ font-style:normal;
+ text-shadow:none;
+ letter-spacing:0;
+}
+#live-view-body .mx-travel-mode-page .mx-travel-metric small{
+ color:#e4e4f2!important;
+ font-weight:650;
+}
+#live-view-body .mx-travel-mode-page .mx-travel-metric .meter{
+ background:rgba(147,157,183,.19);
+ height:8px;
+ margin:8px 0 1px;
+ border-radius:999px;
+ overflow:hidden;
+}
+#live-view-body .mx-travel-mode-page .mx-travel-metric .meter>i{
+ display:block;
+ height:100%;
+ min-width:0;
+ background:linear-gradient(90deg,color-mix(in srgb,var(--travel-accent) 65%,#333d5f),var(--travel-accent))!important;
+ border-radius:999px;
+ box-shadow:0 0 11px var(--travel-glow);
+ transition:width .3s ease;
+}
+@media(prefers-reduced-motion:reduce){
+ #live-view-body .mx-travel-mode-page .mx-travel-metric,
+ #live-view-body .mx-travel-mode-page .mx-travel-metric .meter>i{transition:none}
+}
