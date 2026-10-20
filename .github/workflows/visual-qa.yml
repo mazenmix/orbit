@@ -5,6 +5,9 @@ on:
     paths:
       - 'src/**'
       - 'functions/api/**'
+      - 'package.json'
+      - 'tests/moonQualityMatrix.test.ts'
+      - 'tests/profileMoonSwitch.test.ts'
       - 'scripts/visual-qa.spec.cjs'
       - 'scripts/playwright.config.cjs'
       - 'scripts/qwen-live.mjs'
