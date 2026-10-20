@@ -1269,6 +1269,11 @@ function updateLiveSkyWheel(now:number){
    const natal=chartMode==='overlay'?(owner.id===active.id?data!.natal:chart(birthInstant(owner),owner)):null;
    reconcileLiveHTML(chartWheel,chartMode==='overlay'&&natal?wheel(natal,current):wheel(current));
   }
+  // Stamp the completed Swiss Ephemeris refresh on every visible wheel, including
+  // a modal left open on iOS or desktop. This is the calculation time, not a label.
+  for(const element of [small,todayWheel,enlarged,chartWheel]){
+   if(element)element.setAttribute('data-sky-calculated-at',at.toISOString());
+  }
   const time=root.querySelector<HTMLElement>('#detail[open] .mx-expanded-sky-time');
   if(time)time.textContent=dateText(at,{dateStyle:'full',timeStyle:'medium'});
  }catch(e){console.warn('Live sky wheel update unavailable',e)}
