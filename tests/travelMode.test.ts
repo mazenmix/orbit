@@ -53,7 +53,7 @@ test('Travel Mode does not replace all-29 Go Mode',()=>{
  assert.match(go,/go\.map/);
 });
 
-test('Go Mode and Travel Mode reuse exactly one indicator card renderer and identical grid classes',()=>{
+test('Go Mode and Travel Mode share markup and dimensions while Travel uniformly takes Attraction palette',()=>{
  const main=readFileSync('src/main.ts','utf8');
  const css=readFileSync('src/focus.css','utf8');
  const go=main.slice(main.indexOf('function goModePage(){'),main.indexOf('function travelModePage(){'));
@@ -73,4 +73,10 @@ test('Go Mode and Travel Mode reuse exactly one indicator card renderer and iden
  }
  assert.match(css,/\.metric-card>b\{/);
  assert.match(css,/\.metric-card \.meter>i\{/);
+ const turquoise=css.match(/#live-view-body \.mx-travel-mode-page \.metric-card\.mx-travel-metric\s*\{([^}]+)\}/);
+ assert.ok(turquoise,'Uniform Travel Mode palette must be isolated from Go Mode');
+ assert.match(turquoise[1],/--metric-accent:#68e0a6/);
+ assert.match(turquoise[1],/--metric-tint:rgba\(68,192,131,\.12\)/);
+ assert.match(turquoise[1],/--metric-glow:rgba\(68,192,131,\.19\)/);
+ assert.equal(css.match(/#live-view-body \.mx-travel-mode-page \.metric-card\.mx-travel-metric\s*\{/g)?.length,1);
 });
