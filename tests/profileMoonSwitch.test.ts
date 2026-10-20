@@ -109,3 +109,33 @@ test('Moon card changes practical advice with a different natal overlay and does
  assert.doesNotMatch(unknown,/بالشغل، خلّ أولويتك|صديق قريب/);
  for(const text of [atHome,atWork,unknown])assert.doesNotMatch(text,/البيت\s*\d+|درجات|°|\d+\/100/);
 });
+
+test('Moon text includes strongest real personal contact even when both natal-house contexts are already present',()=>{
+ const natal=chart(0),sky=chart(0);
+ natal.cusps=Array.from({length:12},(_,i)=>i*30);
+ natal.points.find(p=>p.id==='Moon')!.longitude=315; // An independent natal emotional focus.
+ sky.points.find(p=>p.id==='Moon')!.longitude=95; // Another active natal-house focus.
+ const baseline=moonPersonalSummary(r(natal,sky,'Venus',90),true,'ar');
+ const alternate=moonPersonalSummary(r(natal,sky,'Mercury',90),true,'ar');
+ const supportive=moonPersonalSummary(r(natal,sky,'Venus',120),true,'ar');
+ assert.match(baseline,/رتّب مساحة الراحة/); // Current Moon overlay.
+ assert.match(baseline,/صديق قريب/); // Natal emotional overlay.
+ assert.match(baseline,/بالتقارب/); // Strong personalized contact MUST NOT disappear.
+ assert.match(alternate,/رسالة مبهمة/);
+ assert.notEqual(baseline,alternate,'Changing only the strongest calculated natal target must change the visible prose.');
+ assert.notEqual(baseline,supportive,'Changing the calculated interpretation must change the visible prose.');
+ assert.doesNotMatch(baseline,banned);
+ assert.doesNotMatch(alternate,banned);
+});
+
+test('Moon reading omits low-confidence contacts and never invents birth houses with unknown birth time',()=>{
+ const natal=chart(0,false),sky=chart(0);
+ const report=r(natal,sky,'Venus',90);
+ report.evidence[0].weight=.2;
+ const low=moonPersonalSummary(report,false,'ar');
+ assert.doesNotMatch(low,/بالتقارب|البيت\s*\d+|\d+°/);
+ report.evidence[0].weight=.88;
+ const supported=moonPersonalSummary(report,false,'ar');
+ assert.match(supported,/بالتقارب/);
+ assert.doesNotMatch(supported,/البيت\s*\d+|\d+°/);
+});
