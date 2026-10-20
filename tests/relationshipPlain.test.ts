@@ -41,12 +41,13 @@ test('compact romance cards show attraction, sexual chemistry and practical syna
  const start=main.indexOf('function relationshipFocus('),end=main.indexOf('function peoplePage(){',start);
  assert.ok(start>=0&&end>start);
  const ui=main.slice(start,end);
- for(const fragment of ['relationshipBrief(c.evidence)','mx-brief-sexual','mx-brief-fact','المودة','الجنس','mx-brief-advice','mx-brief-bottom','mx-brief-details','<details']){
+ for(const fragment of ['relationshipBrief(c.evidence)','mx-brief-sexual','mx-brief-fact','المودة','الجنس','mx-brief-advice']){
   // Romantic reading and its technical evidence remain available.
   if(fragment==='المودة')continue;
   assert.ok(ui.includes(fragment),fragment);
  }
- assert.ok(ui.indexOf('mx-brief-sexual')<ui.indexOf('mx-brief-details'));
+ assert.ok(!ui.includes('mx-brief-bottom')&&!ui.includes('mx-brief-details'));
+ assert.ok(main.slice(end,main.indexOf('function aiPayload(){',end)).includes('synastry-technical'));
  assert.ok(!ui.includes('mx-partner-plain-card'));
  assert.ok(ui.includes("person.kind==='dating'||person.kind==='friend'"));
 });
