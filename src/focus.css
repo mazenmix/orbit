@@ -486,3 +486,61 @@
  #live-view-body .mx-focused-dashboard .mx-focus-moon small{font-size:9px}
  #live-view-body .mx-focused-dashboard .mx-focus-moon strong{font-size:12px}
 }
+
+/* Expanding Today changes scale, not the calculation lifecycle.
+ * The same live ephemeris renderer continues running inside this dialog. */
+#detail:has(.mx-expanded-sky){
+ width:min(870px,calc(100vw - 24px));
+ max-width:870px;
+ max-height:92dvh;
+ padding:19px 20px 21px;
+ overflow:auto;
+}
+#detail .mx-expanded-sky h2{
+ font-size:clamp(17px,2.5vw,23px);
+ line-height:1.4;
+ margin:7px 0;
+}
+#detail .mx-expanded-sky-time{
+ display:block;
+ margin:3px 0 8px;
+ text-align:center;
+ font-variant-numeric:tabular-nums;
+ color:#b9e3d3;
+ font-size:12px;
+}
+#detail .mx-expanded-wheel{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ margin:auto;
+ width:100%;
+ min-width:0;
+}
+#detail .mx-expanded-wheel svg.chart-wheel{
+ display:block;
+ width:min(100%,750px);
+ max-width:750px;
+ height:auto;
+ max-height:none;
+ margin:auto;
+ overflow:visible;
+}
+#detail .mx-expanded-sky-notes{
+ margin:8px auto 0;
+ color:#aab6ca;
+ text-align:center;
+ font-size:11px;
+ line-height:1.6;
+}
+@media(max-width:760px){
+ #detail:has(.mx-expanded-sky){
+  width:calc(100vw - 12px);
+  max-width:100%;
+  padding:10px 9px 14px;
+  border-radius:15px;
+ }
+ #detail .mx-expanded-sky-time{font-size:10px}
+ #detail .mx-expanded-wheel svg.chart-wheel{width:100%;max-width:100%;margin:0 auto}
+ #detail .mx-expanded-sky-notes{font-size:10px}
+}
