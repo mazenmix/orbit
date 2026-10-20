@@ -123,8 +123,8 @@ function livedNatalTheme(topic:SoulTopic,basis:NatalBasis[],specific:{ar:string;
  return {
   summaryAr:'بموضوع «'+topic.ar+'»، '+firstAr+' يسلّط الضوء على '+role(a.planet,true)+'، بينما '+secondAr+' يضيف '+role(b.planet,true)+'. '+bridgeAr,
   summaryEn:'For “'+topic.en+'”, '+firstEn+' symbolizes '+role(a.planet,false)+', while '+secondEn+' adds '+role(b.planet,false)+'. '+bridgeEn,
-  deepAr:meetingAr+' '+settingAr+' مثال واقعي حتى تختبر القراءة: '+specific.ar+'. إذا شفت هالنمط عندك، قوّي جانب '+rule.resource.ar+'، وانتبه من '+rule.risk.ar+'.',
-  deepEn:meetingEn+' '+settingEn+' A concrete situation to test the interpretation: '+specific.en+'. If it matches your actual experience, develop '+rule.resource.en+' while watching for '+rule.risk.en+'.'
+  deepAr:meetingAr+' '+settingAr+' وإذا شفت هالنمط بحياتك فعلاً، قوّي جانب '+rule.resource.ar+'، وانتبه من '+rule.risk.ar+'.',
+  deepEn:meetingEn+' '+settingEn+' If this pattern matches real situations in your life, develop '+rule.resource.en+' while watching for '+rule.risk.en+'.'
  };
 }
 export function soulReading(chart:Chart,topic:SoulTopic,options:SoulOptions={}):SoulReading{
@@ -152,7 +152,7 @@ export function soulReading(chart:Chart,topic:SoulTopic,options:SoulOptions={}):
  const knownTime=options.knownTime!==false;
  const lived=livedNatalTheme(topic,basis,specific,rule);
  return {topic,basis,basisStatus:'available',
-  summary:{ar:lived.summaryAr,en:lived.summaryEn},
+  summary:{ar:theme.focusAr+'. '+lived.summaryAr,en:theme.focusEn+'. '+lived.summaryEn},
   deep:{ar:lived.deepAr+(mixed?' أكو جوانب داعمة وجوانب متعارضة؛ لا تستخلص صفة ثابتة من جانب واحد.':'')+(retroAr?' '+retroAr:''),en:lived.deepEn+(mixed?' Both harmonious and challenging aspects exist, so avoid a one-sided conclusion.':'')+(retroTextEn?' '+retroTextEn:'')},
   strengths:{ar:[rule.resource.ar],en:[rule.resource.en]},weaknesses:{ar:[rule.risk.ar],en:[rule.risk.en]},
   example:{ar:specific.ar+'.',en:specific.en+'.'},advice:{ar:theme.actionAr,en:theme.actionEn},
