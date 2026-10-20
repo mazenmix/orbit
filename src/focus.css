@@ -141,3 +141,14 @@
 .mx-today-gauge-caption{font-size:.72rem!important;line-height:1.6!important;color:#aeb6d0!important;margin:10px 0 0!important}
 @media(max-width:880px){.mx-today-gauges .mx-focus-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:420px){.mx-today-gauges{padding:12px!important}.mx-today-gauges .mx-focus-metric{padding:10px 9px;grid-template-columns:20px 1fr auto;column-gap:5px}.mx-today-gauges .mx-focus-metric strong{font-size:1.18rem}.mx-today-gauges .mx-today-gauge-header h2{font-size:.9rem}.mx-today-gauges .mx-focus-metric b{font-size:.77rem}}
+
+/* MX Intelligence: separate indicators and Go Mode without duplicating the matrix. */
+.mx-intel-tabs{display:flex;align-items:center;gap:9px;margin:2px 0 16px;flex-wrap:wrap}
+.mx-intel-tab{min-height:43px;border:1px solid rgba(179,159,235,.24);background:rgba(113,104,170,.08);color:#c8c4e0;border-radius:12px;padding:9px 19px;font-weight:750;cursor:pointer}
+.mx-intel-tab:hover{border-color:#9286d7;background:rgba(115,101,191,.14)}
+.mx-intel-tab.is-current{color:#f5eeff;border-color:#a38bea;background:linear-gradient(125deg,rgba(112,81,178,.46),rgba(87,75,155,.28));box-shadow:inset 0 0 0 1px rgba(184,157,255,.1)}
+.mx-intel-tab:focus-visible{outline:2px solid #bda3fa;outline-offset:3px}
+.mx-intel-go .mx-today-gauges{margin-bottom:13px!important}
+.mx-intel-go .go-grid{margin-top:12px}
+.mx-intel-go .go-card{min-width:0}
+@media(max-width:440px){.mx-intel-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px}.mx-intel-tab{padding:8px 6px;font-size:12px!important;min-width:0}.mx-intel-go .mx-today-gauge-header h2{font-size:.85rem}}
