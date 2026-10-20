@@ -6,6 +6,7 @@ import './security.css';
 import './mychart.css';
 import './premium.css';
 import {moonSignReading} from './moonSignNarrative.ts';
+import {moonHumanReading} from './moonHuman.ts';
 import {precisionChartStories} from './chartPrecisionNarrative.ts';
 import './astroCalendar.css';
 import './typography.css';
@@ -633,40 +634,28 @@ function bindAstroCalendar(){
 }
 
 function moonAspectNarrative(event:LunarWindow['events'][number]){
- const planetTheme:Record<string,[string,string]>={
-  Sun:['وضوح المشاعر والاهتمام بالظهور','emotional visibility and self-expression'],
-  Mercury:['طريقة الحچي والرسائل وتفسير الكلام','conversations, messages and how words are understood'],
-  Venus:['الانسجام والعلاقات والذوق الشخصي','rapport, relationships and social comfort'],
-  Mars:['الانفعال والمبادرة وطريقة التصرف عند الضغط','impulse, initiative and handling irritation'],
-  Jupiter:['الثقة والتوسع والمبالغة بالتوقعات','confidence, perspective and overly large expectations'],
-  Saturn:['الحدود والواجبات والصبر','boundaries, obligations and patience']
+ const topics:Record<string,[string,string,string,string]>={
+  Sun:['قرار يخص ثقتك بنفسك','a decision about identity','إذا محتار، وضّح أولويتك قبل الجواب.','If unsure, clarify your priority before responding.'],
+  Mercury:['حوار أو خبر يحتاج فهم','a conversation needing clarity','إذا الكلام مبهم، اسأل بدل ما تفترض.','If wording is vague, ask instead of assuming.'],
+  Venus:['التقارب والتقدير','affection and appreciation','خلي الاهتمام واضح وخفيف وشوف الرد الحقيقي.','Express interest gently and assess the real response.'],
+  Mars:['المبادرة وردّة الفعل','initiative and reactions','اختار فعل محسوب بدل رد قد تندم عليه.','Choose a measured step instead of reacting impulsively.'],
+  Jupiter:['التوسع والتعلم','growth and learning','راجع التفاصيل قبل الوعد بشي أكبر.','Check the details before making big commitments.'],
+  Saturn:['الالتزام والمسؤولية','commitment and responsibilities','حدد حدودك والمطلوب منك قبل الموافقة.','Define your limits and the task before agreeing.']
  };
- const angleTheme:Record<number,[string,string]>={
-  0:['يزيد التركيز الرمزي على الموضوع.','Symbolically, the theme takes greater focus.'],
-  60:['يفتح مجال لتواصل أو تعديل مرن.','Symbolically, this favors a flexible small adjustment.'],
-  90:['يشير لاحتكاك رمزي يحتاج توازن.','Symbolically, tension invites a more balanced approach.'],
-  120:['يشير لانسياب رمزي بس مو ضمان نتيجة.','Symbolically, flow is emphasized, not a guaranteed result.'],
-  180:['يبرز اختلاف حاجتين ويحتاج إنصات للطرفين.','Symbolically, two competing needs call for perspective.']
- };
- const what=planetTheme[event.target]??[t('معنى الكوكب','The planet theme'),t('معنى الكوكب','The planet theme')];
- const how=angleTheme[event.angle]??angleTheme[0];
- return t('القمر يسوي '+aspect(event.angle)+' دقيق ويا '+planet(event.target)+'؛ الموضوع الرمزي هنا '+what[0]+'. '+how[0],
-  'The Moon forms an exact '+aspect(event.angle)+' with '+planet(event.target)+', highlighting '+what[1]+'. '+how[1]);
+ const item=topics[event.target]??['موضوع يحتاج انتباه','a topic worth attention','خلّي الواقع هو المعيار.','Use reality as the yardstick.'];
+ const tension=event.angle===90||event.angle===180;
+ return t('اليوم راقب '+item[0]+'. '+(tension?'قد تتزاحم عندك أولويتان؛ لا تحسم وأنت مستعجل. ':'تگدر تتعامل وياه بخطوة هادئة. ')+item[2],
+  'Pay attention to '+item[1]+'. '+(tension?'Two priorities may pull against each other; avoid rushing. ':'A measured approach may help. ')+item[3]);
 }
 function moonMomentNarrative(window:LunarWindow){
  const future=window.events.find(e=>+e.time>+selected);
- const ifVoid=window.isVoid?
-  t('القمر خلّص آخر اتصال دقيق له بهذا البرج، وهسه إلى انتقاله للبرج القادم ماكو اتصال رئيسي كلاسيكي جديد وفق هالتعريف. مو معنى هذا أن اليوم فاشل؛ إذا عندك خطوة مهمة، راجع تفاصيلها ولا تعتمد على التنجيم وحده.',
-  'The Moon has passed its last classical exact aspect in this sign; there are no more such major contacts until ingress under this convention. It does not mean that a plan will fail; use practical facts to assess decisions.'):
-  future?t('القمر بعده يصنع اتصالات دقيقة بهذا البرج. أقرب واحد هو '+planet(future.target)+' ('+aspect(future.angle)+')؛ '+moonAspectNarrative(future),
-  'The Moon has further exact aspects in this sign. The next is with '+planet(future.target)+' ('+aspect(future.angle)+'). '+moonAspectNarrative(future)):
-  t('ماكو اتصال رئيسي دقيق باقي ضمن حسابات هذا البرج. نتابع دخول القمر للبرج القادم بدل ما نخترع حدث أو نتيجة.',
-  'No additional exact classical contact remains in this sign. The next sign ingress is the verified upcoming astronomical event.');
- return ifVoid+' '+t('هذه قراءة فلكية حسابية وتأويل رمزي، مو سبب مثبت للأحداث أو لقرارات الأمان.','These are calculated events with symbolic interpretations, not proven causes of events or a safety assessment.');
+ if(window.isVoid)return t('خلّي هالفترة للأعمال البسيطة ومراجعة التفاصيل إذا يفيدك. ما معناها أن اليوم سيّئ، ولا تحدد مصير أي قرار.','Use this interval for routine tasks and reviewing details; it does not make the day bad or determine your decisions.');
+ return future?moonAspectNarrative(future):
+  t('ماكو موضوع إضافي قوي بهالوقت حتى ننسب إله حدث من خيالنا. اعتمد على الوقائع قبل أي قرار.','No additional strong theme stands out. Use actual circumstances when deciding.');
 }
 
 function moonSignLiveHtml(sign:number,r:Report):string{
- const lines=moonSignReading(sign,r.current,r.natal,active.known,lang==='ar');
+ const lines=moonHumanReading(sign,r,active.known,lang);
  return lines.map((line,i)=>'<p class="mx-moon-sign-line'+(i===4?' mx-moon-personal':'')+'"><span aria-hidden="true">'+(i===4?'✧':'◦')+'</span>'+esc(line)+'</p>').join('');
 }
 function updateLiveMoonSign(now:number){
@@ -708,10 +697,10 @@ function lunarPage(){
   const w=moonWindow(),last=w.lastAspect,when=w.isVoid?w.ingressAt:w.vocStartsAt;
   const date=(at:Date)=>dateText(at,{weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
   const tile=(label:string,at:Date,cls:string,symbol:'entered'|'next'|'voc-start'|'voc-end')=>'<div class="premium-time-tile '+cls+'"><div class="time-tile-top"><span class="mx-lunar-tile-icon">'+lunarUiIcon(symbol)+'</span><small>'+label+'</small></div><time datetime="'+at.toISOString()+'">'+date(at)+'</time><span class="time-tile-zone">'+esc(active.zone)+'</span></div>';
-  const lastLabel=last?planet(last.transit)+' · '+aspect(last.angle)+' · '+planet(last.target):t('ما انحسب اتصال كلاسيكي دقيق ضمن البرج الحالي.','No classical exact aspect in the current sign.');
+  const lastLabel=last?moonAspectNarrative(last):t('ماكو موضوع إضافي مهيمن بهالفترة.','No additional dominant theme in this interval.');
   return '<div class="section-title"><div><span class="eyebrow">MX EYE · MOON TIMING</span><h2>'+t('توقيت القمر وخلو المسار','Moon timing and void-of-course')+'</h2></div></div>'+
    '<div class="lunar-premium-grid"><section class="panel lunar-premium-card"><div class="lunar-card-heading"><span class="lunar-emblem" aria-hidden="true">'+lunarUiIcon('moon')+'</span><div><small>'+t('موقع القمر الحالي · بث حي','CURRENT MOON SIGN · LIVE')+'</small><h2>'+signName(w.sign*30)+'</h2></div></div>'+lunarGaugeMarkup('moon',w.enteredAt,w.ingressAt)+'<div class="mx-moon-sign-reading" id="mx-moon-sign-reading" data-moon-sign="'+w.sign+'">'+moonSignLiveHtml(w.sign,data!)+'</div><div class="premium-time-pair">'+tile(t('دخل البرج الحالي','Entered current sign'),w.enteredAt,'lunar-muted','entered')+tile(t('يدخل البرج القادم','Next sign ingress'),w.ingressAt,'lunar-teal','next')+'</div></section>'+
-   '<section class="panel lunar-premium-card mx-voc-status '+(w.isVoid?'is-voc':'is-clear')+'" data-voc-start="'+(+w.vocStartsAt)+'" data-voc-end="'+(+w.ingressAt)+'"><div class="lunar-card-heading"><span class="lunar-emblem violet" aria-hidden="true">'+lunarUiIcon('void')+'</span><div><small>VOID OF COURSE</small><h2>'+ (w.isVoid?t('القمر خالي المسار الآن','Moon is void-of-course'):t('القمر خارج خلو المسار','Moon is not VOC'))+'</h2></div><span class="lunar-state">'+(w.isVoid?t('فعّال','Active'):t('غير فعّال','Not active'))+'</span></div><div class="mx-lunar-live-row"><span class="mx-lunar-live-indicator"><i></i>'+(liveTimePinned?t('وقت مختار','SELECTED TIME'):'LIVE')+'</span><span class="mx-lunar-countdown" data-voc-countdown></span></div>'+lunarGaugeMarkup('voc',w.vocStartsAt,w.ingressAt,w.enteredAt)+'<p>'+t('هاي الفترة تبدأ بعد آخر زاوية رئيسية دقيقة للقمر، وتنتهي لحظة دخوله البرج الجديد.','This interval begins after the Moon’s final exact major aspect and ends with the next sign ingress.')+'</p><div class="premium-time-pair">'+tile(t('بداية خلو المسار','VOC begins'),w.vocStartsAt,'lunar-violet','voc-start')+tile(t('نهاية خلو المسار','VOC ends'),w.ingressAt,'lunar-gold','voc-end')+'</div></section></div>'+
+   '<section class="panel lunar-premium-card mx-voc-status '+(w.isVoid?'is-voc':'is-clear')+'" data-voc-start="'+(+w.vocStartsAt)+'" data-voc-end="'+(+w.ingressAt)+'"><div class="lunar-card-heading"><span class="lunar-emblem violet" aria-hidden="true">'+lunarUiIcon('void')+'</span><div><small>VOID OF COURSE</small><h2>'+ (w.isVoid?t('القمر خالي المسار الآن','Moon is void-of-course'):t('القمر خارج خلو المسار','Moon is not VOC'))+'</h2></div><span class="lunar-state">'+(w.isVoid?t('فعّال','Active'):t('غير فعّال','Not active'))+'</span></div><div class="mx-lunar-live-row"><span class="mx-lunar-live-indicator"><i></i>'+(liveTimePinned?t('وقت مختار','SELECTED TIME'):'LIVE')+'</span><span class="mx-lunar-countdown" data-voc-countdown></span></div>'+lunarGaugeMarkup('voc',w.vocStartsAt,w.ingressAt,w.enteredAt)+'<p>'+t('إذا عندك قرار مهم، راجع ظروفه ومعلوماته الفعلية. التوقيت يساعدك ترتب، مو يقرر عنك.','For important decisions, check the actual facts first. Timing helps with planning, not predicting results.')+'</p><div class="premium-time-pair">'+tile(t('بداية خلو المسار','VOC begins'),w.vocStartsAt,'lunar-violet','voc-start')+tile(t('نهاية خلو المسار','VOC ends'),w.ingressAt,'lunar-gold','voc-end')+'</div></section></div>'+
    '<section class="panel lunar-advice-card"><div class="lunar-advice-head"><div><span class="eyebrow">MX EYE · EXPLAINED TIMING</span><h2>'+t('شنو معناه بهاللحظة؟','How to use this timing')+'</h2></div><span class="lunar-advice-badge">'+(w.isVoid?t('خلو المسار فعّال','Void-of-course active'):t('القمر يتحرك باتجاه اتصالاته','Moon approaching aspects'))+'</span></div><p class="mx-lunar-explained">'+moonMomentNarrative(w)+'</p><div class="lunar-last-aspect"><small>'+t('آخر اتصال دقيق قبل الانتقال','Last exact major aspect')+'</small><strong>'+lastLabel+'</strong>'+(last?'<time datetime="'+last.time.toISOString()+'">'+date(last.time)+'</time>':'')+'</div><div class="button-row"><button id="export-lunar-calendar" class="primary">'+(w.isVoid?t('أضف موعد انتقال القمر للتقويم','Add next ingress to calendar'):t('أضف بداية خلو المسار للتقويم','Add VOC start to calendar'))+'</button><button class="secondary" data-go="time">'+t('افتح آلة الزمن','Open Time Machine')+'</button></div><small>'+t('تذكير التقويم: ','Calendar reminder: ')+date(when)+'</small></section>'+
    '<section class="panel lunar-timeline"><div class="section-title"><div><span class="eyebrow">EXACT EPHEMERIS · MEANING</span><h2>'+t('الاتصالات الدقيقة بهذا البرج','Exact aspects in this sign')+'</h2></div></div><p class="mx-lunar-timeline-lead">'+t('الأوقات أدناه لحظات فلكية دقيقة محسوبة، والنص يشرح معناها الرمزي بلغة سهلة. الأحداث الماضية مكتوب عليها «صار»، والقادمة «قادم».','Times below are calculated exact astronomical contacts with a plain-language symbolic explanation. Past and upcoming events are marked.')+'</p><div class="premium-timeline">'+(w.events.length?w.events.map(e=>'<div class="timeline-entry '+(+e.time<=+selected?'mx-aspect-past':'mx-aspect-upcoming')+'"><span class="timeline-dot"></span><div><b>'+planet(e.transit)+' · '+aspect(e.angle)+' · '+planet(e.target)+'</b><span class="mx-aspect-phase">'+(+e.time<=+selected?t('صار بالفعل','Already exact'):t('قادم','Upcoming'))+'</span><time datetime="'+e.time.toISOString()+'">'+date(e.time)+'</time><p class="mx-lunar-aspect-story">'+moonAspectNarrative(e)+'</p></div></div>').join(''):'<p>'+t('ماكو زاوية كلاسيكية دقيقة ضمن التعريف المحدد.','No exact classical aspects under the chosen convention.')+'</p>')+'</div><details><summary>'+t('طريقة الحساب الفلكي','Astronomical calculation convention')+'</summary><p>'+t('يستخدم آخر زاوية رئيسية دقيقة للقمر مع الشمس أو عطارد أو الزهرة أو المريخ أو المشتري أو زحل، حتى لحظة دخوله البرج التالي.','Uses the last exact major aspect of the Moon to the Sun, Mercury, Venus, Mars, Jupiter or Saturn until its next sign ingress.')+'</p></details></section>';
  }catch(e){return '<section class="panel"><h2>'+t('تعذر حساب القمر','Moon calculation unavailable')+'</h2><p class="alert">'+esc(String(e))+'</p></section>'}
