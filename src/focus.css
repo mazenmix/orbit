@@ -164,3 +164,33 @@
 .mx-go-mode-page>.panel,.mx-go-mode-page>.mx-today-gauges{margin:0!important}
 .mx-go-mode-page .metrics-grid{min-width:0}
 .mx-go-mode-page .metric-card,.mx-go-mode-page .go-card{min-width:0}
+
+/* Philippines travel shortlist: the same calculated 12 indices, no second scoring engine. */
+.mx-travel-mode-page{min-width:0;display:grid;gap:13px}
+.mx-travel-mode-page>.section-title{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:0}
+.mx-travel-mode-page>.section-title h2{margin:4px 0 0}
+.mx-travel-mode-page>.section-title .mx-travel-all{min-height:37px}
+.mx-travel-intro{margin:0 0 4px;color:#bbc3d9;font-size:13px;line-height:1.8}
+.mx-travel-group{padding:16px 18px!important;margin:0!important;border:1px solid rgba(167,145,213,.2);border-radius:14px}
+.mx-travel-group .section-title{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mx-travel-group h2{font-size:1.03rem}
+.mx-travel-description{font-size:12px;line-height:1.7;color:#aeb9d5;margin:5px 0 14px!important}
+.mx-travel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mx-travel-metric{min-width:0;margin:0!important;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
+.mx-travel-metric small{line-height:1.4}
+.mx-travel-metric b{font-variant-numeric:tabular-nums}
+.mx-travel-note{margin:0!important;padding:14px 18px!important}
+.mx-travel-note h3{margin:0 0 8px}
+.mx-travel-note p{font-size:12px;line-height:1.75}
+.mx-travel-note small{display:block;color:#97a4bf;line-height:1.6}
+@media(max-width:750px){.mx-travel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-travel-mode-page>.section-title .mx-travel-all{font-size:11px!important}}
+@media(max-width:420px){
+ .mobile-nav .nav-item{min-width:0;padding-inline:0}
+ .mobile-nav .nav-item span{font-size:17px}
+ .mobile-nav .nav-item b{font-size:clamp(6.6px,1.9vw,8px);letter-spacing:-.12px}
+ .mx-travel-group{padding:12px!important}
+ .mx-travel-grid{gap:8px}
+ .mx-travel-mode-page>.section-title{align-items:flex-start}
+ .mx-travel-mode-page>.section-title h2{font-size:1.15rem}
+ .mx-travel-intro{font-size:12px}
+}
