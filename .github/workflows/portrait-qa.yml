@@ -4,6 +4,12 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/portrait-qa.yml'
+      - 'src/main.ts'
+      - 'src/moonPersonal.ts'
+      - 'src/natalPortrait.ts'
+      - 'scripts/visual-qa.spec.cjs'
+      - 'tests/profileMoonSwitch.test.ts'
+      - 'pnpm-lock.yaml'
   workflow_dispatch:
 permissions:
   contents: read
