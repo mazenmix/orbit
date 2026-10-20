@@ -399,11 +399,22 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/#go',{waitUntil:'domcontentloaded'});
   await expect(page.locator('[data-section="go"]')).toBeVisible({timeout:75000});
-  const original=Object.fromEntries(await page.locator('.metric-card').evaluateAll(rows=>rows.map(row=>{
-   const title=row.querySelector('small')?.textContent?.trim();
-   const value=Number(row.querySelector('b')?.textContent?.replace(/[^0-9]/g,'').replace(/100$/,''));
-   return [title,value];
-  })));
+  // Compare the exact computed Go Mode card design against the Travel Mode
+  // counterpart for the same calculated metric, not a merely similar palette.
+  const metricStyle=rows=>rows.map(row=>{
+   const style=getComputedStyle(row);
+   const number=getComputedStyle(row.querySelector('b'));
+   const bar=getComputedStyle(row.querySelector('.meter'));
+   const fill=getComputedStyle(row.querySelector('.meter i'));
+   return [row.getAttribute('data-indicator-id'),{
+    value:Number(row.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')),
+    width:Math.round(row.getBoundingClientRect().width*10)/10,
+    padding:style.padding,borderRadius:style.borderRadius,borderColor:style.borderColor,
+    background:style.backgroundImage,numberFont:number.fontSize,numberColor:number.color,
+    barHeight:bar.height,barFill:fill.backgroundImage
+   }];
+  });
+  const goStyle=Object.fromEntries(await page.locator('.mx-go-mode-indicators [data-indicator-id]').evaluateAll(metricStyle));
   const nav=device==='iphone'?page.locator('.mobile-nav'):page.locator('.sidebar .nav');
   const options=await nav.locator('[data-go]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-go')));
   expect(options).toEqual(['today','chart','people','go','travelmode','calendar','more']);
@@ -412,6 +423,15 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('[data-section="travelmode"]')).toBeVisible({timeout:75000});
   await expect(page.locator('[data-travel-group]')).toHaveCount(3);
   await expect(page.locator('[data-travel-metric]')).toHaveCount(12);
+  const travelStyle=Object.fromEntries(await page.locator('[data-travel-metric]').evaluateAll(metricStyle));
+  for(const [id,seen] of Object.entries(travelStyle)){
+   const expected=goStyle[id];
+   expect(expected,'Missing same indicator '+id+' in Go Mode').toBeTruthy();
+   for(const property of ['value','padding','borderRadius','borderColor','background','numberFont','numberColor','barHeight','barFill']){
+    expect(seen[property],'Style mismatch for '+id+' property '+property).toEqual(expected[property]);
+   }
+   expect(Math.abs(seen.width-expected.width),'Gauge width mismatch: '+id).toBeLessThanOrEqual(1);
+  }
   expect(await page.locator('[data-travel-group]').evaluateAll(rows=>rows.map(r=>r.querySelectorAll('[data-travel-metric]').length))).toEqual([6,3,3]);
   const ids=await page.locator('[data-travel-metric]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-travel-metric')));
   expect(ids).toEqual(['dating','newpeople','social','attraction','romance','chemistry','sexuality','desire','nightlife','travel','risk','sleep']);
