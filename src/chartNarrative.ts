@@ -27,10 +27,19 @@ const areas=[
  {key:'Jupiter',ar:'فرص التطوّر',en:'Growth opportunities',themeAr:'الطريقة التي تميل بها إلى توسيع خبرتك',themeEn:'How you approach learning and expansion',actionAr:'تعلم مهارة جديدة بطريقة قابلة للقياس.',actionEn:'Develop one measurable new skill.'},
  {key:'Saturn',ar:'المسؤولية والحدود',en:'Responsibility & limits',themeAr:'المواضيع التي تحتاج منك صبر وخطة',themeEn:'Where patience and steady structure matter',actionAr:'قسّم الالتزام الكبير إلى خطوات أسبوعية صغيرة.',actionEn:'Break a large commitment into weekly steps.'}
 ] as const;
+const livedArea:Record<string,[string,string]>={
+ Sun:['مثلاً: يوم يصير خلاف على قرار مهم، شلون توازن بين قناعتك وبين توقعات المحيط؟','For example, consider how you balance conviction with others\' expectations when making a decision.'],
+ Moon:['مثلاً: من تكون مرهق، شنو التصرف اللي يرجعلك إحساس الهدوء بدل ما تفرغ ضيقك بشخص ثاني؟','When tired, what actually restores calm instead of directing frustration at someone?'],
+ Mercury:['مثلاً: بالنقاشات والشغل، هل تختصر الفكرة للناس لو تدخل بتفاصيل تضيع الرسالة؟','At work or in a conversation, do you make the point clear or bury it in details?'],
+ Venus:['مثلاً: بالعلاقة، هل تحس بالاهتمام من الكلام الحلو لو من الاستمرارية والمواقف؟ احچي تفضيلك بدل ما تفترضه.','In relationships, do words or consistent actions feel more caring? Express your preference.'],
+ Mars:['مثلاً: من تتعرض لضغط، هل تبادر بحسم المشكلة لو تندفع قبل ما تكتمل المعلومات؟','Under pressure, do you take useful initiative or rush before the facts are clear?'],
+ Jupiter:['مثلاً: فرصة سفر أو تعلم أو شغل جديد قد تشجعك؛ قارن الحماس بالكلفة والوقت قبل الالتزام.','For an opportunity to travel, learn or work, compare excitement with actual time and costs.'],
+ Saturn:['مثلاً: الالتزام اللي تتجنب بدايته يصير أسهل إذا قسمت أول أسبوع لخطوات واضحة.','A difficult commitment becomes easier to approach when its first week has clear steps.']
+};
 export function chartStories(chart:Chart,knownTime=true):ChartInsight[]{
  const readable=interpretableNatalPoints(chart.points,knownTime);
  return areas.flatMap(area=>{const p=readable.find((p:Point)=>p.id===area.key);if(!p)return [];const sign=signs[Math.floor((((p.longitude%360)+360)%360)/30)];
- return [{titleAr:area.ar,titleEn:area.en,signAr:sign[0],signEn:sign[1],ar:'وجود '+namesAr[area.key]+' ببرج '+sign[0]+' يربط '+area.themeAr+' بموضوع '+sign[2]+'، وفق التفسير الرمزي للخارطة.',en:area.key+' in '+sign[1]+' links '+area.themeEn+' with '+sign[3]+' symbolically.',actionAr:area.actionAr,actionEn:area.actionEn}];
+ return [{titleAr:area.ar,titleEn:area.en,signAr:sign[0],signEn:sign[1],ar:'وجود '+namesAr[area.key]+' ببرج '+sign[0]+' يربط رمزياً '+area.themeAr+' بأسلوب '+sign[2]+'. مو حكم ثابت على شخصيتك: شوف إذا هذا النمط يبان بقراراتك الفعلية. '+livedArea[area.key][0],en:area.key+' in '+sign[1]+' symbolically connects '+area.themeEn+' with '+sign[3]+'. It is a reflection prompt rather than a fixed personality verdict. '+livedArea[area.key][1],actionAr:area.actionAr,actionEn:area.actionEn}];
  });
 }
 export function profileAddress(profile:Pick<Profile,'sex'|'name'>,arabic=true){
