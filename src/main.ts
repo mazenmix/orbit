@@ -26,6 +26,7 @@ import {partnerInsights,gaugeLevel} from './peopleInsights.ts';
 import {personalTransitPlainReading} from './relationshipPlain.ts';
 import {relationshipBrief} from './relationshipBrief.ts';
 import {signalStory} from './readingNarrative.ts';
+import {humanPlanet,humanSoul,humanPartner} from './humanReading.ts';
 import {decodePrivateSetup} from './privateSetup.ts';
 import {readJournal,writeJournal,checkJournal,parseJournalBackup,summarizeJournal,type JournalEntry,type InteractionKind,type Outcome} from './journal.ts';
 import {reviewEvidence,reviewSignal} from './decision.ts';
@@ -376,7 +377,7 @@ function natalAsteroidDetails(person:Profile,natal:Chart){
 }
 function chartSpecificFingerprint(person:Profile,natal:Chart){
  const readings=precisionChartStories(natal,undefined,[],person.known).slice(0,4);
- return '<section class="panel mx-chart-fingerprint"><h3>'+t('البصمة الحسابية الفريدة لصاحب الخارطة','This chart owner’s calculated natal fingerprint')+'</h3><div class="mx-chart-fingerprint-grid">'+readings.map(r=>'<article><b>'+t(r.titleAr,r.titleEn)+'</b><p>'+t(r.ar,r.en)+'</p></article>').join('')+'</div></section>';
+ return '<section class="panel mx-chart-fingerprint"><h3>'+t('ملامح شخصيتك بالحياة اليومية','Your real-life reflection themes')+'</h3><div class="mx-chart-fingerprint-grid">'+readings.map(r=>{const plain=humanPlanet(r);return '<article><b>'+t(plain.title.ar,plain.title.en)+'</b><p>'+t(plain.summary.ar,plain.summary.en)+'</p></article>'}).join('')+'</div></section>';
 }
 
 function chartPage(){
@@ -393,10 +394,10 @@ function chartPage(){
  const owner=profileAddress(person,lang==='ar'),info=precisionChartStories(r.natal,chartMode==='natal'?undefined:r.current,chartMode==='natal'?[]:r.evidence,person.known),now=transitOverview(r);
  const sex=person.sex==='male'?'Male':person.sex==='female'?'Female':t('مو محدد','Not specified');
  const chartLead=chartMode==='natal'?t('هاي خارطة الميلاد الثابتة؛ التفاصيل أدناه تخص صاحب أو صاحبة الخارطة، مو أحداث اليوم.','This is the fixed natal chart; its descriptions concern the owner, not events today.'):chartMode==='transit'?t('هنا حركة الكواكب في الوقت المختار؛ التفسير مرتبط بالحاضر مو بطباع الشخص الثابتة.','These are current transits for the chosen moment, not fixed personality traits.'):t('المقارنة تعرض حركة اليوم فوق مواضع الميلاد. الألوان والرموز توضح الطبقتين.','The overlay compares current transits with natal positions. Colored symbols distinguish the layers.');
- const cards=info.map(x=>'<article class="chart-story"><span class="eyebrow">'+t(x.titleAr,x.titleEn)+' · '+t(x.signAr,x.signEn)+'</span><p>'+t(x.ar,x.en)+'</p><p class="advice-action"><b>'+t('نصيحة عملية: ','Practical suggestion: ')+'</b>'+(lang==='ar'?actionForGender(x.actionAr,person.sex):x.actionEn)+'</p></article>').join('');
+ const cards=info.map(x=>{const direct=humanPlanet(x);return '<article class="chart-story"><span class="eyebrow">'+t(direct.title.ar,direct.title.en)+'</span><p>'+t(direct.summary.ar,direct.summary.en)+'</p><p class="advice-action"><b>'+t('خطوة مفيدة: ','Useful step: ')+'</b>'+t(direct.action.ar,direct.action.en)+'</p></article>'}).join('');
  const lead=chartOwnerHeader(person);
  const stories='<section class="panel"><div class="section-title"><h2>'+t('قراءة الكواكب والزوايا لصاحب الخارطة','Planetary placements and calculated aspects for this person')+'</h2></div><div class="chart-stories">'+cards+'</div></section>';
- const natalBrief=soulReading(r.natal,soulTopics[0],{knownTime:person.known});
+ const natalBrief=humanSoul(soulReading(r.natal,soulTopics[0],{knownTime:person.known}));
  const daily='<section class="panel chart-transit-summary"><h2>'+t('شنو تقول الحركة الفلكية عن اللحظة؟','What stands out at this moment?')+'</h2><p>'+t(now.ar,now.en)+'</p><div class="mini-trends">'+r.signals.slice(0,4).map(signal=>'<div class="trend-item"><b>'+cat(signal.category)+'</b><span class="reading-level '+gaugeLevel(signal.score)+'">'+signal.score+'</span><small>'+esc(copy(signal).action)+'</small></div>').join('')+'</div></section>';
  return '<div class="section-title"><div class="segmented"><button data-chart="natal" class="'+(chartMode==='natal'?'selected':'')+'">'+t('خارطة الولادة','Natal')+'</button><button data-chart="transit" class="'+(chartMode==='transit'?'selected':'')+'">'+t('العبور','Transits')+'</button><button data-chart="overlay" class="'+(chartMode==='overlay'?'selected':'')+'">'+t('مقارنة العبور','Transit overlay')+'</button><button data-chart="details" class="'+(chartMode==='details'?'selected':'')+'">'+t('التفاصيل','Details')+'</button></div></div>'+lead+
  (!person.known||!c.cusps.length?'<div class="alert">'+t('وقت الميلاد غير معروف أو البيوت غير متاحة لهذا الموقع، لهذا ما نظهر أرقام بيوت غير موثوقة.','Birth time unknown or houses unavailable for these coordinates, so house positions are not invented.')+'</div>':'')+
@@ -773,6 +774,7 @@ function relationshipWindowUI(person:Profile){
 }
 function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
  const brief=relationshipBrief(c.evidence);
+ const peopleMeaning={attraction:humanPartner(brief.attractionContact,'attraction'),sexual:humanPartner(brief.sexualContact,'sexual'),harmony:humanPartner(brief.harmonyContact,'harmony'),challenge:humanPartner(brief.challengeContact,'challenge')};
  const text=(v:{ar:string;en:string})=>esc(t(v.ar,v.en));
  const romantic=person.kind==='dating'||person.kind==='friend';
  const evidenceLine=(labelAr:string,labelEn:string,e:typeof c.evidence[number]|null)=>{
@@ -784,10 +786,10 @@ function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
  const attraction=romantic?
   '<article class="mx-brief-card mx-brief-sexual"><small>♥ '+t('الجاذبية والجنس','ATTRACTION & SEX')+'</small>'+
    '<h3>'+t('الانجذاب والكيمياء الجنسية','Attraction & sexual chemistry')+'</h3>'+
-   '<div class="mx-brief-fact"><b>'+t('الجاذبية','Attraction')+'</b><p>'+text(brief.attraction)+'</p></div>'+
-   '<div class="mx-brief-fact"><b>'+t('الجنس','Sexual chemistry')+'</b><p>'+text(brief.sexual)+'</p></div></article>':'';
- const harmony=card('✦','أقوى انسجام','MAIN HARMONY',text(brief.harmonyTitle),text(brief.harmony),text(brief.harmonyAction));
- const challenge=card('◇','أبرز تحدّي','MAIN CHALLENGE',text(brief.challengeTitle),text(brief.challenge),text(brief.challengeAction));
+   '<div class="mx-brief-fact"><b>'+t('الجاذبية','Attraction')+'</b><p>'+text(peopleMeaning.attraction)+'</p></div>'+
+   '<div class="mx-brief-fact"><b>'+t('الجنس','Sexual chemistry')+'</b><p>'+text(peopleMeaning.sexual)+'</p></div></article>':'';
+ const harmony=card('✦','أقوى انسجام','MAIN HARMONY',text(brief.harmonyTitle),text(peopleMeaning.harmony),text(brief.harmonyAction));
+ const challenge=card('◇','أبرز تحدّي','MAIN CHALLENGE',text(brief.challengeTitle),text(peopleMeaning.challenge),text(brief.challengeAction));
  const partnerReport=report(person,selected);
  const activeTransit=rankPrioritySignals({signals:data!.signals,natal:data!.natal,knownBirthTime:active.known,complete:data!.complete}).find(x=>x.factor.applying);
  const partnerTransit=rankPrioritySignals({signals:partnerReport.signals,natal:partnerReport.natal,knownBirthTime:person.known,complete:partnerReport.complete}).find(x=>x.factor.applying);
