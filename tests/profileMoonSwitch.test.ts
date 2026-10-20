@@ -63,3 +63,34 @@ test('user profile selection drives selected chart not active profile',()=>{
  assert.match(main,/data-chart-owner/);
  assert.match(main,/moonPersonalSummary\(r,active\.known,lang\)/);
 });
+
+test('Moon house labels distinguish natal house 11, current sky house 10 and transit over natal house 4',()=>{
+ const natal=chart(0);
+ natal.cusps=Array.from({length:12},(_,i)=>i*30);
+ natal.points.find(p=>p.id==='Moon')!.longitude=315; // Natal 11th.
+ const sky=chart(0);
+ sky.cusps=Array.from({length:12},(_,i)=>(170+i*30)%360);
+ sky.points.find(p=>p.id==='Moon')!.longitude=95; // Transit sky 10th, natal overlay 4th.
+ const value=r(natal,sky,'Venus',120);
+ const ar=moonPersonalSummary(value,true,'ar');
+ const en=moonPersonalSummary(value,true,'en');
+ assert.match(ar,/خارطة العبور الحالية القمر بالبيت 10/);
+ assert.match(ar,/قمرك الولادي بالبيت 11/);
+ assert.match(ar,/القمر العابر.*بيوت ميلادك.*البيت 4/);
+ assert.match(ar,/بيت العبور الحالي يختلف/);
+ assert.match(en,/current transit chart the Moon is in house 10/);
+ assert.match(en,/natal Moon is in house 11/);
+ assert.match(en,/natal house cusps.*house 4/);
+});
+test('Moon summary never invents family from a natal Moon in house 11 or a transit Moon in house 10',()=>{
+ const natal=chart(0),sky=chart(0);
+ natal.cusps=Array.from({length:12},(_,i)=>i*30);
+ sky.cusps=[...natal.cusps];
+ natal.points.find(p=>p.id==='Moon')!.longitude=315; // Natal 11th.
+ sky.points.find(p=>p.id==='Moon')!.longitude=285; // Current 10th, overlay 10th.
+ const ar=moonPersonalSummary(r(natal,sky,'Venus',120),true,'ar');
+ assert.match(ar,/القمر بالبيت 10/);
+ assert.match(ar,/قمرك الولادي بالبيت 11/);
+ assert.match(ar,/على بيوت ميلادك، فيقع بالبيت 10/);
+ assert.doesNotMatch(ar,/البيت والعائلة/);
+});
