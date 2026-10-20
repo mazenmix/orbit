@@ -466,7 +466,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
  });
 }
 
-\n// Actual browser checks, not just DOM-string assertions. Runs on Chromium and
+// Actual browser checks, not just DOM-string assertions. Runs on Chromium and
 // WebKit (Safari engine) at desktop, tablet and iPhone-sized viewports.
 for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['iphone',390,844]]){
  test(device+' compact Today Moon and VOC green gauges with a genuinely refreshing enlarged sky wheel',async({browser})=>{
