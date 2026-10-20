@@ -69,7 +69,7 @@ const point=(chart:Chart,id:string)=>chart.points.find(p=>p.id===id);
 const moonSign=(longitude:number)=>Math.floor(((longitude%360+360)%360)/30);
 export function moonPersonalSummary(report:Report,knownTime:boolean,lang:Lang):string{
  const moon=point(report.current,'Moon');
- if(!moon)return lang==='ar'?'حالياً ما عندي معلومات كافية حتى أعطيك قراءة موجهة إلك.':'There is not enough current information for a personal reflection.';
+ if(!moon||!Number.isFinite(moon.longitude))return lang==='ar'?'حالياً ما عندي معلومات كافية حتى أعطيك قراءة موجهة إلك.':'There is not enough current information for a personal reflection.';
  const lines:string[]=[];
  // Sign supplies only the tone, never an invented event.
  lines.push(signGuidance[moonSign(moon.longitude)][lang]);
