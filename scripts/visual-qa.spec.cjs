@@ -129,6 +129,17 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('.chart-expanded .professional-wheel')).toBeVisible();
   await expect(page.locator('.professional-wheel')).not.toContainText('ASC');
   await expect(page.locator('.professional-wheel')).not.toContainText('MC');
+  // The Moon card must follow the active birth profile as well, not just the chart wheel.
+  await page.goto('/#today',{waitUntil:'domcontentloaded'});
+  await page.evaluate(()=>localStorage.setItem('mx.active','qa-self'));
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('.mx-moon-personal-summary').first().waitFor({state:'visible',timeout:75000});
+  const ownMoon=await page.locator('.mx-moon-personal-summary').first().textContent();
+  await page.evaluate(()=>localStorage.setItem('mx.active','qa-person'));
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('.mx-moon-personal-summary').first().waitFor({state:'visible',timeout:75000});
+  const partnerMoon=await page.locator('.mx-moon-personal-summary').first().textContent();
+  expect(partnerMoon,'Moon and your chart must use the newly selected birth profile').not.toEqual(ownMoon);
   expect(errors).toEqual([]);
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   expect(overflow).toBeLessThan(8);
