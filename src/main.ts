@@ -48,7 +48,7 @@ import {createSyncCode,parseSyncCode,uploadEncrypted,downloadEncrypted,syncStatu
 import {subscribeBackgroundPush,unsubscribeBackgroundPush,sendBackgroundPushTest,getPushStatus,pushAvailableOnThisDevice,backgroundPushOptedIn,refreshBackgroundPushIfNeeded,type MoonPushEvent} from './pushClient.ts';
 import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './progressions.ts';
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
-import {derivedMetrics,goModes,reviewGoMode,type GoDomain,type GoReview} from './metrics.ts';
+import {derivedMetrics,goModes,reviewGoMode,type GoDomain,type GoReview,type MetricResult} from './metrics.ts';
 import {travelMetricsByGroup} from './travelMode.ts';
 import {supportive,difficult} from './math.ts';
 import {initEngine,report,defaultProfile,compatibility,chart,sunMoonState,confirmedEclipses,asteroidSwissRuntime,birthInstant,targets,localValue,zonedInstant,validateProfile,type Profile,type Report,type Chart} from './engine.ts';
@@ -477,6 +477,18 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:GoReview){
  // but a derived index alone must never be mistaken for measured success or another person's desire.
  return lead+' '+(story?story.good+' '+story.action+' ':'')+limit;
 }
+/** Shared gauge markup for both Go Mode and Travel Mode; colors, spacing
+ * and optional calculation details must remain identical by construction. */
+function indicatorGaugeCard(m:MetricResult,travelId?:string){
+ const label=t(m.ar,m.en);
+ return '<div class="metric-card '+(travelId?'mx-travel-metric ':'')+gaugeLevel(m.value)+'"'+
+  (travelId?' data-travel-metric="'+travelId+'"':'')+'>'+
+  '<small>'+label+'</small>'+
+  '<b>'+m.value+'<em>/100</em></b>'+
+  '<div class="meter" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+m.value+'"><i style="width:'+m.value+'%"></i></div>'+
+  '<details><summary>'+t('طريقة الحساب','Derivation')+'</summary><code>'+esc(m.formula)+'</code></details>'+
+  '</div>';
+}
 function goModePage(){
  const indicators=derivedMetrics(data!.scores),go=goModes(indicators),r=data!,decisions=resolveDecisions(r.evidence,r.signals);
  const names:Record<GoDomain,[string,string]>={work:['العمل','Work'],social:['التواصل الاجتماعي','Social'],relationships:['العلاقات','Relationships'],travel:['السفر','Travel']};
@@ -485,7 +497,7 @@ function goModePage(){
   '<div class="go-grid">'+go.map(d=>{const memo=reviewGoMode(d,indicators,decisions),state=memo.state;return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><p class="go-decision">'+mxGoNarrative(d.domain,state,memo)+'</p></div>'}).join('')+'</div>'+
   '<p class="subtle">'+t('هاي إشارات رمزية للتفكير بالتوقيت، مو قرار مضمون ولا قياس فعلي للجنس أو المشاعر.','Symbolic planning prompts only—not guarantees or measurements of sex, feelings, or outcomes.')+'</p></section>';
  const allIndicators='<section class="panel mx-go-mode-indicators"><div class="section-title"><h2>'+t('المؤشرات الـ29 كلها','All 29 indicators')+'</h2>'+tag(t('من 1 إلى 99','1–99 index'))+'</div><div class="metrics-grid">'+
-  indicators.map(m=>'<div class="metric-card '+gaugeLevel(m.value)+'"><small>'+t(m.ar,m.en)+'</small><b>'+m.value+'<em>/100</em></b><div class="meter"><i style="width:'+m.value+'%"></i></div><details><summary>'+t('طريقة الحساب','Derivation')+'</summary><code>'+esc(m.formula)+'</code></details></div>').join('')+
+  indicators.map(m=>indicatorGaugeCard(m)).join('')+
   '</div><p class="subtle">'+t('كل هاي أرقام رمزية مشتقة من ثمانية مجالات محسوبة؛ مو قياس حقيقي للرغبة ولا احتمال وقوع حدث.','These symbolic indices derive from eight calculated areas, not actual measures of desire or event probabilities.')+'</p></section>';
  return '<div class="mx-go-mode-page" data-section="go"><div class="section-title"><div><span class="eyebrow">MX ASTRO · GO MODE</span><h2>'+t('مؤشراتك كلها بمكان واحد','All your indicators in one place')+'</h2></div></div>'+gauges+goCards+allIndicators+'</div>';
 }
@@ -497,12 +509,7 @@ function travelModePage(){
   '<section class="panel mx-travel-group" data-travel-group="'+group.id+'">'+
   '<div class="section-title"><h2>'+t(group.titleAr,group.titleEn)+'</h2>'+tag(group.rows.length+' '+t('مؤشرات','indicators'))+'</div>'+
   '<p class="mx-travel-description">'+t(group.descriptionAr,group.descriptionEn)+'</p>'+
-  '<div class="mx-travel-grid">'+group.rows.map(({id,metric})=>
-   '<article class="metric-card mx-travel-metric '+gaugeLevel(metric.value)+'" data-travel-metric="'+id+'">'+
-   '<small>'+t(metric.ar,metric.en)+'</small>'+
-   '<b>'+metric.value+'<em>/100</em></b>'+
-   '<div class="meter" role="progressbar" aria-label="'+esc(t(metric.ar,metric.en))+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+metric.value+'"><i style="width:'+metric.value+'%"></i></div>'+
-   '</article>').join('')+'</div></section>'
+  '<div class="metrics-grid mx-travel-grid">'+group.rows.map(({id,metric})=>indicatorGaugeCard(metric,id)).join('')+'</div></section>'
  ).join('');
  return '<div class="mx-travel-mode-page" data-section="travelmode">'+
   '<div class="section-title"><div><span class="eyebrow">🇵🇭 PHILIPPINES · TRAVEL MODE</span><h2>'+t('مؤشرات سفرتك المهمة','Your essential travel indicators')+'</h2></div>'+
