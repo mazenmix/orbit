@@ -122,7 +122,7 @@ test('fortune calendar color must come from genuine aspect weights and show tran
 test('MX Ai no longer renders the WHY NOW audit box',()=>{
  const block=main.slice(main.indexOf('function goModePage(){'),main.indexOf('function asteroidsPage(){'));
  for(const word of ['WHY NOW','ليش هسه؟','intel-audit','مجموع أوزان الإشارات الداعمة'])assert.ok(!block.includes(word),word);
- assert.ok(block.includes('وين تركز هسّه؟')&&block.includes('مصفوفة المؤشرات الـ29'));
+ assert.ok(block.includes('وين تركز هسّه؟')&&block.includes('المؤشرات الـ29 كلها'));
 });
 test('presentation labels use Ai and never expose provider model branding',()=>{
  const soul=readFileSync('src/soulUI.ts','utf8'),ai=main.slice(main.indexOf('function aiPage(){'),main.indexOf('function moonPushSchedule()',main.indexOf('function aiPage(){')));
