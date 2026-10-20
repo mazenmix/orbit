@@ -45,5 +45,23 @@ export function moonSignReading(sign:number,current:Chart,natal:Chart,knownTime=
     'In your chart, the Moon is '+nearest.orb.toFixed(2)+'° away from a '+(aspectEn[nearest.angle]??nearest.angle+'°')+' with natal '+name+'. It is outside the close-orb limit, so no strong aspect is claimed.';
   }else personal=arabic?'لا تتوفر مواضع ولادية كافية لمقارنة القمر بدقة.':'Insufficient natal positions are available for a reliable Moon comparison.';
 }
+ // Fifth line must answer 'what does this mean for me' rather than stop at the orb.
+ // These are everyday illustrations tied to the actual natal target, not personal facts.
+ const moonScenes:Record<string,[string,string]>={
+  Sun:['إذا محتار بين راحتك وصورتك قدّام الناس، خلّ قرارك يعكس أولويتك الحقيقية.','If comfort conflicts with your public image, check which priority is actually yours.'],
+  Moon:['إذا موقف استفزك، اعرف شنو تحتاج حتى تهدأ قبل ما ترد.','If something unsettles you, name what would help you settle before replying.'],
+  Mercury:['إذا حچي شخص انفهِم بطريقتين، اسأل سؤال مباشر بدل ما تقرأ النية من السكوت.','If a message has two possible meanings, ask instead of guessing intent.'],
+  Venus:['بالتقارب، فرّق بين الإعجاب الحقيقي وبين تخمين رغبة الطرف الثاني؛ المبادرة تكون بلا ضغط.','In romance, distinguish your interest from assumptions about the other person; keep invitations low-pressure.'],
+  Mars:['إذا تحمست لموقف، صرف الحماس بخطوة مفيدة مو بردّة فعل سريعة.','If you feel driven to respond, use the energy for one useful step rather than a snap reaction.'],
+  Jupiter:['إذا انجذبت لفكرة جديدة، جرّب جزء بسيط منها قبل ما توعد بشي كبير.','If a new idea excites you, test a small part before making big promises.'],
+  Saturn:['راجع شنو فعلاً واجب عليك وشنو ضغط زايد تگدر تخففه.','Separate real obligations from avoidable extra pressure.'],
+  Uranus:['التغيير مو لازم يكون قطيعة؛ اختبر أسلوب جديد وخلي الرجوع ممكن.','Change need not mean rupture; try a new approach while keeping a way back.'],
+  Neptune:['إذا انطباعك قوي بس المعلومات ناقصة، ثبّت الوقائع قبل لا تبني توقع.','When the feeling is strong but facts are thin, confirm what you know before predicting.'],
+  Pluto:['إذا تريد تحسم موقف، انتبه للسيطرة والحدود واحچي عن المشكلة بدل شدّ الحبل.','When you want to force a resolution, check boundaries and discuss the issue instead of a power struggle.']
+ };
+ if(best){
+  const scene=moonScenes[best.natal.id];
+  if(scene)personal+=' '+(arabic?'ترجمتها بالحياة: '+scene[0]:'In everyday life: '+scene[1]);
+ }
  return [...intro,personal];
 }
