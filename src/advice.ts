@@ -85,7 +85,7 @@ export function advice(s:Signal,language:'ar'|'en'){
   context[1]+(review.contradictory?' A supporting symbolic contact coexists with a challenging factor; a one-sided conclusion would be misleading.':'')
  ];
  if(review.contradictory){
-  title=['بين '+transitRole[0]+' و'+natalRole[0]+' · إشارات متعارضة','Between '+transitRole[1]+' and '+natalRole[1]+' · mixed signals'];
+  title=['بين '+transitRole[0].split(' و')[0]+' و'+natalRole[0].split(' و')[0]+' · إشارات متعارضة','Between '+transitRole[1].split(' and ')[0]+' and '+natalRole[1].split(' and ')[0]+' · mixed contacts'];
  }
  return {title:pick(title),good:pick(good),careful:pick(careful),action:pick(action)};
 }
