@@ -72,3 +72,57 @@ test('reader interfaces keep exact calculations inside optional disclosures',()=
  assert.ok(soul.includes('humanSoul(reading)'));
  assert.ok(soul.includes('soul-evidence'));
 });
+
+test('human relationship pair matching works independent of person order',()=>{
+ const sun={first:point('Sun',12),second:point('Neptune',80),angle:90,orb:.3,influence:.9} as SynastryEvidence;
+ const swapped={...sun,first:sun.second,second:sun.first};
+ const a=humanPartner(sun,'challenge'),b=humanPartner(swapped,'challenge');
+ assert.match(a.ar,/الصورة المثالية/);
+ assert.equal(a.ar,b.ar);
+ clean(a.ar);
+});
+
+test('attraction and intimacy adapt to ease versus friction rather than repeating a generic card',()=>{
+ const easy={first:point('Venus',12),second:point('Mars',81),angle:120,orb:.5,influence:.9} as SynastryEvidence;
+ const hard={...easy,angle:90};
+ for(const category of ['attraction','sexual'] as const){
+  const a=humanPartner(easy,category),b=humanPartner(hard,category);
+  assert.notEqual(a.ar,b.ar,category);
+  assert.match(b.ar,/اختلاف|الإيقاع/);
+  clean(a.ar);clean(b.ar);
+ }
+});
+
+test('natal deep reading does not copy its separately displayed strength and challenge cards',()=>{
+ for(const topic of soulTopics){
+  const source=soulReading(natal as any,topic);
+  const reading=humanSoul(source);
+  if(source.basisStatus!=='available')continue;
+  assert.ok(!reading.deep.ar.includes(source.strengths.ar[0]),String(topic.id));
+  assert.ok(!reading.deep.ar.includes(source.weaknesses.ar[0]),String(topic.id));
+  assert.ok(reading.deep.ar.includes(topic.ar),String(topic.id));
+  clean(reading.deep.ar);
+ }
+});
+
+test('daily examples adapt to the actual category even with the same astrological factor',()=>{
+ const e=factor('Saturn','Venus',90);
+ const romance=signalStory(signal(e),natal,true,'ar')!;
+ const work=signalStory({...signal(e),category:'career'},natal,true,'ar')!;
+ assert.notEqual(romance.careful,work.careful);
+ assert.notEqual(romance.good,work.good);
+ assert.match(romance.careful,/يعجبك/);
+ assert.match(work.careful,/مسؤول/);
+ for(const row of [romance,work]){clean(row.good);clean(row.careful);}
+});
+
+test('natal signature interprets a real linked second point without repeating the same text',()=>{
+ const chart=precisionChartStories(natal as any);
+ const pointReading=chart.find(x=>x.id==='Sun')!;
+ assert.ok(pointReading);
+ const withLink=humanPlanet({...pointReading,aspect:'Saturn'});
+ const withoutLink=humanPlanet({...pointReading,aspect:null});
+ assert.notEqual(withLink.summary.ar,withoutLink.summary.ar);
+ assert.match(withLink.summary.ar,/الالتزام/);
+ clean(withLink.summary.ar);
+});
