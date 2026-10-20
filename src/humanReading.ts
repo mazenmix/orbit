@@ -40,6 +40,7 @@ export function humanSoul(reading:SoulReading):{summary:Both;deep:Both}{
  const tension=aspect&&(aspect.type===90||aspect.type===180);
  const convergence=aspect&&aspect.type===0;
  const mixed=reading.contradictory;
+ const third=reading.basis[2];
  const arDifference=a.sign===b.sign?
   'واضح من المزج الرمزي ميل إلى '+style(a.sign,'ar')+' بأكثر من موقف، بس تطبيقه يختلف حسب الظروف.':
   'عدك ميلين مختلفين: '+style(a.sign,'ar')+' من جهة، و'+style(b.sign,'ar')+' من جهة ثانية. يمكن واحد ينفعك بالعلاقات والثاني بالشغل؛ السياق يحدد.';
@@ -56,14 +57,16 @@ export function humanSoul(reading:SoulReading):{summary:Both;deep:Both}{
   'There is no stronger supporting pattern here, so test both approaches against actual experiences.';
  const arHouse=house(a.house,'ar')?'ركز خصوصاً على '+house(a.house,'ar')+'. ':'';
  const enHouse=house(a.house,'en')?'This may be worth exploring especially around '+house(a.house,'en')+'. ':'';
+ const thirdAr=third?'وقد يضيف احتياج '+(planetAreas[third.planet]?.ar??'آخر')+' أسلوب '+style(third.sign,'ar')+(house(third.house,'ar')?' بموضوع '+house(third.house,'ar'):'')+'. ':'';
+ const thirdEn=third?'The need around '+(planetAreas[third.planet]?.en??'another personal theme')+' may also bring '+style(third.sign,'en')+(house(third.house,'en')?' into '+house(third.house,'en'):'')+'. ':'';
  return {
  summary:{
   ar:topic.focusAr.replace(/[.؟!\s]+$/u,'')+'. '+arDifference,
   en:topic.focusEn.replace(/[.!?\s]+$/u,'')+'. '+enDifference
  },
  deep:{
-  ar:arPattern+' '+arHouse+'الجانب اللي تگدر تنمّيه: '+reading.strengths.ar[0]+'. والشي اللي يحتاج انتباه: '+reading.weaknesses.ar[0]+'.'+(mixed?' القراءة بيها ميول متعارضة، لذلك مو من الصحيح تنسب لنفسك صفة مطلقة.':''),
-  en:enPattern+' '+enHouse+'A useful strength to develop is '+reading.strengths.en[0]+'. A possible blind spot is '+reading.weaknesses.en[0]+'.'+(mixed?' The indicators disagree, so avoid a one-sided personality label.':'')
+  ar:'بخصوص '+reading.topic.ar+'، '+arPattern+' '+arHouse+thirdAr+(mixed?'المؤشرات مو كلها بنفس الاتجاه؛ شوف شنو ينطبق على مواقفك فعلياً قبل ما تعتبره صفة ثابتة.':'قارن هالتفسير بمواقفك المتكررة، مو بحادثة وحدها.'),
+  en:'For '+reading.topic.en+', '+enPattern+' '+enHouse+thirdEn+(mixed?'The indicators do not all point the same way, so avoid a fixed personality label.':'Compare this theme with recurring experiences rather than one event.')
  }
  };
 }
@@ -94,10 +97,13 @@ export function humanPlanet(insight:PrecisionInsight):{title:Both;summary:Both;a
  const ar=style(signAr,'ar'),en=style(signEn,'en');
  const hsAr=house(insight.house,'ar'),hsEn=house(insight.house,'en');
  const scene=scenes[insight.id]??{ar:insight.actionAr,en:insight.actionEn};
+ const linked=insight.aspect?planetAreas[insight.aspect]:undefined;
+ const linkedAr=linked?'هذا الجانب يلتقي أيضاً ويا '+linked.ar+'؛ لذلك راقب شلون تتعامل ويا الاحتياجين بنفس الموقف. ':'';
+ const linkedEn=linked?'It also interacts with '+linked.en+'; notice how both needs feature in the same situation. ':'';
  return {
   title:d,
-  summary:{ar:'بموضوع '+d.ar+'، ممكن يفيدك أسلوب '+ar+'. '+(hsAr?'جرّب تلاحظ هالشي خصوصاً بـ'+hsAr+'. ':'')+'مثال: '+scene.ar,
-   en:'For '+d.en+', the symbolic approach suggests '+en+'. '+(hsEn?'Look for this around '+hsEn+'. ':'')+'For example: '+scene.en},
+  summary:{ar:'بموضوع '+d.ar+'، ممكن يفيدك أسلوب '+ar+'. '+(hsAr?'جرّب تلاحظ هالشي خصوصاً بـ'+hsAr+'. ':'')+linkedAr+'مثال: '+scene.ar,
+   en:'For '+d.en+', the symbolic approach suggests '+en+'. '+(hsEn?'Look for this around '+hsEn+'. ':'')+linkedEn+'For example: '+scene.en},
   action:{ar:insight.actionAr,en:insight.actionEn}
  };
 }
@@ -107,7 +113,7 @@ const pairContexts:Record<string,Both>={
  'Mars|Pluto':{ar:'أكو موضوع حسم وسيطرة متداخل مع الرغبة. التفاهم يحتاج مساحة للطرفين، مو تنافس منو يقود.',en:'Desire may become intertwined with control. Mutual choice matters more than competing to lead.'},
  'Mercury|Mercury':{ar:'طريقة التعبير والفهم بينكما ممكن تكون محور راحة أو سوء فهم. أهم اختبار: هل كل واحد يفهم قصد الثاني من غير تخمين؟',en:'Communication styles can help or create friction; check whether each person understands what was meant.'},
  'Moon|Venus':{ar:'التقارب هنا يركز على الأمان والتقدير. مشاعر الراحة تصير أقوى بالأفعال الثابتة مو الكلام وحده.',en:'Connection centers on reassurance and care; consistent actions matter more than declarations.'},
- 'Sun|Neptune':{ar:'الصورة المثالية والتوقعات ممكن تتقدم على الكلام الواضح. اسألوا شنو يريد كل طرف فعلاً.',en:'Idealized expectations can outpace clear communication; discuss what each person actually wants.'},
+ 'Neptune|Sun':{ar:'الصورة المثالية والتوقعات ممكن تتقدم على الكلام الواضح. اسألوا شنو يريد كل طرف فعلاً.',en:'Idealized expectations can outpace clear communication; discuss what each person actually wants.'},
  'Mars|Mars':{ar:'الإيقاع وطريقة المبادرة قد تختلف بينكما. وضحوا متى كل واحد يريد يتحرك ومتى يحتاج مساحة.',en:'Initiative and pace may differ; talk about when to act and when to allow space.'},
  'Saturn|Venus':{ar:'المودة تحتاج تنسجم ويا حدود المسؤولية والاستمرارية. راقبوا الالتزام الحقيقي بلا وعود أكبر من الممكن.',en:'Affection must meet realistic commitments and boundaries. Look at consistent follow-through.'}
 };
@@ -116,6 +122,11 @@ export function humanPartner(e:SynastryEvidence|null|undefined,kind:'attraction'
  const key=[e.first.id,e.second.id].sort().join('|'),base=pairContexts[key];
  const pressure=e.angle===90||e.angle===180;
  const context=base??(kind==='sexual'?{ar:'التقارب الجسدي يرتبط باختلاف أسلوب التعبير والمبادرة؛ لا نستنتج الرغبة أو الموافقة من خارطة.',en:'Physical intimacy depends on communication and mutual choice, never on a chart alone.'}: {ar:'أحد جوانب التقارب يحتاج تنسيق بين احتياجات مختلفة، ويظهر أثره الحقيقي بطريقة التعامل اليومية.',en:'This theme concerns negotiating different needs through actual everyday interactions.'});
+ const angleFocus=pressure?
+  {ar:' إذا واحد منكم يستعجل والثاني يحتاج وقت، وضّحوا الإيقاع ولا تخلّون الاختلاف يتحوّل لضغط.',en:' If your preferred pace differs, discuss it rather than turning the difference into pressure.'}:
+  e.angle===0?
+  {ar:' قد يصير هالجانب بارز بالتعامل؛ قوّة الانطباع مو بديل عن التفاهم.',en:' The theme may feel prominent; intensity is no substitute for understanding.'}:
+  {ar:' ممكن تلاقون طريقة مريحة تجمع رغباتكم، بس لازم تظهر بالأفعال مو بالتوقع.',en:' There may be room for a comfortable compromise, but it needs to appear in real behavior.'};
  const add=kind==='sexual'?
   {ar:' بالكيمياء الجنسية، الرغبة المتبادلة والراحة وحدود كل واحد أهم من أي مؤشر رمزي.',en:' For sexual chemistry, mutual interest, comfort and boundaries come first.'}:
  kind==='attraction'?
@@ -123,5 +134,5 @@ export function humanPartner(e:SynastryEvidence|null|undefined,kind:'attraction'
  pressure?
   {ar:' لأن القراءة تبرز اختلافاً محتملاً، اختاروا نقاش واحد محدد وابتعدوا عن الاتهام.',en:' The interpretation suggests possible friction; address one issue without blame.'}:
   {ar:' هذا جانب ممكن يساعد بالتفاهم إذا الأفعال فعلاً تدعمه.',en:' This is a potentially helpful theme if actual behavior supports it.'};
- return {ar:context.ar+add.ar,en:context.en+add.en};
+ return {ar:context.ar+angleFocus.ar+add.ar,en:context.en+angleFocus.en+add.en};
 }
