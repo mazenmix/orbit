@@ -67,7 +67,7 @@ test('reader interfaces keep exact calculations inside optional disclosures',()=
  const soul=readFileSync('src/soulUI.ts','utf8');
  assert.ok(main.includes('moonHumanReading(sign,r,active.known,lang)'));
  assert.ok(main.includes('humanPartner(brief.attractionContact'));
- assert.ok(main.includes('humanPlanet(x)'));
+ assert.ok(main.includes('natalPortrait(r.natal,person.known,lang)')); // Retained personalized natal reading
  assert.ok(main.includes('mx-focus-technical'));
  assert.ok(soul.includes('humanSoul(reading)'));
  assert.ok(soul.includes('soul-evidence'));
