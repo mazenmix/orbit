@@ -170,6 +170,18 @@ function tag(text:string,cls=''){return `<span class="tag ${cls}">${text}</span>
 
 /** Restore the four daily gauges from existing calculated symbolic indices.
  * Their values must track the selected person's report, not a hard-coded score. */
+/** One compact gauge component is used by Today, Go Mode's four primary
+ * meters and all twelve Travel Mode cards. */
+function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,string],travelId?:string){
+ const label=override?t(override[0],override[1]):t(m.ar,m.en),amount=m.value;
+ return '<article class="mx-focus-metric '+gaugeLevel(amount)+'"'+
+  (travelId?' data-travel-metric="'+travelId+'"':' data-today-gauge="'+m.id+'"')+
+  ' data-indicator-id="'+m.id+'">'+
+  '<span class="mx-today-gauge-icon" aria-hidden="true">'+symbol+'</span><b>'+label+'</b>'+
+  '<strong>'+amount+'<small>/100</small></strong>'+
+  '<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
+  '</article>';
+}
 function todayQuickGauges(r:Report,insideGo=false){
  const available=derivedMetrics(r.scores);
  const items=[
@@ -181,14 +193,9 @@ function todayQuickGauges(r:Report,insideGo=false){
  const gauges=items.map(item=>{
   const found=available.find(row=>row.id===item.id);
   if(!found)throw Error('Missing daily gauge: '+item.id);
-  const label=t(item.ar,item.en),amount=found.value;
-  return '<article class="mx-focus-metric '+gaugeLevel(amount)+'" data-today-gauge="'+item.id+'">'+
-   '<span class="mx-today-gauge-icon" aria-hidden="true">'+item.symbol+'</span><b>'+label+'</b>'+
-   '<strong>'+amount+'<small>/100</small></strong>'+
-   '<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
-   '</article>';
+  return quickGaugeCard(found,item.symbol,[item.ar,item.en]);
  }).join('');
- return '<section class="panel mx-today-gauges" aria-label="'+t('مؤشرات اليوم المختصرة','Today quick indicators')+'">'+
+ return '<section class="panel mx-today-gauges mx-quick-gauges" aria-label="'+t('مؤشرات اليوم المختصرة','Today quick indicators')+'">'+
   '<div class="mx-today-gauge-header"><h2>'+(insideGo?t('مؤشرات الجنس والحب والعاطفة والعمل','Sex, Love, Emotions & Work'):t('مؤشرات اليوم','Today at a glance'))+'</h2>'+
   (insideGo?'':'<button type="button" class="text-button" data-go="intel">'+t('كل المؤشرات','All indicators')+' ↗</button>')+'</div>'+
   '<div class="mx-focus-metrics">'+gauges+'</div>'+
@@ -501,6 +508,15 @@ function goModePage(){
   '</div><p class="subtle">'+t('كل هاي أرقام رمزية مشتقة من ثمانية مجالات محسوبة؛ مو قياس حقيقي للرغبة ولا احتمال وقوع حدث.','These symbolic indices derive from eight calculated areas, not actual measures of desire or event probabilities.')+'</p></section>';
  return '<div class="mx-go-mode-page" data-section="go"><div class="section-title"><div><span class="eyebrow">MX ASTRO · GO MODE</span><h2>'+t('مؤشراتك كلها بمكان واحد','All your indicators in one place')+'</h2></div></div>'+gauges+goCards+allIndicators+'</div>';
 }
+/** Simple glyphs that correspond to the exact travel domains and keep the
+ * same single-icon layout as the four quick Go Mode gauges. */
+function travelSymbol(id:string){
+ const icons:Record<string,string>={
+  dating:'♥',newpeople:'✦',social:'☷',attraction:'✧',romance:'♡',chemistry:'◇',
+  sexuality:'♥',desire:'✧',nightlife:'☾',travel:'✈',risk:'⚑',sleep:'◔'
+ };
+ return icons[id]??'✦';
+}
 /** Travel Mode is a concise Philippines-focused selection of the same live
  * twelve calculated indicators, not a new probability model. */
 function travelModePage(){
@@ -509,9 +525,9 @@ function travelModePage(){
   '<section class="panel mx-travel-group" data-travel-group="'+group.id+'">'+
   '<div class="section-title"><h2>'+t(group.titleAr,group.titleEn)+'</h2>'+tag(group.rows.length+' '+t('مؤشرات','indicators'))+'</div>'+
   '<p class="mx-travel-description">'+t(group.descriptionAr,group.descriptionEn)+'</p>'+
-  '<div class="metrics-grid mx-travel-grid">'+group.rows.map(({id,metric})=>indicatorGaugeCard(metric,id)).join('')+'</div></section>'
+  '<div class="mx-focus-metrics mx-travel-grid">'+group.rows.map(({id,metric})=>quickGaugeCard(metric,travelSymbol(id),undefined,id)).join('')+'</div></section>'
  ).join('');
- return '<div class="mx-travel-mode-page" data-section="travelmode">'+
+ return '<div class="mx-travel-mode-page mx-quick-gauges" data-section="travelmode">'+
   '<div class="section-title"><div><span class="eyebrow">🇵🇭 PHILIPPINES · TRAVEL MODE</span><h2>'+t('مؤشرات سفرتك المهمة','Your essential travel indicators')+'</h2></div>'+
   '<button type="button" class="secondary mx-travel-all" data-go="go">'+t('كل المؤشرات الـ29','All 29 indicators')+' ↗</button></div>'+
   '<p class="mx-travel-intro">'+t('هنا أهم 12 مؤشر من Go Mode، مرتبة للتعارف والمواعيد والسهر والتنقل. الأرقام تتحدث حسب خارطتك والوقت المختار، مو قيم ثابتة.','Here are the 12 travel-focused Go Mode indicators for meeting people, dating, nightlife and getting around. They change with the selected chart and time.')+'</p>'+
