@@ -58,8 +58,8 @@ export function humanSoul(reading:SoulReading):{summary:Both;deep:Both}{
  const enHouse=house(a.house,'en')?'This may be worth exploring especially around '+house(a.house,'en')+'. ':'';
  return {
  summary:{
-  ar:topic.focusAr+' '+arDifference,
-  en:topic.focusEn+' '+enDifference
+  ar:topic.focusAr.replace(/[.؟!\s]+$/u,'')+'. '+arDifference,
+  en:topic.focusEn.replace(/[.!?\s]+$/u,'')+'. '+enDifference
  },
  deep:{
   ar:arPattern+' '+arHouse+'الجانب اللي تگدر تنمّيه: '+reading.strengths.ar[0]+'. والشي اللي يحتاج انتباه: '+reading.weaknesses.ar[0]+'.'+(mixed?' القراءة بيها ميول متعارضة، لذلك مو من الصحيح تنسب لنفسك صفة مطلقة.':''),
