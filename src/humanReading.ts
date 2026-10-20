@@ -102,7 +102,7 @@ export function humanPlanet(insight:PrecisionInsight):{title:Both;summary:Both;a
  const linkedEn=linked?'It also interacts with '+linked.en+'; notice how both needs feature in the same situation. ':'';
  return {
   title:d,
-  summary:{ar:'بموضوع '+d.ar+'، ممكن يفيدك أسلوب '+ar+'. '+(hsAr?'جرّب تلاحظ هالشي خصوصاً بموضوع '+hsAr+'. '')+linkedAr+'مثال: '+scene.ar,
+  summary:{ar:'بموضوع '+d.ar+'، ممكن يفيدك أسلوب '+ar+'. '+(hsAr?'جرّب تلاحظ هالشي خصوصاً بموضوع '+hsAr+'. ':'')+linkedAr+'مثال: '+scene.ar,
    en:'For '+d.en+', the symbolic approach suggests '+en+'. '+(hsEn?'Look for this around '+hsEn+'. ':'')+linkedEn+'For example: '+scene.en},
   action:{ar:insight.actionAr,en:insight.actionEn}
  };
