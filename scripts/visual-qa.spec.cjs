@@ -362,9 +362,9 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('[data-today-gauge]')).toHaveCount(4,{timeout:75000});
   const fromToday=Object.fromEntries(await page.locator('[data-today-gauge]').evaluateAll(rows=>rows.map(n=>[n.getAttribute('data-today-gauge'),Number(n.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'))])));
   const nav=device==='iphone'?page.locator('.mobile-nav'):page.locator('.sidebar .nav');
-  await expect(nav.locator('[data-go]')).toHaveCount(6);
+  await expect(nav.locator('[data-go]')).toHaveCount(7);
   const routes=await nav.locator('[data-go]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-go')));
-  expect(routes).toEqual(['today','chart','people','go','calendar','more']);
+  expect(routes).toEqual(['today','chart','people','go','travelmode','calendar','more']);
   await nav.locator('[data-go="go"]').click();
   await expect(page).toHaveURL(/#go$/);
   await expect(page.locator('#live-view-body [data-section="go"]')).toBeVisible({timeout:75000});
@@ -387,6 +387,46 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('.go-card')).toHaveCount(4);
   await page.goto('/#more',{waitUntil:'domcontentloaded'});
   await expect(page.locator('button[data-go="intel"]')).toHaveCount(0);
+  expect(errors).toEqual([]);
+  await context.close();
+ });
+}
+
+for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
+ test(device+' Philippines Travel Mode is below Go Mode and shows 12 calculated gauges',async({browser},testInfo)=>{
+  const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,isMobile:device==='iphone',hasTouch:device==='iphone'});
+  const page=await context.newPage(),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/#go',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('[data-section="go"]')).toBeVisible({timeout:75000});
+  const original=Object.fromEntries(await page.locator('.metric-card').evaluateAll(rows=>rows.map(row=>{
+   const title=row.querySelector('small')?.textContent?.trim();
+   const value=Number(row.querySelector('b')?.textContent?.replace(/[^0-9]/g,'').replace(/100$/,''));
+   return [title,value];
+  })));
+  const nav=device==='iphone'?page.locator('.mobile-nav'):page.locator('.sidebar .nav');
+  const options=await nav.locator('[data-go]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-go')));
+  expect(options).toEqual(['today','chart','people','go','travelmode','calendar','more']);
+  await nav.locator('[data-go="travelmode"]').click();
+  await expect(page).toHaveURL(/#travelmode$/);
+  await expect(page.locator('[data-section="travelmode"]')).toBeVisible({timeout:75000});
+  await expect(page.locator('[data-travel-group]')).toHaveCount(3);
+  await expect(page.locator('[data-travel-metric]')).toHaveCount(12);
+  expect(await page.locator('[data-travel-group]').evaluateAll(rows=>rows.map(r=>r.querySelectorAll('[data-travel-metric]').length))).toEqual([6,3,3]);
+  const ids=await page.locator('[data-travel-metric]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-travel-metric')));
+  expect(ids).toEqual(['dating','newpeople','social','attraction','romance','chemistry','sexuality','desire','nightlife','travel','risk','sleep']);
+  for(const id of ids){
+   const number=Number(await page.locator('[data-travel-metric="'+id+'"] [role="progressbar"]').getAttribute('aria-valuenow'));
+   expect(Number.isFinite(number)).toBe(true);
+   expect(number).toBeGreaterThanOrEqual(1);
+   expect(number).toBeLessThanOrEqual(99);
+  }
+  await page.screenshot({path:'artifacts/ui-qa/travelmode-'+device+'-'+testInfo.project.name+'.png',fullPage:true});
+  const over=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+  expect(over,'No horizontal overflow').toBeLessThan(8);
+  await page.locator('[data-go="go"]').first().click();
+  await expect(page.locator('.metric-card')).toHaveCount(29);
+  await expect(page.locator('.go-card')).toHaveCount(4);
   expect(errors).toEqual([]);
   await context.close();
  });
