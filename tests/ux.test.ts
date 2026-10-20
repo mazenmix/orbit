@@ -88,11 +88,32 @@ test('calendar uses English-only weekdays and month names, no large hero',()=>{
  assert.ok(main.includes("new Intl.DateTimeFormat('en-US'"));
  assert.ok(!main.includes("const header='<div class=\"astro-cal-hero\""));
 });
-test('live redraw preserves open details and avoids location reload',()=>{
+test('real-time redraw retains open details, wheel DOM and Time Machine selection',()=>{
+ assert.ok(main.includes('function reconcileLiveNode('));
+ assert.ok(main.includes('function reconcileLiveHTML('));
+ assert.ok(main.includes("const keepOpen=element.tagName==='DETAILS'"));
+ assert.ok(main.includes("element.matches('svg.chart-wheel')"));
  assert.ok(main.includes('function refreshLiveBody('));
- assert.ok(main.includes("if(liveTimePinned)return;"));
- assert.ok(main.includes('preserved=Array.from('));
+ assert.ok(main.includes('if(liveTimePinned)return;'));
+ assert.ok(!main.includes('region.innerHTML=content()'));
  assert.ok(!main.includes('location.reload('));
+});
+test('live ephemeris updates main, chart, and enlarged sky wheels independently of full content',()=>{
+ assert.ok(main.includes('LIVE_SKY_INTERVAL_MS=5000'));
+ assert.ok(main.includes("const at=new Date(now),sky=chart(at,active,true)"));
+ assert.ok(main.includes('reconcileLiveHTML(enlarged,html)'));
+ assert.ok(main.includes('reconcileLiveHTML(chartWheel,'));
+ assert.ok(main.includes("screen==='chart'"));
+ assert.ok(main.includes("screen==='lunar'&&!boundary"));
+ assert.ok(main.includes('const fresh=getReport(at)'));
+ assert.ok(main.includes('people:30000'));
+ assert.ok(main.includes('time:30000'));
+ assert.ok(main.includes("document.addEventListener('visibilitychange'"));
+});
+test('VOC no longer displays confusing out-of-void wording',()=>{
+ assert.ok(main.includes("t('ماشي عدل','Moon on course')"));
+ assert.ok(main.includes("t('القمر ماشي عدل','Moon is on course')"));
+ assert.ok(!main.includes("t('خارج خلو المسار'"));
 });
 
 test('soul identity and natal wheel remove decorative face and obsolete labels',()=>{
