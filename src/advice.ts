@@ -80,6 +80,12 @@ export function advice(s:Signal,language:'ar'|'en'){
   'This reading links '+transitRole[1]+' with '+natalRole[1]+'. '+angleRole[1]+' '+situation[1]
  ];
  // Keep the action specific; show the calculation in the evidence panel instead of repeating orb tables.
- good=[context[0],context[1]];
+ good=[
+  context[0]+(review.contradictory?' أكو دلالة داعمة، وبالمقابل دلالة تتطلب انتباه؛ لذلك مو من الصحيح نحكم باتجاه واحد.':''),
+  context[1]+(review.contradictory?' A supporting symbolic contact coexists with a challenging factor; a one-sided conclusion would be misleading.':'')
+ ];
+ if(review.contradictory){
+  title=['بين '+transitRole[0]+' و'+natalRole[0]+' · إشارات متعارضة','Between '+transitRole[1]+' and '+natalRole[1]+' · mixed signals'];
+ }
  return {title:pick(title),good:pick(good),careful:pick(careful),action:pick(action)};
 }
