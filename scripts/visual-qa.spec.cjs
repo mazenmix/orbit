@@ -97,6 +97,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('.mx-chart-meta-card')).toHaveCount(5);
   await expect(page.locator('.professional-wheel')).toBeVisible();
   const initial=await page.locator('.professional-wheel .wheel-planet[data-planet="Sun"] title').textContent();
+  const initialPortrait=await page.locator('.mx-person-natal-portrait').first().textContent();
   await page.locator('#active-profile').selectOption('qa-person');
   await expect(page.locator('#soul-person-select')).toHaveValue('qa-person');
   await expect(page.locator('.mx-chart-owner-title h2')).toHaveText('Test Person');
@@ -105,6 +106,9 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('.mx-meta-gender b')).toHaveText('Female');
   const changed=await page.locator('.professional-wheel .wheel-planet[data-planet="Sun"] title').textContent();
   expect(changed).not.toEqual(initial);
+  const changedPortrait=await page.locator('.mx-person-natal-portrait').first().textContent();
+  expect(changedPortrait,'A different natal chart must produce different personal prose').not.toEqual(initialPortrait);
+  await expect(page.locator('.mx-person-natal-portrait p')).toHaveCount(4);
   await expect(page.locator('.professional-wheel .wheel-planet').first()).toBeVisible();
   await page.screenshot({path:'artifacts/ui-qa/chart-'+device+'-'+testInfo.project.name+'.png',fullPage:true});
   for(const mode of ['transit','overlay','details','natal']){
