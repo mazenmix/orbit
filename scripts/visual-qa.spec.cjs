@@ -498,7 +498,15 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   await expect(dialog).toBeVisible();
   const enlarged=dialog.locator('.mx-expanded-wheel svg.chart-wheel');
   await expect(enlarged).toBeVisible();
-  const handle=await enlarged.elementHandle(),old=await enlarged.getAttribute('data-sky-calculated-at');
+  // The second-hand must tick while the modal is still open. Five-second
+  // ephemeris changes alone are not an adequate live-clock experience.
+  const modalTime=dialog.locator('.mx-expanded-sky-time');
+  const firstSecond=await modalTime.textContent();
+  expect(firstSecond).toMatch(/\\d{2}:\\d{2}:\\d{2}/);
+  await expect.poll(()=>modalTime.textContent(),{timeout:4500,intervals:[200,400,600,800]}).not.toBe(firstSecond);
+  const firstCalculated=await enlarged.getAttribute('data-sky-calculated-at');
+  expect(firstCalculated).not.toBeNull();
+  const handle=await enlarged.elementHandle(),old=firstCalculated;
   await expect.poll(()=>enlarged.getAttribute('data-sky-calculated-at'),{timeout:16000}).not.toBe(old);
   expect(await handle.evaluate(node=>node.isConnected),'Zoomed wheel element survives real sky refresh').toBe(true);
   await expect(dialog.locator('.mx-expanded-sky-time')).toBeVisible();
