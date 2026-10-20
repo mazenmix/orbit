@@ -82,6 +82,24 @@ export function asteroidReading(item:NamedAsteroid,contact:NamedContact|undefine
  const theme=english?c.enTheme:c.arTheme;
  const action=english?c.enAction:c.arAction;
  const natalName=contact?(({Sun:'شمسك',Moon:'قمرك',Mercury:'عطاردك',Venus:'زهرتك',Mars:'مريخك',Jupiter:'مشتريك',Saturn:'زحلك',Uranus:'أورانوسك',Neptune:'نبتونك',Pluto:'بلوتوك',Ascendant:'طالعك',MC:'مهنتك',Chiron:'كيرونك',Ceres:'سيريسك',Pallas:'بالاسك',Juno:'جونوك',Vesta:'فيستاك',Pholus:'فولوسك'} as Record<string,string>)[contact.natal.id]??contact.natal.id):'';
- const emphasis=!contact?(english?'No tight natal contact at this selected moment.':'ماكو اتصال ولادي قريب بهاللحظة.'):english?('A close contact to natal '+contact.natal.id+' highlights this theme symbolically, without revealing anyone’s private feelings.'):('حاليّاً قريب من اتصال مع '+natalName+'؛ ركّز على النصيحة العملية مو توقع أحداث مؤكدة.');
+ const natalArea:Record<string,[string,string]>={
+  Sun:['قراراتك وثقتك بنفسك','decisions and identity'],Moon:['حاجتك للراحة وردّ الفعل','emotional comfort'],Mercury:['طريقة حچيك وفهمك للآخر','communication and understanding'],
+  Venus:['التقارب والتقدير','affection and values'],Mars:['المبادرة وحدود الاندفاع','initiative and boundaries'],Jupiter:['التوسع واختيار الفرص','growth and opportunity'],
+  Saturn:['الالتزام والمسؤولية','commitment and responsibility'],Uranus:['الاستقلال والتغيير','autonomy and change'],
+  Neptune:['التوقعات والخيال','expectations and imagination'],Pluto:['العمق والسيطرة','intensity and control'],
+  Ascendant:['حضورك والانطباع الأول','presence and first impressions'],MC:['العمل ودورك العام','career and public role']
+ };
+ const aspectAr:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
+ const aspectEn:Record<number,string>={0:'conjunction',60:'sextile',90:'square',120:'trine',180:'opposition'};
+ const angleMeaning=contact?(
+   contact.angle===90||contact.angle===180?
+    (english?'There may be a symbolic tension to examine, not evidence that trouble will occur.':'هذا يرمز لشدّ يحتاج توازن، مو دليل أن مشكلة راح تصير.'):
+   contact.angle===0?
+    (english?'The themes converge; their outcome is not predetermined.':'الدلالتين يجتمعن، بس النتيجة ما تنحسب من الخارطة.'):
+    (english?'This aspect suggests room for cooperation when backed by real actions.':'الزاوية تطرح مجال للتنسيق إذا التصرفات الواقعية تدعمه.')
+  ):'';
+ const emphasis=!contact?(english?'No tight natal contact at this selected moment.':'ماكو اتصال ولادي قريب بهاللحظة.'):english?
+  (item.name+' '+aspectEn[contact.angle]+' natal '+contact.natal.id+' (orb '+contact.orb.toFixed(2)+'°). The symbolic theme meets '+(natalArea[contact.natal.id]?.[1]??'a natal priority')+'. '+angleMeaning):
+  (item.name+' '+aspectAr[contact.angle]+' ويا '+natalName+' (فارق '+contact.orb.toFixed(2)+'°). هالمعنى يرتبط بموضوع '+(natalArea[contact.natal.id]?.[0]??'أولوياتك')+'. '+angleMeaning);
  return {theme,action,emphasis};
 }
