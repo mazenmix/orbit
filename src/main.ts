@@ -169,7 +169,7 @@ function focusedToday(){
  const factor=priority?.factor;
  const evidence=factor?planet(factor.transit.id)+' '+aspect(factor.angle)+' '+planet(factor.natal.id)+' · '+factor.orb.toFixed(2)+'°':t('لا توجد زاوية رئيسية مهيمنة ضمن الأورب الحالي','No dominant major aspect in the current orb');
  const phase=factor?(factor.applying?t('يقترب من الدقة','Applying'):t('يبتعد عن الدقة','Separating')):'';
- const quality=priority?.status==='mixed'?t('الدلائل الداعمة والمتحدية موجودة معاً؛ لا تعتمد على اتجاه واحد.','Supporting and challenging evidence coexist; avoid a one-sided reading.'):
+ const quality=priority?.status==='mixed'?'':
   priority?.limitation==='unknown-time'?t('وقت الميلاد مو مؤكد؛ البيوت والطالع مو داخلين بالترجيح.','Birth time unknown; house and ascendant relevance excluded.'):
   priority?.limitation==='missing-ephemeris'?t('بعض البيانات الفلكية الثانوية مو متوفرة؛ ما تم تعويضها بتخمين.','Some supplementary ephemerides are unavailable; missing positions were not invented.'):'';
  const time=(at:Date)=>dateText(at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
@@ -189,8 +189,10 @@ function focusedToday(){
  const personal=focusScan?.done&&focusScan.key===focusEventKey()?focusScan.events:[];
  const eventMarkup=focusEventMarkup([...personal,...futureEvents]);
  const matchedAi=aiAnswer&&aiScope===liveQwenScope()&&aiAnswerAt&&Math.abs(+new Date(aiAnswerAt)-+selected)<15*60000;
+ const secondFocus=rankPrioritySignals({signals:r.signals,natal:r.natal,knownBirthTime:active.known,complete:r.complete}).find(x=>x.signal.category!==main?.category);
+ const secondReading=secondFocus?copy(secondFocus.signal):null;
  const aiSnippet=matchedAi?esc(conciseInterpretation(aiAnswer).brief):
-   reading?esc(reading.action):
+   secondReading?esc(secondReading.title+' — '+secondReading.good):
    t('ماكو اتصال شخصي قوي حالياً حتى ننسب إله قصة من خيالنا. تابع بياناتك الفعلية، وافتح تحليل Ai لما تتوفر دلائل محسوبة.','There is no strong personal contact to justify a made-up narrative. Review real circumstances and use Ai when calculated evidence is available.');
  return '<div class="mx-focused-dashboard"><div class="mx-focus-main">'+
  '<section class="panel mx-focus-hero"><div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('أهم اتصال شخصي','MAIN PERSONAL TRANSIT')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'): 'LIVE')+'</span></div><h2>'+esc(reading?.title??t('ماكو اتصال مهيمن الآن','No dominant aspect at this moment'))+'</h2><p>'+esc(reading?.good??t('ماكو اتصال فلكي قوي يدعم قراءة شخصية بهذه اللحظة.','No strong astrological contact supports a personal reading at this moment.'))+'</p>'+(reading?'<p class="mx-focus-story-example">'+esc(reading.careful)+'</p><p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(reading.action)+'</p>':'')+(quality?'<p class="mx-focus-quality">'+quality+'</p>':'')+'<div class="mx-focus-proof"><b>'+t('الدليل','EVIDENCE')+'</b><span>'+esc(evidence)+'</span></div><div class="mx-focus-proof"><b>'+t('وقت الرصد','OBSERVED AT')+'</b><span>'+dateText(selected,{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+(phase?' · '+phase:'')+'</span></div>'+
