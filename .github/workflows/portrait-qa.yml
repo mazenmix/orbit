@@ -30,10 +30,10 @@ jobs:
       - run: pnpm build
       - run: npm install --prefix /tmp/astro-qa --no-save @playwright/test@1.58.2
       - run: /tmp/astro-qa/node_modules/.bin/playwright install --with-deps chromium
-      - name: Compare Mazen and Jillyanne text in browser
+      - name: Verify profile, Moon and Go Mode on desktop and iPhone
         run: |
           pnpm exec vite preview --host 127.0.0.1 --port 4173 > /tmp/astro-preview.log 2>&1 &
-          /tmp/astro-qa/node_modules/.bin/playwright test --config scripts/playwright.config.cjs --project=chromium --grep "saved People owner switches|Today Moon prose"
+          /tmp/astro-qa/node_modules/.bin/playwright test --config scripts/playwright.config.cjs --project=chromium --grep "saved People owner switches|Today Moon prose|new Go Mode tab"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
