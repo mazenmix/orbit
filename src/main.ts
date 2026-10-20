@@ -198,7 +198,7 @@ function todayQuickGauges(r:Report,insideGo=false){
  return '<section class="panel mx-today-gauges mx-quick-gauges" aria-label="'+t('مؤشرات اليوم المختصرة','Today quick indicators')+'">'+
   (insideGo?'':'<div class="mx-today-gauge-header"><h2>'+t('مؤشرات اليوم','Today at a glance')+'</h2><button type="button" class="text-button" data-go="intel">'+t('كل المؤشرات','All indicators')+' ↗</button></div>')+
   '<div class="mx-focus-metrics">'+gauges+'</div>'+
-  '<p class="mx-today-gauge-caption">'+t('مؤشرات تنجيمية رمزية محسوبة لخارطتك والوقت المختار؛ مو قياس فعلي للرغبة أو ضمان لحدث.','Calculated symbolic astrology indices for the selected chart and time—not measured desire or event probabilities.')+'</p></section>';
+  '</section>';
 }
 /** A single, source-grounded view of the selected time; no invented success probabilities. */
 function focusedToday(){
