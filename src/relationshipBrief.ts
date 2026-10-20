@@ -42,7 +42,7 @@ const find=(evidence:readonly SynastryEvidence[],kind:ContactKind):SynastryEvide
 const chemistryDetails:Record<string,{attraction:TwoLanguage;sexual:TwoLanguage}>={
  'Mars|Venus':{
   attraction:{ar:'أسلوب إظهار المودة عند طرف يلتقي ويا جرأة المبادرة عند الثاني؛ ممكن يصير التقارب سريع إذا الاهتمام متبادل، بس سرعة واحد مو بالضرورة سرعة الثاني.',en:'One person’s affectionate style meets the other’s initiative. Attraction may feel lively if it is mutual, though the two may move at different speeds.'},
-  sexual:{ar:'الزهرة والمريخ يرمزان للتوافق بين الحنان والرغبة الجسدية؛ اسألوا عن الإيقاع والحدود بدل افتراض إن الشرارة تكفي.',en:'Venus and Mars link affection with physical initiative; discuss pace and boundaries rather than assuming chemistry is sufficient.'}
+  sexual:{ar:'الزهرة والمريخ يرمزان لكيمياء جنسية تجمع الحنان والمبادرة؛ اسألوا عن الإيقاع والحدود بدل افتراض إن الشرارة تكفي.',en:'Venus and Mars link affection with physical initiative; discuss pace and boundaries rather than assuming chemistry is sufficient.'}
  },
  'Pluto|Venus':{
   attraction:{ar:'الزهرة وبلوتو يركزان على قوة الانشداد وحساسية الثقة؛ الانبهار وحده ما يكشف نوايا الطرف الثاني.',en:'Venus and Pluto highlight magnetism and trust. Intensity does not disclose the other person’s intentions.'},
@@ -79,7 +79,7 @@ const meaningFor=(e:SynastryEvidence,kind:ContactKind):TwoLanguage=>{
   {ar:'هنا يتقاطع التعبير الجسدي ويا الحاجة للارتياح، وما ممكن نستنتج رغبات خاصة أو موافقة من الخارطة.',en:'Physical expression and personal comfort meet symbolically; private desires and consent cannot be inferred.'});
  return {
   ar:prefix+(kind==='attraction'?'الجاذبية هنا تتعلق بطبيعة التفاعل، مو بضمان مشاعر متبادلة. ':'')+base.ar+(challenging?' الزاوية المتحدية تضيف شدّ واختلاف بالإيقاع يحتاج تفاهم، مو حكم بفشل العلاقة.':conj?' الاقتران يزيد التركيز على الموضوع، من دون اتجاه مضمون.':''),
-  en:prefixEn+base.en+(challenging?' The challenging aspect suggests pacing differences to discuss, not a failed relationship.':conj?' The conjunction intensifies the theme without predicting an outcome.':'')
+  en:prefixEn+base.en+(challenging?' The challenging aspect adds potential friction and pacing differences to discuss, not a failed relationship.':conj?' The conjunction intensifies the theme without predicting an outcome.':'')
  };
 };
 const initial:TwoLanguage={ar:'ماكو اتصال قريب يدعم تقييم هالجانب فلكياً.',en:'No close calculated aspect supports a reading of this area.'};
