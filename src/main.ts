@@ -220,11 +220,10 @@ function todayQuickGauges(r:Report,insideGo=false){
 function todaySkyWheel(r:Report){
  return '<div class="chart-layout chart-expanded mx-today-sky-layout">'+
   '<section class="panel large-wheel mx-today-sky" aria-label="'+t('خارطة السماء بهاللحظة','Current sky wheel')+'">'+
-  '<h2>'+t('خارطة السماء هسّه','Current sky chart')+'</h2>'+
+  '<div class="mx-today-sky-heading"><h2>'+t('سماء اللحظة','Current sky')+'</h2>'+
+  '<button type="button" class="secondary mx-today-sky-expand" id="expand-sky-wheel-link" aria-label="'+t('كبّر دائرة السماء','Expand sky wheel')+'">⤢ '+t('تكبير','Expand')+'</button></div>'+
   '<button type="button" id="expand-sky-wheel" class="mx-today-sky-open" aria-label="'+t('تكبير خارطة السماء الحالية','Expand current sky wheel')+'">'+wheel(r.current)+'</button>'+
   '<time class="mx-today-sky-time" datetime="'+r.at.toISOString()+'">'+dateText(r.at,{dateStyle:'full',timeStyle:'medium'})+'</time>'+
-  '<div class="mx-aspect-legend"><span class="harmonious">'+t('تثليث / تسديس','Trine / Sextile')+'</span><span class="challenging">'+t('تربيع / مقابلة','Square / Opposition')+'</span><span class="conjunction">'+t('اقتران','Conjunction')+'</span></div>'+
-  '<button type="button" class="secondary mx-today-sky-expand" id="expand-sky-wheel-link">'+t('⤢ كبّر الدائرة','⤢ Expand wheel')+'</button>'+
   '</section></div>';
 }
 function focusedToday(){
