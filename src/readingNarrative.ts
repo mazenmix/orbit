@@ -125,9 +125,9 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
   (labelA===labelB?'ركز على '+labelA:'وازن بين '+labelA+' و'+labelB):
   (labelA===labelB?'Focus on '+labelA:'Balance '+labelA+' with '+labelB);
  const takeaway=language==='ar'?
-  tension?'من ناحية تريد '+roleA+'، وبنفس الوقت تحتاج '+roleB+'. هذا الشدّ ممكن يظهر بقرار تتردد بيه أو نقاش تريد تحسمه بسرعة، ففصل الأمرين أنفع من تجاهل واحد.':
-  merged?'هالفترة الموضوعين مرتبطين بقوة: '+roleA+' و'+roleB+'. جرب تفرق بين اللي تريده فعلاً واللي تفترض أن المفروض يصير.':
-  'القراءة تميل إلى تسهيل الجمع بين '+roleA+' و'+roleB+' إذا اتخذت خطوة محسوبة؛ السلاسة وحدها ما تثبت أن ظروفك مناسبة.':
+  tension?'القراءة تبرز شدّاً محتملاً بين '+roleA+' وبين '+roleB+'. إذا ظهر عندك تردد بقرار أو اختلاف بحوار، حدد الأولوية اللي تحتاج معالجة أولاً بدل ما تضغط على نفسك وتحسم بسرعة.':
+  merged?'الموضوع الأبرز يجمع بين '+roleA+' وبين '+roleB+'. إذا واجهت موقفاً مشابهاً، اسأل نفسك: شنو أعرفه فعلاً وشنو مجرد توقع؟ هالفرق يساعدك تقرر أوضح.':
+  'قد يكون أسهل عليك توفّق بين '+roleA+' وبين '+roleB+'، خصوصاً إذا رتبت أولوياتك بخطوة عملية واحدة. احكم على النتيجة من تصرفاتك والواقع، مو من الانطباع وحده.':
   tension?'A possible tension lies between '+roleA+' and '+roleB+'. It could show up as indecision or a conversation you want to settle too quickly.':
   merged?'The strongest theme brings '+roleA+' together with '+roleB+'. Separate what you genuinely want from what you assume should happen.':
   'The pattern symbolically favors coordinating '+roleA+' and '+roleB+', provided real circumstances support it.';
@@ -135,7 +135,7 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
  const balance=contrast?(language==='ar'?' وأكو جانب معاكس بنفس القراءة؛ لذلك لا تعتبر الصورة كلها سهلة أو كلها صعبة.':' A competing theme is present, so avoid treating the whole situation as either easy or difficult.'):'';
  const good=takeaway+place+balance;
  const caution=language==='ar'?
-  'مثال ممكن، مو حدث متوقع: '+((scenes[e.natal.id]??categories[s.category])[0]) :
+  'مثلاً، إذا مرّيت بموقف مشابه: '+((scenes[e.natal.id]??categories[s.category])[0]) :
   'An illustrative situation, not a predicted event: '+((scenes[e.natal.id]??categories[s.category])[1]);
  const practical=action(e,s.category,language);
  const basis=first+' '+angle+' '+second+' · '+e.orb.toFixed(2)+'°';
