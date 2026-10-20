@@ -114,21 +114,26 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
  const p=index(language),a=meanings[e.angle]?.[p]??'',angle=aspects[e.angle]?.[p]??String(e.angle);
  const area=domains[s.category][p],first=name(e.transit.id,language),second=name(e.natal.id,language);
  const h=houseOf(e,natal,known);
- const houseText=h>=1&&h<=12?(language==='ar'?' وموضعه الولادي بالبيت '+h+' يربط هالموضوع بـ'+places[h][0]+'.':' Its natal house '+h+' also connects it with '+places[h][1]+'.'):'';
- const stage=e.orb<.5?
-  (language==='ar'?'الفارق الزاوي أقل من نصف درجة؛ هذا اتصال قريب جداً ضمن النموذج، مو توقيت حدث بحياتك.':'The orb is below half a degree; this is a close calculated aspect, not a predicted life event.'):
-  (language==='ar'?'هذا الاتصال ضمن هامش الحساب الحالي.':'This aspect lies within the calculated orb.');
- const tension=factors.find(x=>x!==e&&((supportive(e)&&difficult(x))||(difficult(e)&&supportive(x))));
- const other=tension?
-  (language==='ar'?' وبالمقابل '+name(tension.transit.id,language)+' '+(aspects[tension.angle]?.[0]??'اتصال')+' '+name(tension.natal.id,language)+' يضيف زاوية ثانية؛ لذلك الصورة مو أحادية.':
-   ' In contrast, '+name(tension.transit.id,language)+' '+(aspects[tension.angle]?.[1]??'aspect')+' natal '+name(tension.natal.id,language)+' adds a counter-theme; this is a mixed reading.'):'';
- const unique=e.transit.id===e.natal.id;
+ const home=h>=1&&h<=12?places[h][p]:null;
+ const contrast=factors.find(x=>x!==e&&((supportive(e)&&difficult(x))||(difficult(e)&&supportive(x))));
+ const tension=e.angle===90||e.angle===180;
+ const merged=e.angle===0;
+ const roleA=focus(e.transit.id,language),roleB=focus(e.natal.id,language);
+ const labelA=(headings[e.transit.id]??domains[s.category])[p];
+ const labelB=(headings[e.natal.id]??domains[s.category])[p];
  const title=language==='ar'?
-  (unique?'مراجعة '+(headings[e.natal.id]?.[0]??area):'بين '+(headings[e.transit.id]?.[0]??area)+' و'+(headings[e.natal.id]?.[0]??area)):
-  (unique?'Revisiting '+(headings[e.natal.id]?.[1]??area):'Between '+(headings[e.transit.id]?.[1]??area)+' and '+(headings[e.natal.id]?.[1]??area));
- const good=language==='ar'?
-  first+' '+angle+' '+second+' الأصلي: يربط رمزياً '+focus(e.transit.id,language)+' بـ'+focus(e.natal.id,language)+'. '+a+houseText+other:
-  first+' '+angle+' natal '+second+': symbolically links '+focus(e.transit.id,language)+' with '+focus(e.natal.id,language)+'. '+a+houseText+other;
+  (labelA===labelB?'ركز على '+labelA:'وازن بين '+labelA+' و'+labelB):
+  (labelA===labelB?'Focus on '+labelA:'Balance '+labelA+' with '+labelB);
+ const takeaway=language==='ar'?
+  tension?'من ناحية تريد '+roleA+'، وبنفس الوقت تحتاج '+roleB+'. هذا الشدّ ممكن يظهر بقرار تتردد بيه أو نقاش تريد تحسمه بسرعة، ففصل الأمرين أنفع من تجاهل واحد.':
+  merged?'هالفترة الموضوعين مرتبطين بقوة: '+roleA+' و'+roleB+'. جرب تفرق بين اللي تريده فعلاً واللي تفترض أن المفروض يصير.':
+  'القراءة تميل إلى تسهيل الجمع بين '+roleA+' و'+roleB+' إذا اتخذت خطوة محسوبة؛ السلاسة وحدها ما تثبت أن ظروفك مناسبة.':
+  tension?'A possible tension lies between '+roleA+' and '+roleB+'. It could show up as indecision or a conversation you want to settle too quickly.':
+  merged?'The strongest theme brings '+roleA+' together with '+roleB+'. Separate what you genuinely want from what you assume should happen.':
+  'The pattern symbolically favors coordinating '+roleA+' and '+roleB+', provided real circumstances support it.';
+ const place=home?(language==='ar'?' أقرب مجال حتى تراجع هذا الموضوع هو '+home+'.':' The area to reflect on is '+home+'.'):'';
+ const balance=contrast?(language==='ar'?' وأكو جانب معاكس بنفس القراءة؛ لذلك لا تعتبر الصورة كلها سهلة أو كلها صعبة.':' A competing theme is present, so avoid treating the whole situation as either easy or difficult.'):'';
+ const good=takeaway+place+balance;
  const caution=language==='ar'?
   'مثال ممكن، مو حدث متوقع: '+((scenes[e.natal.id]??categories[s.category])[0]) :
   'An illustrative situation, not a predicted event: '+((scenes[e.natal.id]??categories[s.category])[1]);
