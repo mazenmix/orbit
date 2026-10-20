@@ -81,6 +81,16 @@ const categories:Record<Category,Bi>={
  recovery:['احجز وقت راحة محدد ولا تخلّي كل فراغ يتحول لمهمة جديدة.','Protect one real rest window rather than filling every gap with work.'],
  timing:['جهّز بديل واضح لأي موعد يعتمد على ظروف أو موافقة غيرك.','Prepare a fallback for any plan dependent on external circumstances.']
 };
+const everydayCases:Record<Category,Bi>={
+ overview:['بين شغلتين ببالك، اختار أي وحدة تحتاج جواب اليوم وأي وحدة تكدر تأجلها.','When two priorities compete, identify what needs an answer today and what can wait.'],
+ career:['إذا مسؤول طلب منك شغلة مستعجلة، وضّح النتيجة والموعد قبل ما تعطي وعد.','If a manager asks for something urgent, clarify the result and deadline before committing.'],
+ love:['إذا شخص يعجبك وتأخر ردّه، لا تعتبر الصمت قبول أو رفض؛ وضّح اهتمامك باحترام مرة وحدة.','If someone you like replies late, do not treat silence as acceptance or rejection; express interest respectfully once.'],
+ communication:['إذا وصلت رسالة مبهمة، اسأل عن المعنى المقصود قبل لا تبني قرار على تخمين.','If a message is vague, clarify its meaning before acting on an assumption.'],
+ energy:['إذا طاقة البدايات عالية بس تركيزك مشتت، اختار خطوة تگدر تكملها بدون استنزاف.','If you feel motivated but scattered, choose a small step you can finish without exhaustion.'],
+ emotions:['إذا موقف ضايقك، افصل التصرف اللي صار فعلاً عن المعنى اللي تخيلته وراه.','If something upset you, separate what happened from the meaning you inferred.'],
+ recovery:['إذا يومك مزدحم، احجز وقت راحة حقيقي وخلي مهمة ثانوية لبعدين.','When the day is full, protect actual recovery time and postpone one optional task.'],
+ timing:['إذا موعد يعتمد على موافقة شخص أو وسيلة سفر، جهز خيار احتياطي قبل ما ترتبط بيه.','If a plan depends on someone else or travel logistics, have a fallback before committing.']
+};
 const name=(id:string,lang:Language)=>(names[id]??[id,id])[index(lang)];
 const focus=(id:string,lang:Language)=>(causes[id]??[id,id])[index(lang)];
 const nextSteps:Record<string,Bi>={
@@ -133,10 +143,10 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
   'The pattern symbolically favors coordinating '+roleA+' and '+roleB+', provided real circumstances support it.';
  const place=home?(language==='ar'?' أقرب مجال حتى تراجع هذا الموضوع هو '+home+'.':' The area to reflect on is '+home+'.'):'';
  const balance=contrast?(language==='ar'?' وأكو جانب معاكس بنفس القراءة؛ لذلك لا تعتبر الصورة كلها سهلة أو كلها صعبة.':' A competing theme is present, so avoid treating the whole situation as either easy or difficult.'):'';
- const good=takeaway+place+balance;
+ const good=(language==='ar'?'بموضوع '+area+'، ':'Regarding '+area+', ')+takeaway+place+balance;
  const caution=language==='ar'?
-  'مثلاً، إذا مرّيت بموقف مشابه: '+((scenes[e.natal.id]??categories[s.category])[0]) :
-  'An illustrative situation, not a predicted event: '+((scenes[e.natal.id]??categories[s.category])[1]);
+  'مثلاً، إذا صار هالموقف: '+everydayCases[s.category][0] :
+  'For instance, if this comes up: '+everydayCases[s.category][1];
  const practical=action(e,s.category,language);
  const basis=first+' '+angle+' '+second+' · '+e.orb.toFixed(2)+'°';
  return {title,good,careful:caution,action:practical,basis};
