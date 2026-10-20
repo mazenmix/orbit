@@ -56,7 +56,7 @@ export function humanSoul(reading:SoulReading):{summary:Both;deep:Both}{
   'عدك ميلين مختلفين: '+style(a.sign,'ar')+' من جهة، و'+style(b.sign,'ar')+' من جهة ثانية. يمكن واحد ينفعك بالعلاقات والثاني بالشغل؛ السياق يحدد.';
  const enDifference=a.sign===b.sign?
   'The symbolism emphasizes '+style(a.sign,'en')+' across different situations, though context changes how it works.':
-  'Two approaches are highlighted: '+style(a.sign,'en')+' and '+style(b.sign,'en')+'. Which is useful depends on the situation.';
+  'Depending on the situation, you may shift between '+style(a.sign,'en')+' on one side and '+style(b.sign,'en')+' on the other. Neither style defines your personality on its own.';
  const arPattern=tension?'إذا استعجلت الحسم، هالاحتياجين ممكن يتزاحمن؛ اختبر وين تحتاج توازن بدل ما تضغط على نفسك.':
   convergence?'الموضوعين قريبين من بعض بقراءتك؛ فرّق بين رغبتك الحقيقية وبين الحاجة لإثبات موقفك.':
   aspect?'من الممكن تنسيق هالأسلوبين بسهولة نسبية، بس هذا يحتاج موقف فعلي حتى تختبره.':
