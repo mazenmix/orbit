@@ -58,7 +58,7 @@ test('automatic Qwen reading resets promptly when active profile or language swi
  assert.ok(main.includes("aiRequestId++"));
 });
 
-test('calendar is a focused route and MX Ai retains all original indices',()=>{assert.ok(main.includes("case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage()"));assert.ok(main.includes("t('MX Ai','MX Ai')"));assert.ok(main.includes("مصفوفة المؤشرات الـ29"));});
+test('calendar stays independent and Go Mode includes all 29 indices',()=>{assert.ok(main.includes("case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage()"));assert.ok(main.includes("go:()=>t('Go Mode','Go Mode')"));assert.ok(main.includes("المؤشرات الـ29 كلها"));});
 
 test('lunar explanations are anchored to actual aspect events, not raw angles alone',()=>{
  assert.ok(main.includes('function moonMomentNarrative('));
