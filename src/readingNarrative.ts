@@ -83,11 +83,25 @@ const categories:Record<Category,Bi>={
 };
 const name=(id:string,lang:Language)=>(names[id]??[id,id])[index(lang)];
 const focus=(id:string,lang:Language)=>(causes[id]??[id,id])[index(lang)];
+const nextSteps:Record<string,Bi>={
+ Neptune:['حدّد المعلومة الناقصة واسأل عنها سؤال واحد مباشر؛ لا تكمّل القصة من خيالك.','Identify the missing fact and ask one direct question rather than filling gaps with hope.'],
+ Mercury:['اكتب جملة واحدة توضّح المطلوب، وبعدين راقب الرد الحقيقي من غير استنتاج مسبق.','Write one clear question, then use the real response rather than guessing.'],
+ Venus:['إذا الاهتمام متبادل، اقترح موعداً أو حديثاً واضحاً بلا اختبار مشاعر أو ضغط.','Where interest is reciprocal, suggest a clear low-pressure conversation or date.'],
+ Mars:['انجز أول جزء من المهمة أو النقاش وحدّد شنو يحتاج مهلة قبل أي تصعيد.','Complete the first manageable step, then decide what needs more time.'],
+ Saturn:['ثبّت حدود مسؤوليتك وموعد التنفيذ قبل أي التزام جديد.','Define your responsibility and deadline before agreeing to anything else.'],
+ Moon:['خذ مساحة قصيرة حتى تهدأ، وبعدها احچي عن الحاجة اللي فعلاً تريد توصلها.','Take a short pause, then state the need you actually want understood.'],
+ Sun:['حدّد موقفاً واحداً ينسجم ويا أولوياتك وفسّره للمعنيين بكلام واضح.','Choose one position consistent with your priorities and explain it clearly.'],
+ Jupiter:['احسب كلفة الفرصة والوقت المطلوب إلها قبل ما تتحول الفكرة إلى وعد.','Price the opportunity in time and resources before making a commitment.'],
+ Uranus:['جرّب تغييراً بسيطاً أسبوع واحد قبل ما تقلب الخطة كلها.','Test one reversible change for a week before reshaping the whole plan.'],
+ Pluto:['اكتب شنو تملك تغيّره بنفسك، وشنو يبقى قرار غيرك؛ بعدها تحرك على الجزء الأول فقط.','Separate what you control from what another person decides, then act on your part only.'],
+ Ascendant:['ابدأ بالتعارف بشغلة طبيعية تخصك، واسأل الشخص عن رأيه بلا مبالغة.','Introduce yourself naturally and ask a genuine question without performing a persona.'],
+ MC:['اختصر النقاش المهني بمطلوب واحد ومؤشر واضح تعرف بيه إن المهمة انجزت.','Define one work deliverable and a clear test of completion.']
+};
 const action=(e:Evidence,c:Category,lang:Language)=>{
- const p=index(lang),scene=scenes[e.natal.id]??scenes[e.transit.id];
- return (scene?.[p]??categories[c][p])+' '+(e.applying?
-  (lang==='ar'?'خلّ الخطوة الجاية صغيرة، لأن الزاوية بعدها تقترب من الدقة.':'Keep the next step small while the aspect is approaching exactness.'):
-  (lang==='ar'?'راجع شنو تعلمت من الموقف بدل ما تعيد نفس المحاولة.':'Review what you learned rather than repeating the same attempt.'));
+ const direct=(nextSteps[e.natal.id]??nextSteps[e.transit.id]??categories[c])[index(lang)];
+ return direct+(e.applying?
+  (lang==='ar'?' اختبر الخطوة قبل ما تكبّرها.':'Test that step before expanding it.'):
+  (lang==='ar'?' إذا جربتها قبل، راجع النتيجة وعدّل أسلوبك.':'If you have tried it already, review the outcome and adjust.'));
 };
 function houseOf(e:Evidence,natal:Chart|undefined,known:boolean):number{
  if(!known||!natal||natal.cusps.length!==12||['Ascendant','MC'].includes(e.natal.id))return 0;
@@ -113,8 +127,8 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
   (unique?'مراجعة '+(headings[e.natal.id]?.[0]??area):'بين '+(headings[e.transit.id]?.[0]??area)+' و'+(headings[e.natal.id]?.[0]??area)):
   (unique?'Revisiting '+(headings[e.natal.id]?.[1]??area):'Between '+(headings[e.transit.id]?.[1]??area)+' and '+(headings[e.natal.id]?.[1]??area));
  const good=language==='ar'?
-  'بهذا الوقت، '+first+' العابر يعمل '+angle+' ويا '+second+' بميلادك، فالتنجيم يربط '+focus(e.transit.id,language)+' بـ'+focus(e.natal.id,language)+'. '+a+houseText+' '+stage+other:
-  'At this moment, transiting '+first+' forms a '+angle+' to natal '+second+', symbolically linking '+focus(e.transit.id,language)+' with '+focus(e.natal.id,language)+'. '+a+houseText+' '+stage+other;
+  first+' '+angle+' '+second+' الأصلي: يربط رمزياً '+focus(e.transit.id,language)+' بـ'+focus(e.natal.id,language)+'. '+a+houseText+other:
+  first+' '+angle+' natal '+second+': symbolically links '+focus(e.transit.id,language)+' with '+focus(e.natal.id,language)+'. '+a+houseText+other;
  const caution=language==='ar'?
   'مثال ممكن، مو حدث متوقع: '+((scenes[e.natal.id]??categories[s.category])[0]) :
   'An illustrative situation, not a predicted event: '+((scenes[e.natal.id]??categories[s.category])[1]);
