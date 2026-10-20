@@ -528,9 +528,6 @@ function travelModePage(){
   '<div class="mx-focus-metrics mx-travel-grid">'+group.rows.map(({id,metric})=>quickGaugeCard(metric,travelSymbol(id),undefined,id)).join('')+'</div></section>'
  ).join('');
  return '<div class="mx-travel-mode-page mx-quick-gauges" data-section="travelmode">'+
-  '<div class="section-title"><div><span class="eyebrow">🇵🇭 PHILIPPINES · TRAVEL MODE</span><h2>'+t('مؤشرات سفرتك المهمة','Your essential travel indicators')+'</h2></div>'+
-  '<button type="button" class="secondary mx-travel-all" data-go="go">'+t('كل المؤشرات الـ29','All 29 indicators')+' ↗</button></div>'+
-  '<p class="mx-travel-intro">'+t('هنا أهم 12 مؤشر من Go Mode، مرتبة للتعارف والمواعيد والسهر والتنقل. الأرقام تتحدث حسب خارطتك والوقت المختار، مو قيم ثابتة.','Here are the 12 travel-focused Go Mode indicators for meeting people, dating, nightlife and getting around. They change with the selected chart and time.')+'</p>'+
   sections+
   '</div>';
 }
