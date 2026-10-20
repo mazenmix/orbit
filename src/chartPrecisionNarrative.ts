@@ -60,8 +60,8 @@ export function precisionChartStories(natal:Chart,current?:Chart,evidence:readon
   const trAr=transit?' بالوقت المختار: '+(arName[transit.transit.id]??transit.transit.id)+' يعمل '+(arAspect[transit.angle]??transit.angle+'°')+' مع موضعه الأصلي بفارق '+transit.orb.toFixed(2)+'° '+(transit.applying?'ويقترب من الدقة.':'ويبتعد عن الدقة.'):'';
   const trEn=transit?' At the selected moment '+transit.transit.id+' makes a '+(enAspect[transit.angle]??transit.angle+'°')+' to natal '+p.id+', orb '+transit.orb.toFixed(2)+'°, '+(transit.applying?'applying.':'separating.'):'';
   return {id:p.id,titleAr:role.ar,titleEn:role.en,signAr:z[0],signEn:z[1],degree,house,aspect:match?.point.id??null,
-   ar:placementAr+' بهذا التأويل، '+role.roleAr+' يتفاعل مع '+z[2]+'.'+asAr+trAr,
-   en:placementEn+' In the symbolic reading, '+role.roleEn+' interacts with '+z[3]+'.'+asEn+trEn,
+   ar:'شلون ممكن يبين هذا بحياتك؟ موضوع '+role.roleAr+' ينقري هنا من زاوية '+z[2]+'. استخدم هالمعنى حتى تراجع تصرفاتك الفعلية، مو حتى تحكم على شخصيتك بحتمية. '+placementAr+asAr+trAr,
+   en:'How might this relate to everyday choices? '+role.roleEn+' is symbolically framed through '+z[3]+'. Compare the theme with real behavior instead of treating it as a fixed personality verdict. '+placementEn+asEn+trEn,
    actionAr:role.actionAr,actionEn:role.actionEn};
  });
 }
