@@ -56,11 +56,20 @@ test('Go Mode contains all 29 metrics, all four daily gauges and all four decisi
  assert.equal(metrics.length,29,'All 29 computed indices are available');
 });
 
-test('Today gauges and the independent Go Mode page coexist without any duplicate menu items',()=>{
+test('Today replaces its top gauges with a professional current-sky wheel in both UI modes',()=>{
  const focused=main.slice(main.indexOf('function focusedToday()'),main.indexOf('function focusedCalendar()'));
  const classic=main.slice(main.indexOf('function today(){'),main.indexOf('function trend(',main.indexOf('function today(){')));
- assert.match(focused,/todayQuickGauges\(r\)/);
- assert.match(classic,/todayQuickGauges\(r\)/);
- assert.match(css,/\.mx-today-gauges/);
- assert.match(css,/@media\(max-width:420px\)/);
+ const sky=main.slice(main.indexOf('function todaySkyWheel('),main.indexOf('function focusedToday()'));
+ const live=main.slice(main.indexOf('function updateLiveSkyWheel('),main.indexOf('function refreshLiveBody('));
+ assert.match(focused,/todaySkyWheel\(r\)/);
+ assert.match(classic,/todaySkyWheel\(r\)/);
+ assert.doesNotMatch(focused,/todayQuickGauges\(r\)/);
+ assert.doesNotMatch(classic,/todayQuickGauges\(r\)/);
+ assert.match(sky,/chart-layout chart-expanded mx-today-sky-layout/);
+ assert.match(sky,/wheel\(r\.current\)/);
+ assert.match(sky,/id="expand-sky-wheel"/);
+ assert.match(live,/if\(todayWheel\)reconcileLiveHTML\(todayWheel,html\)/);
+ assert.match(live,/if\(enlarged\)reconcileLiveHTML\(enlarged,html\)/);
+ assert.match(css,/\.mx-today-sky-layout/);
+ assert.ok(!classic.includes('sky-card'),'Avoid duplicate sky wheels on Today');
 });
