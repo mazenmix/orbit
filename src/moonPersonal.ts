@@ -85,11 +85,9 @@ export function moonPersonalSummary(report:Report,knownTime:boolean,lang:Lang):s
   .filter(e=>e.transit.id==='Moon'&&(knownTime||!['Moon','Ascendant','MC'].includes(e.natal.id)))
   .sort((a,b)=>b.weight-a.weight||a.orb-b.orb)[0];
  const advice=relevant&&contactAdvice[relevant.natal.id]?.[lang];
- if(advice){
-  // Avoid burying the short reading in repetitive advice: limit to three sentences.
-  if(lines.length>=3)lines.pop();
-  lines.push(advice);
- }
+ // The natal emotional need stays visible; an aspect is only added if the card
+ // has room, never at the expense of a calculated personal natal context.
+ if(advice&&lines.length<3)lines.push(advice);
  if(lines.length===1){
   // No birth-house assumptions if the birth time or cusps are absent.
   lines.push(lang==='ar'
