@@ -152,3 +152,15 @@
 .mx-intel-go .go-grid{margin-top:12px}
 .mx-intel-go .go-card{min-width:0}
 @media(max-width:440px){.mx-intel-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px}.mx-intel-tab{padding:8px 6px;font-size:12px!important;min-width:0}.mx-intel-go .mx-today-gauge-header h2{font-size:.85rem}}
+
+/* A sixth primary destination is visible on mobile without overflowing. */
+@media(max-width:600px){
+ .mobile-nav .nav-item{min-width:0;max-width:none;flex:1 1 0}
+ .mobile-nav .nav-item span{font-size:clamp(17px,5vw,21px)}
+ .mobile-nav .nav-item b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:clamp(7px,2.15vw,8px)}
+}
+.mx-go-mode-page{min-width:0;display:grid;gap:12px}
+.mx-go-mode-page>.section-title{margin:0 0 3px}
+.mx-go-mode-page>.panel,.mx-go-mode-page>.mx-today-gauges{margin:0!important}
+.mx-go-mode-page .metrics-grid{min-width:0}
+.mx-go-mode-page .metric-card,.mx-go-mode-page .go-card{min-width:0}
