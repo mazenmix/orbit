@@ -1,7 +1,7 @@
 import type {Chart,Report} from './engine.ts';
 import {distance,houseNumber,type Point,type Evidence} from './math.ts';
 import {interpretableNatalPoints} from './readingBasis.ts';
-export type PrecisionInsight={id:string;titleAr:string;titleEn:string;signAr:string;signEn:string;ar:string;en:string;actionAr:string;actionEn:string;degree:number;house:number|null;aspect:string|null};
+export type PrecisionInsight={id:string;titleAr:string;titleEn:string;signAr:string;signEn:string;ar:string;en:string;actionAr:string;actionEn:string;degree:number;house:number|null;aspect:string|null;aspectAngle?:number|null;aspectOrb?:number|null};
 const planets:Record<string,{ar:string;en:string;roleAr:string;roleEn:string;actionAr:string;actionEn:string}>={
  Sun:{ar:'الشمس · الهوية',en:'Sun · Identity',roleAr:'القرار وطريقة التعبير عن الذات',roleEn:'decision-making and self-expression',actionAr:'دقق وين تقدر تثبت قرارك بالفعل، مو بالتوقع.',actionEn:'Test your priorities against what you actually do.'},
  Moon:{ar:'القمر · الاحتياج العاطفي',en:'Moon · Emotional needs',roleAr:'الراحة وسرعة رد الفعل',roleEn:'comfort and emotional reactions',actionAr:'راقب احتياجك للراحة قبل ما تحكم على تصرف الآخرين.',actionEn:'Check your own need for comfort before judging others.'},
@@ -79,7 +79,7 @@ export function precisionChartStories(natal:Chart,current?:Chart,evidence:readon
     ' No major natal aspect was calculated within 5.5° for this body.';
   const trAr=transit?' بالوقت المختار: '+(arName[transit.transit.id]??transit.transit.id)+' يعمل '+(arAspect[transit.angle]??transit.angle+'°')+' مع موضعه الأصلي بفارق '+transit.orb.toFixed(2)+'° '+(transit.applying?'ويقترب من الدقة.':'ويبتعد عن الدقة.'):'';
   const trEn=transit?' At the selected moment '+transit.transit.id+' makes a '+(enAspect[transit.angle]??transit.angle+'°')+' to natal '+p.id+', orb '+transit.orb.toFixed(2)+'°, '+(transit.applying?'applying.':'separating.'):'';
-  return {id:p.id,titleAr:role.ar,titleEn:role.en,signAr:z[0],signEn:z[1],degree,house,aspect:match?.point.id??null,
+  return {id:p.id,titleAr:role.ar,titleEn:role.en,signAr:z[0],signEn:z[1],degree,house,aspect:match?.point.id??null,aspectAngle:match?.angle??null,aspectOrb:match?.orb??null,
    ar:'قراءة '+role.ar+' في '+z[0]+': أسلوب '+z[2]+' يلتقي ويا موضوع '+role.roleAr+'. '+(house&&livedHouses[house]?'بيت الميلاد '+house+' يضيف ساحة '+livedHouses[house][0]+'. ':'')+(match?'واتصاله الأقرب ويا '+(arName[match.point.id]??match.point.id)+' ('+(arAspect[match.angle]??String(match.angle)) +') يضيف جانب ثاني: '+angleMeaning[match.angle][0]+' ':'')+'مثال حتى تختبره بحياتك: '+(lifeExamples[p.id]?.[0]??role.actionAr)+' '+(transit?'وبهذا الوقت '+(arName[transit.transit.id]??transit.transit.id)+' '+(arAspect[transit.angle]??'يتصل')+' ويا موضعه الولادي؛ '+(transit.applying?'الزاوية تقترب من الدقة.':'الزاوية تبتعد عن الدقة.'):'')+' الأساس الحسابي: '+placementAr+asAr,
    en:role.en+' in '+z[1]+' connects '+z[3]+' with '+role.roleEn+'. '+(house&&livedHouses[house]?'Natal house '+house+' places this theme around '+livedHouses[house][1]+'. ':'')+(match?'Its closest natal aspect with '+match.point.id+' ('+(enAspect[match.angle]??String(match.angle))+') adds a second dimension: '+angleMeaning[match.angle][1]+' ':'')+'A situation to test in real life: '+(lifeExamples[p.id]?.[1]??role.actionEn)+' '+(transit?'At the selected time '+transit.transit.id+' forms a '+(enAspect[transit.angle]??'contact')+' to natal '+p.id+', '+(transit.applying?'applying.':'separating.'):'')+' Calculation basis: '+placementEn+asEn,
 
