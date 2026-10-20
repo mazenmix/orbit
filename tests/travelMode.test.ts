@@ -53,11 +53,24 @@ test('Travel Mode does not replace all-29 Go Mode',()=>{
  assert.match(go,/go\.map/);
 });
 
-test('Travel Mode gauge colors use the same four value levels, including numbers and progress bars',()=>{
- const focus=readFileSync('src/focus.css','utf8');
+test('Go Mode and Travel Mode reuse exactly one indicator card renderer and identical grid classes',()=>{
+ const main=readFileSync('src/main.ts','utf8');
+ const css=readFileSync('src/focus.css','utf8');
+ const go=main.slice(main.indexOf('function goModePage(){'),main.indexOf('function travelModePage(){'));
+ const travel=main.slice(main.indexOf('function travelModePage(){'),main.indexOf('function asteroidsPage(){'));
+ assert.match(main,/function indicatorGaugeCard\(m:MetricResult,travelId\?:string\)/);
+ assert.match(go,/indicators\.map\(m=>indicatorGaugeCard\(m\)\)/);
+ assert.match(travel,/group\.rows\.map\(\(\{id,metric\}\)=>indicatorGaugeCard\(metric,id\)\)/);
+ assert.match(travel,/class="metrics-grid mx-travel-grid"/);
+ assert.match(main,/data-indicator-id/);
+ assert.match(main,/data-travel-metric/);
+ assert.ok(!css.includes('#live-view-body .mx-travel-mode-page .mx-travel-metric{'),
+  'Travel cards must not have a separate visual theme or dimensions');
+ assert.ok(!css.includes('grid-template-columns:repeat(3,minmax(0,1fr));gap:10px'),
+  'Travel cannot override Go grid columns');
  for(const level of ['strong','steady','caution','low']){
-  assert.ok(focus.includes('.mx-travel-metric.'+level),level+' style must exist');
+  assert.match(css,new RegExp('\\.metric-card\\.'+level+'\\{'),'shared '+level+' color');
  }
- assert.match(focus,/\.mx-travel-metric>b\s*\{[\s\S]*?color:var\(--travel-accent\)!important/);
- assert.match(focus,/\.mx-travel-metric \.meter>i\s*\{[\s\S]*?--travel-accent/);
+ assert.match(css,/\.metric-card>b\{/);
+ assert.match(css,/\.metric-card \.meter>i\{/);
 });
