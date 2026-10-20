@@ -35,6 +35,26 @@ const angleMeaning:Record<number,[string,string]>={
  120:['يوحي بانسياب بين موضوعين، لكنه ليس ضمان نتيجة.','Suggests symbolic ease without guaranteeing an outcome.'],
  180:['يظهر قطبين يحتاجان إنصاتاً وحدوداً متبادلة.','Highlights two poles that call for balance and boundaries.']
 };
+const lifeExamples:Record<string,[string,string]>={
+ Sun:['إذا قرار بالشغل أو بحياتك الخاصة يتعارض ويا توقعات الناس، شنو تختار وشنو تشرح لهم؟','If a decision clashes with expectations, what do you choose and how do you explain it?'],
+ Moon:['لما تمر بيوم متعب، شنو يعطيك راحة حقيقية: الانسحاب شوي، حچي واضح، لو ترتيب مكانك؟','After a difficult day, what really restores comfort: space, conversation or structure?'],
+ Mercury:['وقت تفهم رسالة بطريقتين، شكد تعتمد على السؤال المباشر بدل الاستنتاج؟','When a message seems ambiguous, how often do you clarify instead of assuming?'],
+ Venus:['بالقرب العاطفي، شنو يثبت الاهتمام عندك: كلام واضح، مبادرة، لو استمرارية؟','In relationships, what makes care credible: words, initiative or consistency?'],
+ Mars:['عند اختلاف بالرأي، شنو الفرق بين الحزم المفيد وبين ردّة فعل تستعجلها؟','During disagreement, where is the line between useful assertiveness and a rushed reaction?'],
+ Jupiter:['إذا فرصة جديدة عجبتك، هل تحسب الجهد والكلفة مثلما تحسب الفائدة؟','When an opportunity excites you, do you weigh effort and costs as well as potential gain?'],
+ Saturn:['المسؤولية اللي تشيلها: كلها ضرورية، لو جزء منها لأنك ما تحب تقول لا؟','Are all your responsibilities necessary, or do some come from struggling to say no?'],
+ Uranus:['إذا طريقة قديمة ما عادت تفيد، شنو أصغر تجربة جديدة ما تخرب الاستقرار؟','When an old routine stops helping, what reversible experiment could improve it?'],
+ Neptune:['وقت تتمنى نتيجة عاطفية أو مهنية، شلون تميّز الأمل من الشي اللي عندك دليل عليه؟','When you hope for an outcome, how do you distinguish evidence from wishful interpretation?'],
+ Pluto:['في خلاف قديم، شنو تقدر تغيره بتصرفك وشنو مو من حقك تفرضه على غيرك؟','In an old disagreement, what can you change yourself and what is not yours to control?']
+};
+const livedHouses:Record<number,[string,string]>={
+ 1:['صورتك الذاتية وأول مبادرة','identity and personal initiative'],2:['القيم والمصاريف والاستقرار','resources and financial steadiness'],
+ 3:['الرسائل والتعلّم اليومي','messages and everyday learning'],4:['البيت والعائلة','home and family'],
+ 5:['الانجذاب والإبداع والمتعة','romance, creativity and pleasure'],6:['الروتين والشغل اليومي','routine and everyday work'],
+ 7:['الشراكات والتفاهم','partnerships and mutual agreements'],8:['الثقة والحدود والمال المشترك','trust, boundaries and shared resources'],
+ 9:['السفر والقناعات والتعلّم','travel and wider perspectives'],10:['المسار المهني والسمعة','career and reputation'],
+ 11:['الأصدقاء والمجتمعات','friendships and communities'],12:['الخصوصية والخلوة','private reflection and solitude']
+};
 type Contact={point:Point;angle:number;orb:number};
 function nearestNatal(point:Point,points:readonly Point[]):Contact|null{
  const choices:Contact[]=[];
@@ -60,8 +80,9 @@ export function precisionChartStories(natal:Chart,current?:Chart,evidence:readon
   const trAr=transit?' بالوقت المختار: '+(arName[transit.transit.id]??transit.transit.id)+' يعمل '+(arAspect[transit.angle]??transit.angle+'°')+' مع موضعه الأصلي بفارق '+transit.orb.toFixed(2)+'° '+(transit.applying?'ويقترب من الدقة.':'ويبتعد عن الدقة.'):'';
   const trEn=transit?' At the selected moment '+transit.transit.id+' makes a '+(enAspect[transit.angle]??transit.angle+'°')+' to natal '+p.id+', orb '+transit.orb.toFixed(2)+'°, '+(transit.applying?'applying.':'separating.'):'';
   return {id:p.id,titleAr:role.ar,titleEn:role.en,signAr:z[0],signEn:z[1],degree,house,aspect:match?.point.id??null,
-   ar:'شلون ممكن يبين هذا بحياتك؟ موضوع '+role.roleAr+' ينقري هنا من زاوية '+z[2]+'. استخدم هالمعنى حتى تراجع تصرفاتك الفعلية، مو حتى تحكم على شخصيتك بحتمية. '+placementAr+asAr+trAr,
-   en:'How might this relate to everyday choices? '+role.roleEn+' is symbolically framed through '+z[3]+'. Compare the theme with real behavior instead of treating it as a fixed personality verdict. '+placementEn+asEn+trEn,
+   ar:'قراءة '+role.ar+' في '+z[0]+': أسلوب '+z[2]+' يلتقي ويا موضوع '+role.roleAr+'. '+(house&&livedHouses[house]?'بيت الميلاد '+house+' يضيف ساحة '+livedHouses[house][0]+'. ':'')+(match?'واتصاله الأقرب ويا '+(arName[match.point.id]??match.point.id)+' ('+(arAspect[match.angle]??String(match.angle)) +') يضيف جانب ثاني: '+angleMeaning[match.angle][0]+' ':'')+'مثال حتى تختبره بحياتك: '+(lifeExamples[p.id]?.[0]??role.actionAr)+' '+(transit?'وبهذا الوقت '+(arName[transit.transit.id]??transit.transit.id)+' '+(arAspect[transit.angle]??'يتصل')+' ويا موضعه الولادي؛ '+(transit.applying?'الزاوية تقترب من الدقة.':'الزاوية تبتعد عن الدقة.'):''),
+   en:role.en+' in '+z[1]+' connects '+z[3]+' with '+role.roleEn+'. '+(house&&livedHouses[house]?'Natal house '+house+' places this theme around '+livedHouses[house][1]+'. ':'')+(match?'Its closest natal aspect with '+match.point.id+' ('+(enAspect[match.angle]??String(match.angle))+') adds a second dimension: '+angleMeaning[match.angle][1]+' ':'')+'A situation to test in real life: '+(lifeExamples[p.id]?.[1]??role.actionEn)+' '+(transit?'At the selected time '+transit.transit.id+' forms a '+(enAspect[transit.angle]??'contact')+' to natal '+p.id+', '+(transit.applying?'applying.':'separating.'):''),
+
    actionAr:role.actionAr,actionEn:role.actionEn};
  });
 }
