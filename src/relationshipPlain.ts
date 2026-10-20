@@ -132,7 +132,7 @@ export function personalTransitPlainReading(e:Pick<Evidence,'transit'|'natal'|'a
  return {
   title:{ar:'عبور مرتبط بـ'+area.ar,en:'Transit involving '+area.en},
   meaning:{
-   ar:'ضمن '+area.ar+'، اتصال '+transit.ar+' بـ'+natal.ar+' يلفت النظر رمزياً إلى طريقة تعاملك مع هالموضوع. '+link.ar+' '+(e.applying?'زاويته تقترب من الدقة.':'زاويته تبتعد عن الدقة.')+' '+transitScenes[category].ar,
+   ar:'ضمن '+area.ar+'، اتصال '+transit.ar+' بـ'+natal.ar+' يلفت النظر رمزياً إلى طريقة تعاملك مع هالموضوع. '+link.ar+' '+(e.applying?'هذا الاتصال يقترب من الدقة.':'هذا الاتصال يبتعد عن الدقة.')+' '+transitScenes[category].ar,
    en:'Within '+area.en+', '+transit.en+' meets natal '+natal.en+' symbolically. '+link.en+' '+(e.applying?'The aspect is applying.':'The aspect is separating.')+' '+transitScenes[category].en
   },
   advice:{ar:'خلّ الموقف الحقيقي وردّ الطرف الثاني يحدد الخطوة الجاية؛ الحساب يفسّر رمز، مو يحدد وقوع حدث.',en:'Let actual circumstances and the other person\'s response guide your next step; the calculation is symbolic, not a predicted event.'}
