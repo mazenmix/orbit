@@ -171,7 +171,7 @@
 .mx-travel-mode-page>.section-title h2{margin:4px 0 0}
 .mx-travel-mode-page>.section-title .mx-travel-all{min-height:37px}
 .mx-travel-intro{margin:0 0 4px;color:#bbc3d9;font-size:13px;line-height:1.8}
-.mx-travel-group{padding:22px!important;margin:0!important;border:1px solid rgba(167,145,213,.2);border-radius:14px}
+.mx-travel-group{padding:28px!important;margin:0!important;border:1px solid rgba(167,145,213,.2);border-radius:14px}
 .mx-travel-group .section-title{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .mx-travel-group h2{font-size:1.03rem}
 .mx-travel-description{font-size:12px;line-height:1.7;color:#aeb9d5;margin:5px 0 14px!important}
@@ -182,7 +182,7 @@
 .mx-travel-note p{font-size:12px;line-height:1.75}
 .mx-travel-note small{display:block;color:#97a4bf;line-height:1.6}
 @media(max-width:750px){.mx-travel-mode-page>.section-title .mx-travel-all{font-size:11px!important}}
-@media(max-width:760px){.mx-travel-group{padding:19px!important}}
+@media(max-width:760px){.mx-travel-group{padding:22px!important}}
 @media(max-width:420px){
  .mobile-nav .nav-item{min-width:0;padding-inline:0}
  .mobile-nav .nav-item span{font-size:17px}
