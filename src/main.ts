@@ -1262,7 +1262,7 @@ function updateLiveSkyWheel(now:number){
    if(todayWheel)reconcileLiveHTML(todayWheel,html);
    if(enlarged)reconcileLiveHTML(enlarged,html);
   }
-  const todayTime=root.querySelector<HTMLElement>('.mx-today-sky-time');
+  const todayTime=root.querySelector<HTMLTimeElement>('.mx-today-sky-time');
   if(todayTime){todayTime.dateTime=new Date(now).toISOString();todayTime.textContent=dateText(new Date(now),{dateStyle:'full',timeStyle:'medium'})}
   if(chartWheel){
    const owner=chartOwnerProfile();
