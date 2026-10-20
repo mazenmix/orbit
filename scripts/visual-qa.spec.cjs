@@ -312,3 +312,44 @@ test('Moon timing uses six coherent SVG icons instead of assorted arrow characte
  await expect(page.locator('.lunar-premium-grid .mx-lunar-tile-icon svg')).toHaveCount(4);
  await expect(page.locator('.premium-time-tile')).toHaveCount(4);
 });
+
+for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
+ test(device+' Today Moon prose is chart-specific, jargon-free and survives a reload',async({browser},testInfo)=>{
+  const context=await browser.newContext({viewport:{width,height},isMobile:device==='iphone',hasTouch:device==='iphone'});
+  const page=await context.newPage(),crashes=[];
+  page.on('pageerror',e=>crashes.push(e.message));
+  await page.goto('/#today',{waitUntil:'domcontentloaded'});
+  await page.evaluate(()=>{
+   const owners=[
+    {id:'moon-qa-a',kind:'self',name:'First Owner',date:'1985-03-29',time:'01:20',zone:'Asia/Baghdad',city:'Baghdad',lat:33.3,lon:44.4,known:true,sex:'male'},
+    {id:'moon-qa-b',kind:'self',name:'Second Owner',date:'1985-03-29',time:'13:20',zone:'Asia/Baghdad',city:'Baghdad',lat:33.3,lon:44.4,known:true,sex:'male'}
+   ];
+   localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify(owners));
+   localStorage.setItem('mx.active','moon-qa-a');
+   localStorage.setItem('mx.uiMode','pro');
+  });
+  await page.reload({waitUntil:'domcontentloaded'});
+  const card=page.locator('.lunar-card p');
+  await card.waitFor({state:'visible',timeout:75000});
+  await expect(page.locator('#active-profile option')).toHaveCount(2);
+  const first=(await card.innerText()).trim();
+  const banned=/\\b(?:orb|aspects?|houses?|natal moon)\\b|(?:البيت|بيوت|تربيع|تثليث|تسديس|مقابلة|اقتران)\\s*\\d*|°|\\d+\\s*\\/\\s*100/iu;
+  expect(first.length).toBeGreaterThan(80);
+  expect(first).not.toMatch(banned);
+  await page.locator('#active-profile').selectOption('moon-qa-b');
+  await expect(page.locator('#active-profile')).toHaveValue('moon-qa-b');
+  await expect.poll(()=>card.innerText()).not.toBe(first);
+  const second=(await card.innerText()).trim();
+  expect(second).not.toMatch(banned);
+  expect(second.length).toBeGreaterThan(80);
+  await page.reload({waitUntil:'domcontentloaded'});
+  await card.waitFor({state:'visible',timeout:75000});
+  await expect(page.locator('#active-profile')).toHaveValue('moon-qa-b');
+  expect((await card.innerText()).trim()).toBe(second);
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+  expect(overflow).toBeLessThan(8);
+  expect(crashes).toEqual([]);
+  await page.screenshot({path:'artifacts/ui-qa/moon-personal-'+device+'-'+testInfo.project.name+'.png',fullPage:true});
+  await context.close();
+ });
+}
