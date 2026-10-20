@@ -22,7 +22,7 @@ test('Asteroid readings and evidence UI are narrative-first and confidential bir
 
 
 test('main navigation exposes standalone Go Mode after People and preserves professional deep links',()=>{
- assert.match(main,/const primaryRoutes=\['today','chart','people','go','calendar','more'\]/);
+ assert.match(main,/const primaryRoutes=\['today','chart','people','go','travelmode','calendar','more'\]/);
  assert.ok(main.includes("if(uiMode==='simple')return ''"));
  assert.ok(main.includes("function morePage()"));
  assert.ok(main.includes("localStorage.setItem('mx.uiMode',uiMode)"));
