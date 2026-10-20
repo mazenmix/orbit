@@ -46,28 +46,43 @@ const of=(points:Chart['points'],id:string)=>points.find(p=>p.id===id);
 export function moonPersonalSummary(report:Report,knownTime:boolean,lang:Lang):string{
  const currentMoon=of(report.current.points,'Moon');
  if(!currentMoon)return lang==='ar'?'معلومات القمر الحالية غير متوفرة؛ ما أگدر أطلع تفسير شخصي من دون حساب.':'Current Moon data is unavailable; a personal interpretation needs a real calculation.';
- const naturalStyle=signStyle[signOf(currentMoon.longitude)][lang];
  const natal=report.natal;
  const natalMoon=knownTime?of(natal.points,'Moon'):undefined;
  const natalVenus=of(natal.points,'Venus');
  const natalMercury=of(natal.points,'Mercury');
+ const naturalStyle=signStyle[signOf(currentMoon.longitude)][lang];
  const birthStyle=get(natalMoon??natalVenus??natalMercury,lang);
- const h=knownTime&&natal.cusps.length===12?houseNumber(currentMoon.longitude,natal.cusps):0;
- const houseText=h>0?areas[h][lang]:'';
+ // Three different house frames must never be conflated:
+ // 1. Moon's house in the current sky chart (transit houses).
+ // 2. Natal Moon's house at birth (fixed natal position).
+ // 3. Transiting Moon over the natal house cusps (personal overlay).
+ // Placidus cusps are required; no house is inferred for unknown birth times.
+ const skyHouse=knownTime&&report.current.cusps.length===12?houseNumber(currentMoon.longitude,report.current.cusps):0;
+ const natalMoonHouse=knownTime&&natalMoon&&natal.cusps.length===12?houseNumber(natalMoon.longitude,natal.cusps):0;
+ const overlayHouse=knownTime&&natal.cusps.length===12?houseNumber(currentMoon.longitude,natal.cusps):0;
  const contact=report.evidence.filter(e=>e.transit.id==='Moon'&&(knownTime||!['Moon','Ascendant','MC'].includes(e.natal.id))).sort((a,b)=>b.weight-a.weight||a.orb-b.orb)[0];
  const target=contact?themes[contact.natal.id]?.[lang]:null;
  const challenged=contact&&(contact.angle===90||contact.angle===180);
  const shared=contact&&(contact.angle===0||contact.angle===60||contact.angle===120);
+ const practicalHouse=skyHouse||overlayHouse;
  if(lang==='ar'){
-  const lead='القمر حالياً يركز رمزياً على '+naturalStyle+'. '+(houseText?'وبخارطتك إنت يرتبط أكثر بموضوع '+houseText+'. ':knownTime?'':'وقت ولادتك مو مؤكد، لذلك ما أگدر أحدد بيتاً خاصاً إلك. ');
+  const sky=skyHouse?'بخارطة العبور الحالية القمر بالبيت '+skyHouse+' ('+areas[skyHouse].ar+'). ':'';
+  const birth=natalMoonHouse?'قمرك الولادي بالبيت '+natalMoonHouse+' ('+areas[natalMoonHouse].ar+'). ':
+   knownTime?'بيت قمرك الولادي غير متاح للحساب. ':'وقت ولادتك مو مؤكد، لذلك ما أگدر أحدد بيتاً خاصاً إلك. ';
+  const overlay=overlayHouse?'أما القمر العابر من نسقطه على بيوت ميلادك، فيقع بالبيت '+overlayHouse+' ('+areas[overlayHouse].ar+'). ':'';
+  const distinct=skyHouse&&overlayHouse&&skyHouse!==overlayHouse?'بيت العبور الحالي يختلف عن البيت اللي يمر بيه القمر ضمن خارطتك الولادية؛ لا نخلط بينهن. ':'';
   const personal=birthStyle?'أسلوبك الولادي يميل إلى '+birthStyle+'؛ قارن بين الاحتياجين قبل ما تتصرف. ':'';
   const transit=target?(challenged?'أكو شدّ محتمل يخص '+target+'، فالأفضل ما تستعجل الحسم. ':shared?'أكو مجال أسهل نسبياً لترتيب '+target+' إذا الظروف تساعد. ':'أكو تركيز إضافي على '+target+'، لكن هذا مو ضمان لحدث. '):'ماكو اتصال شخصي قريب كافي أستنتج منه حدثاً بعينه. ';
-  const practical=h===5||h===7?'مثلاً، إذا تريد تبادر عاطفياً، عبّر بوضوح وخلي ردّ الطرف الثاني يحدد خطوتك. ':h===10||h===6?'مثلاً، إذا عندك قرار بالشغل، ثبّت المطلوب والموعد قبل الموافقة. ':h===3||contact?.natal.id==='Mercury'?'مثلاً، إذا رسالة تحتمل أكثر من معنى، اسأل عن المقصود بدل التخمين. ':h===11?'مثلاً، إذا تفكر ترجع تتواصل ويا صديق، ابدي بكلام بسيط وراقب تجاوبه. ':h===4?'مثلاً، إذا موضوع بالبيت مأثر عليك، احچي عن احتياجك بدل ما تفترض الآخرين يعرفوه. ':'مثلاً، إذا محتار بخطوة، افصل رغبتك عن الوقائع وخذ قراراً قابلاً للتعديل. ';
-  return lead+personal+transit+practical;
+  const practical=practicalHouse===5||practicalHouse===7?'مثلاً، إذا تريد تبادر عاطفياً، عبّر بوضوح وخلي ردّ الطرف الثاني يحدد خطوتك. ':practicalHouse===10||practicalHouse===6?'مثلاً، إذا عندك قرار بالشغل، ثبّت المطلوب والموعد قبل الموافقة. ':practicalHouse===3||contact?.natal.id==='Mercury'?'مثلاً، إذا رسالة تحتمل أكثر من معنى، اسأل عن المقصود بدل التخمين. ':practicalHouse===11?'مثلاً، إذا تفكر ترجع تتواصل ويا صديق، ابدي بكلام بسيط وراقب تجاوبه. ':practicalHouse===4?'مثلاً، إذا موضوع بالبيت مأثر عليك، احچي عن احتياجك بدل ما تفترض الآخرين يعرفوه. ':'مثلاً، إذا محتار بخطوة، افصل رغبتك عن الوقائع وخذ قراراً قابلاً للتعديل. ';
+  return 'القمر حالياً يرمز إلى '+naturalStyle+'. '+sky+birth+overlay+distinct+personal+transit+practical;
  }
- const lead='The current Moon symbolizes '+naturalStyle+'. '+(houseText?'In your natal chart this relates especially to '+houseText+'. ':knownTime?'':'Your birth time is uncertain, so no personal house is inferred. ');
+ const sky=skyHouse?'In the current transit chart the Moon is in house '+skyHouse+' ('+areas[skyHouse].en+'). ':'';
+ const birth=natalMoonHouse?'Your natal Moon is in house '+natalMoonHouse+' ('+areas[natalMoonHouse].en+'). ':
+  knownTime?'Your natal Moon house is unavailable. ':'Your birth time is uncertain, so no personal house is inferred. ';
+ const overlay=overlayHouse?'When the transiting Moon is placed against your natal house cusps, it falls in house '+overlayHouse+' ('+areas[overlayHouse].en+'). ':'';
+ const distinct=skyHouse&&overlayHouse&&skyHouse!==overlayHouse?'Transit-chart houses and natal-overlay houses use different reference frames; they must not be confused. ':'';
  const personal=birthStyle?'Your natal pattern emphasizes '+birthStyle+'; notice how these two needs interact. ':'';
  const transit=target?(challenged?'A possible tension around '+target+' calls for care. ':shared?'There may be an easier opportunity to work with '+target+' if circumstances support it. ':'Another theme involves '+target+', without predicting an event. '):'No close personal contact supports predicting a specific event. ';
- const practical=h===5||h===7?'For example, in romance, communicate interest clearly and respect the actual response. ':h===10||h===6?'For example, clarify work expectations before committing. ':h===3||contact?.natal.id==='Mercury'?'For example, clarify an ambiguous message rather than assuming intent. ':h===11?'For example, approach a friend with an open question and observe their actual response. ':h===4?'For example, communicate a home or family need directly rather than expecting others to guess. ':'For example, separate your hopes from confirmed facts and choose a reversible step. ';
- return lead+personal+transit+practical;
+ const practical=practicalHouse===5||practicalHouse===7?'For example, in romance, communicate interest clearly and respect the actual response. ':practicalHouse===10||practicalHouse===6?'For example, clarify work expectations before committing. ':practicalHouse===3||contact?.natal.id==='Mercury'?'For example, clarify an ambiguous message rather than assuming intent. ':practicalHouse===11?'For example, approach a friend with an open question and observe their actual response. ':practicalHouse===4?'For example, communicate a home or family need directly rather than expecting others to guess. ':'For example, separate your hopes from confirmed facts and choose a reversible step. ';
+ return 'The current Moon symbolizes '+naturalStyle+'. '+sky+birth+overlay+distinct+personal+transit+practical;
 }
