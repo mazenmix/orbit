@@ -1,0 +1,116 @@
+import type {Chart} from './engine.ts';
+import {rankedFactors,houseNumber,supportive,difficult,type Signal,type Evidence,type Category} from './math.ts';
+
+/** Editorial interpretation, exclusively from calculated factors.
+ * This is symbolic astrology, never a claim about a real event, consent, private thoughts or probability. */
+type Language='ar'|'en';
+type Bi=readonly [string,string];
+const index=(lang:Language)=>lang==='ar'?0:1;
+const names:Record<string,Bi>={
+ Sun:['الشمس','Sun'],Moon:['القمر','Moon'],Mercury:['عطارد','Mercury'],Venus:['الزهرة','Venus'],
+ Mars:['المريخ','Mars'],Jupiter:['المشتري','Jupiter'],Saturn:['زحل','Saturn'],
+ Uranus:['أورانوس','Uranus'],Neptune:['نبتون','Neptune'],Pluto:['بلوتو','Pluto'],
+ Ascendant:['الطالع','Ascendant'],MC:['وسط السماء','Midheaven'],Chiron:['كيرون','Chiron'],
+ Ceres:['سيريس','Ceres'],Pallas:['بالاس','Pallas'],Juno:['جونو','Juno'],
+ Vesta:['فيستا','Vesta'],Pholus:['فولوس','Pholus']
+};
+const causes:Record<string,Bi>={
+ Sun:['رغبتك باتخاذ قرار يمثّلك بدل إرضاء الجميع','your need to choose a direction that reflects your priorities'],
+ Moon:['حاجتك للراحة والاطمئنان قبل ردّة الفعل','your need for security before responding'],
+ Mercury:['رغبتك بفهم المقصود والتعبير الواضح','the need to understand and express things clearly'],
+ Venus:['الاهتمام والتقدير وطريقة التقارب','care, attraction and feeling valued'],
+ Mars:['الدافع والمبادرة والقدرة على قول لا','initiative, motivation and assertiveness'],
+ Jupiter:['الرغبة بالتوسع وتجربة فرصة جديدة','the desire to expand or explore an opportunity'],
+ Saturn:['حساب المسؤولية والتكلفة والحدود','the need for structure, responsibility and boundaries'],
+ Uranus:['الرغبة بالاستقلال وتغيير الأسلوب المعتاد','the urge for autonomy and a different approach'],
+ Neptune:['الفارق بين التصور الجميل والوقائع المؤكدة','the gap between hopes and verified facts'],
+ Pluto:['الإصرار على معرفة ما يمكن تغييره والسيطرة عليه','the desire for deeper change and awareness of power'],
+ Ascendant:['الانطباع الأول وطريقة حضورك أمام الناس','first impressions and how you come across'],
+ MC:['اتجاهك بالشغل وسمعتك المهنية','career direction and public responsibility']
+};
+const places:readonly Bi[]=[
+ ['',''],['صورتك عن نفسك والمبادرات','identity and initiative'],['الموارد والصرف والقيمة الشخصية','resources, money and self-worth'],
+ ['الحوارات والرسائل والتعلّم','messages, conversations and learning'],['البيت والعائلة والخصوصية','home, family and privacy'],
+ ['الرومانسية والمتعة والتعبير','romance, play and creative expression'],['الشغل اليومي والعادات','daily work and habits'],
+ ['العلاقات والاتفاق بين طرفين','relationships and agreements'],['الثقة والموارد المشتركة','trust and shared resources'],
+ ['السفر والتعلّم والقناعات','travel, study and beliefs'],['الشغل والسمعة والمسؤولية','career and reputation'],
+ ['الأصدقاء والمجموعات','friends and communities'],['الراحة والخلوة والأمور الخاصة','rest, solitude and private matters']
+];
+const meanings:Record<number,Bi>={
+ 0:['الاقتران يجمع الموضوعين، فممكن يصير من الصعب تفصل الرغبة عن القلق أو الحماس عن الحساب.','A conjunction brings both themes together, making it useful to separate impulse from judgment.'],
+ 60:['التسديس يفتح فرصة للتنسيق بين هالجانبين، بس يحتاج مبادرة فعلية منك.','A sextile points to cooperation that still needs deliberate effort.'],
+ 90:['التربيع يصوّر شدّ بين احتياجين، والتحدي هو ما تخلي أحدهما يلغي الثاني.','A square highlights competing needs; the task is not to let one erase the other.'],
+ 120:['التثليث يرمز لسهولة نسبية بالتعامل، مو ضمان أن أي خطوة حتنجح.','A trine represents relative symbolic ease, not guaranteed success.'],
+ 180:['المقابلة تبرز طرفين للموضوع؛ الحل غالباً بالحوار والحدود مو بحسم متسرع.','An opposition asks for dialogue and boundaries between two different priorities.']
+};
+const aspects:Record<number,Bi>={0:['اقتران','conjunction'],60:['تسديس','sextile'],90:['تربيع','square'],120:['تثليث','trine'],180:['مقابلة','opposition']};
+const domains:Record<Category,Bi>={
+ overview:['إدارة الأولويات','priorities'],career:['العمل والقرار المهني','career decisions'],love:['العلاقة والتقارب','connection and relationships'],
+ communication:['الكلام والرسائل','conversations and messages'],energy:['المبادرة والجهد','initiative and effort'],
+ emotions:['المشاعر وردّ الفعل','emotional reactions'],recovery:['الراحة واستعادة التوازن','rest and recovery'],timing:['الوقت ومرونة الخطة','planning and timing']
+};
+const scenes:Record<string,Bi>={
+ Neptune:['إذا وصلتك إشارة مبهمة من شخص أو عرض مغري، لا تعتبر اللي تتمنى يصير حقيقة؛ اسأل عن التفاصيل وشوف التصرف المتكرر.','If a message is ambiguous or an offer sounds ideal, verify details instead of treating hope as evidence.'],
+ Mercury:['إذا انتظرت جواب برسالة أو قرار شغل، فرّق بين التأخير وبين الرفض، واطلب توضيح واحد محدد.','If a reply is delayed, separate the delay from rejection and ask one clear question.'],
+ Venus:['إذا جذبك شخص، احچي عن اهتمامك بوضوح وخلي تجاوبه الحقيقي يحدد الخطوة، مو إشارات تتخيلها.','If attracted to someone, communicate clearly and let their actual response guide you.'],
+ Mars:['إذا عندك مواجهة أو خطوة مأجلها، اختار فعل صغير محسوب بدل ردّ قوي ما تگدر تتراجع عنه.','For a confrontation or postponed task, choose a measured small action rather than an irreversible reaction.'],
+ Saturn:['إذا أكو مسؤولية تثقل عليك، اكتب شنو عليك وشنو مو من واجبك قبل لا تعطي وعد جديد.','With a heavy obligation, distinguish what is yours to do from what is not before promising more.'],
+ Sun:['إذا شفت نفسك تحاول ترضي الكل، اختار قرار واحد ينسجم ويا أولوياتك واشرحه بلا دفاع طويل.','If you are trying to please everyone, name one decision that fits your priorities and explain it simply.'],
+ Moon:['إذا موقف حرّك مشاعرك، سمّ الشعور أولاً واسأل نفسك إذا تحتاج راحة أو معلومة قبل الرد.','If a situation stirs feelings, name them and decide whether you need rest or more information before replying.'],
+ Jupiter:['إذا فكرة سفر أو شغل أو تعلّم حمّستك، قارن الوقت والكلفة بالنتيجة الواقعية قبل الالتزام.','When travel, work or learning excites you, compare time and cost with real outcomes before committing.'],
+ Uranus:['إذا تريد تغيّر روتين أو علاقة، جرّب تعديل يمكن ترجع عنه بدل القطع المفاجئ.','If you want change, test a reversible adjustment rather than abruptly cutting ties.'],
+ Pluto:['إذا عندك موضوع تريد تحسمه بالقوة، فكّر بالحدود اللي تتحكم بيها وبالنتيجة اللي ما تقدر تفرضها.','If you want to force an outcome, distinguish boundaries you control from responses you cannot.'],
+ Ascendant:['إذا تعرّفت على شخص جديد، ركّز على وضوح الحچي والانطباع الحقيقي بدل تمثيل صورة مثالية.','For a new introduction, prioritize straightforward communication over performing an ideal image.'],
+ MC:['إذا عندك اجتماع أو طلب من مسؤول، قدّم إنجاز محدد واطلب المطلوب منك بصراحة.','For a work meeting, present one concrete result and clarify expectations.']
+};
+const categories:Record<Category,Bi>={
+ overview:['سوّي ترتيب بسيط لأولويتين بدل تعالج كل حياتك دفعة وحدة.','Choose two priorities rather than trying to fix everything at once.'],
+ career:['خلي الاتفاق مكتوب: شنو المطلوب ومنو مسؤول ومتى التسليم.','Document the deliverable, owner and deadline.'],
+ love:['إذا أكو اهتمام متبادل، اقترح خطوة واضحة واترك مساحة لقبول أو رفض الطرف الثاني.','If interest is mutual, make one clear invitation and allow room for either response.'],
+ communication:['اسأل سؤال واحد محدد وخلي جواب الشخص الآخر يوضح الصورة.','Ask one specific question and allow the actual answer to clarify things.'],
+ energy:['اختار مهمة أو تمرين بحدود معقولة، وسجّل شنو أنجزت فعلاً.','Choose a manageable task or workout and review what you really completed.'],
+ emotions:['راقب شنو صار فعلاً وشنو أضفته من تفسير قبل أي رد.','Distinguish the actual event from your interpretation before responding.'],
+ recovery:['احجز وقت راحة محدد ولا تخلّي كل فراغ يتحول لمهمة جديدة.','Protect one real rest window rather than filling every gap with work.'],
+ timing:['جهّز بديل واضح لأي موعد يعتمد على ظروف أو موافقة غيرك.','Prepare a fallback for any plan dependent on external circumstances.']
+};
+const name=(id:string,lang:Language)=>(names[id]??[id,id])[index(lang)];
+const focus=(id:string,lang:Language)=>(causes[id]??[id,id])[index(lang)];
+const action=(e:Evidence,c:Category,lang:Language)=>{
+ const p=index(lang),scene=scenes[e.natal.id]??scenes[e.transit.id];
+ return (scene?.[p]??categories[c][p])+' '+(e.applying?
+  (lang==='ar'?'خلّ الخطوة الجاية صغيرة، لأن الزاوية بعدها تقترب من الدقة.':'Keep the next step small while the aspect is approaching exactness.'):
+  (lang==='ar'?'راجع شنو تعلمت من الموقف بدل ما تعيد نفس المحاولة.':'Review what you learned rather than repeating the same attempt.'));
+};
+function houseOf(e:Evidence,natal:Chart|undefined,known:boolean):number{
+ if(!known||!natal||natal.cusps.length!==12||['Ascendant','MC'].includes(e.natal.id))return 0;
+ return houseNumber(e.natal.longitude,natal.cusps);
+}
+export type SignalStory={title:string;good:string;careful:string;action:string;basis:string};
+export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,language:Language):SignalStory|null{
+ const factors=rankedFactors(s.allFactors??s.factors),e=factors[0];
+ if(!e||e.weight<.30)return null;
+ const p=index(language),a=meanings[e.angle]?.[p]??'',angle=aspects[e.angle]?.[p]??String(e.angle);
+ const area=domains[s.category][p],first=name(e.transit.id,language),second=name(e.natal.id,language);
+ const h=houseOf(e,natal,known);
+ const houseText=h>=1&&h<=12?(language==='ar'?' وموضعه الولادي بالبيت '+h+' يربط هالموضوع بـ'+places[h][0]+'.':' Its natal house '+h+' also connects it with '+places[h][1]+'.'):'';
+ const stage=e.orb<.5?
+  (language==='ar'?'الفارق الزاوي أقل من نصف درجة؛ هذا اتصال قريب جداً ضمن النموذج، مو توقيت حدث بحياتك.':'The orb is below half a degree; this is a close calculated aspect, not a predicted life event.'):
+  (language==='ar'?'هذا الاتصال ضمن هامش الحساب الحالي.':'This aspect lies within the calculated orb.');
+ const tension=factors.find(x=>x!==e&&((supportive(e)&&difficult(x))||(difficult(e)&&supportive(x))));
+ const other=tension?
+  (language==='ar'?' وبالمقابل '+name(tension.transit.id,language)+' '+(aspects[tension.angle]?.[0]??'اتصال')+' '+name(tension.natal.id,language)+' يضيف زاوية ثانية؛ لذلك الصورة مو أحادية.':
+   ' In contrast, '+name(tension.transit.id,language)+' '+(aspects[tension.angle]?.[1]??'aspect')+' natal '+name(tension.natal.id,language)+' adds a counter-theme; this is a mixed reading.'):'';
+ const unique=e.transit.id===e.natal.id;
+ const title=language==='ar'?
+  (unique?'مراجعة '+focus(e.natal.id,language):'بين '+focus(e.transit.id,language)+' و'+focus(e.natal.id,language)):
+  (unique?'Revisiting '+focus(e.natal.id,language):'Between '+focus(e.transit.id,language)+' and '+focus(e.natal.id,language));
+ const good=language==='ar'?
+  'بهذا الوقت، '+first+' العابر يعمل '+angle+' ويا '+second+' بميلادك، فالتنجيم يربط '+focus(e.transit.id,language)+' بـ'+focus(e.natal.id,language)+'. '+a+houseText+' '+stage+other:
+  'At this moment, transiting '+first+' forms a '+angle+' to natal '+second+', symbolically linking '+focus(e.transit.id,language)+' with '+focus(e.natal.id,language)+'. '+a+houseText+' '+stage+other;
+ const caution=language==='ar'?
+  'مثال ممكن، مو حدث متوقع: '+((scenes[e.natal.id]??categories[s.category])[0]) :
+  'An illustrative situation, not a predicted event: '+((scenes[e.natal.id]??categories[s.category])[1]);
+ const practical=action(e,s.category,language);
+ const basis=first+' '+angle+' '+second+' · '+e.orb.toFixed(2)+'°';
+ return {title,good,careful:caution,action:practical,basis};
+}
