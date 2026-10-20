@@ -13,6 +13,40 @@ emotions:{title:['افهم شعورك قبل ما تتصرف','Understand your f
 recovery:{title:['خفّف الحمل حتى ترجع بتركيز','Reduce the load to regain focus'],good:['ترك مساحة بين الالتزامات حتى تلملم نفسك.','Leave room between commitments to regroup.'],careful:['تملأ كل فراغ بشغل وتتعامل ويا الراحة كأنها تقصير.','Filling every gap with work and treating rest as failure.'],do:['شيل مهمة مو ضرورية من جدولك واحجز مكانها استراحة.','Remove one nonessential task and reserve that time for a break.'],ease:['ارجع لروتينك بالتدريج؛ مو لازم تعوّض كلشي دفعة وحدة.','Return to your routine gradually rather than catching up all at once.']},
 timing:{title:['خلّي خطوتك قابلة للتعديل','Keep your next step adjustable'],good:['تجربة محدودة تعطيك جواب قبل الالتزام الكامل.','A limited trial can answer a question before full commitment.'],careful:['ربط كل خططك بموعد واحد أو جواب بعده مو مؤكد.','Basing every plan on one deadline or an unconfirmed answer.'],do:['جرّب أصغر نسخة من خطتك وحدد شنو يخليك تكمل أو توقف.','Try the smallest version of your plan and define when to continue or stop.'],ease:['قيّم نتيجة المحاولة السابقة قبل ما تعيدها بنفس الطريقة.','Assess the last attempt before repeating it unchanged.']}
 };
+/** Editorial layer shared by Today, Signals, Time Machine and evidence cards.
+ * The calculated aspect chooses a symbolic focus; situations are examples,
+ * never claims that an event or emotion actually occurred. */
+const livedScenes:Record<Category,Pair>={
+ overview:['مثلاً: عندك أكثر من شغلة تنتظر جواب؟ افصل القرار اللي بإيدك عن الشي اللي يتوقف على غيرك.','For example: separate the decision you control from the one awaiting someone else.'],
+ career:['مثلاً: قبل اجتماع أو موافقة على مشروع، اطلب النتيجة المطلوبة والموعد ومنو صاحب القرار.','Before a meeting or project approval, clarify the deliverable, deadline and decision owner.'],
+ love:['مثلاً: إذا تريد تقرب من شخص، رسالة صريحة وخفيفة أنفع من اختبار غيرته أو تفسير سكوته.','If you want to connect, a clear gentle invitation beats testing jealousy or interpreting silence.'],
+ communication:['مثلاً: إذا وصلتك رسالة مبهمة، اسأل عن المقصود قبل ما ترد على معنى يمكن ما كان مقصود.','If a message is vague, clarify it before reacting to a meaning nobody intended.'],
+ energy:['مثلاً: عندك مشروع متأخر أو تمرين صعب؟ حدد خطوة يمكن تكمّلها اليوم بلا استنزاف.','With a delayed task or demanding workout, pick one sustainable step today.'],
+ emotions:['مثلاً: إذا ضايقك موقف أو تأخر رد شخص، ميّز بين الشي اللي صار وبين التفسير اللي دار ببالك.','If a situation or late reply bothers you, separate what happened from your interpretation.'],
+ recovery:['مثلاً: إذا جدولك مزدحم، احجز فسحة راحة حقيقية بدل ما تنتظر يخلص كل الشغل.','If your schedule is packed, protect an actual rest window rather than waiting for work to end.'],
+ timing:['مثلاً: قبل موعد أو قرار، جهز بديل بسيط إذا تأخر الرد أو تغيرت الظروف.','Before an appointment or decision, prepare one small alternative if circumstances change.']
+};
+const planetMeaning:Record<string,Pair>={
+ Sun:['إثبات الذات والاختيار','identity and personal choice'],
+ Moon:['الراحة والانفعال','comfort and emotional response'],
+ Mercury:['الأفكار والكلام','thinking and communication'],
+ Venus:['المودة والقيمة والانجذاب','affection, values and attraction'],
+ Mars:['المبادرة والاحتكاك','initiative and friction'],
+ Jupiter:['التوسع والمبالغة بالوعود','expansion and overpromising'],
+ Saturn:['المسؤولية والحدود','responsibility and boundaries'],
+ Uranus:['التغيير والاستقلال','change and independence'],
+ Neptune:['التوقعات والخيال والوضوح','expectations, imagination and clarity'],
+ Pluto:['العمق والسيطرة والتغيير البطيء','intensity, power and gradual change'],
+ Ascendant:['الانطباع الأول','first impressions'],
+ MC:['المسار المهني','career direction']
+};
+const angleStory:Record<number,Pair>={
+ 0:['يتجمع الموضوعان بنقطة وحدة؛ راقب شنو صار ياخذ اهتمام أكثر من حجمه.','Both themes gather in one place; notice what demands disproportionate attention.'],
+ 60:['أكو مجال لتعاون هادئ بين الموضوعين إذا بادرت بخطوة صغيرة.','The themes suggest a possible opening for a modest cooperative step.'],
+ 90:['أكو شدّ رمزي بين احتياجين؛ مو لازم تحسم واحد وتلغي الثاني.','The themes suggest friction between needs; neither has to cancel the other.'],
+ 120:['الجمع بين الموضوعين يبدو أسهل رمزياً، لكن النتيجة تعتمد على تصرفاتك والواقع.','The themes symbolically flow more easily, but outcomes still depend on real actions.'],
+ 180:['ممكن تشوف احتياجين على طرفين مختلفين؛ ناقش التوازن بدل ردّة الفعل.','Two opposing needs are highlighted; look for balance instead of reflex.']
+};
 const direction=(e:Evidence)=>[60,120].includes(e.angle)||(e.angle===0&&['Venus','Jupiter'].includes(e.transit.id))?1:[90,180].includes(e.angle)||(e.angle===0&&['Saturn','Mars','Pluto','Uranus'].includes(e.transit.id))?-1:0;
 export function advice(s:Signal,language:'ar'|'en'){
  const pick=(v:Pair)=>v[language==='ar'?0:1],g=guides[s.category];
@@ -35,5 +69,17 @@ export function advice(s:Signal,language:'ar'|'en'){
   careful=review.sensitive?['الترجيح يتبدل باستبعاد اتصالات جرم واحد؛ لا تحوّله لحكم نهائي.','Removing one transiting body changes the balance; do not treat the direction as settled.']:[g.careful[0]+' لا تتجاهل الجانب المعاكس.',g.careful[1]+' Keep the counter-evidence in view.'];
   action=[g.do[0]+' جرّب خطوة محدودة وراجع النتيجة قبل التوسع.',g.do[1]+' Keep the first step small and review the result before expanding.'];
  }
+ // Explain the meaning of the actual leading transit before offering an example.
+ // Avoid saying that the interpretation proves the user's mood, another person's interest, or a future event.
+ const transitRole=planetMeaning[lead.transit.id]??[lead.transit.id,lead.transit.id];
+ const natalRole=planetMeaning[lead.natal.id]??[lead.natal.id,lead.natal.id];
+ const angleRole=angleStory[lead.angle]??['هذا اتصال محسوب بين دلالتين، وتأويله مو حدث مضمون.','This is a calculated link between two symbolic themes, not a guaranteed event.'];
+ const situation=livedScenes[s.category];
+ const context:Pair=[
+  'هنا القراءة تربط '+transitRole[0]+' بـ'+natalRole[0]+'. '+angleRole[0]+' '+situation[0],
+  'This reading links '+transitRole[1]+' with '+natalRole[1]+'. '+angleRole[1]+' '+situation[1]
+ ];
+ // Keep the action specific; show the calculation in the evidence panel instead of repeating orb tables.
+ good=[context[0],context[1]];
  return {title:pick(title),good:pick(good),careful:pick(careful),action:pick(action)};
 }
