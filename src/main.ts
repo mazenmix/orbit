@@ -532,9 +532,6 @@ function travelModePage(){
   '<button type="button" class="secondary mx-travel-all" data-go="go">'+t('كل المؤشرات الـ29','All 29 indicators')+' ↗</button></div>'+
   '<p class="mx-travel-intro">'+t('هنا أهم 12 مؤشر من Go Mode، مرتبة للتعارف والمواعيد والسهر والتنقل. الأرقام تتحدث حسب خارطتك والوقت المختار، مو قيم ثابتة.','Here are the 12 travel-focused Go Mode indicators for meeting people, dating, nightlife and getting around. They change with the selected chart and time.')+'</p>'+
   sections+
-  '<section class="panel mx-travel-note"><h3>'+t('شلون تستخدمها؟','When to check')+'</h3>'+
-   '<p>'+t('بالصباح راجع التعارف وناس جدد. قبل موعد راجع الجاذبية والانسجام. قبل السهر راجع القرب والدافع والطلعة الليلية. قبل التنقل راجع السفر والراحة والحذر.','Morning: meeting people. Before a date: attraction and chemistry. Before a night out: intimacy, desire and nightlife. Before travel: transportation, rest and caution.')+'</p>'+
-   '<small>'+t('مؤشرات فلكية رمزية مو تقييم واقعي للأمان أو احتمال النجاح. الموافقة المتبادلة والسلامة الفعلية والظروف الواقعية أهم من أي رقم.','These are symbolic astrological indices, not objective safety scores or success probabilities. Mutual consent, practical safety and real circumstances come first.')+'</small></section>'+
   '</div>';
 }
 function asteroidsPage(){
