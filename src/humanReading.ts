@@ -35,7 +35,17 @@ const houses:readonly Both[]=[
 const style=(s:number,language:'ar'|'en')=>styles[s]?.[language]??(language==='ar'?'أسلوبك الخاص':'your personal approach');
 const house=(s:number|null,language:'ar'|'en')=>s&&houses[s]?.[language]||'';
 export function humanSoul(reading:SoulReading):{summary:Both;deep:Both}{
- if(reading.basisStatus!=='available'||reading.basis.length<2)return {summary:reading.summary,deep:reading.deep};
+ if(reading.basisStatus!=='available'||reading.basis.length<2){
+  // When birth data is missing, never leak a partial coordinate/planet
+  // report or substitute an invented personality description.
+  return {
+   summary:reading.summary,
+   deep:{
+    ar:reading.basisStatus==='limited'?'المعلومات المتوفرة عن «'+reading.topic.ar+'» ما تكفي حتى نكوّن قراءة شخصية متماسكة. عدنا جزء من البيانات فقط، ولذلك الأفضل تستكمل المعلومات قبل الاستنتاج.':'ماكو بيانات محسوبة كافية عن «'+reading.topic.ar+'» حتى أوصف شخصيتك أو أتوقع تصرفك. هذا الموضوع يحتاج معلومات ولادة صحيحة.',
+    en:reading.basisStatus==='limited'?'The available information for “'+reading.topic.en+'” covers only part of the required chart. Complete the birth inputs rather than filling gaps with personality claims.':'There is insufficient calculated information for “'+reading.topic.en+'”. We cannot responsibly infer a personality pattern without valid birth data.'
+   }
+  };
+ }
  const [a,b]=reading.basis,aspect=soulAspectPairs(reading.basis)[0],topic=getSoulTheme(reading.topic.id);
  const tension=aspect&&(aspect.type===90||aspect.type===180);
  const convergence=aspect&&aspect.type===0;
