@@ -1,0 +1,83 @@
+/* People cards inherit Go Mode's four score colors, accents and tracks. */
+#live-view-body .mx-people-page{min-width:0;display:grid;align-content:start;gap:12px;padding-block-end:22px}
+#live-view-body .mx-people-page>.section-title{margin:0;min-width:0}
+#live-view-body .mx-people-page .people-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:12px;margin:0;min-width:0}
+#live-view-body .mx-people-page .mx-people-section,
+#live-view-body .mx-people-page>.mx-partner-focus,
+#live-view-body .mx-people-page>.mx-partner-deep,
+#live-view-body .mx-people-page>.synastry-technical{margin:0!important;min-width:0;border-radius:16px;padding:clamp(12px,1.6vw,18px)!important;border:1px solid #9c97ce3d;background:linear-gradient(150deg,#211f36d9,#121728 86%)}
+#live-view-body .mx-people-page .mx-partner-deep>summary{font-size:14px;line-height:1.7}
+#live-view-body .mx-people-page .mx-partner-deep[open]>.mx-people-section{margin-top:12px!important}
+#live-view-body .mx-people-page .metric-card{--metric-accent:#b6a6ed;--metric-tint:#7666a614;background:linear-gradient(150deg,var(--metric-tint),#16192b 78%)!important;border:1px solid color-mix(in srgb,var(--metric-accent) 37%,#343850)!important;border-radius:13px!important;padding:clamp(12px,1.3vw,16px)!important;min-width:0;min-height:0;box-shadow:inset 0 1px 0 #ffffff07}
+#live-view-body .mx-people-page .metric-card.strong{--metric-accent:#68e0a6;--metric-tint:#44c0831f}
+#live-view-body .mx-people-page .metric-card.steady{--metric-accent:#a7d98a;--metric-tint:#8ebd641c}
+#live-view-body .mx-people-page .metric-card.caution{--metric-accent:#ecbb6c;--metric-tint:#e0a8511f}
+#live-view-body .mx-people-page .metric-card.low{--metric-accent:#f08b83;--metric-tint:#de6a681e}
+#live-view-body .mx-people-page .mx-people-gauge{width:100%;min-width:0;gap:7px;align-items:stretch;--m:var(--metric-accent)}
+#live-view-body .mx-people-page .mx-people-gauge.strong{--m:#68e0a6}
+#live-view-body .mx-people-page .mx-people-gauge.steady{--m:#a7d98a}
+#live-view-body .mx-people-page .mx-people-gauge.caution{--m:#ecbb6c}
+#live-view-body .mx-people-page .mx-people-gauge.low{--m:#f08b83}
+#live-view-body .mx-people-page .mx-people-gauge-track{width:100%;height:6px;background:#8290b533;border-radius:999px;overflow:hidden}
+#live-view-body .mx-people-page .mx-people-gauge-track>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--m) 66%,#3c456c),var(--m));box-shadow:none}
+#live-view-body .mx-people-page .mx-people-gauge-number b{color:var(--m);font-size:clamp(21px,2vw,25px);text-shadow:0 0 12px color-mix(in srgb,var(--m) 22%,transparent)}
+#live-view-body .mx-people-page .partner-overview .dimension-grid,
+#live-view-body .mx-people-page .partner-insights-grid,
+#live-view-body .mx-people-page .relation-window-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 0;min-width:0}
+#live-view-body .mx-people-page .partner-score{display:flex;flex-direction:column;justify-content:space-between;gap:10px}
+#live-view-body .mx-people-page .partner-score>span{font-size:13px;font-weight:750;line-height:1.5;color:#e9e8f6}
+#live-view-body .mx-people-page .partner-insight{display:flex;flex-direction:column;gap:10px;border-inline-start-width:1px!important}
+#live-view-body .mx-people-page .partner-insight>h3{color:#ede9ff;font-size:15px;line-height:1.5;margin:0}
+#live-view-body .mx-people-page .partner-insight .mx-partner-reading{font-size:13px;line-height:1.75;margin:0;overflow-wrap:anywhere}
+#live-view-body .mx-people-page .partner-insight .mx-partner-basis{font-size:11px;line-height:1.6}
+#live-view-body .mx-people-page .mx-brief-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#live-view-body .mx-people-page .mx-brief-card{gap:9px;min-width:0}
+#live-view-body .mx-people-page .mx-brief-card>h3{font-size:15px!important}
+#live-view-body .mx-people-page .mx-brief-card p{font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+#live-view-body .mx-people-page .person-card{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+#live-view-body .mx-people-page .person-card .person-avatar{flex:none;margin:2px auto 7px}
+#live-view-body .mx-people-page .person-card h3{font-size:15px;line-height:1.4;margin:0;overflow-wrap:anywhere}
+#live-view-body .mx-people-page .person-card p{font-size:12px;line-height:1.55;margin:3px 0}
+#live-view-body .mx-people-page .person-card>small{font-size:11px;line-height:1.5}
+#live-view-body .mx-people-page .person-card>div{width:100%;display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:auto;padding-top:10px}
+#live-view-body .mx-people-page .person-card button{min-height:42px;font-size:12px;max-width:100%}
+#live-view-body .mx-people-page .relationship-calendar>h2,
+#live-view-body .mx-people-page .intimacy-section h2{font-size:clamp(17px,1.6vw,21px);line-height:1.5;margin:0}
+#live-view-body .mx-people-page .relationship-calendar>h3{font-size:14px;margin:18px 0 9px}
+#live-view-body .mx-people-page .relation-window{display:flex;flex-direction:column;gap:10px;align-items:stretch;border-inline-start-width:1px!important}
+#live-view-body .mx-people-page .relation-heading{min-width:0;gap:8px;flex-wrap:wrap}
+#live-view-body .mx-people-page .relation-heading strong{color:var(--metric-accent);font-size:clamp(21px,2vw,25px)}
+#live-view-body .mx-people-page .relation-window>p{min-height:0;margin:0;font-size:13px;line-height:1.75;overflow-wrap:anywhere}
+#live-view-body .mx-people-page .relation-window .relation-window-reason{margin:0;color:#b9c5d9;font-size:11px;line-height:1.6}
+#live-view-body .mx-people-page .relation-window .button-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:8px}
+#live-view-body .mx-people-page .relation-window .button-row button{min-height:44px;padding:10px 12px;font-size:12px}
+#live-view-body .mx-people-page .synastry-technical{overflow-wrap:anywhere}
+@media(min-width:1500px){
+ #live-view-body .mx-people-page .people-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #live-view-body .mx-people-page .partner-overview .dimension-grid,
+ #live-view-body .mx-people-page .relation-window-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:980px){#live-view-body .mx-people-page .people-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+ #live-view-body .mx-people-page{gap:10px}
+ #live-view-body .mx-people-page .mx-people-section,
+ #live-view-body .mx-people-page>.mx-partner-focus,
+ #live-view-body .mx-people-page>.mx-partner-deep{padding:12px!important}
+ #live-view-body .mx-people-page .partner-overview .dimension-grid,
+ #live-view-body .mx-people-page .partner-insights-grid,
+ #live-view-body .mx-people-page .relation-window-grid,
+ #live-view-body .mx-people-page .mx-brief-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+}
+@media(max-width:590px){
+ #live-view-body .mx-people-page .partner-insights-grid,
+ #live-view-body .mx-people-page .relation-window-grid,
+ #live-view-body .mx-people-page .mx-brief-grid{grid-template-columns:minmax(0,1fr)}
+ #live-view-body .mx-people-page .person-card button{flex:1 1 100%}
+}
+@media(max-width:410px){
+ #live-view-body .mx-people-page .people-grid,
+ #live-view-body .mx-people-page .partner-overview .dimension-grid{grid-template-columns:minmax(0,1fr)}
+ #live-view-body .mx-people-page .metric-card{padding:12px!important}
+}
+@media(hover:hover){#live-view-body .mx-people-page .metric-card{transition:border-color .18s ease}#live-view-body .mx-people-page .metric-card:hover{border-color:var(--metric-accent)!important}}
+@media(prefers-reduced-motion:reduce){#live-view-body .mx-people-page .metric-card{transition:none!important}}

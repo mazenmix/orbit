@@ -312,3 +312,17 @@ test('People relationship view has full-width meters, distinct avatars, and the 
  const win=main.slice(main.indexOf('function relationshipWindowUI('),main.indexOf('function relationshipFocus('));
  assert.ok(!win.includes('هاي مقارنة رمزية بين 21 يوم'));
 });
+
+test('People cards inherit Go Mode classes and break down to readable mobile columns',()=>{
+ const people=main.slice(main.indexOf('function peoplePage(){'),main.indexOf('function aiPayload(){'));
+ assert.ok(main.includes("import './peopleCards.css';"));
+ assert.ok(people.includes('mx-people-page'));
+ assert.ok(people.includes('partner-score metric-card'));
+ assert.ok(people.includes('partner-insight metric-card'));
+ assert.ok(people.includes('person-card metric-card'));
+ assert.ok(main.includes('relation-window metric-card'));
+ assert.ok(main.includes('mx-brief-card metric-card'));
+ assert.ok(people.includes(":'')+technical+'</div>'"));
+ const css=readFileSync('src/peopleCards.css','utf8');
+ for(const label of ['--metric-accent:#68e0a6','height:6px','@media(max-width:590px)','@media(max-width:410px)','@media(prefers-reduced-motion:reduce)','min-height:44px'])assert.ok(css.includes(label));
+});
