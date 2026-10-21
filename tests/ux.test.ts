@@ -249,3 +249,22 @@ test('simple home keeps four evidence-first cards, no repeated score tiles, and 
  assert.ok(main.includes('function morePage()'));
  assert.ok(main.includes("case 'today':inner=uiMode==='simple'?focusedToday():today()"));
 });
+
+test('public place and time zone labels show city only, preserving IANA values for calculations',async()=>{
+ const {timezoneCityLabel,placeCityLabel}=await import('../src/placeDisplay.ts');
+ assert.equal(timezoneCityLabel('Asia/Baghdad'),'Baghdad');
+ assert.equal(timezoneCityLabel('Asia/Manila'),'Manila');
+ assert.equal(timezoneCityLabel('America/Denver'),'Denver');
+ assert.equal(timezoneCityLabel('America/Argentina/Buenos_Aires'),'Buenos Aires');
+ assert.equal(timezoneCityLabel('Etc/UTC'),'UTC');
+ assert.equal(placeCityLabel('Baghdad, Baghdad Governorate, Iraq'),'Baghdad');
+ assert.equal(placeCityLabel('Manila, Metro Manila, Philippines'),'Manila');
+ assert.equal(placeCityLabel('بغداد, بغداد, العراق'),'بغداد');
+ assert.ok(main.includes("esc(timezoneCityLabel(z))"));
+ assert.ok(main.includes("new Option(timezoneCityLabel(city.zone),city.zone)"));
+ assert.ok(main.includes("zone.value=city.zone"));
+ assert.ok(main.includes("item.textContent=city.name"));
+ assert.ok(main.includes("chosen.textContent=city.name"));
+ assert.ok(!main.includes("item.textContent=city.label+' · '+city.zone"));
+ assert.ok(!main.includes("esc(active.zone)"));
+});
