@@ -586,20 +586,21 @@ const eclipseCountryPending=new Set<string>();
 function refreshEclipseCountryNames(){
  if(screen!=='eclipses')return;
  root.querySelectorAll<HTMLElement>('[data-eclipse-geo]').forEach(node=>{
-  const key=node.dataset.eclipseGeo!,parts=key.split(',').map(Number);
+  const coords=node.dataset.eclipseGeo!,parts=coords.split(',').map(Number);
   if(parts.length!==2||!parts.every(Number.isFinite))return;
+  const key=(lang==='ar'?'ar':'en')+':'+coords;
   const cached=eclipseCountryNames.get(key);
-  if(cached){node.textContent=cached;return}
+  if(cached!==undefined){if(cached)node.textContent=cached;return}
   if(eclipseCountryPending.has(key))return;
   eclipseCountryPending.add(key);
   const url='https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=3&addressdetails=1&lat='+encodeURIComponent(parts[0])+'&lon='+encodeURIComponent(parts[1])+'&accept-language='+(lang==='ar'?'ar':'en');
   fetch(url,{signal:AbortSignal.timeout(9000)}).then(r=>r.ok?r.json():null).then(result=>{
    const address=result?.address;
    const country=typeof address?.country==='string'?address.country:typeof address?.ocean==='string'?address.ocean:typeof address?.sea==='string'?address.sea:'';
-   if(!country)return;
+   // Cache empty / ocean and failed responses too: never flood a public geocoder.
    eclipseCountryNames.set(key,country);
-   root.querySelectorAll<HTMLElement>('[data-eclipse-geo]').forEach(el=>{if(el.dataset.eclipseGeo===key)el.textContent=country});
-  }).catch(()=>{}).finally(()=>{eclipseCountryPending.delete(key)});
+   if(country)root.querySelectorAll<HTMLElement>('[data-eclipse-geo]').forEach(el=>{if(el.dataset.eclipseGeo===coords)el.textContent=country});
+  }).catch(()=>{eclipseCountryNames.set(key,'')}).finally(()=>{eclipseCountryPending.delete(key)});
  });
 }
 function eclipsesPage(){
