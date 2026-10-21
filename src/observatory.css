@@ -169,3 +169,12 @@
 @media(prefers-reduced-motion:reduce){
  .eclipse-countdown-dot{animation:none}
 }
+
+/* Heatmap values: discrete, consistent four-color quality bands. */
+.heatmap-cell.heatmap-red{background:linear-gradient(145deg,#9c303c,#6c202b);border-color:#e57a83}
+.heatmap-cell.heatmap-orange{background:linear-gradient(145deg,#b76a29,#86431c);border-color:#f2a45b}
+.heatmap-cell.heatmap-yellow{background:linear-gradient(145deg,#d0b245,#99762a);border-color:#f6d965}
+.heatmap-cell.heatmap-green{background:linear-gradient(145deg,#419358,#276c46);border-color:#76d69b}
+.heatmap-cell.heatmap-yellow b,.heatmap-cell.heatmap-yellow small{color:#211d10}
+.heatmap-cell.heatmap-red b,.heatmap-cell.heatmap-orange b,.heatmap-cell.heatmap-green b{color:#fff}
+.heatmap-cell.heatmap-red small,.heatmap-cell.heatmap-orange small,.heatmap-cell.heatmap-green small{color:#fff4ec}
