@@ -268,3 +268,14 @@ test('public place and time zone labels show city only, preserving IANA values f
  assert.ok(!main.includes("item.textContent=city.label+' · '+city.zone"));
  assert.ok(!main.includes("esc(active.zone)"));
 });
+
+test('expanded live sky wheel shows only the timestamp and interactive wheel, without redundant titles and notes',()=>{
+ const start=main.indexOf('const expandSky=()=>');
+ const end=main.indexOf("on('expand-sky-wheel',expandSky)",start);
+ assert.ok(start>0&&end>start);
+ const modal=main.slice(start,end);
+ for(const phrase of ['✦ MX ASTRO · LIVE SKY','سماء اللحظة · الدائرة المكبرة','Current sky · Expanded wheel','مواضع فلكية محسوبة بالزودياك الاستوائي. معانيها تنجيمية رمزية.','Calculated tropical zodiac positions; interpretations are astrological symbolism.'])assert.ok(!modal.includes(phrase),'Unwanted modal text: '+phrase);
+ assert.ok(modal.includes('mx-expanded-sky-time'));
+ assert.ok(modal.includes('mx-expanded-wheel'));
+ assert.ok(modal.includes('updateLiveSkyWheel(liveSkyLastTick)'));
+});
