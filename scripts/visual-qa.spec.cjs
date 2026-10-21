@@ -53,6 +53,19 @@ test('Moon, eclipse and MX Intelligence premium cards',async({page},testInfo)=>{
  await expect(page.locator('.page-heading h1')).toHaveCount(0);
  const eclipseTimestamps=await page.locator('.eclipse-countdown').evaluateAll(nodes=>nodes.map(el=>Number(el.getAttribute('data-eclipse-to'))));
  expect(eclipseTimestamps.every(time=>Number.isFinite(time)&&time>Date.now())).toBe(true);
+ // Both wide and narrow screens must retain five evenly aligned boxes in one row.
+ const initialViewport=page.viewportSize();
+ for(const viewport of [{width:1440,height:900},{width:390,height:844},{width:320,height:720}]){
+  await page.setViewportSize(viewport);
+  const geometry=await page.locator('.eclipse-countdown-grid').evaluateAll(grids=>grids.filter(grid=>getComputedStyle(grid).display!=='none'&&grid.getBoundingClientRect().width>0).map(grid=>{
+   const parent=grid.getBoundingClientRect(),boxes=Array.from(grid.children).map(child=>child.getBoundingClientRect());
+   return {count:boxes.length,sameRow:boxes.every(box=>Math.abs(box.top-boxes[0].top)<2),within:boxes.every(box=>box.left>=parent.left-2&&box.right<=parent.right+2),height:Math.max(...boxes.map(box=>box.height))};
+  }));
+  expect(geometry.length,'at least one visible upcoming eclipse countdown').toBeGreaterThan(0);
+  expect(geometry.every(g=>g.count===5&&g.sameRow&&g.within),'five boxes stay aligned without overflow at '+viewport.width+'px').toBe(true);
+  expect(geometry.every(g=>g.height<=64),'countdown units should stay compact').toBe(true);
+ }
+ if(initialViewport)await page.setViewportSize(initialViewport);
  await page.screenshot({path:'artifacts/ui-qa/eclipses-'+testInfo.project.name+'.png',fullPage:true});
  await page.goto('/#time',{waitUntil:'domcontentloaded'});
  await page.locator('.heatmap-cell').first().waitFor({timeout:75000});
