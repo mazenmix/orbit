@@ -43,12 +43,24 @@ test('Moon, eclipse and MX Intelligence premium cards',async({page},testInfo)=>{
  await expect(page.locator('.eclipse-premium')).toHaveCount(2); // nearest one of each kind
  await expect(page.locator('.eclipse-countdown')).toHaveCount(2);
  await expect(page.locator('.eclipse-countdown-unit')).toHaveCount(8); // month/day/hour/minute per card
+ await expect(page.locator('.eclipse-live-countdown')).toHaveCount(2);
+ await expect(page.locator('.eclipse-geography')).toHaveCount(2);
  await expect(page.locator('.eclipse-overview')).toHaveCount(0);
  await expect(page.locator('.eclipse-countdown[data-eclipse-to]')).toHaveCount(2);
  await expect(page.locator('.page-heading h1')).toHaveCount(0);
  const eclipseTimestamps=await page.locator('.eclipse-countdown').evaluateAll(nodes=>nodes.map(el=>Number(el.getAttribute('data-eclipse-to'))));
  expect(eclipseTimestamps.every(time=>Number.isFinite(time)&&time>Date.now())).toBe(true);
  await page.screenshot({path:'artifacts/ui-qa/eclipses-'+testInfo.project.name+'.png',fullPage:true});
+ await page.goto('/#time',{waitUntil:'domcontentloaded'});
+ await page.locator('.heatmap-cell').first().waitFor({timeout:75000});
+ await expect(page.locator('.rhythm')).toHaveCount(0);
+ await expect(page.locator('.heatmap-summary')).toHaveCount(0);
+ const classified=await page.locator('.heatmap-cell').evaluateAll(cells=>cells.length>0&&cells.every(c=>{
+  const value=Number(c.querySelector('b')?.textContent);
+  const band=value<=25?'red':value<=45?'orange':value<=65?'yellow':'green';
+  return c.classList.contains('heatmap-'+band);
+ }));
+ expect(classified,'every displayed heatmap value gets the right discrete color').toBe(true);
  await page.goto('/#intel',{waitUntil:'domcontentloaded'});
  await page.locator('.metric-card').first().waitFor({timeout:75000});
  await page.screenshot({path:'artifacts/ui-qa/intelligence-'+testInfo.project.name+'.png',fullPage:true});
