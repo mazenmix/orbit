@@ -244,3 +244,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .relation-window .button-row{gap:7px;display:flex;flex-wrap:wrap}
 .relation-window .secondary,.relation-window .text-button{font-size:11px;min-height:36px;padding:8px 10px}
 @media(max-width:1150px){.relation-window-grid{grid-template-columns:1fr}}
+
+.relationship-calendar .relation-window-reason{display:block;font-size:11px;line-height:1.6;color:#b9b5ca;margin-top:7px;min-height:2.2em}
+.relationship-calendar .relation-window p{line-height:1.8}

@@ -290,3 +290,12 @@ test('People page omits real interaction log card and entry controls while keepi
  assert.ok(people.includes("t('أيام التواصل واللقاءات','Communication and meeting windows')"));
  assert.ok(main.includes("journal:readJournal()"),'existing private backup must preserve previously stored data');
 });
+
+test('People timeline card advice is computed per local day, not identical canned sentences',()=>{
+ const section=main.slice(main.indexOf('function relationshipWindowUI('),main.indexOf('function relationshipFocus('));
+ assert.ok(section.includes('relationshipDayReading(day,kind,period,getReport(day.day).signals,used)'));
+ assert.ok(section.includes("21,active.zone"));
+ assert.ok(section.includes('relation-window-reason'));
+ assert.ok(!section.includes('جرب رسالة واحدة واضحة، وراقب الرد الحقيقي بدون إلحاح'));
+ assert.ok(!section.includes('اقترح لقاء بسيط بمكان مناسب، وخلي الموافقة متبادلة.'));
+});

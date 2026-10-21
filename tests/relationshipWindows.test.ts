@@ -12,3 +12,11 @@ test('invalid window lengths and missing symbolic domains are rejected',()=>{
  assert.throws(()=>relationshipWindows(new Date(),d,()=>({} as any)));
  assert.throws(()=>relationshipWindows(new Date(),d,()=>({} as any),90));
 });
+
+test('local calendar days sample noon in historical timezone even through DST',()=>{
+ const marks:Date[]=[];
+ const rows=relationshipWindows(new Date('2026-10-31T17:00:00Z'),d,at=>{marks.push(at);return Object.fromEntries(categories.map(c=>[c,55])) as any},4,'America/Denver');
+ assert.deepEqual(marks.map(x=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Denver',day:'numeric',hour:'numeric',hour12:false}).format(x)),['31, 12','1, 12','2, 12','3, 12']);
+ assert.equal(rows[0].source.communication,55);
+ assert.equal(rows[0].source.energy,55);
+});

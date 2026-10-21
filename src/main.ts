@@ -42,6 +42,7 @@ import {soulRender,type SoulAI} from './soulUI.ts';
 import {soulReading} from './soulEngine.ts';
 import {soulCategories,soulTopics} from './soulData.ts';
 import {relationshipWindows,bestWindows} from './relationshipWindows.ts';
+import {relationshipDayReading} from './relationshipDayNarrative.ts';
 import {lunarWindow,type LunarWindow} from './timing.ts';
 import {vocPhase,vocRemaining,remainingPercent} from './liveVoc.ts';
 import {calendarEvent,calendarDownload} from './calendar.ts';
@@ -887,12 +888,15 @@ function profileForm(p:Profile,isNew=false){
 }
 function relationshipWindowUI(person:Profile){
  try{
-  const match=compatibility(active,person),period=relationshipWindows(selected,match.dimensions,at=>getReport(at).scores,21);
-  const cards=(kind:'message'|'date')=>bestWindows(period,kind,3).map(day=>{
-   const advice=kind==='message'?t('جرب رسالة واحدة واضحة، وراقب الرد الحقيقي بدون إلحاح.','Send one clear message and respect the actual reply.'):t('اقترح لقاء بسيط بمكان مناسب، وخلي الموافقة متبادلة.','Offer a simple meeting and leave the choice mutual.');
-   return '<article class="relation-window '+gaugeLevel(day[kind])+'"><div class="relation-heading"><b>'+dateText(day.day,{weekday:'short',day:'numeric',month:'short'})+'</b><strong>'+day[kind]+'</strong></div><p>'+advice+'</p><div class="button-row"><button class="secondary" data-relationship-time="'+(+day.day)+'">'+t('افتح اليوم','Inspect day')+'</button><button class="text-button" data-relationship-calendar="'+(+day.day)+'" data-relationship-kind="'+kind+'">'+t('تذكير بالتقويم','Calendar reminder')+'</button></div></article>';
-  }).join('');
-  return '<section class="panel relationship-calendar"><span class="eyebrow">MX ASTRO · 21 DAYS</span><h2>'+t('نوافذ التواصل واللقاءات لهذا الشخص','Communication and meeting planning windows')+'</h2><p>'+t('هاي الأيام من حركة كواكبك ومؤشر التوافق الرمزي. مو قراءة لمشاعر الطرف الثاني أو توفره أو موافقته. أي خطوة تحتاج تواصل مباشر واحترام الرد.','These days combine your transits and symbolic compatibility, not the other person’s wishes, availability or consent.')+'</p><h3>'+t('أيام تراسل بيها','Days to consider a message')+'</h3><div class="relation-window-grid">'+cards('message')+'</div>'+(match.romantic?'<h3>'+t('أيام تقترح موعد','Days to propose a date')+'</h3><div class="relation-window-grid">'+cards('date')+'</div>':'')+'</section>';
+  const match=compatibility(active,person),period=relationshipWindows(selected,match.dimensions,at=>getReport(at).scores,21,active.zone);
+  const cards=(kind:'message'|'date')=>{
+   const used=new Set<string>();
+   return bestWindows(period,kind,3).map(day=>{
+    const reading=relationshipDayReading(day,kind,period,getReport(day.day).signals,used);
+    return '<article class="relation-window '+gaugeLevel(day[kind])+'"><div class="relation-heading"><b>'+dateText(day.day,{weekday:'short',day:'numeric',month:'short'})+'</b><strong>'+day[kind]+'</strong></div><p>'+esc(t(reading.ar,reading.en))+'</p><small class="relation-window-reason">'+esc(t(reading.reasonAr,reading.reasonEn))+'</small><div class="button-row"><button class="secondary" data-relationship-time="'+(+day.day)+'">'+t('افتح اليوم','Inspect day')+'</button><button class="text-button" data-relationship-calendar="'+(+day.day)+'" data-relationship-kind="'+kind+'">'+t('تذكير بالتقويم','Calendar reminder')+'</button></div></article>';
+   }).join('');
+  };
+  return '<section class="panel relationship-calendar"><span class="eyebrow">MX ASTRO · 21 DAYS</span><h2>'+t('نوافذ التواصل واللقاءات لهذا الشخص','Communication and meeting planning windows')+'</h2><p>'+t('هاي مقارنة رمزية بين 21 يوم، مو احتمال ترد أو تقبل موعد. تحت كل يوم مكتوب شنو فعلياً دخل بالحساب؛ إذا الفرق ضعيف، ما نعطيه معنى أكبر من حجمه.','This compares 21 symbolic daily samples, not the odds of a reply or an accepted date. Each card shows its calculated basis; small differences are not meaningful predictions.')+'</p><h3>'+t('أيام تراسل بيها','Days to consider a message')+'</h3><div class="relation-window-grid">'+cards('message')+'</div>'+(match.romantic?'<h3>'+t('أيام تقترح موعد','Days to propose a date')+'</h3><div class="relation-window-grid">'+cards('date')+'</div>':'')+'</section>';
  }catch(e){return '<p class="alert">'+esc(String(e))+'</p>'}
 }
 function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
