@@ -1,11 +1,11 @@
 /** Precise calendar-month countdown to a Swiss Ephemeris eclipse maximum.
- * Months use clamped UTC calendar anniversaries; days/hours/minutes are elapsed time.
+ * Months use clamped UTC calendar anniversaries; days/hours/minutes/seconds are elapsed time.
  * The instant is timezone-independent, so the display is the same on every device.
  */
-export type EclipseCountdown = {months:number;days:number;hours:number;minutes:number};
+export type EclipseCountdown = {months:number;days:number;hours:number;minutes:number;seconds:number};
 export function eclipseCountdownParts(now:number,target:number):EclipseCountdown{
  if(!Number.isFinite(now)||!Number.isFinite(target))throw Error('Invalid eclipse countdown time');
- if(target<=now)return {months:0,days:0,hours:0,minutes:0};
+ if(target<=now)return {months:0,days:0,hours:0,minutes:0,seconds:0};
  const from=new Date(now),until=new Date(target);
  const monthAt=(offset:number)=>{
   const date=new Date(Date.UTC(from.getUTCFullYear(),from.getUTCMonth()+offset,1,from.getUTCHours(),from.getUTCMinutes(),from.getUTCSeconds(),from.getUTCMilliseconds()));
@@ -18,6 +18,7 @@ export function eclipseCountdownParts(now:number,target:number):EclipseCountdown
  let remaining=target-monthAt(months);
  const days=Math.floor(remaining/86400000);remaining-=days*86400000;
  const hours=Math.floor(remaining/3600000);remaining-=hours*3600000;
- const minutes=Math.floor(remaining/60000);
- return {months,days,hours,minutes};
+ const minutes=Math.floor(remaining/60000);remaining-=minutes*60000;
+ const seconds=Math.floor(remaining/1000);
+ return {months,days,hours,minutes,seconds};
 }
