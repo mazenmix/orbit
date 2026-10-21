@@ -42,7 +42,10 @@ test('Moon, eclipse and MX Intelligence premium cards',async({page},testInfo)=>{
  await page.locator('.eclipse-premium').first().waitFor({timeout:75000});
  await expect(page.locator('.eclipse-premium')).toHaveCount(2); // nearest one of each kind
  await expect(page.locator('.eclipse-countdown')).toHaveCount(2);
- await expect(page.locator('.eclipse-countdown-unit')).toHaveCount(8); // month/day/hour/minute per card
+ await expect(page.locator('.eclipse-countdown-unit')).toHaveCount(10); // month/day/hour/minute/second per card
+ await expect(page.locator('.eclipse-countdown-unit [data-eclipse-unit="seconds"]')).toHaveCount(2);
+ const initialSeconds=await page.locator('.eclipse-countdown-unit [data-eclipse-unit="seconds"]').first().textContent();
+ expect(initialSeconds).toMatch(/^\\d{2}$/);
  await expect(page.locator('.eclipse-live-countdown')).toHaveCount(2);
  await expect(page.locator('.eclipse-geography')).toHaveCount(2);
  await expect(page.locator('.eclipse-overview')).toHaveCount(0);
