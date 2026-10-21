@@ -178,3 +178,87 @@
 .heatmap-cell.heatmap-yellow b,.heatmap-cell.heatmap-yellow small{color:#211d10}
 .heatmap-cell.heatmap-red b,.heatmap-cell.heatmap-orange b,.heatmap-cell.heatmap-green b{color:#fff}
 .heatmap-cell.heatmap-red small,.heatmap-cell.heatmap-orange small,.heatmap-cell.heatmap-green small{color:#fff4ec}
+
+/* Alert phases are based on Swiss Ephemeris first and last contacts, not maximum. */
+.eclipse-premium.eclipse-warning{
+ border:1px solid #f4cb5e;
+ border-top:3px solid #f4cb5e;
+ background:linear-gradient(150deg,#3c351f,#1d2130 75%);
+ box-shadow:0 0 0 1px #e2bd4e2b,0 8px 24px #c9a63a1f;
+}
+.eclipse-premium.eclipse-warning .eclipse-countdown{
+ --ec-accent:#ffe07d;
+ border-color:#c3a650;
+ background:linear-gradient(125deg,#39301b,#262332);
+}
+.eclipse-premium.eclipse-live{
+ border:1px solid #f36e73;
+ border-top:3px solid #f36e73;
+ background:linear-gradient(150deg,#44232c,#1e1c2b 75%);
+ box-shadow:0 0 0 1px #d75e702e,0 8px 30px #e65b6f24;
+}
+.eclipse-premium.eclipse-live .eclipse-type{background:#6c2734;border-color:#d65c64;color:#fff}
+.eclipse-geography{
+ display:flex;
+ flex-direction:column;
+ gap:5px;
+ margin:14px 0 0;
+ padding:12px 14px;
+ background:#10182bba;
+ border:1px solid #44465f;
+ border-radius:12px;
+}
+.eclipse-geography>span{font-size:11px;color:#b5b1d3}
+.eclipse-geography strong{font-size:14px;font-weight:780;line-height:1.65;color:#f5eaff;overflow-wrap:anywhere}
+.eclipse-geography small{font-size:10px;color:#aaa9bd;line-height:1.6}
+.eclipse-solar .eclipse-geography strong{color:#f6d698}
+.eclipse-live-countdown{
+ display:none;
+ margin:0 0 17px;
+ padding:17px 15px;
+ border:1px solid #fd7980;
+ border-radius:15px;
+ background:linear-gradient(135deg,#782b3a,#42232e);
+ box-shadow:inset 0 0 20px #ffffff0a,0 6px 20px #00000020;
+}
+.eclipse-live .eclipse-countdown{display:none}
+.eclipse-live .eclipse-live-countdown{display:block}
+.eclipse-live-title{
+ margin-bottom:13px;
+ color:#fff4f4;
+ font-size:12px;
+ font-weight:800;
+ letter-spacing:.2px;
+}
+.eclipse-live-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.eclipse-live-unit{
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ min-width:0;
+ min-height:89px;
+ padding:9px 5px;
+ border:1px solid #ffffff2e;
+ border-radius:12px;
+ background:#ffffff12;
+}
+.eclipse-live-unit span{
+ font-size:clamp(27px,3vw,38px);
+ line-height:1.15;
+ font-weight:900;
+ color:#fff;
+ font-variant-numeric:tabular-nums;
+ font-feature-settings:"tnum";
+ direction:ltr;
+ unicode-bidi:isolate;
+}
+.eclipse-live-unit small{font-size:11px;color:#ffe8eb;margin-top:6px}
+.eclipse-premium.eclipse-finished .eclipse-countdown{opacity:.5}
+@media(max-width:600px){
+ .eclipse-geography{padding:10px 12px}
+ .eclipse-live-countdown{padding:13px 11px}
+ .eclipse-live-unit{min-height:78px}
+ .eclipse-live-unit span{font-size:clamp(24px,7vw,33px)}
+ .eclipse-live-unit small{font-size:10px}
+}
