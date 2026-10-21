@@ -279,3 +279,14 @@ test('expanded live sky wheel shows only the timestamp and interactive wheel, wi
  assert.ok(modal.includes('mx-expanded-wheel'));
  assert.ok(modal.includes('updateLiveSkyWheel(liveSkyLastTick)'));
 });
+
+test('People page omits real interaction log card and entry controls while keeping relationship planning',()=>{
+ const people=main.slice(main.indexOf('function peoplePage(){'),main.indexOf('function aiPayload(){'));
+ for(const removed of ['journalPanel(', 'journal-panel', 'journal-form','سجل التفاعل الحقيقي','Real-world interaction history','Timing windows and private journal'])assert.ok(!people.includes(removed), 'unexpected interaction log surface: '+removed);
+ assert.ok(!main.includes('function journalPanel('));
+ assert.ok(!main.includes("querySelector<HTMLFormElement>('#journal-form')"));
+ assert.ok(!main.includes('[data-journal-delete]'));
+ assert.ok(people.includes('relationshipWindowUI(partner)'));
+ assert.ok(people.includes("t('أيام التواصل واللقاءات','Communication and meeting windows')"));
+ assert.ok(main.includes("journal:readJournal()"),'existing private backup must preserve previously stored data');
+});
