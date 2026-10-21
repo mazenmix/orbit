@@ -121,8 +121,8 @@
 }
 .eclipse-countdown-grid{
  display:grid;
- grid-template-columns:repeat(4,minmax(0,1fr));
- gap:8px;
+ grid-template-columns:repeat(5,minmax(0,1fr));
+ gap:6px;
 }
 .eclipse-countdown-unit{
  display:flex;
@@ -138,7 +138,7 @@
 }
 .eclipse-countdown-number{
  color:#fff9ee;
- font-size:clamp(22px,2.4vw,31px);
+ font-size:clamp(19px,2.05vw,28px);
  line-height:1.08;
  font-weight:850;
  font-variant-numeric:tabular-nums;
@@ -160,10 +160,10 @@
 .eclipse-actions .secondary{font-size:12px}
 @media(max-width:600px){
  .eclipse-countdown{padding:13px 11px;margin-bottom:14px}
- .eclipse-countdown-grid{gap:6px}
+ .eclipse-countdown-grid{gap:5px}
  .eclipse-countdown-unit{min-height:64px;padding:7px 2px}
- .eclipse-countdown-number{font-size:clamp(20px,6vw,26px)}
- .eclipse-countdown-unit small{font-size:10px}
+ .eclipse-countdown-number{font-size:clamp(17px,5.2vw,24px)}
+ .eclipse-countdown-unit small{font-size:9px}
  .eclipse-actions .secondary{font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){
