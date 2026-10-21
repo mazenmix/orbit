@@ -40,6 +40,14 @@ test('Moon, eclipse and MX Intelligence premium cards',async({page},testInfo)=>{
  await page.screenshot({path:'artifacts/ui-qa/moon-'+testInfo.project.name+'.png',fullPage:true});
  await page.goto('/#eclipses',{waitUntil:'domcontentloaded'});
  await page.locator('.eclipse-premium').first().waitFor({timeout:75000});
+ await expect(page.locator('.eclipse-premium')).toHaveCount(2); // nearest one of each kind
+ await expect(page.locator('.eclipse-countdown')).toHaveCount(2);
+ await expect(page.locator('.eclipse-countdown-unit')).toHaveCount(8); // month/day/hour/minute per card
+ await expect(page.locator('.eclipse-overview')).toHaveCount(0);
+ await expect(page.locator('.eclipse-countdown[data-eclipse-to]')).toHaveCount(2);
+ await expect(page.locator('.page-heading h1')).toHaveCount(0);
+ const eclipseTimestamps=await page.locator('.eclipse-countdown').evaluateAll(nodes=>nodes.map(el=>Number(el.getAttribute('data-eclipse-to'))));
+ expect(eclipseTimestamps.every(time=>Number.isFinite(time)&&time>Date.now())).toBe(true);
  await page.screenshot({path:'artifacts/ui-qa/eclipses-'+testInfo.project.name+'.png',fullPage:true});
  await page.goto('/#intel',{waitUntil:'domcontentloaded'});
  await page.locator('.metric-card').first().waitFor({timeout:75000});
