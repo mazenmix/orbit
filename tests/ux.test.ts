@@ -303,7 +303,7 @@ test('People timeline card advice is computed per local day, not identical canne
 test('People relationship view has full-width meters, distinct avatars, and the technical appendix last',()=>{
  const p=main.slice(main.indexOf('function peoplePage(){'),main.indexOf('function aiPayload(){'));
  assert.ok(p.includes("technical='<details class=\"panel synastry-technical\""));
- assert.ok(p.includes(":'')+technical;"));
+ assert.ok(p.includes(":'')+technical+'</div>';"));
  assert.ok(p.includes('partnerCardStory(x,c.dimensions'));
  assert.ok(!p.includes('MX ASTRO · SYNASTRY'));
  assert.ok(!p.includes('التصرف المفيد: '));
