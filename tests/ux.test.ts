@@ -299,3 +299,16 @@ test('People timeline card advice is computed per local day, not identical canne
  assert.ok(!section.includes('جرب رسالة واحدة واضحة، وراقب الرد الحقيقي بدون إلحاح'));
  assert.ok(!section.includes('اقترح لقاء بسيط بمكان مناسب، وخلي الموافقة متبادلة.'));
 });
+
+test('People relationship view has full-width meters, distinct avatars, and the technical appendix last',()=>{
+ const p=main.slice(main.indexOf('function peoplePage(){'),main.indexOf('function aiPayload(){'));
+ assert.ok(p.includes("technical='<details class=\"panel synastry-technical\""));
+ assert.ok(p.includes(":'')+technical;"));
+ assert.ok(p.includes('partnerCardStory(x,c.dimensions'));
+ assert.ok(!p.includes('MX ASTRO · SYNASTRY'));
+ assert.ok(!p.includes('التصرف المفيد: '));
+ assert.ok(p.includes('mx-people-gauge-track'));
+ assert.ok(main.includes('personHue(p.id)'));
+ const win=main.slice(main.indexOf('function relationshipWindowUI('),main.indexOf('function relationshipFocus('));
+ assert.ok(!win.includes('هاي مقارنة رمزية بين 21 يوم'));
+});
