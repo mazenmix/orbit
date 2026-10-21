@@ -12,7 +12,8 @@ test('daily narratives follow actual dated indices and computed transit evidence
  const first=relationshipDayReading(days[0],'message',rows,[{category:'communication',allFactors:[evidence('Mercury',60)],factors:[evidence('Mercury',60)]} as any],used);
  const second=relationshipDayReading(days[1],'message',rows,[{category:'communication',allFactors:[evidence('Mars',90)],factors:[evidence('Mars',90)]} as any],used);
  assert.notEqual(first.ar,second.ar);
- assert.notEqual(first.reasonAr,second.reasonAr);
+ // Equal computed indices must produce equal reasons; do not invent differences.
+ assert.equal(first.reasonAr,second.reasonAr);
  assert.match(first.ar,/الكلام الواضح/);
  assert.match(second.ar,/الاندفاع/);
  assert.equal(first.factor,'Mercury-60-Mercury');
@@ -34,4 +35,16 @@ test('a day with no computed contact explicitly says so rather than inventing a 
  assert.match(message.ar,/ماكو اتصال تقارب/);
  assert.ok(!/مضمون|راح توافق|راح ترد/.test(message.ar));
  assert.ok(!message.reasonAr.includes('undefined'));
+});
+
+test('no weak contact is promoted to sound uniquely important, and neutral contacts do not promise ease',()=>{
+ const days=bestWindows(rows,'message',3),used=new Set<string>();
+ const strongest=evidence('Mercury',60),weak={...evidence('Venus',60),weight:.36};
+ const group=[{category:'communication',allFactors:[strongest,weak],factors:[strongest]}] as any;
+ const a=relationshipDayReading(days[0],'message',rows,group,used);
+ const b=relationshipDayReading(days[1],'message',rows,group,used);
+ assert.equal(a.factor,b.factor);
+ const neutral=evidence('Sun',0);
+ const c=relationshipDayReading(days[2],'message',rows,[{category:'communication',allFactors:[neutral],factors:[neutral]}] as any,new Set());
+ assert.match(c.ar,/ما يرجّح/);
 });

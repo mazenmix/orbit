@@ -63,13 +63,19 @@ export function relationshipDayReading(day:RelationshipWindow,mode:Kind,period:r
  const topic=mode==='message'?'communication':day.source.energy>day.source.love+12?'energy':'love';
  const group=signals.find(s=>s.category===topic);
  const factors=rankedFactors(group?.allFactors??group?.factors??[]);
- const factor=factors.find(e=>!usedFactors.has(e.id))??factors[0]??null;
+ const strongest=factors[0]??null;
+ // Never promote a weak secondary contact just to manufacture variety.
+ const distinct=factors.find(e=>!usedFactors.has(e.id)&&e.weight>=Math.max(.35,(strongest?.weight??0)-.15));
+ const factor=distinct??strongest;
  if(factor)usedFactors.add(factor.id);
  const code=factor?.transit.id??'';
  const script=thoughts[code]?.[mode]??(mode==='message'?generalMessage:generalDate);
  const hard=factor?difficult(factor)&&!supportive(factor):false;
- const natural=factor?{ar:hard?script.arHard:script.arGood,en:hard?script.enHard:script.enGood}:mode==='message'?
- {ar:'بهذا اليوم ماكو اتصال تواصل محدد حتى أعطيه قصة خاصة؛ الدرجة أكثرها من توافقكم الثابت، فاختار الوقت حسب ظروفكم الفعلية.',en:'No distinct communication contact was calculated for this day; the rating mainly reflects static compatibility, so choose a time that works in real life.'}:
+ const undecided=!!factor&&!supportive(factor)&&!difficult(factor);
+ const natural=factor?(undecided?
+ {ar:mode==='message'?'الاتصال المحسوب اليوم يركز على الكلام، بس ما يرجّح إذا حوارك راح يكون أسهل أو أصعب؛ خذ القرار من طبيعة السالفة.':'الاتصال المحسوب اليوم يركز على التقارب، بس ما يثبت إن الموعد مناسب أو مقبول؛ خذ القرار حسب اتفاقكم.',en:mode==='message'?'The calculated communication contact is neutral; it does not establish whether a conversation will go well.':'The calculated closeness contact is neutral; it cannot establish that a date would be welcome.'}:
+ {ar:hard?script.arHard:script.arGood,en:hard?script.enHard:script.enGood}):mode==='message'?
+ {ar:'بهذا اليوم ماكو اتصال تواصل محدد حتى أعطيه قصة خاصة؛ الترتيب جاي من قيمة الأساس المحايدة والتوافق الثابت، فاختار الوقت حسب ظروفكم الفعلية.',en:'No distinct communication contact was calculated for this day; the ranking combines a neutral default with static compatibility, so choose a time that works in real life.'}:
  {ar:'ماكو اتصال تقارب مميز يبرر توقع لقاء بهاليوم؛ الترتيب رمزي، وفكرة الموعد تعتمد على موافقتكم وظروفكم.',en:'No distinct closeness contact justifies predicting a meeting today; the ranking is symbolic, and actual plans depend on mutual agreement.'};
  const delta=nearest(period,day,mode);
  const comparisonAr=Math.abs(delta)<3?'قريب من وسط الفترة':delta>0?'أعلى من وسط الفترة بـ'+delta+' درجات':'أقل من وسط الفترة بـ'+Math.abs(delta)+' درجات';
