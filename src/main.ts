@@ -612,7 +612,7 @@ function eclipsesPage(){
   const stage=(label:string,at:Date|null)=>'<div class="eclipse-stage '+(at?'':'not-available')+'"><small>'+label+'</small>'+(at?'<time datetime="'+at.toISOString()+'">'+time(at)+'</time>':'<span>—</span>')+'</div>';
   const countdown=(e:ConfirmedEclipse)=>{
    const parts=eclipseCountdownParts(Date.now(),+e.maximum);
-   const fields=([['months',t('شهر','MONTHS')],['days',t('يوم','DAYS')],['hours',t('ساعة','HOURS')],['minutes',t('دقيقة','MINUTES')]] as const);
+   const fields=([['months',t('شهر','MONTHS')],['days',t('يوم','DAYS')],['hours',t('ساعة','HOURS')],['minutes',t('دقيقة','MINUTES')],['seconds',t('ثانية','SECONDS')]] as const);
    return '<div class="eclipse-countdown" data-eclipse-to="'+(+e.maximum)+'" role="timer" aria-label="'+t('المتبقي حتى ذروة الكسوف أو الخسوف','Time until eclipse maximum')+'"><div class="eclipse-countdown-heading"><span class="eclipse-countdown-dot" aria-hidden="true"></span>'+t('المتبقي حتى الذروة','COUNTDOWN TO MAXIMUM')+'</div><div class="eclipse-countdown-grid">'+fields.map(([unit,label])=>'<div class="eclipse-countdown-unit"><span class="eclipse-countdown-number" data-eclipse-unit="'+unit+'">'+String(parts[unit]).padStart(2,'0')+'</span><small>'+label+'</small></div>').join('')+'</div></div>';
   };
   return '<div class="confirmed-eclipses eclipse-premium-grid">'+eclipses.map((e,i)=>{
@@ -1345,7 +1345,7 @@ function tickEclipseCountdowns(now:number){
   const target=Number(tile.dataset.eclipseTo);
   if(!Number.isFinite(target))return;
   const parts=eclipseCountdownParts(now,target);
-  for(const unit of ['months','days','hours','minutes'] as const){
+  for(const unit of ['months','days','hours','minutes','seconds'] as const){
    const el=tile.querySelector<HTMLElement>('[data-eclipse-unit="'+unit+'"]');
    const value=String(parts[unit]).padStart(2,'0');
    if(el&&el.textContent!==value)el.textContent=value;
