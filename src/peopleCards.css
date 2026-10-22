@@ -81,3 +81,214 @@
 }
 @media(hover:hover){#live-view-body .mx-people-page .metric-card{transition:border-color .18s ease}#live-view-body .mx-people-page .metric-card:hover{border-color:var(--metric-accent)!important}}
 @media(prefers-reduced-motion:reduce){#live-view-body .mx-people-page .metric-card{transition:none!important}}
+
+
+/* Compact People / Synastry layout (desktop, tablet and phone).
+   Show ALL narrative text; never clamp or hide interpretation or chart evidence. */
+#live-view-body .mx-people-page{
+  gap:9px;
+  padding-block-end:14px;
+}
+#live-view-body .mx-people-page .mx-people-section,
+#live-view-body .mx-people-page>.mx-partner-focus,
+#live-view-body .mx-people-page>.mx-partner-deep,
+#live-view-body .mx-people-page>.synastry-technical{
+  padding:clamp(11px,1.05vw,14px)!important;
+  border-radius:14px;
+}
+#live-view-body .mx-people-page .mx-people-section .section-title{
+  gap:7px;
+  margin:0 0 6px;
+}
+#live-view-body .mx-people-page .partner-overview>.section-title h2,
+#live-view-body .mx-people-page .relationship-calendar>h2{
+  font-size:clamp(15px,1.45vw,18px);
+  line-height:1.4;
+}
+#live-view-body .mx-people-page .partner-overview>.section-title .big-score{
+  font-size:clamp(23px,2.25vw,29px);
+  line-height:1.1;
+}
+#live-view-body .mx-people-page .partner-overview>h3{
+  font-size:13px;
+  line-height:1.4;
+  margin:5px 0 0;
+}
+#live-view-body .mx-people-page .partner-overview .dimension-grid,
+#live-view-body .mx-people-page .partner-insights-grid,
+#live-view-body .mx-people-page .relation-window-grid,
+#live-view-body .mx-people-page .mx-brief-grid{
+  gap:9px;
+  margin-top:9px;
+}
+#live-view-body .mx-people-page .metric-card{
+  padding:clamp(9px,0.95vw,12px)!important;
+  border-radius:12px!important;
+}
+#live-view-body .mx-people-page .partner-score{
+  gap:5px;
+  justify-content:initial;
+}
+#live-view-body .mx-people-page .partner-score>span{
+  font-size:12.5px;
+  line-height:1.4;
+}
+#live-view-body .mx-people-page .mx-people-gauge{
+  gap:4px;
+}
+#live-view-body .mx-people-page .mx-people-gauge-number b{
+  font-size:clamp(19px,1.8vw,22px);
+}
+#live-view-body .mx-people-page .mx-people-gauge-number small{
+  font-size:10px;
+}
+#live-view-body .mx-people-page .mx-people-gauge-track{
+  height:5px;
+}
+#live-view-body .mx-people-page .partner-insight{
+  gap:6px;
+  justify-content:flex-start;
+}
+#live-view-body .mx-people-page .partner-insight>h3{
+  font-size:13.5px;
+  line-height:1.4;
+}
+#live-view-body .mx-people-page .partner-insight .mx-partner-reading{
+  font-size:12px;
+  line-height:1.55;
+  margin:0;
+  overflow-wrap:anywhere;
+  display:block;
+  max-height:none;
+  -webkit-line-clamp:unset;
+}
+#live-view-body .mx-people-page .partner-insight .mx-partner-basis{
+  font-size:10px;
+  line-height:1.45;
+}
+#live-view-body .mx-people-page .mx-brief-card{
+  gap:6px;
+}
+#live-view-body .mx-people-page .mx-brief-card>h3{
+  font-size:13.5px!important;
+  line-height:1.4;
+}
+#live-view-body .mx-people-page .mx-brief-card p{
+  font-size:12px;
+  line-height:1.55;
+}
+#live-view-body .mx-people-page .relationship-calendar>h3{
+  font-size:13px;
+  line-height:1.4;
+  margin:12px 0 5px;
+}
+#live-view-body .mx-people-page .relation-window{
+  gap:6px;
+  min-height:0;
+  justify-content:flex-start;
+}
+#live-view-body .mx-people-page .relation-heading{
+  gap:6px;
+  align-items:baseline;
+}
+#live-view-body .mx-people-page .relation-heading b{
+  font-size:12px;
+  line-height:1.4;
+}
+#live-view-body .mx-people-page .relation-heading strong{
+  font-size:22px;
+  line-height:1.1;
+}
+#live-view-body .mx-people-page .relation-window>p{
+  font-size:12px;
+  line-height:1.5;
+  min-height:0;
+  margin:0;
+  overflow-wrap:anywhere;
+  display:block;
+  max-height:none;
+  -webkit-line-clamp:unset;
+}
+#live-view-body .mx-people-page .relation-window .relation-window-reason{
+  min-height:0;
+  margin:0;
+  font-size:10.5px;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+  display:block;
+  max-height:none;
+}
+#live-view-body .mx-people-page .relation-window .button-row{
+  gap:6px;
+  padding-top:4px;
+  margin-top:auto;
+}
+#live-view-body .mx-people-page .relation-window .button-row button{
+  min-height:38px;
+  padding:7px 9px;
+  border-radius:10px;
+  font-size:11.5px;
+  line-height:1.35;
+}
+#live-view-body .mx-people-page .people-grid{
+  gap:9px;
+}
+#live-view-body .mx-people-page .person-card{
+  gap:4px;
+}
+#live-view-body .mx-people-page .person-card>div{
+  gap:6px;
+  padding-top:6px;
+}
+#live-view-body .mx-people-page .person-card button{
+  min-height:38px;
+}
+
+/* On large screens a third column removes entire rows of tall cards. */
+@media(min-width:1250px){
+  #live-view-body .mx-people-page .partner-overview .dimension-grid,
+  #live-view-body .mx-people-page .partner-insights-grid,
+  #live-view-body .mx-people-page .relation-window-grid,
+  #live-view-body .mx-people-page .mx-brief-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+@media(min-width:760px) and (max-width:1249px){
+  #live-view-body .mx-people-page .partner-overview .dimension-grid,
+  #live-view-body .mx-people-page .partner-insights-grid,
+  #live-view-body .mx-people-page .relation-window-grid,
+  #live-view-body .mx-people-page .mx-brief-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:759px){
+  #live-view-body .mx-people-page{
+    gap:8px;
+  }
+  #live-view-body .mx-people-page .mx-people-section,
+  #live-view-body .mx-people-page>.mx-partner-focus,
+  #live-view-body .mx-people-page>.mx-partner-deep{
+    padding:10px!important;
+  }
+  #live-view-body .mx-people-page .partner-overview .dimension-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+  #live-view-body .mx-people-page .partner-insights-grid,
+  #live-view-body .mx-people-page .relation-window-grid,
+  #live-view-body .mx-people-page .mx-brief-grid{
+    grid-template-columns:minmax(0,1fr);
+    gap:8px;
+  }
+  #live-view-body .mx-people-page .metric-card{
+    padding:10px!important;
+  }
+  #live-view-body .mx-people-page .relation-window .button-row button{
+    min-height:40px;
+  }
+}
+@media(max-width:350px){
+  #live-view-body .mx-people-page .partner-overview .dimension-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
