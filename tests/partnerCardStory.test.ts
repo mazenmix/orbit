@@ -5,9 +5,9 @@ import {partnerCardStory} from '../src/partnerCardStory.ts';
 const d={attraction:82,sexual:55,emotional:65,communication:73,stability:46,conflict:39};
 const today={love:63,communication:74,energy:53};
 const items=partnerInsights(d,today);
-test('ten topics produce distinct, score-based explanations without a repeated action template',()=>{
+test('sixteen topics produce distinct, score-based explanations without a repeated action template',()=>{
  const s=items.map(x=>partnerCardStory(x,d,today,[]));
- assert.equal(new Set(s.map(x=>x.ar)).size,10);
+ assert.equal(new Set(s.map(x=>x.ar)).size,16;
  assert.ok(s.every(x=>x.ar.length>30&&!x.ar.includes('التصرف المفيد')));
  assert.notEqual(partnerCardStory(items[0],d,today,[]).ar,partnerCardStory(items[0],{...d,attraction:40,sexual:85},today,[]).ar);
 });
