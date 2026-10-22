@@ -404,7 +404,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await nav.locator('[data-go="go"]').click();
   await expect(page).toHaveURL(/#go$/);
   await expect(page.locator('#live-view-body [data-section="go"]')).toBeVisible({timeout:75000});
-  await expect(page.locator('.metric-card')).toHaveCount(29);
+  await expect(page.locator('.mx-go-mode-indicators .metric-card')).toHaveCount(29);
   await expect(page.locator('.go-card')).toHaveCount(4);
   await expect(page.locator('.mx-go-mode-page [data-today-gauge]')).toHaveCount(4);
   await expect(page.locator('[data-intel-tab]')).toHaveCount(0);
@@ -419,7 +419,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   expect(overflow,'horizontal overflow').toBeLessThan(8);
   await page.goto('/#intel',{waitUntil:'domcontentloaded'});
-  await expect(page.locator('.metric-card')).toHaveCount(29);
+  await expect(page.locator('.mx-go-mode-indicators .metric-card')).toHaveCount(29);
   await expect(page.locator('.go-card')).toHaveCount(4);
   await page.goto('/#more',{waitUntil:'domcontentloaded'});
   await expect(page.locator('button[data-go="intel"]')).toHaveCount(0);
@@ -495,7 +495,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   const over=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   expect(over,'No horizontal overflow').toBeLessThan(8);
   await nav.locator('[data-go="go"]').click();
-  await expect(page.locator('.metric-card')).toHaveCount(29);
+  await expect(page.locator('.mx-go-mode-indicators .metric-card')).toHaveCount(29);
   await expect(page.locator('.go-card')).toHaveCount(4);
   expect(errors).toEqual([]);
   await context.close();

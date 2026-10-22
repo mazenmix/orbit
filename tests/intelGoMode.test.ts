@@ -50,7 +50,7 @@ test('Go Mode contains all 29 metrics, all four daily gauges and all four decisi
  assert.match(view,/indicators\.map\(m=>/);
  assert.match(view,/go\.map\(d=>/);
  assert.match(view,/mxGoNarrative/);
- assert.match(view,/goCards\+allIndicators/);
+ assert.match(view,/goCards\+renderGoLifeGauges\(r\.scores\)\+allIndicators/);
  for(const id of indicatorIds)assert.ok(main.includes("id:'"+id+"'"),id);
  const metrics=derivedMetrics(inputs);
  assert.equal(metrics.length,29,'All 29 computed indices are available');

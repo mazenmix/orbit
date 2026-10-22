@@ -8,7 +8,9 @@ const aspectLabels:Record<number,[string,string]>={0:['اقتران','conjunctio
 const topics:Record<IntimacyTheme,string[]>={
  desire:['Mars','Venus','Pluto','Ascendant'],chemistry:['Moon','Venus','Mars'],date:['Venus','Moon','Mercury'],
  flirt:['Mercury','Venus'],exploration:['Uranus','Jupiter','Mercury'],fantasyTalk:['Neptune','Moon','Mercury'],
- trust:['Saturn','Moon','Venus'],initiative:['Mars','Mercury'],boundaries:['Saturn','Mars'],consistency:['Saturn','Sun','Moon']
+ trust:['Saturn','Moon','Venus'],initiative:['Mars','Mercury'],boundaries:['Saturn','Mars'],consistency:['Saturn','Sun','Moon'],
+ intellectual:['Mercury','Jupiter','Saturn'],emotionalNeeds:['Moon','Venus','Saturn'],conflictRepair:['Mars','Saturn','Mercury'],
+ closenessPace:['Venus','Moon','Mars'],longTerm:['Saturn','Sun','Moon'],contactTiming:['Mercury','Moon','Venus']
 };
 const diff=(a:number,b:number,high:[string,string],low:[string,string],even:[string,string]):[string,string]=>a-b>=9?high:b-a>=9?low:even;
 /** Different, score-contingent explanations. Never guesses feelings, preferences or event probabilities. */
@@ -51,6 +53,30 @@ export function partnerCardStory(x:PartnerInsight,d:Record<Dimension,number>,tod
   ['هدوء الاختلاف أعلى من الثبات؛ حل الاحتكاك أوضح من استمرار نفس الإيقاع.', 'Conflict resilience leads stability; navigating friction is the clearer theme.'],
   ['الثبات أعلى من هدوء الخلاف؛ الالتزام الرمزي أقوى من القدرة على تجاوز الشد.', 'Stability leads conflict resilience; commitment is stronger than ease in disagreements.'],
   ['الثبات وهدوء الاختلاف قريبين؛ الحدود تتحدد بالكلام والفعل مو بالتنجيم.', 'Stability and conflict resilience are close; boundaries come from actions and discussion.']);break;
+ case 'intellectual':words=diff(d.communication,calm,
+  ['الحوار أقوى من سهولة تجاوز التوتر؛ وضوح الفكرة مهم لكن اختلاف الآراء يحتاج صبر.', 'Conversation outweighs conflict resilience; clear ideas still need patience with differences.'],
+  ['هدوء الاختلاف أعلى من سرعة التفاهم؛ ممكن يكون الاتفاق بطيئاً لكن النقاش أقل تصادماً.', 'Conflict resilience leads dialogue; agreement may take time while disagreement stays manageable.'],
+  ['التفاهم وتحمل الاختلاف متقاربين؛ اسأل عن الرأي الفعلي بدل افتراض تشابه الأفكار.', 'Dialogue and difference-tolerance are close; ask about real views rather than assuming agreement.']);break;
+ case 'emotionalNeeds':words=diff(d.emotional,d.stability,
+  ['الألفة أعلى من الثبات؛ ناقشوا شنو يعني الاهتمام المستمر بعيداً عن حرارة البداية.', 'Emotional affinity leads stability; discuss what sustained care looks like beyond the beginning.'],
+  ['الثبات أعلى من التعبير العاطفي؛ اسألوا عن وتيرة الاطمئنان والوقت المشترك.', 'Stability leads emotional expression; discuss reassurance and shared time.'],
+  ['الألفة والثبات متقاربين؛ اختلاف الحاجة للمساحة يُفهم بالسؤال مو بالنتيجة الرقمية.', 'Closeness and steadiness are similar; personal-space needs require conversation.']);break;
+ case 'conflictRepair':words=diff(calm,d.communication,
+  ['تجاوز الشد أسهل رمزياً من شرح المشكلة؛ ركزوا على تسمية سبب الخلاف بوضوح.', 'Repair looks stronger than communication; name the cause rather than only moving on.'],
+  ['الكلام أسهل من تهدئة التوتر؛ ضعوا قاعدة للراحة قبل العودة للنقاش.', 'Dialogue exceeds conflict resilience; agree on a cool-down before revisiting tension.'],
+  ['الكلام والإصلاح متقاربان؛ اختبروا أسلوب حل اختلاف صغير، مو احتمال غياب كل خلاف.', 'Dialogue and repair are close; observe how a small disagreement is actually resolved.']);break;
+ case 'closenessPace':words=diff(d.attraction,d.emotional,
+  ['الجاذبية أسرع من الألفة؛ لا تختصروا التعارف بكيمياء اللحظة.', 'Attraction leads emotional comfort; allow time for understanding beyond chemistry.'],
+  ['الألفة أعلى من الجاذبية؛ التقارب الهادئ قد يناسب أكثر من خطوات سريعة.', 'Emotional comfort exceeds attraction; a slower pace may fit better.'],
+  ['الجاذبية والألفة متقاربتان؛ الإيقاع الفعلي يحدده الطرفان بكلام واضح.', 'Attraction and comfort are close; real pacing is negotiated together.']);break;
+ case 'longTerm':words=diff(d.stability,calm,
+  ['الثبات أعلى من مرونة الخلاف؛ استقرار العادات ما يغني عن معالجة الخلافات.', 'Steadiness leads conflict resilience; stable habits do not replace working through friction.'],
+  ['مرونة الخلاف أعلى من الثبات؛ القدرة على الإصلاح مهمة لكنها لا تعني اتفاقاً على المستقبل.', 'Repair leads steadiness; resilience does not establish aligned long-term goals.'],
+  ['الثبات وإصلاح الخلاف متقاربان؛ مو دليل على عمر العلاقة أو استمرارها.', 'Stability and repair are close; neither predicts how long a relationship lasts.']);break;
+ case 'contactTiming':words=diff(today.communication,today.love,
+  ['التواصل اليوم يتقدم على الجو العاطفي؛ رسالة محددة أفضل من تلميح غامض.', 'Today dialogue leads romance; a clear message may fit better than vague hints.'],
+  ['الجو العاطفي أعلى من سهولة الحوار؛ خلّ تواصلك لطيفاً وبلا ضغط.', 'Romantic symbolism leads dialogue; keep contact gentle and low-pressure.'],
+  ['التواصل والعاطفة متقاربان بهالوقت؛ قراءة التوقيت ما تكشف استعداد الشخص للرد.', 'Dialogue and romance are similar at this time; no score reveals willingness to reply.']);break;
  case 'consistency':words=diff(d.stability,d.communication,
   ['الاستمرارية أعلى من التفاهم بالكلام؛ الثبات بالنموذج أوضح من سلاسة السوالف.', 'Stability exceeds communication; steadiness leads everyday conversational ease.'],
   ['التفاهم أعلى من الاستمرارية؛ سوالف مريحة ما تضمن علاقة ثابتة مع الوقت.', 'Communication exceeds stability; easy conversations do not guarantee consistency.'],

@@ -1,0 +1,33 @@
+/* Additive layout: preserves the existing Go Mode, Travel and People gauge skins. */
+#live-view-body .mx-go-life,
+#live-view-body .mx-travel-practical-section{margin-top:14px;min-width:0}
+#live-view-body .mx-go-life>.section-title,
+#live-view-body .mx-travel-practical-section>.section-title{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+#live-view-body .mx-go-life>.section-title h2,
+#live-view-body .mx-travel-practical-section>.section-title h2{font-size:clamp(15px,1.4vw,19px);margin:0}
+#live-view-body .mx-go-life>.section-title small,
+#live-view-body .mx-travel-practical-section>.section-title small{color:#abb8d2;font-size:11px;line-height:1.65}
+#live-view-body .mx-go-life-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;align-items:stretch}
+#live-view-body .mx-go-life-card{min-width:0;display:flex;flex-direction:column;gap:9px}
+#live-view-body .mx-go-life-card p{font-size:12px;line-height:1.7;margin:5px 0 0;color:#c2cbe0;overflow-wrap:anywhere}
+#live-view-body .mx-go-life-card .meter{margin-top:0}
+#live-view-body .mx-travel-practical-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#live-view-body .mx-travel-practical{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0}
+#live-view-body .mx-travel-practical>small{font-size:13px;font-weight:750;color:#e6e3f7}
+#live-view-body .mx-travel-practical>b{font-size:clamp(23px,3vw,28px);color:var(--metric-accent,#b6a6ed)}
+#live-view-body .mx-travel-practical>b em{font-size:12px;font-style:normal;margin-inline-start:3px;opacity:.75}
+#live-view-body .mx-travel-check-items{display:grid;gap:6px;margin-top:3px}
+#live-view-body .mx-travel-check-items label{display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px 7px;border-radius:9px;border:1px solid #8795bc29;background:#9298c108;font-size:12px;line-height:1.5;min-width:0}
+#live-view-body .mx-travel-check-items label input{accent-color:#75d5ad;flex:none;margin:2px 0 0;width:17px;height:17px;cursor:pointer}
+#live-view-body .mx-travel-check-items label span{overflow-wrap:anywhere}
+#live-view-body .mx-travel-check-count{font-size:11px;margin:0;color:#b6c2d9}
+#live-view-body .mx-travel-activity{justify-content:center;gap:12px}
+#live-view-body .mx-travel-activity strong{font-size:15px;color:#e9e8fa}
+#live-view-body .mx-travel-activity p{font-size:13px;color:#bdc9da;line-height:1.7;margin:0}
+@media(max-width:650px){
+ #live-view-body .mx-travel-practical-grid{grid-template-columns:minmax(0,1fr)}
+ #live-view-body .mx-go-life-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #live-view-body .mx-go-life-card{padding:12px!important}
+}
+@media(max-width:355px){#live-view-body .mx-go-life-grid{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){#live-view-body .mx-travel-practical .meter i{transition:none!important}}
