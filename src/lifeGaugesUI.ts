@@ -9,7 +9,7 @@ const escapeHTML=(value:string)=>value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'
 /** A separate group: the original 29 calculated indicators are unchanged. */
 export function renderGoLifeGauges(scores:Record<Category,number>):string{
  const gauges=goLifeGauges(scores);
- return '<section class="panel mx-go-life"><div class="section-title"><h2>'+t('قرارات الحياة اليومية','Daily decision lenses')+'</h2><small>'+t('قراءات فلكية رمزية، مو توقعات نجاح واقعية','Symbolic astrology, not measured outcome probabilities')+'</small></div>'+
+ return '<section class="panel mx-go-life"><div class="section-title"><h2>'+t('قرارات الحياة اليومية','Daily decision lenses')+'</h2></div>'+
   '<div class="metrics-grid mx-go-life-grid">'+gauges.map(m=>{
    const label=t(m.name.ar,m.name.en),advice=t(m.advice.ar,m.advice.en);
    return '<article class="metric-card mx-go-life-card '+gaugeLevel(m.value)+'" data-life-gauge="'+m.id+'">'+
