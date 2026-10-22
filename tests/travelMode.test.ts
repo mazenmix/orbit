@@ -48,7 +48,7 @@ test('Travel Mode does not replace all-29 Go Mode',()=>{
  assert.match(travel,/mx-focus-metrics mx-travel-grid/);
  assert.match(travel,/travelMetricsByGroup/);
  assert.match(travel,/group\.rows\.map/);
- assert.match(travel,/renderTravelPractical/);
+ assert.doesNotMatch(travel,/renderTravelPractical/,'Practical readiness must not appear in Travel Mode');
  assert.match(src,/aria-valuenow/);
  assert.match(go,/indicators\.map/);
  assert.match(go,/go\.map/);
