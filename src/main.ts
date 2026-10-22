@@ -521,28 +521,78 @@ function advancedPage(){
  }catch(e){return `<section class="panel"><h2>${t('الحساب المتقدم غير متاح لهذا الوقت','Advanced calculations unavailable at this date')}</h2><p class="alert">${esc(String(e))}</p></section>`}
 }
 function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:GoReview){
- const ar:Record<GoDomain,[string,string,string]>={
-  work:['حدد أصعب مهمة وأنجزها أولاً؛ خفف الاجتماعات الثانوية.','راجع الأولويات قبل توقيع التزام مهني جديد.','رتّب الملفات والمواعيد واترك القرار الكبير حتى تتضح معلوماته.'],
-  social:['ابدأ حديثاً خفيفاً مع شخص تعرفه وشوف إذا الحوار متبادل.','شارك بمناسبة صغيرة من دون توقع رد مثالي من الآخرين.','خلي اللقاءات قليلة ومريحة بدل الإرهاق الاجتماعي.'],
-  relationships:['إذا عندك تواصل متبادل، اختر دعوة واضحة ومحترمة.','تأكد من الرغبة المتبادلة قبل اقتراح موعد.','لا تفسر تأخر الرد كإشارة مؤكدة؛ حافظ على حدود الطرفين.'],
-  travel:['رتّب مشواراً بسيطاً مع وقت احتياطي وانتباه للطريق.','دقق المواعيد والحجوزات قبل أي تغيير بخطة التنقل.','لا تؤجل احتياطات السلامة؛ اختَر جدولاً أقل ضغطاً.']
+ // One actionable sentence plus one short, chart-dependent cue; never embed the full signalStory.
+ // Go scores are symbolic planning aids, not facts about future events or another person's feelings.
+ const actions:Record<GoDomain,Record<'go'|'check'|'hold',[string,string]>>={
+  work:{
+   go:['ابدأ بأهم مهمة وحدد نتيجة واضحة قبل الاجتماع الجاي.','Start the highest-priority task and define one deliverable.'],
+   check:['راجع الأولويات قبل قبول موعد أو مسؤولية جديدة.','Review priorities before taking on a new commitment.'],
+   hold:['خلّص الشغل المفتوح ولا تضيف التزام جديد هسه.','Close open work before taking on more.']
+  },
+  social:{
+   go:['بادر بتواصل بسيط، وخلّي التفاعل المتبادل هو المقياس.','Reach out simply, and look for mutual engagement.'],
+   check:['اختَر شخص واحد للتواصل، بدون ضغط أو توقعات.','Connect with one person without pressure or assumptions.'],
+   hold:['خفّف اللقاءات واختَر تواصل مريح وغير مرهق.','Keep social plans light and comfortable.']
+  },
+  relationships:{
+   go:['إذا الاهتمام متبادل، اقترح موعد واضح وبسيط.','If interest is mutual, suggest a simple specific date.'],
+   check:['عبّر عن اهتمامك بوضوح، وراقب الرد الفعلي.','Express interest clearly and notice the actual response.'],
+   hold:['لا تفسّر الصمت أو تأخر الرد كدليل على المشاعر.','Do not assume feelings from silence or a delayed reply.']
+  },
+  travel:{
+   go:['رتّب مشوارك بعد تأكيد الموعد والعنوان.','Confirm the time and destination before setting off.'],
+   check:['راجع الحجز والتكاليف وشروط التغيير قبل الدفع.','Verify reservations, costs and change terms before paying.'],
+   hold:['لا تغيّر حجوزات مهمة بسبب مؤشر رمزي؛ دقّق التفاصيل.','Do not change major reservations based on a symbolic score.']
+  }
  };
- const en:Record<GoDomain,[string,string,string]>={
-  work:['Prioritize one demanding task and protect time for it.','Review commitments before accepting another deadline.','Organize the essentials before making a major work commitment.'],
-  social:['Start a light conversation and notice whether the exchange is mutual.','Choose a low-pressure meeting without assuming how others will respond.','Choose quieter social plans when you need more room to recharge.'],
-  relationships:['Where interest is mutual, suggest a clear, respectful invitation.','Check reciprocal interest before proposing a date.','A slow response proves nothing; respect both people’s boundaries.'],
-  travel:['Plan a manageable outing with extra time for delays.','Confirm departure times and reservations before changing plans.','Keep practical safety checks first and reduce schedule pressure.']
+ const limits:Record<GoDomain,{none:[string,string];missing:[string,string];sensitive:[string,string];mixed:[string,string]}>={
+  work:{none:['ماكو دليل محسوب كافي لتقييم العمل هسه.','Not enough calculated evidence for work.'],missing:['بعض معطيات العمل ناقصة؛ لا تحسم عليها.','Some work evidence is missing; avoid firm conclusions.'],sensitive:['الترجيح مو ثابت؛ خلّ القرار قابل للتعديل.','The balance is fragile; keep decisions reversible.'],mixed:['المؤشرات متعارضة؛ جرّب خطوة صغيرة وقِس نتيجتها.','Signals conflict; test one small step.']},
+  social:{none:['ماكو دليل محسوب كافي للتواصل الاجتماعي هسه.','Not enough calculated evidence for social plans.'],missing:['قراءة التواصل ناقصة؛ اعتمد على الرد الحقيقي.','Social evidence is incomplete; rely on real responses.'],sensitive:['الترجيح حساس؛ لا تبني توقع على رقم واحد.','The balance is sensitive; avoid single-score assumptions.'],mixed:['أكو عوامل متعارضة؛ خلي المبادرة خفيفة.','Signals are mixed; keep the invitation low pressure.']},
+  relationships:{none:['ماكو دليل محسوب كافي لقراءة العلاقات هسه.','Not enough calculated evidence for relationships.'],missing:['القراءة ناقصة؛ مشاعر الطرف الثاني ما تنقاس هنا.','Evidence is incomplete; this cannot measure feelings.'],sensitive:['الترجيح غير مستقر؛ خلّي التواصل هو الفيصل.','The balance is unstable; direct communication matters.'],mixed:['العوامل متعارضة؛ لا تفترض انجذاب أو رفض.','Signals conflict; assume neither interest nor rejection.']},
+  travel:{none:['ماكو دليل محسوب كافي لتوقيت السفر هسه.','Not enough calculated evidence for travel timing.'],missing:['بعض معطيات السفر ناقصة؛ اعتمد على الحجوزات.','Evidence is incomplete; rely on reservation details.'],sensitive:['الترجيح مو ثابت؛ حضّر خطة بديلة.','The balance is unstable; keep a backup plan.'],mixed:['العوامل متعارضة؛ خلّي خطتك مرنة.','Signals conflict; keep the itinerary flexible.']}
  };
- const i=state==='go'?0:state==='check'?1:2,lead=t(ar[domain][i],en[domain][i]);
- const top=memo.strongest;
- if(!top)return t('ماكو عوامل محسوبة كافية لمصادر هذا المؤشر؛ ما نطلع توصية من المتوسط الافتراضي.','The source categories lack calculated evidence; default averages do not justify a recommendation.');
- const factors=memo.supportFactor&&memo.challengeFactor?[memo.supportFactor,memo.challengeFactor]:[top];
- const basis=''; // Exact contacts are available in the calculation-evidence section, never in this decision summary.
- const limit=!memo.complete?t(' بعض مصادر المؤشر غير متاحة.',' Some source categories lack evidence.'):memo.sensitive?t(' الترجيح حساس لاستبعاد جرم واحد.',' The balance is sensitive to removing one transiting body.'):'';
- const story=signalStory({category:evidenceCategory(top),score:50,tier:'C',tone:'neutral',factors:[top]},data?.natal,active.known,lang);
- // The Go card first explains the actual factor in human terms. Mathematical proof remains visible,
- // but a derived index alone must never be mistaken for measured success or another person's desire.
- return lead+' '+(story?story.good+' '+story.action+' ':'')+limit;
+ const pick=(pair:[string,string])=>t(pair[0],pair[1]);
+ if(!memo.strongest)return pick(limits[domain].none);
+ const first=pick(actions[domain][state]);
+ if(!memo.complete)return first+' '+pick(limits[domain].missing);
+ if(memo.sensitive)return first+' '+pick(limits[domain].sensitive);
+ if(memo.mixed)return first+' '+pick(limits[domain].mixed);
+ const cues:Record<GoDomain,Record<string,[string,string]>>={
+  work:{
+   Mercury:['دقّق المراسلات والتعليمات.','Double-check messages and instructions.'],
+   Saturn:['ثبّت المسؤولية والموعد كتابةً.','Confirm ownership and deadline in writing.'],
+   Mars:['لا تستعجل قبل تدقيق التفاصيل.','Check details before acting fast.'],
+   Jupiter:['لا توعد بأكثر من وقتك.','Avoid overpromising.'],
+   Neptune:['اطلب توضيحاً للمعلومات المبهمة.','Clarify ambiguous details.'],
+   default:['حدّد المطلوب ومنو مسؤول عنه.','Define the next deliverable and owner.']
+  },
+  social:{
+   Mercury:['اسأل سؤال واضح واستمع للجواب.','Ask clearly and listen to the reply.'],
+   Venus:['الود المباشر أنفع من التلميحات.','A kind direct approach beats hints.'],
+   Mars:['لا تحوّل اختلاف بسيط إلى جدال.','Avoid turning a small difference into an argument.'],
+   Saturn:['احترم وقت وحدود الآخرين.','Respect other people’s time and boundaries.'],
+   Jupiter:['نوعية اللقاء أهم من عدد المعارف.','Connection quality beats contact quantity.'],
+   default:['شوف إذا الطرف الثاني يبادر هم.','Notice whether they reciprocate.']
+  },
+  relationships:{
+   Venus:['عبّر عن تقدير محدد بدون اختبار مشاعر.','Show specific appreciation without testing feelings.'],
+   Mercury:['اسأل عن النية بدل تفسير التلميحات.','Ask rather than decode ambiguous hints.'],
+   Mars:['هدّئ الاندفاع قبل طرح موضوع حساس.','Slow down before a sensitive conversation.'],
+   Saturn:['احترم المساحة والحدود المتبادلة.','Respect mutual space and boundaries.'],
+   Neptune:['افصل الواقع عن توقعاتك.','Separate facts from expectations.'],
+   default:['قيّم الاهتمام من الأفعال، مو التخمين.','Judge interest by actions, not guesses.']
+  },
+  travel:{
+   Mercury:['تأكد من التذاكر والعناوين.','Verify tickets and addresses.'],
+   Saturn:['اترك وقت احتياطي للتأخير.','Allow a buffer for delays.'],
+   Jupiter:['راجع الميزانية قبل أي إضافة.','Review budget before upgrading plans.'],
+   Mars:['انتبه للتنقلات المستعجلة.','Avoid rushed transfers.'],
+   Uranus:['جهّز خيار بديل للمشوار.','Keep an alternate route ready.'],
+   default:['أكد المواعيد قبل التحرك.','Check timings before leaving.']
+  }
+ };
+ // The additional cue varies with the actual strongest calculated transit.
+ return first+' '+pick(cues[domain][memo.strongest.transit.id]??cues[domain].default);
 }
 /** Compact Go Mode indicator gauge: label, score and progress bar only. */
 function indicatorGaugeCard(m:MetricResult,travelId?:string){
