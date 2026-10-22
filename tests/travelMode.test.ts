@@ -40,7 +40,7 @@ test('Travel Mode is a main navigation option immediately below Go Mode, not a s
  assert.match(src,/function travelModePage\(\)/);
  assert.match(src,/data-section="travelmode"/);
  assert.ok(!src.includes("card('travelmode'"));
- assert.ok(src.includes('travelMetricsByGroup(derivedMetrics(data!.scores))'));
+ assert.ok(src.includes('const calculated=derivedMetrics(data!.scores),groups=travelMetricsByGroup(calculated)'));
 });
 test('Travel Mode does not replace all-29 Go Mode',()=>{
  const travel=src.slice(src.indexOf('function travelModePage(){'),src.indexOf('function asteroidsPage(){'));
@@ -48,6 +48,7 @@ test('Travel Mode does not replace all-29 Go Mode',()=>{
  assert.match(travel,/mx-focus-metrics mx-travel-grid/);
  assert.match(travel,/travelMetricsByGroup/);
  assert.match(travel,/group\.rows\.map/);
+ assert.match(travel,/renderTravelPractical/);
  assert.match(src,/aria-valuenow/);
  assert.match(go,/indicators\.map/);
  assert.match(go,/go\.map/);
