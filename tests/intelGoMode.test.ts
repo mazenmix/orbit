@@ -73,3 +73,18 @@ test('Today replaces its top gauges with a professional current-sky wheel in bot
  assert.match(css,/\.mx-today-sky-layout/);
  assert.ok(!classic.includes('sky-card'),'Avoid duplicate sky wheels on Today');
 });
+
+
+test('Go Mode recommendations stay compact and use actual chart evidence',()=>{
+ const start=main.indexOf('function mxGoNarrative(');
+ const end=main.indexOf('/** Compact Go Mode indicator gauge',start);
+ const narrative=main.slice(start,end);
+ assert.ok(start>=0&&end>start);
+ assert.doesNotMatch(narrative,/signalStory\(/,'Do not duplicate the long transit story inside every Go card');
+ assert.doesNotMatch(narrative,/story\.good|story\.action/,'Never concatenate verbose story paragraphs');
+ assert.match(narrative,/memo\.strongest\.transit\.id/,'Cue must come from strongest computed transit');
+ assert.match(narrative,/memo\.complete/,'Missing evidence must be disclosed');
+ assert.match(narrative,/memo\.sensitive/,'Sensitive scores must be qualified');
+ assert.match(narrative,/memo\.mixed/,'Conflicting evidence must be qualified');
+ for(const domain of ['work','social','relationships','travel'])assert.ok(narrative.includes(domain+':{'),domain);
+});
