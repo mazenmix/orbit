@@ -542,8 +542,7 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:GoReview){
  // but a derived index alone must never be mistaken for measured success or another person's desire.
  return lead+' '+(story?story.good+' '+story.action+' ':'')+limit;
 }
-/** Shared gauge markup for both Go Mode and Travel Mode; colors, spacing
- * and optional calculation details must remain identical by construction. */
+/** Compact Go Mode indicator gauge: label, score and progress bar only. */
 function indicatorGaugeCard(m:MetricResult,travelId?:string){
  const label=t(m.ar,m.en);
  return '<div class="metric-card '+(travelId?'mx-travel-metric ':'')+gaugeLevel(m.value)+'" data-indicator-id="'+m.id+'"'+
@@ -551,7 +550,6 @@ function indicatorGaugeCard(m:MetricResult,travelId?:string){
   '<small>'+label+'</small>'+
   '<b>'+m.value+'<em>/100</em></b>'+
   '<div class="meter" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+m.value+'"><i style="width:'+m.value+'%"></i></div>'+
-  '<details><summary>'+t('طريقة الحساب','Derivation')+'</summary><code>'+esc(m.formula)+'</code></details>'+
   '</div>';
 }
 function goModePage(){
