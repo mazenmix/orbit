@@ -2,6 +2,23 @@ import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 async function files(root){const out=[];for(const e of await fs.readdir(root,{withFileTypes:true})){const p=root+'/'+e.name;if(e.isDirectory())out.push(...await files(p));else out.push(p)}return out}
 const paths=(await files('dist')).filter(p=>!p.endsWith('/_headers')&&!p.endsWith('/sw.js'));
+// Fail the deployment rather than accidentally serving first-party source maps,
+// TypeScript/JSX sources or the development entry point.
+// The Swiss Ephemeris vendor tree retains its own licensing/source obligations.
+const leaked=paths.filter(p=>
+ (p.startsWith('dist/src/') ||
+  /\.(?:map|ts|tsx|jsx)$/i.test(p) ||
+  /\/(?:\.env(?:\..*)?|\.dev\.vars|vite\.config\.[cm]?[jt]s)$/i.test(p)) &&
+ !p.startsWith('dist/vendor/swiss/')
+);
+if(leaked.length)throw new Error('Unexpected development/source files in production: '+leaked.join(', '));
+const html=await fs.readFile('dist/index.html','utf8');
+if(/(?:src|href)=["']\/src\//.test(html))throw new Error('Uncompiled development entry point leaked to production HTML');
+for(const p of paths.filter(p=>/\.(?:js|css)$/i.test(p)&&!p.startsWith('dist/vendor/swiss/'))){
+ const body=await fs.readFile(p,'utf8');
+ if(/(?:\/\/[#@]|\/\*#)\s*sourceMappingURL\s*=/.test(body))
+  throw new Error('Source mapping directive leaked to production: '+p);
+}
 const version=crypto.createHash('sha256');for(const p of paths)version.update(await fs.readFile(p));
 const urls=['/',...paths.map(p=>'/'+p.slice(5))];
 await fs.writeFile('dist/sw.js',`const CACHE='mx-astro-${version.digest('hex').slice(0,12)}';const FILES=${JSON.stringify(urls)};
