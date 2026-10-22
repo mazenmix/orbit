@@ -7,7 +7,7 @@ test('professional SVG icons have genuine paths, not decorative emoji placeholde
  assert.match(soulIcon('crown'),/<path/);
 });
 
-test('complete interactive page outputs 25 clickable SVG category cards and all eight topic actions',async()=>{
+test('complete natal page outputs 25 clickable SVG categories and eight topic actions without removed cards',async()=>{
  const {soulRender}=await import('../src/soulUI.ts');
  const date=new Date('1985-03-29T16:20:00Z');
  const points=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Chiron','Ceres','Pallas','Juno','Vesta','Pholus'].map((id,i)=>({id,longitude:(i*25+15)%360,speed:1,symbol:'●'}));
@@ -18,7 +18,9 @@ test('complete interactive page outputs 25 clickable SVG category cards and all 
  assert.ok(!html.includes('MX SOUL DNA'));
  assert.equal((html.match(/class="soul-category /g)||[]).length,25);
  assert.equal((html.match(/data-soul-topic="/g)||[]).length,10); // 8 navigation + prev/next
- assert.ok(html.includes('data-soul-save="1"'));
+ assert.ok(!html.includes('data-soul-save='));
+ assert.ok(!html.includes('soul-ai-section')&&!html.includes('soul-discovery'));
+ assert.ok(html.includes('soul-detail-grid')&&html.includes('soul-evidence'));
  assert.ok(!html.includes('soul-head.svg'));
  assert.ok(html.includes('شخصيتك الحقيقية')&&html.includes('نقاط القوة'));
 });
@@ -46,16 +48,18 @@ test('summary appears once and calculation provenance remains visible in the evi
  assert.ok(html.includes('Placidus')&&html.includes('Swiss Ephemeris'));
  assert.match(html,/class="soul-detail-box deep"><h4>.*?<\/h4><p>[\s\S]*?<\/p><p>/);
  const fallback=soulRender({profile:defaultProfile,chart,categoryId:9,topicId:67,query:'',ai:{summary:'REJECTED MODEL SUMMARY',detailedAnalysis:'REJECTED MODEL DETAIL',strengths:['REPEATED RESOURCE'],challenges:['REPEATED CHALLENGE'],practicalInsights:['REPEATED ACTION'],reflectionQuestions:['REPEATED QUESTION'],quality:'verified-editorial-fallback'}});
- assert.ok(fallback.includes('soul-ai-grounding-note'));
+ assert.ok(!fallback.includes('soul-ai-grounding-note'));
+ assert.ok(!fallback.includes('soul-ai-section')&&!fallback.includes('soul-discovery'));
  assert.ok(!fallback.includes('REJECTED MODEL')&&!fallback.includes('REPEATED ACTION'));
  assert.equal(fallback.split(encoded).length-1,1);
 });
-test('insufficient natal evidence disables inference and hides traits, examples and stale Ai text',async()=>{
+test('insufficient natal evidence hides unsupported interpretations and removed AI widgets',async()=>{
  const {soulRender}=await import('../src/soulUI.ts');
  const {defaultProfile}=await import('../src/engine.ts');
  const chart={date:new Date('2000-01-01T12:00:00Z'),points:[planet('Sun',280),planet('Moon',NaN)],asc:null,mc:null,cusps:[],missing:[]};
  const html=soulRender({profile:{...defaultProfile,known:false},chart,categoryId:1,topicId:1,query:'',ai:{summary:'STALE CLAIM',detailedAnalysis:'STALE DETAIL',strengths:['STALE TRAIT'],challenges:[],practicalInsights:[],reflectionQuestions:[]}});
- assert.match(html,/id="soul-ai" disabled/);
+ assert.ok(!html.includes('id="soul-ai"'));
+ assert.ok(!html.includes('soul-ai-section')&&!html.includes('soul-discovery'));
  assert.ok(html.includes('البيانات غير كافية'));
  for(const css of ['strengths','weaknesses','example'])assert.ok(!html.includes('class="soul-detail-box '+css+'"'));
  assert.ok(!html.includes('STALE')&&!html.includes('NaN°')&&!html.includes('undefined'));
