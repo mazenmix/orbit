@@ -28,6 +28,9 @@ test('main navigation exposes standalone Go Mode after People and preserves prof
  assert.ok(main.includes("localStorage.setItem('mx.uiMode',uiMode)"));
  assert.match(main,/nav\(primaryRoutes\)/);
  assert.match(main,/nav\(primaryRoutes,true\)/);
+ assert.ok(main.includes('nav-subitem'),'Moon Timing must be visible as a child of Today');
+ assert.ok(main.includes("!mobile&&n==='today'"),'Moon child must not add a primary mobile route');
+ assert.ok(main.includes('data-go="lunar" class="nav-item nav-subitem'));
  assert.ok(!main.includes("nav(['today','signals','people','chart'])"));
  assert.ok(!main.includes("nav(['time','lunar','eclipses','asteroids','advanced','intel','evidence','ai','settings'])"));
 });
