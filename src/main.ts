@@ -201,7 +201,15 @@ function sectionTabs(){
   '<button type="button" class="mx-section-tab '+(screen===route?'is-current':'')+'" data-go="'+route+'" '+(screen===route?'aria-current="page"':'')+'><span class="mx-tab-icon" aria-hidden="true">'+icon(route)+'</span>'+labels[route]()+'</button>'
  ).join('')+'</nav>';
 }
-function nav(names:string[],mobile=false){return `<nav class="${mobile?'mobile-nav':'nav'}" aria-label="${t('التنقل الرئيسي','Main navigation')}">${names.map(n=>{const active=primaryRoutes.includes(n)?primarySection(screen)===n:screen===n;return `<button data-go="${n}" class="nav-item ${active?'active':''}" ${active?'aria-current="page"':''}><span>${icon(n)}</span><b>${labels[n]()}</b></button>`}).join('')}</nav>`}
+function nav(names:string[],mobile=false){return `<nav class="${mobile?'mobile-nav':'nav'}" aria-label="${t('التنقل الرئيسي','Main navigation')}">${names.map(n=>{
+ const active=primaryRoutes.includes(n)?primarySection(screen)===n:screen===n;
+ const parentState=active?(n==='today'&&screen==='lunar'?'aria-current="true"':'aria-current="page"'):'';
+ const main=`<button data-go="${n}" class="nav-item ${active?'active':''}" ${parentState}><span>${icon(n)}</span><b>${labels[n]()}</b></button>`;
+ const child=!mobile&&n==='today'
+  ?`<button type="button" data-go="lunar" class="nav-item nav-subitem ${screen==='lunar'?'active':''}" ${screen==='lunar'?'aria-current="page"':''}><span>${icon('lunar')}</span><b>${labels.lunar()}</b></button>`
+  :'';
+ return main+child;
+ }).join('')}</nav>`}
 function demoNotice(){
  if(!(active.id==='demo'&&active.name==='Demo'&&active.city==='Greenwich'&&active.date==='2000-01-01'))return '';
  return `<section class="demo-notice" role="note"><div><strong>${t('هذه خارطة تجربة، مو خارطتك الشخصية.','This is a demo chart, not your personal reading.')}</strong><p>${t('القراءة هسّه محسوبة لبيانات Greenwich التجريبية. أدخل بيانات ميلادك الحقيقية حتى تطلع حساباتك إنت؛ بياناتك تبقى بهذا المتصفح.','The current reading uses the Greenwich sample profile. Enter your birth details for your own calculation; your details stay in this browser.')}</p></div><button class="secondary" data-go="settings">${t('ضبط بيانات ميلادي','Set up my chart')} ↗</button></section>`;
