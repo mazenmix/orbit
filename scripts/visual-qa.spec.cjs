@@ -505,7 +505,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
 // Actual browser checks, not just DOM-string assertions. Runs on Chromium and
 // WebKit (Safari engine) at desktop, tablet and iPhone-sized viewports.
 for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['iphone',390,844]]){
- test(device+' compact Today Moon and VOC green gauges with a genuinely refreshing enlarged sky wheel',async({browser})=>{
+ test(device+' compact Today Moon/VOC gauges match live VOC phase and refresh enlarged sky wheel',async({browser})=>{
   const context=await browser.newContext({
    viewport:{width,height},deviceScaleFactor:1,
    isMobile:device==='iphone',hasTouch:device==='iphone'
@@ -521,11 +521,16 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   expect(panel.width,'Today sky should be a compact panel').toBeLessThanOrEqual(500);
   const progress=page.locator('.mx-focus-moon progress');
   await expect(progress).toHaveCount(2);
-  const green=await page.locator('.mx-focus-moon article').first().evaluate(el=>{
-   const color=getComputedStyle(el).backgroundImage;
-   return color.includes('linear-gradient')&&color.includes('19, 100, 76');
+  const theme=await page.locator('.mx-focus-lunar-status').evaluate(card=>{
+   const active=card.classList.contains('is-voc');
+   const start=Number(card.getAttribute('data-voc-start'));
+   const end=Number(card.getAttribute('data-voc-end'));
+   const bg=getComputedStyle(card.querySelector('.mx-focus-moon article')).backgroundImage;
+   return {active,expected:Date.now()>=start&&Date.now()<end,
+    correctColor:active?bg.includes('117, 42, 72'):bg.includes('19, 100, 76')};
   });
-  expect(green,'The moon and VOC panels use emerald backgrounds').toBe(true);
+  expect(theme.active,'VOC card follows the calculated Moon phase').toBe(theme.expected);
+  expect(theme.correctColor,'Moon progress cards must be crimson only during VOC').toBe(true);
   await expect.poll(()=>wheel.getAttribute('data-sky-calculated-at'),{timeout:16000}).not.toBeNull();
   const first=await wheel.getAttribute('data-sky-calculated-at');
   await expect.poll(()=>wheel.getAttribute('data-sky-calculated-at'),{timeout:16000}).not.toBe(first);
