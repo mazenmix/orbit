@@ -49,7 +49,7 @@ import {soulCategories,soulTopics} from './soulData.ts';
 import {relationshipWindows,bestWindows} from './relationshipWindows.ts';
 import {relationshipDayReading} from './relationshipDayNarrative.ts';
 import {lunarWindow,type LunarWindow} from './timing.ts';
-import {vocPhase,vocRemaining,remainingPercent} from './liveVoc.ts';
+import {vocPhase,vocColorState,vocRemaining,remainingPercent} from './liveVoc.ts';
 import {calendarEvent,calendarDownload} from './calendar.ts';
 import {encryptBackup,decryptBackup} from './secureBackup.ts';
 import {isVaultConfigured,vaultOpened,setupVault,flushVault,vaultPending,unlockVaultWithUI} from './vault.ts';
@@ -276,8 +276,10 @@ function focusedToday(){
  const time=(at:Date)=>dateText(at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
  let moon='<p class="mx-focus-note">'+t('توقيت القمر غير متاح حالياً.','Moon calculation unavailable.')+'</p>';
  let futureEvents:FocusEvent[]=[];
+ let moonIsVoid=false,moonVocStart=NaN,moonVocEnd=NaN;
  try{
   const w=moonWindow(),now=+selected;
+  moonIsVoid=w.isVoid;moonVocStart=+w.vocStartsAt;moonVocEnd=+w.ingressAt;
   const percent=(from:Date,to:Date)=>Math.max(0,Math.min(100,Math.round(100*(+to-now)/Math.max(1,+to-(+from)))));
   const vocEnd=w.isVoid?w.ingressAt:w.vocStartsAt,vocStart=w.isVoid?w.vocStartsAt:w.enteredAt;
   moon='<div class="mx-focus-moon"><article><small>☾ '+t('القمر الآن','Current Moon')+'</small><strong>'+signName(w.sign*30)+'</strong><small>'+t('الانتقال القادم','Next ingress')+'</small><time datetime="'+w.ingressAt.toISOString()+'">'+time(w.ingressAt)+'</time><progress max="100" value="'+percent(w.enteredAt,w.ingressAt)+'"></progress></article>'+
@@ -299,7 +301,7 @@ function focusedToday(){
  '<section class="panel mx-focus-hero"><div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('شنو الأهم إلك هسه؟','YOUR MAIN FOCUS')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'): 'LIVE')+'</span></div><h2>'+esc(reading?.title??t('ماكو اتصال مهيمن الآن','No dominant aspect at this moment'))+'</h2><p>'+esc(reading?.good??t('ماكو اتصال فلكي قوي يدعم قراءة شخصية بهذه اللحظة.','No strong astrological contact supports a personal reading at this moment.'))+'</p>'+(reading?'<p class="mx-focus-story-example">'+esc(reading.careful)+'</p><p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(reading.action)+'</p>':'')+(quality?'<p class="mx-focus-quality">'+quality+'</p>':'')+'<details class="mx-focus-technical"><summary>'+t('أساس الحساب (اختياري)','Calculation basis (optional)')+'</summary><p>'+esc(evidence)+'</p><small>'+dateText(selected,{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+(phase?' · '+phase:'')+'</small></details>'+
  '<div class="mx-focus-actions"><button class="primary" data-go="evidence">'+t('ليش هاي القراءة؟','Why this reading?')+' ↗</button>'+(factor?'<button class="secondary" id="focus-refine-peak">'+t('احسب وقت الذروة','Verify exact peak')+' ⏱</button>':'')+'</div><div class="mx-focus-peak" id="focus-peak-result" aria-live="polite"></div></section>'+
  '<section class="panel mx-focus-panel mx-focus-ai"><h2>✧ MX Ai · '+t('قراءة قصيرة','Short explanation')+'</h2><p>'+aiSnippet+'</p><button class="secondary mx-focus-subaction" data-go="ai">'+t('تحليل Ai','Ai analysis')+' ↗</button></section></div>'+
- '<aside class="mx-focus-aside"><section class="panel mx-focus-panel"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+'<p class="mx-moon-personal-summary">'+esc(moonPersonalSummary(r,active.known,lang))+'</p><button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
+ '<aside class="mx-focus-aside"><section class="panel mx-focus-panel mx-focus-lunar-status '+(moonIsVoid?'is-voc':'is-clear')+'" data-voc-start="'+moonVocStart+'" data-voc-end="'+moonVocEnd+'"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+'<p class="mx-moon-personal-summary">'+esc(moonPersonalSummary(r,active.known,lang))+'</p><button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
  '<section class="panel mx-focus-panel"><h2>'+t('أقرب 3 أحداث فلكية دقيقة','Next 3 exact sky events')+'</h2><div id="focus-events">'+eventMarkup+'</div><small class="mx-focus-note">'+t('اتصالات شخصية وقمرية محسوبة؛ ما نعرض تواريخ مستقبلية بلا تحقق.','Verified natal-transit and lunar events only; never inferred event dates.')+'</small><button class="secondary mx-focus-subaction" data-go="calendar">'+t('فتح التقويم','Open calendar')+' ↗</button></section></aside></div>';
 }
 
@@ -906,9 +908,9 @@ function lunarUiIcon(type:'moon'|'void'|'entered'|'next'|'voc-start'|'voc-end'){
 }
 
 /** Ring data is derived exclusively from computed Moon timing boundaries. */
-function lunarGaugeMarkup(kind:'moon'|'voc',start:Date,end:Date,signStart:Date=start){
+function lunarGaugeMarkup(kind:'moon'|'voc',start:Date,end:Date,signStart:Date=start,vocStart:Date=start){
  const label=kind==='moon'?t('المتبقي حتى البرج القادم','Until next sign'):t('المتبقي حتى بداية خلو المسار','Until VOC begins');
- return '<div class="mx-lunar-gauge" data-lunar-gauge="'+kind+'" data-gauge-start="'+(+start)+'" data-gauge-end="'+(+end)+'" data-gauge-sign-start="'+(+signStart)+'">'+
+ return '<div class="mx-lunar-gauge '+vocColorState(+vocStart,+end,+selected)+'" data-gauge-voc-start="'+(+vocStart)+'" data-lunar-gauge="'+kind+'" data-gauge-start="'+(+start)+'" data-gauge-end="'+(+end)+'" data-gauge-sign-start="'+(+signStart)+'">'+
   '<div class="mx-lunar-gauge-ring" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">'+
   '<svg viewBox="0 0 76 76" aria-hidden="true" focusable="false"><circle class="mx-lunar-gauge-track" cx="38" cy="38" r="30"/><circle class="mx-lunar-gauge-progress" cx="38" cy="38" r="30"/></svg><strong data-gauge-percent>—</strong></div>'+
   '<div class="mx-lunar-gauge-copy"><span data-gauge-label>'+label+'</span><strong data-gauge-time>—</strong></div></div>';
@@ -940,8 +942,8 @@ function lunarPage(){
   const date=(at:Date)=>dateText(at,{weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
   const tile=(label:string,at:Date,cls:string,symbol:'entered'|'next'|'voc-start'|'voc-end')=>'<div class="premium-time-tile '+cls+'"><div class="time-tile-top"><span class="mx-lunar-tile-icon">'+lunarUiIcon(symbol)+'</span><small>'+label+'</small></div><time datetime="'+at.toISOString()+'">'+date(at)+'</time><span class="time-tile-zone">'+esc(timezoneCityLabel(active.zone))+'</span></div>';
   const lastLabel=last?moonAspectNarrative(last):t('ماكو موضوع إضافي مهيمن بهالفترة.','No additional dominant theme in this interval.');
-  return '<div class="lunar-premium-grid"><section class="panel lunar-premium-card"><div class="lunar-card-heading"><span class="lunar-emblem" aria-hidden="true">'+lunarUiIcon('moon')+'</span><div><small>'+t('موقع القمر الحالي · بث حي','CURRENT MOON SIGN · LIVE')+'</small><h2>'+signName(w.sign*30)+'</h2></div></div>'+lunarGaugeMarkup('moon',w.enteredAt,w.ingressAt)+'<div class="mx-moon-sign-reading" id="mx-moon-sign-reading" data-moon-sign="'+w.sign+'">'+moonSignLiveHtml(w.sign,data!)+'</div><div class="premium-time-pair">'+tile(t('دخل البرج الحالي','Entered current sign'),w.enteredAt,'lunar-muted','entered')+tile(t('يدخل البرج القادم','Next sign ingress'),w.ingressAt,'lunar-teal','next')+'</div></section>'+
-   '<section class="panel lunar-premium-card mx-voc-status '+(w.isVoid?'is-voc':'is-clear')+'" data-voc-start="'+(+w.vocStartsAt)+'" data-voc-end="'+(+w.ingressAt)+'"><div class="lunar-card-heading"><span class="lunar-emblem violet" aria-hidden="true">'+lunarUiIcon('void')+'</span><div><small>VOID OF COURSE</small><h2>'+ (w.isVoid?t('القمر خالي المسار الآن','Moon is void-of-course'):t('القمر ماشي عدل','Moon is on course'))+'</h2></div><span class="lunar-state">'+(w.isVoid?t('فعّال','Active'):t('غير فعّال','Not active'))+'</span></div><div class="mx-lunar-live-row"><span class="mx-lunar-live-indicator"><i></i>'+(liveTimePinned?t('وقت مختار','SELECTED TIME'):'LIVE')+'</span><span class="mx-lunar-countdown" data-voc-countdown></span></div>'+lunarGaugeMarkup('voc',w.vocStartsAt,w.ingressAt,w.enteredAt)+'<p>'+t('إذا عندك قرار مهم، راجع ظروفه ومعلوماته الفعلية. التوقيت يساعدك ترتب، مو يقرر عنك.','For important decisions, check the actual facts first. Timing helps with planning, not predicting results.')+'</p><div class="premium-time-pair">'+tile(t('بداية خلو المسار','VOC begins'),w.vocStartsAt,'lunar-violet','voc-start')+tile(t('نهاية خلو المسار','VOC ends'),w.ingressAt,'lunar-gold','voc-end')+'</div></section></div>'+lunarMansionMarkup()+
+  return '<div class="lunar-premium-grid"><section class="panel lunar-premium-card"><div class="lunar-card-heading"><span class="lunar-emblem" aria-hidden="true">'+lunarUiIcon('moon')+'</span><div><small>'+t('موقع القمر الحالي · بث حي','CURRENT MOON SIGN · LIVE')+'</small><h2>'+signName(w.sign*30)+'</h2></div></div>'+lunarGaugeMarkup('moon',w.enteredAt,w.ingressAt,w.enteredAt,w.vocStartsAt)+'<div class="mx-moon-sign-reading" id="mx-moon-sign-reading" data-moon-sign="'+w.sign+'">'+moonSignLiveHtml(w.sign,data!)+'</div><div class="premium-time-pair">'+tile(t('دخل البرج الحالي','Entered current sign'),w.enteredAt,'lunar-muted','entered')+tile(t('يدخل البرج القادم','Next sign ingress'),w.ingressAt,'lunar-teal','next')+'</div></section>'+
+   '<section class="panel lunar-premium-card mx-voc-status '+(w.isVoid?'is-voc':'is-clear')+'" data-voc-start="'+(+w.vocStartsAt)+'" data-voc-end="'+(+w.ingressAt)+'"><div class="lunar-card-heading"><span class="lunar-emblem violet" aria-hidden="true">'+lunarUiIcon('void')+'</span><div><small>VOID OF COURSE</small><h2>'+ (w.isVoid?t('القمر خالي المسار الآن','Moon is void-of-course'):t('القمر ماشي عدل','Moon is on course'))+'</h2></div><span class="lunar-state">'+(w.isVoid?t('فعّال','Active'):t('غير فعّال','Not active'))+'</span></div><div class="mx-lunar-live-row"><span class="mx-lunar-live-indicator"><i></i>'+(liveTimePinned?t('وقت مختار','SELECTED TIME'):'LIVE')+'</span><span class="mx-lunar-countdown" data-voc-countdown></span></div>'+lunarGaugeMarkup('voc',w.vocStartsAt,w.ingressAt,w.enteredAt,w.vocStartsAt)+'<p>'+t('إذا عندك قرار مهم، راجع ظروفه ومعلوماته الفعلية. التوقيت يساعدك ترتب، مو يقرر عنك.','For important decisions, check the actual facts first. Timing helps with planning, not predicting results.')+'</p><div class="premium-time-pair">'+tile(t('بداية خلو المسار','VOC begins'),w.vocStartsAt,'lunar-violet','voc-start')+tile(t('نهاية خلو المسار','VOC ends'),w.ingressAt,'lunar-gold','voc-end')+'</div></section></div>'+lunarMansionMarkup()+
    '<section class="panel lunar-advice-card"><div class="lunar-advice-head"><div><span class="eyebrow">MX EYE · EXPLAINED TIMING</span><h2>'+t('شنو معناه بهاللحظة؟','How to use this timing')+'</h2></div><span class="lunar-advice-badge">'+(w.isVoid?t('خلو المسار فعّال','Void-of-course active'):t('القمر يتحرك باتجاه اتصالاته','Moon approaching aspects'))+'</span></div><p class="mx-lunar-explained">'+moonMomentNarrative(w)+'</p><div class="lunar-last-aspect"><small>'+t('آخر اتصال دقيق قبل الانتقال','Last exact major aspect')+'</small><strong>'+lastLabel+'</strong>'+(last?'<time datetime="'+last.time.toISOString()+'">'+date(last.time)+'</time>':'')+'</div><div class="button-row"><button id="export-lunar-calendar" class="primary">'+(w.isVoid?t('أضف موعد انتقال القمر للتقويم','Add next ingress to calendar'):t('أضف بداية خلو المسار للتقويم','Add VOC start to calendar'))+'</button><button class="secondary" data-go="time">'+t('افتح آلة الزمن','Open Time Machine')+'</button></div><small>'+t('تذكير التقويم: ','Calendar reminder: ')+date(when)+'</small></section>'+
    '<section class="panel lunar-timeline"><div class="section-title"><div><span class="eyebrow">EXACT EPHEMERIS · MEANING</span><h2>'+t('شنو يتغير خلال هالفترة؟','How the timing themes change')+'</h2></div></div><p class="mx-lunar-timeline-lead">'+t('الأوقات أدناه لحظات فلكية دقيقة محسوبة، والنص يشرح معناها الرمزي بلغة سهلة. الأحداث الماضية مكتوب عليها «صار»، والقادمة «قادم».','Times below are calculated exact astronomical contacts with a plain-language symbolic explanation. Past and upcoming events are marked.')+'</p><div class="premium-timeline">'+(w.events.length?w.events.map(e=>'<div class="timeline-entry '+(+e.time<=+selected?'mx-aspect-past':'mx-aspect-upcoming')+'"><span class="timeline-dot"></span><div><b>'+moonAspectNarrative(e)+'</b><span class="mx-aspect-phase">'+(+e.time<=+selected?t('صار بالفعل','Already exact'):t('قادم','Upcoming'))+'</span><time datetime="'+e.time.toISOString()+'">'+date(e.time)+'</time><details class="mx-lunar-aspect-story"><summary>'+t('الدليل الحسابي','Calculation details')+'</summary>'+planet(e.transit)+' · '+aspect(e.angle)+' · '+planet(e.target)+'</details></div></div>').join(''):'<p>'+t('ماكو زاوية كلاسيكية دقيقة ضمن التعريف المحدد.','No exact classical aspects under the chosen convention.')+'</p>')+'</div><details><summary>'+t('طريقة الحساب الفلكي','Astronomical calculation convention')+'</summary><p>'+t('يستخدم آخر زاوية رئيسية دقيقة للقمر مع الشمس أو عطارد أو الزهرة أو المريخ أو المشتري أو زحل، حتى لحظة دخوله البرج التالي.','Uses the last exact major aspect of the Moon to the Sun, Mercury, Venus, Mars, Jupiter or Saturn until its next sign ingress.')+'</p></details></section>';
  }catch(e){return '<section class="panel"><h2>'+t('تعذر حساب القمر','Moon calculation unavailable')+'</h2><p class="alert">'+esc(String(e))+'</p></section>'}
@@ -1302,6 +1304,9 @@ function updateLunarGauge(kind:'moon'|'voc',now:number){
  const el=root.querySelector<HTMLElement>('[data-lunar-gauge="'+kind+'"]');if(!el)return;
  const start=Number(el.dataset.gaugeStart),end=Number(el.dataset.gaugeEnd),signStart=Number(el.dataset.gaugeSignStart);
  if(!Number.isFinite(now)||!Number.isFinite(start)||!Number.isFinite(end)||end<=start)return;
+ const vocStart=Number(el.dataset.gaugeVocStart);
+ el.classList.toggle('is-voc',vocColorState(vocStart,end,now)==='is-voc');
+ el.classList.toggle('is-clear',vocColorState(vocStart,end,now)==='is-clear');
  const phase=kind==='voc'?vocPhase(start,end,now):'active';
  const a=kind==='voc'&&phase==='upcoming'?signStart:start;
  const b=kind==='voc'&&phase==='upcoming'?start:end;
@@ -1319,6 +1324,18 @@ function updateLunarGauge(kind:'moon'|'voc',now:number){
  if(tm&&tm.textContent!==timer)tm.textContent=timer;
  if(ring)ring.style.strokeDashoffset=String(60*Math.PI*(1-percentage/100));
  if(bar){bar.setAttribute('aria-label',label);bar.setAttribute('aria-valuenow',String(rounded))}
+}
+/** Flip the Today lunar panel immediately on ephemeris VOC boundaries. */
+function updateTodayVocStatus(now:number):boolean{
+ const card=root.querySelector<HTMLElement>('.mx-focus-lunar-status');
+ if(!card)return false;
+ const start=Number(card.dataset.vocStart),end=Number(card.dataset.vocEnd);
+ if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start)return false;
+ const phase=vocPhase(start,end,now),active=vocColorState(start,end,now)==='is-voc';
+ const changed=card.classList.contains('is-voc')!==active;
+ if(changed){card.classList.toggle('is-voc',active);card.classList.toggle('is-clear',!active)}
+ // An expired sign window must be recalculated, even if it is now green.
+ return changed||phase==='elapsed';
 }
 function updateLiveVocClock(now:number):boolean{
  updateLunarGauge('moon',now);updateLunarGauge('voc',now);
@@ -1496,7 +1513,7 @@ function refreshLiveView(force=false){
   liveSkyLastTick=now;updateLiveSkyWheel(now);
  }
  if(liveTimePinned)return; // Explicit Time Machine instants stay fixed.
- const boundary=screen==='lunar'&&updateLiveVocClock(now);
+ const boundary=screen==='lunar'?updateLiveVocClock(now):screen==='today'?updateTodayVocStatus(now):false;
  if(screen==='lunar'&&!boundary)updateLiveMoonSign(now);
  const cadence=LIVE_CONTENT_INTERVAL_MS[screen]??30000;
  // Settings fields are user-owned state, not an ephemeral sky calculation.
