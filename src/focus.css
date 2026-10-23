@@ -50,6 +50,9 @@
 .mx-simple .astro-cal-meta{flex-wrap:wrap}
 .mx-focus-advanced{margin-top:14px}
 .mx-simple .mx-section-tabs{display:none}
+/* Moon timing stays one tap away under Today even in the default Simple mode. */
+.mx-simple .mx-section-tabs.mx-today-section-tabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 0 11px;margin:0 0 13px}
+.mx-simple .mx-today-section-tabs .mx-section-tab{min-height:36px;padding:7px 13px;border-radius:10px;font-size:12px}
 .mx-simple .settings-layout{max-width:1100px}
 @media(max-width:1100px){.mx-focused-dashboard{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:670px){.mx-focus-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-focus-moon{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-more-grid{grid-template-columns:1fr}.mx-focus-hero{padding:16px!important}}

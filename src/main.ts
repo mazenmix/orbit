@@ -177,24 +177,27 @@ function heatmapUI(){try{const cells=getHeatmap(),key=heatmapCategory;const scor
 /** Six destinations; Go Mode is its own first-class page directly after People. */
 const primaryRoutes=['today','chart','people','go','travelmode','calendar','more'];
 function primarySection(route:string):string{
- if(route==='signals')return 'today';
+ if(route==='signals'||route==='lunar')return 'today';
  if(route==='asteroids')return 'chart';
- if(['time','lunar','eclipses','advanced'].includes(route))return 'calendar';
+ if(['time','eclipses','advanced'].includes(route))return 'calendar';
  if(route==='intel')return 'go'; // Keep legacy #intel bookmarks working.
  if(['ai','evidence','settings'].includes(route))return 'more';
  return primaryRoutes.includes(route)?route:'today';
 }
 const sectionRoutes:Record<string,string[]>={
- today:['today','signals'],
+ today:['today','lunar','signals'],
  chart:['chart','asteroids'],
- calendar:['calendar','time','lunar','eclipses','advanced'],
+ calendar:['calendar','time','eclipses','advanced'],
  more:['more','ai','evidence','settings']
 };
 function sectionTabs(){
- if(uiMode==='simple')return '';
- const current=primarySection(screen),routes=sectionRoutes[current];
+ const current=primarySection(screen);
+ // The Moon is a child of Today in both Simple and Professional modes.
+ // Simple mode shows just these two choices; all other technical tabs stay hidden.
+ if(uiMode==='simple'&&current!=='today')return '';
+ const routes=uiMode==='simple'?['today','lunar']:sectionRoutes[current];
  if(!routes||routes.length<2)return '';
- return '<nav class="mx-section-tabs" aria-label="'+t('تبويبات القسم','Section tabs')+'">'+routes.map(route=>
+ return '<nav class="mx-section-tabs'+(current==='today'?' mx-today-section-tabs':'')+'" aria-label="'+t('تبويبات القسم','Section tabs')+'">'+routes.map(route=>
   '<button type="button" class="mx-section-tab '+(screen===route?'is-current':'')+'" data-go="'+route+'" '+(screen===route?'aria-current="page"':'')+'><span class="mx-tab-icon" aria-hidden="true">'+icon(route)+'</span>'+labels[route]()+'</button>'
  ).join('')+'</nav>';
 }
@@ -206,7 +209,7 @@ function demoNotice(){
 function render(){
  liveLastRender=Date.now();
  // These top-level routes use compact headings: preserve time, location and profile tools.
- const hidePageHeadingTitle=['travelmode','go','people','chart','today','calendar','more','ai','settings','eclipses'].includes(screen);
+ const hidePageHeadingTitle=['travelmode','go','people','chart','today','lunar','calendar','more','ai','settings','eclipses'].includes(screen);
  document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.documentElement.lang=lang==='ar'?'ar-IQ':'en';
  document.documentElement.dataset.uiMode=uiMode;
  root.innerHTML=`<div class="shell ${uiMode==='simple'?'mx-simple':'mx-professional'}"><aside class="sidebar"><a class="brand" href="#today"><span class="brand-wordmark"><i>MX</i> Astro</span></a>${nav(primaryRoutes)}</aside><div class="workspace"><header class="topbar"><a class="mobile-brand" href="#today"><b class="brand-wordmark"><i>MX</i> Astro</b></a><div class="top-actions"><button class="language" id="language">${lang==='ar'?'EN':'عربي'}</button><button id="tools" class="icon-button mobile-tools" aria-label="${t('أدوات أكثر','More tools')}">⋯</button><button class="avatar" style="--mx-avatar-hue:${personHue(active.id)}" data-go="settings" aria-label="${t('الملف الشخصي','Profile')}">${esc(active.name.slice(0,1))}</button></div></header><main id="main"><div class="page-heading"><div>${hidePageHeadingTitle?'':`<div class="eyebrow">MX ASTRO · ${labels[primarySection(screen)]?.()??labels.today()}</div>${screen==='chart'||screen==='evidence'?'':`<h1>${labels[screen]?.()??labels.today()}</h1>`}`}<p><span id="live-page-clock">${dateText(selected)}</span> <span class="location">⌖ ${esc(placeCityLabel(screen==='chart'?chartOwnerProfile().city:active.city))}</span></p></div><div class="heading-actions"><label class="sr-only" for="active-profile">${t('الملف النشط','Active profile')}</label><select id="active-profile">${topProfileOptions()}</select><button class="icon-button" id="refresh" aria-label="${t('تحديث','Refresh')}">↻</button></div></div>${demoNotice()}${error?`<div class="alert">${esc(error)}</div>`:''}<div id="live-view-body">${!ready?`<section class="loading panel"><div class="orbital-loader">◎</div><h2>${t('دا أفتح مرصدك…','Opening your observatory…')}</h2><p>${t('تحميل المحرك والبيانات الفلكية المحلية.','Loading the local engine and ephemeris data.')}</p></section>`:content()}</div></main>${nav(primaryRoutes,true)}</div></div><dialog id="detail"><div id="dialog-content"></div></dialog><div class="toast" role="status" aria-live="polite" id="toast"></div>`;
@@ -385,7 +388,6 @@ function morePage(){
  const group=(ar:string,en:string,cards:string)=>'<section class="panel mx-focus-panel"><h2>'+t(ar,en)+'</h2><div class="mx-more-grid">'+cards+'</div></section>';
  return '<section class="panel mx-focus-panel"><div class="mx-mode-choices"><button class="secondary" data-ui-mode="simple" aria-pressed="'+(uiMode==='simple')+'">✦ '+t('بسيط','Simple')+'</button><button class="secondary" data-ui-mode="pro" aria-pressed="'+(uiMode==='pro')+'">◎ '+t('محترفين','Professional')+'</button></div></section>'+
  group('الرصد والتوقيت','Sky & timing',
-  card('lunar','توقيت القمر','Moon timing','خلو المسار والاتصالات الدقيقة','VOC and exact Moon aspects')+
   card('time','آلة الزمن','Time Machine','تاريخ ووقت تختاره','Calculate a chosen moment')+
   card('eclipses','الكسوف والخسوف','Eclipses','الأحداث الفلكية المؤكدة','Certified astronomical events'))+
  group('القراءة والشرح','Reading & explanation',

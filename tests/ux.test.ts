@@ -23,13 +23,22 @@ test('Asteroid readings and evidence UI are narrative-first and confidential bir
 
 test('main navigation exposes standalone Go Mode after People and preserves professional deep links',()=>{
  assert.match(main,/const primaryRoutes=\['today','chart','people','go','travelmode','calendar','more'\]/);
- assert.ok(main.includes("if(uiMode==='simple')return ''"));
+ assert.ok(main.includes("if(uiMode==='simple'&&current!=='today')return ''"));
  assert.ok(main.includes("function morePage()"));
  assert.ok(main.includes("localStorage.setItem('mx.uiMode',uiMode)"));
  assert.match(main,/nav\(primaryRoutes\)/);
  assert.match(main,/nav\(primaryRoutes,true\)/);
  assert.ok(!main.includes("nav(['today','signals','people','chart'])"));
  assert.ok(!main.includes("nav(['time','lunar','eclipses','asteroids','advanced','intel','evidence','ai','settings'])"));
+});
+test('Moon timing lives under Today in Simple and Professional modes, not Calendar or More',()=>{
+ assert.match(main,/if\(route==='signals'\|\|route==='lunar'\)return 'today'/);
+ assert.match(main,/today:\['today','lunar','signals'\]/);
+ assert.match(main,/calendar:\['calendar','time','eclipses','advanced'\]/);
+ assert.ok(main.includes("uiMode==='simple'?['today','lunar']:sectionRoutes[current]"));
+ assert.ok(main.includes('mx-today-section-tabs'));
+ const more=main.slice(main.indexOf('function morePage(){'),main.indexOf('function scoresHTML('));
+ assert.ok(!more.includes("card('lunar'"),'Moon timing should not be duplicated in More');
 });
 test('grouped feature tabs preserve old deep links and keep evidence contextual',()=>{
  for(const route of ["signals","asteroids","lunar","eclipses","advanced","ai","evidence"]){

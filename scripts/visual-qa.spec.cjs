@@ -184,18 +184,30 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
 }
 
 
-test('primary links and accessible feature tabs preserve deep links',async({page})=>{
+test('Moon timing nests under Today on desktop and keeps its direct #lunar link',async({page})=>{
  await page.goto('/#today',{waitUntil:'domcontentloaded'});
  await page.locator('.sidebar .nav-item').first().waitFor({timeout:75000});
- await expect(page.locator('.sidebar .nav-item')).toHaveCount(8);
- await page.locator('.sidebar [data-go="time"]').click();
- await expect(page.locator('.mx-section-tabs [data-go="advanced"]')).toBeVisible();
- await page.locator('.sidebar [data-go="lunar"]').click();
- await expect(page.locator('.sidebar [data-go="lunar"]')).toHaveAttribute('aria-current','page');
- await page.locator('.sidebar [data-go="chart"]').click();
- await expect(page.locator('.mx-section-tabs [data-go="asteroids"]')).toBeVisible();
- await page.goto('/#evidence',{waitUntil:'domcontentloaded'});
- await expect(page.locator('.sidebar [data-go="intel"]')).toHaveAttribute('aria-current','page');
+ await expect(page.locator('.sidebar .nav-item')).toHaveCount(7);
+ await expect(page.locator('.sidebar [data-go="lunar"]')).toHaveCount(0);
+ await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toBeVisible({timeout:75000});
+ await page.locator('.mx-section-tabs [data-go="lunar"]').click();
+ await expect(page).toHaveURL(/#lunar$/);
+ await expect(page.locator('.sidebar [data-go="today"]')).toHaveAttribute('aria-current','page');
+ await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toHaveAttribute('aria-current','page');
+ await expect(page.locator('.lunar-premium-grid')).toBeVisible({timeout:75000});
+ await page.locator('.sidebar [data-go="calendar"]').click();
+ await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toHaveCount(0);
+ await page.goto('/#lunar');
+ await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toBeVisible({timeout:75000});
+ await page.locator('.mx-section-tabs [data-go="today"]').click();
+ await expect(page).toHaveURL(/#today$/);
+ // Pro mode also exposes Moon under Today, never Calendar.
+ await page.evaluate(()=>localStorage.setItem('mx.uiMode','pro'));
+ await page.reload();
+ await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toBeVisible({timeout:75000});
+ await page.locator('.sidebar [data-go="calendar"]').click();
+ await expect(page.locator('.mx-section-tabs [data-go="advanced"]')).toBeVisible({timeout:75000});
+ await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toHaveCount(0);
 });
 
 test('Qwen3 automatically displays only one read-only text panel',async({page})=>{
