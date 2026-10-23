@@ -303,16 +303,10 @@ function focusedToday(){
  focusMoonEvents=futureEvents;
  const personal=focusScan?.done&&focusScan.key===focusEventKey()?focusScan.events:[];
  const eventMarkup=focusEventMarkup([...personal,...futureEvents]);
- const matchedAi=aiAnswer&&aiScope===liveQwenScope()&&aiAnswerAt&&Math.abs(+new Date(aiAnswerAt)-+selected)<15*60000;
- const secondFocus=rankPrioritySignals({signals:r.signals,natal:r.natal,knownBirthTime:active.known,complete:r.complete}).find(x=>x.signal.category!==main?.category);
- const secondReading=secondFocus?copy(secondFocus.signal):null;
- const aiSnippet=matchedAi?esc(conciseInterpretation(aiAnswer).brief):
-   secondReading?esc(secondReading.title+' — '+secondReading.good):
-   t('ماكو اتصال شخصي قوي حالياً حتى ننسب إله قصة من خيالنا. تابع بياناتك الفعلية، وافتح تحليل Ai لما تتوفر دلائل محسوبة.','There is no strong personal contact to justify a made-up narrative. Review real circumstances and use Ai when calculated evidence is available.');
  return todaySkyWheel(r)+'<div class="mx-focused-dashboard"><div class="mx-focus-main">'+
  '<section class="panel mx-focus-hero"><div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('شنو الأهم إلك هسه؟','YOUR MAIN FOCUS')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'): 'LIVE')+'</span></div><h2>'+esc(reading?.title??t('ماكو اتصال مهيمن الآن','No dominant aspect at this moment'))+'</h2><p>'+esc(reading?.good??t('ماكو اتصال فلكي قوي يدعم قراءة شخصية بهذه اللحظة.','No strong astrological contact supports a personal reading at this moment.'))+'</p>'+(reading?'<p class="mx-focus-story-example">'+esc(reading.careful)+'</p><p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(reading.action)+'</p>':'')+(quality?'<p class="mx-focus-quality">'+quality+'</p>':'')+'<details class="mx-focus-technical"><summary>'+t('أساس الحساب (اختياري)','Calculation basis (optional)')+'</summary><p>'+esc(evidence)+'</p><small>'+dateText(selected,{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+(phase?' · '+phase:'')+'</small></details>'+
  '<div class="mx-focus-actions"><button class="primary" data-go="evidence">'+t('ليش هاي القراءة؟','Why this reading?')+' ↗</button>'+(factor?'<button class="secondary" id="focus-refine-peak">'+t('احسب وقت الذروة','Verify exact peak')+' ⏱</button>':'')+'</div><div class="mx-focus-peak" id="focus-peak-result" aria-live="polite"></div></section>'+
- '<section class="panel mx-focus-panel mx-focus-ai"><h2>✧ MX Ai · '+t('قراءة قصيرة','Short explanation')+'</h2><p>'+aiSnippet+'</p><button class="secondary mx-focus-subaction" data-go="ai">'+t('تحليل Ai','Ai analysis')+' ↗</button></section></div>'+
+ '</div>'+
  '<aside class="mx-focus-aside"><section class="panel mx-focus-panel mx-focus-lunar-status '+(moonIsVoid?'is-voc':'is-clear')+'" data-voc-start="'+moonVocStart+'" data-voc-end="'+moonVocEnd+'"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+'<p class="mx-moon-personal-summary">'+esc(moonPersonalSummary(r,active.known,lang))+'</p><button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
  '<section class="panel mx-focus-panel"><h2>'+t('أقرب 3 أحداث فلكية دقيقة','Next 3 exact sky events')+'</h2><div id="focus-events">'+eventMarkup+'</div><button class="secondary mx-focus-subaction" data-go="calendar">'+t('فتح التقويم','Open calendar')+' ↗</button></section></aside></div>';
 }

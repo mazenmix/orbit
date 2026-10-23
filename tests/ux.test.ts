@@ -249,12 +249,15 @@ test('Moon timing status and four milestones use matching inline SVG pictograms'
  assert.ok(styles.includes('.mx-lunar-tile-icon .mx-lunar-icon'));
 });
 
-test('simple home keeps four evidence-first cards, no repeated score tiles, and refines exact peaks on demand',()=>{
+test('simple home has the main focus, Moon and exact-event cards without duplicate AI reading',()=>{
  const start=main.indexOf('function focusedToday()'),end=main.indexOf('function focusedCalendar()',start);
  const focus=main.slice(start,end);
  assert.ok(start>=0&&end>start);
  assert.ok(focus.includes('mx-focus-hero'));
- assert.ok(focus.includes('mx-focus-ai'));
+ assert.ok(!focus.includes('mx-focus-ai'));
+ assert.ok(!focus.includes('Short explanation'));
+ assert.ok(!focus.includes('aiSnippet'));
+ assert.ok(main.includes('function aiPage()'),'Keep separate AI page available');
  assert.ok(focus.includes('mx-focus-moon'));
  assert.ok(focus.includes('Next 3 exact sky events'));
  assert.ok(!focus.includes('mx-focus-metrics')&&!focus.includes('Two additional signals'));
