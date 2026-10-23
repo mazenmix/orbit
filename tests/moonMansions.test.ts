@@ -35,3 +35,11 @@ test('The 28 → 1 mansion crossing works at tropical Aries zero',()=>{
  const after=new Date(+current.exitsAt+10000);
  assert.equal(lunarMansionWindow(after,read).number,1);
 });
+
+test('Mansion interpretations do not append editorial parentheticals to unfavorable activities',()=>{
+ for(const mansion of LUNAR_MANSIONS){
+  assert.doesNotMatch(mansion.arAvoid,/بحسب الموروث فقط|بالموروث التقليدي/);
+  assert.doesNotMatch(mansion.enAvoid,/traditional belief(?: only)?/i);
+ }
+ assert.equal(LUNAR_MANSIONS[27].arAvoid,'الشؤون الصحية.');
+});

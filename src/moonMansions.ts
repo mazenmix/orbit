@@ -23,7 +23,7 @@ const entries: readonly MansionEntry[] = [
  ['النثرة','Al-Nathrah','المودة والقوة وتحقيق الهدف.','Affection and determination.','العائلة والحب والسفر البري.','Family, love, land journeys.','تعيين موظفين جدد.','Hiring new staff.'],
  ['الطرف','Al-Tarf','الحذر والدفاع عند الخلاف.','Caution and self-protection.','حماية الحقوق ومواجهة الاعتداء.','Protecting boundaries and responding to threats.','السفر والمواعيد والعناية بالحدائق.','Travel, romance, gardening.'],
  ['الجبهة','Al-Jabhah','التعافي والمساندة وحسن النية.','Support, kindness and recovery.','التواصل والتعلم والبناء.','Socializing, study, construction.','السفر أو التهور بالأدوية.','Travel or medication misuse.'],
- ['الزبرة','Al-Zubrah','التقدم والطموح والاحترام.','Ambition, progress and respect.','العمل والترقية والسفر.','Career progress, travel, requests.','شؤون صحة النساء (بالموروث التقليدي).','Women’s health matters (traditional belief).'],
+ ['الزبرة','Al-Zubrah','التقدم والطموح والاحترام.','Ambition, progress and respect.','العمل والترقية والسفر.','Career progress, travel, requests.','شؤون صحة النساء.','Women’s health matters.'],
  ['الصرفة','Al-Sarfah','تحديات تتطلب صبراً وعملًا.','Challenges and productive effort.','الزراعة والبناء والمراسلات.','Agriculture, building, messages.','الارتباط العاطفي والسفر البحري.','Romantic commitments and sea voyages.'],
  ['العواء','Al-Awwa','الرغبة والنمو والتقارب.','Desire, growth and connection.','الحب والتجارة والبدايات الإبداعية.','Romance, trade, creative starts.','الإفراط في الطعام.','Overeating.'],
  ['السماك','Al-Simak','التغيير والانتقال والتحسن.','Transition and making a change.','العاطفة والانتقال من مكان أو عمل.','Romance, moving home or changing jobs.','الزواج والسفر البري.','Marriage and land travel.'],
@@ -40,7 +40,7 @@ const entries: readonly MansionEntry[] = [
  ['سعد الأخبية','Sa’d al-Akhbiyah','النمو والحماية والبحث.','Growth, protection and study.','الزراعة والبحوث والتعلم.','Plant care, research, learning.','الزواج والتخطيط للحمل.','Marriage and conception planning.'],
  ['الفرغ الأول','Al Fargh al-Awwal','المحبة والتقارب وتكوين الروابط.','Affection, unions and support.','الحب والصداقة والتجارة والسفر البري.','Love, friendship, commerce, land travel.','البناء والرحلات البحرية.','Construction and sea voyages.'],
  ['الفرغ الثاني','Al Fargh al-Thani','المال والتجارة والتواصل مع بعض المشاغبة.','Income, trade and social connections.','التجارة والزراعة والعناية بالصحة.','Business, gardening, health care.','البناء والسفر بحراً وبدء مشروع جديد.','Construction, sea travel, starting projects.'],
- ['بطن الحوت','Batn al-Hut','اكتمال مرحلة وبداية حصاد النتائج.','Completion, guidance and fruition.','الارتباط والتجارة والزراعة والسفر.','Marriage, commerce, gardening, travel.','الشؤون الصحية (بحسب الموروث فقط).','Health matters (traditional belief only).']
+ ['بطن الحوت','Batn al-Hut','اكتمال مرحلة وبداية حصاد النتائج.','Completion, guidance and fruition.','الارتباط والتجارة والزراعة والسفر.','Marriage, commerce, gardening, travel.','الشؤون الصحية.','Health matters.']
 ];
 export type LunarMansion = {
  number:number; arName:string; enName:string; arTheme:string; enTheme:string;
