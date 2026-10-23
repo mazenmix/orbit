@@ -601,3 +601,25 @@
  box-shadow:0 0 9px #f55c875d;
 }
 #live-view-body .mx-focused-dashboard .mx-focus-lunar-status.is-voc .mx-focus-moon progress::-moz-progress-bar{background:linear-gradient(90deg,#d85074,#ff91aa)}
+
+
+/* Show Moon Timing immediately under Today in the desktop sidebar. */
+.sidebar .nav .nav-item.nav-subitem{
+ margin-inline-start:21px;
+ margin-inline-end:3px;
+ margin-bottom:3px;
+ min-height:34px;
+ padding:6px 10px;
+ gap:9px;
+ border-radius:9px;
+ background:linear-gradient(90deg,#a183d60d,#5a52751c);
+ border-inline-start:2px solid #75659365;
+}
+.sidebar .nav .nav-item.nav-subitem span{width:17px;font-size:18px;color:#b6a9e6}
+.sidebar .nav .nav-item.nav-subitem b{font-size:12px!important;color:#bab0db}
+.sidebar .nav .nav-item.nav-subitem.active{
+ background:linear-gradient(100deg,#8272bc40,#6b4d8f22);
+ border-color:#8071ac80;
+ border-inline-start:3px solid #d0afff;
+}
+.sidebar .nav .nav-item.nav-subitem.active b{color:#f2e4ff}
