@@ -598,3 +598,16 @@
  box-shadow:0 0 9px #f55c875d;
 }
 #live-view-body .mx-focused-dashboard .mx-focus-lunar-status.is-voc .mx-focus-moon progress::-moz-progress-bar{background:linear-gradient(90deg,#d85074,#ff91aa)}
+
+/* Event-specific Moon and natal interpretations: precise time + clear meaning + action. */
+#live-view-body .mx-focused-dashboard .mx-focus-event{align-items:flex-start;padding:11px 0;gap:9px}
+#live-view-body .mx-focused-dashboard .mx-focus-event-body{min-width:0;flex:1}
+#live-view-body .mx-focused-dashboard .mx-focus-event-body>strong{font-size:13px;line-height:1.5;color:#efe9ff}
+#live-view-body .mx-focused-dashboard .mx-focus-event-body>small{font-size:11px!important;color:#b5bed9;line-height:1.45}
+#live-view-body .mx-focused-dashboard .mx-focus-event-body p{
+ margin:6px 0 0!important;font-size:12px!important;line-height:1.65!important;color:#d1d6eb;
+ overflow-wrap:break-word;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-event-body p b{font-weight:800;color:#e1c5ff}
+#live-view-body .mx-focused-dashboard .mx-focus-event-body .mx-focus-event-step{color:#bdebdc}
+#live-view-body .mx-focused-dashboard .mx-focus-event-body .mx-focus-event-step b{color:#78e0b9}

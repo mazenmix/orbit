@@ -26,6 +26,7 @@ import {narrativeEvidence} from './narrativeEvidence.ts';
 import {CALCULATION_VERSION} from './engine.ts';
 import {distinctHighlights} from './highlights.ts';
 import {rankPrioritySignals,distinctPriority,conciseInterpretation} from './focusPriority.ts';
+import {focusEventReading,type FocusReadingInput} from './focusEventReading.ts';
 import {refineNatalTransit} from './precision.ts';
 import {scanLunations,type Lunation} from './eclipse.ts';
 import type {ConfirmedEclipse} from './realEclipses.ts';
@@ -91,7 +92,7 @@ let aiConnection={checked:false,configured:false,provider:'none',model:'Qwen3'};
 async function refreshAIConnection(){try{const response=await fetch('/api/explain',{cache:'no-store',signal:AbortSignal.timeout(8000)});const result=await response.json();aiConnection={checked:true,configured:result.configured===true,provider:String(result.provider??'none'),model:String(result.model??'Qwen3')};}catch{aiConnection={checked:true,configured:false,provider:'none',model:'Qwen3'}}if(screen==='ai'){updateLiveQwenCard();void refreshLiveQwen(true)}}
 let uiMode:'simple'|'pro'=localStorage.getItem('mx.uiMode')==='pro'?'pro':'simple';
 let calendarExpanded=false;
-type FocusEvent={name:string;at:Date;mark:string;personal:boolean};
+type FocusEvent={name:string;at:Date;mark:string;personal:boolean;reading:FocusReadingInput};
 let focusScan:{key:string;events:FocusEvent[];running:boolean;done:boolean}|null=null;
 let focusMoonEvents:FocusEvent[]=[];
 let compareId='',chartMode='natal',soulPersonId='',soulCategory=1,soulTopic=1,soulQuery='',filter:Category|'all'='all',aiAnswer='',aiBusy=false;
@@ -295,9 +296,9 @@ function focusedToday(){
   const vocEnd=w.isVoid?w.ingressAt:w.vocStartsAt,vocStart=w.isVoid?w.vocStartsAt:w.enteredAt;
   moon='<div class="mx-focus-moon"><article><small>☾ '+t('القمر الآن','Current Moon')+'</small><strong>'+signName(w.sign*30)+'</strong><small>'+t('الانتقال القادم','Next ingress')+'</small><time datetime="'+w.ingressAt.toISOString()+'">'+time(w.ingressAt)+'</time><progress max="100" value="'+percent(w.enteredAt,w.ingressAt)+'"></progress></article>'+
    '<article><small>◌ VOID OF COURSE</small><strong>'+(w.isVoid?t('خالي المسار','VOC active'):t('ماشي عدل','Moon on course'))+'</strong><small>'+(w.isVoid?t('نهاية الفترة','Period ends'):t('بداية الفترة','Period begins'))+'</small><time datetime="'+vocEnd.toISOString()+'">'+time(vocEnd)+'</time><progress max="100" value="'+percent(vocStart,vocEnd)+'"></progress></article></div>';
-  const moonIngress:FocusEvent={name:t('انتقال القمر للبرج التالي','Moon ingress'),at:w.ingressAt,mark:'☾',personal:false};
-  const voc:FocusEvent={name:w.isVoid?t('نهاية خلو المسار','VOC ends'):t('بداية خلو المسار','VOC begins'),at:w.isVoid?w.ingressAt:w.vocStartsAt,mark:'◌',personal:false};
-  futureEvents=[moonIngress,voc,...w.events.filter(e=>+e.time>now).map(e=>({name:planet(e.transit)+' '+aspect(e.angle)+' '+planet(e.target),at:e.time,mark:'✧',personal:false}))].filter(e=>+e.at>now);
+  const moonIngress:FocusEvent={name:t('انتقال القمر للبرج التالي','Moon ingress')+' · '+signName(((w.sign+1)%12)*30),at:w.ingressAt,mark:'☾',personal:false,reading:{kind:'moon-ingress',nextSign:(w.sign+1)%12}};
+  const voc:FocusEvent={name:w.isVoid?t('نهاية خلو المسار','VOC ends'):t('بداية خلو المسار','VOC begins'),at:w.isVoid?w.ingressAt:w.vocStartsAt,mark:'◌',personal:false,reading:{kind:w.isVoid?'voc-end':'voc-start'}};
+  futureEvents=[moonIngress,voc,...w.events.filter(e=>+e.time>now).map(e=>({name:planet(e.transit)+' '+aspect(e.angle)+' '+planet(e.target),at:e.time,mark:'✧',personal:false,reading:{kind:'moon-aspect' as const,target:e.target,angle:e.angle}}))].filter(e=>+e.at>now);
  }catch(e){futureEvents=[];moon='<p class="mx-focus-note">'+t('تعذر التحقق من بيانات القمر: ','Moon ephemeris unavailable: ')+esc(String(e))+'</p>'}
  focusMoonEvents=futureEvents;
  const personal=focusScan?.done&&focusScan.key===focusEventKey()?focusScan.events:[];
@@ -313,7 +314,7 @@ function focusedToday(){
  '<div class="mx-focus-actions"><button class="primary" data-go="evidence">'+t('ليش هاي القراءة؟','Why this reading?')+' ↗</button>'+(factor?'<button class="secondary" id="focus-refine-peak">'+t('احسب وقت الذروة','Verify exact peak')+' ⏱</button>':'')+'</div><div class="mx-focus-peak" id="focus-peak-result" aria-live="polite"></div></section>'+
  '<section class="panel mx-focus-panel mx-focus-ai"><h2>✧ MX Ai · '+t('قراءة قصيرة','Short explanation')+'</h2><p>'+aiSnippet+'</p><button class="secondary mx-focus-subaction" data-go="ai">'+t('تحليل Ai','Ai analysis')+' ↗</button></section></div>'+
  '<aside class="mx-focus-aside"><section class="panel mx-focus-panel mx-focus-lunar-status '+(moonIsVoid?'is-voc':'is-clear')+'" data-voc-start="'+moonVocStart+'" data-voc-end="'+moonVocEnd+'"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+'<p class="mx-moon-personal-summary">'+esc(moonPersonalSummary(r,active.known,lang))+'</p><button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
- '<section class="panel mx-focus-panel"><h2>'+t('أقرب 3 أحداث فلكية دقيقة','Next 3 exact sky events')+'</h2><div id="focus-events">'+eventMarkup+'</div><small class="mx-focus-note">'+t('اتصالات شخصية وقمرية محسوبة؛ ما نعرض تواريخ مستقبلية بلا تحقق.','Verified natal-transit and lunar events only; never inferred event dates.')+'</small><button class="secondary mx-focus-subaction" data-go="calendar">'+t('فتح التقويم','Open calendar')+' ↗</button></section></aside></div>';
+ '<section class="panel mx-focus-panel"><h2>'+t('أقرب 3 أحداث فلكية دقيقة','Next 3 exact sky events')+'</h2><div id="focus-events">'+eventMarkup+'</div><button class="secondary mx-focus-subaction" data-go="calendar">'+t('فتح التقويم','Open calendar')+' ↗</button></section></aside></div>';
 }
 
 /** A stable daily scan, deferred until the home view is painted. Bounded to the
@@ -342,13 +343,20 @@ function focusEventKey(){
 function focusEventMarkup(events:FocusEvent[]){
  const unique:FocusEvent[]=[];
  for(const e of events.filter(e=>+e.at>+selected).sort((a,b)=>+a.at-+b.at||Number(b.personal)-Number(a.personal))){
-  const existing=unique.find(x=>Math.abs(+x.at-+e.at)<60000);
-  if(existing){if(!existing.name.includes(e.name))existing.name+=' · '+e.name;existing.personal=existing.personal||e.personal;continue}
+  // Merge only a duplicate of the SAME exact contact; separate simultaneous
+  // Moon and natal events deserve separate interpretations.
+  const existing=unique.find(x=>Math.abs(+x.at-+e.at)<60000&&x.reading.kind===e.reading.kind&&
+   x.reading.transit===e.reading.transit&&x.reading.target===e.reading.target&&x.reading.angle===e.reading.angle);
+  if(existing)continue;
   unique.push({...e});
  }
- const three=unique.slice(0,3);
- return three.length?three.map(e=>'<div class="mx-focus-event"><span class="mx-event-mark">'+e.mark+'</span><div><strong>'+esc(e.name)+'</strong><small>'+dateText(e.at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+' · '+esc(timezoneCityLabel(active.zone))+(e.personal?' · '+t('شخصي','Personal'):'')+'</small></div></div>').join(''):
-  '<p>'+t('لا توجد لحظات دقيقة مثبتة ضمن البحث الحالي.','No verified exact events in this search window.')+'</p>';
+ return unique.slice(0,3).map(e=>{
+  const reading=focusEventReading(e.reading,lang);
+  return '<div class="mx-focus-event"><span class="mx-event-mark" aria-hidden="true">'+e.mark+'</span><div class="mx-focus-event-body"><strong>'+esc(e.name)+'</strong>'+
+   '<small>'+dateText(e.at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+' · '+esc(timezoneCityLabel(active.zone))+(e.personal?' · '+t('شخصي','Personal'):'')+'</small>'+
+   '<p class="mx-focus-event-meaning"><b>'+t('دلالته:','Meaning:')+'</b> '+esc(reading.effect)+'</p>'+
+   '<p class="mx-focus-event-step"><b>'+t('شنو تسوي:','What to do:')+'</b> '+esc(reading.action)+'</p></div></div>';
+ }).join('')||'<p>'+t('ماكو أحداث دقيقة ضمن فترة البحث الحالية.','No exact events found in the current search interval.')+'</p>';
 }
 function startFocusEventScan(){
  if(!ready||!data||screen!=='today'||uiMode!=='simple')return;
@@ -373,7 +381,7 @@ function startFocusEventScan(){
    const window=refineNatalTransit(e,at,d=>chart(d,active,true,false).points,e.transit.id==='Moon'?3:21);
    const future=window.events.filter(event=>+event.time>=+at);
    for(const peak of future){
-    focusScan.events.push({name:planet(e.transit.id)+' '+aspect(e.angle)+' '+planet(e.natal.id),at:peak.time,mark:'✧',personal:true});
+    focusScan.events.push({name:planet(e.transit.id)+' '+aspect(e.angle)+' '+planet(e.natal.id),at:peak.time,mark:'✧',personal:true,reading:{kind:'personal-aspect',transit:e.transit.id,target:e.natal.id,angle:e.angle}});
    }
   }catch(err){console.warn('Cannot verify personal transit peak',e.id,err)}
   setTimeout(step,60);
