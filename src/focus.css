@@ -50,9 +50,6 @@
 .mx-simple .astro-cal-meta{flex-wrap:wrap}
 .mx-focus-advanced{margin-top:14px}
 .mx-simple .mx-section-tabs{display:none}
-/* Moon timing stays one tap away under Today even in the default Simple mode. */
-.mx-simple .mx-section-tabs.mx-today-section-tabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 0 11px;margin:0 0 13px}
-.mx-simple .mx-today-section-tabs .mx-section-tab{min-height:36px;padding:7px 13px;border-radius:10px;font-size:12px}
 .mx-simple .settings-layout{max-width:1100px}
 @media(max-width:1100px){.mx-focused-dashboard{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:670px){.mx-focus-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-focus-moon{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-more-grid{grid-template-columns:1fr}.mx-focus-hero{padding:16px!important}}
@@ -601,25 +598,3 @@
  box-shadow:0 0 9px #f55c875d;
 }
 #live-view-body .mx-focused-dashboard .mx-focus-lunar-status.is-voc .mx-focus-moon progress::-moz-progress-bar{background:linear-gradient(90deg,#d85074,#ff91aa)}
-
-
-/* Show Moon Timing immediately under Today in the desktop sidebar. */
-.sidebar .nav .nav-item.nav-subitem{
- margin-inline-start:21px;
- margin-inline-end:3px;
- margin-bottom:3px;
- min-height:34px;
- padding:6px 10px;
- gap:9px;
- border-radius:9px;
- background:linear-gradient(90deg,#a183d60d,#5a52751c);
- border-inline-start:2px solid #75659365;
-}
-.sidebar .nav .nav-item.nav-subitem span{width:17px;font-size:18px;color:#b6a9e6}
-.sidebar .nav .nav-item.nav-subitem b{font-size:12px!important;color:#bab0db}
-.sidebar .nav .nav-item.nav-subitem.active{
- background:linear-gradient(100deg,#8272bc40,#6b4d8f22);
- border-color:#8071ac80;
- border-inline-start:3px solid #d0afff;
-}
-.sidebar .nav .nav-item.nav-subitem.active b{color:#f2e4ff}

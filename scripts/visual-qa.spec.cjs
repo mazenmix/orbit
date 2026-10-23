@@ -184,33 +184,54 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
 }
 
 
-test('Moon timing nests under Today on desktop and keeps its direct #lunar link',async({page})=>{
+test('Moon is a standard-size navigation option after Today, without duplicate tabs',async({page})=>{
  await page.goto('/#today',{waitUntil:'domcontentloaded'});
  await page.locator('.sidebar .nav-item').first().waitFor({timeout:75000});
- await expect(page.locator('.sidebar .nav-item')).toHaveCount(8);
- await expect(page.locator('.sidebar .nav > .nav-item').first()).toHaveAttribute('data-go','today');
- await expect(page.locator('.sidebar .nav > .nav-item').nth(1)).toHaveAttribute('data-go','lunar');
- await expect(page.locator('.sidebar [data-go="lunar"].nav-subitem')).toBeVisible();
- await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toBeVisible({timeout:75000});
- await page.locator('.sidebar [data-go="lunar"].nav-subitem').click();
+ const buttons=page.locator('.sidebar .nav > .nav-item');
+ await expect(buttons).toHaveCount(8);
+ await expect(buttons.nth(0)).toHaveAttribute('data-go','today');
+ await expect(buttons.nth(1)).toHaveAttribute('data-go','lunar');
+ await expect(buttons.nth(1)).toContainText('القمر');
+ await expect(page.locator('.mx-section-tabs')).toHaveCount(0);
+ const style=await buttons.nth(1).evaluate(el=>{
+  const siblings=Array.from(el.parentElement.children);
+  const baseline=getComputedStyle(siblings[2]);
+  const moon=getComputedStyle(el);
+  return {
+   equalPadding:moon.padding===baseline.padding,
+   equalFont:moon.fontSize===baseline.fontSize,
+   equalHeight:Math.abs(el.getBoundingClientRect().height-siblings[2].getBoundingClientRect().height)<2,
+   equalMargin:moon.margin===baseline.margin
+  };
+ });
+ expect(style,'Moon must match other primary nav items').toEqual({equalPadding:true,equalFont:true,equalHeight:true,equalMargin:true});
+ await buttons.nth(1).click();
  await expect(page).toHaveURL(/#lunar$/);
- await expect(page.locator('.sidebar [data-go="today"]')).toHaveAttribute('aria-current','true');
- await expect(page.locator('.sidebar [data-go="lunar"].nav-subitem')).toHaveAttribute('aria-current','page');
- await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toHaveAttribute('aria-current','page');
+ await expect(page.locator('.sidebar [data-go="lunar"]')).toHaveAttribute('aria-current','page');
+ await expect(page.locator('.sidebar [data-go="today"]')).not.toHaveAttribute('aria-current','page');
  await expect(page.locator('.lunar-premium-grid')).toBeVisible({timeout:75000});
- await page.locator('.sidebar [data-go="calendar"]').click();
- await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toHaveCount(0);
- await page.goto('/#lunar');
- await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toBeVisible({timeout:75000});
- await page.locator('.mx-section-tabs [data-go="today"]').click();
+ await expect(page.locator('.mx-section-tabs')).toHaveCount(0);
+ await page.locator('.sidebar [data-go="today"]').click();
  await expect(page).toHaveURL(/#today$/);
- // Pro mode also exposes Moon under Today, never Calendar.
  await page.evaluate(()=>localStorage.setItem('mx.uiMode','pro'));
  await page.reload();
- await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toBeVisible({timeout:75000});
+ await expect(page.locator('.sidebar [data-go="lunar"]')).toBeVisible();
+ await expect(page.locator('.mx-section-tabs')).toHaveCount(0);
  await page.locator('.sidebar [data-go="calendar"]').click();
  await expect(page.locator('.mx-section-tabs [data-go="advanced"]')).toBeVisible({timeout:75000});
  await expect(page.locator('.mx-section-tabs [data-go="lunar"]')).toHaveCount(0);
+});
+test('Moon has the same full-size mobile navigation button and opens the original lunar page',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/#today',{waitUntil:'domcontentloaded'});
+ const nav=page.locator('.mobile-nav');
+ await expect(nav.locator('.nav-item')).toHaveCount(8);
+ await expect(nav.locator('.nav-item').nth(1)).toHaveAttribute('data-go','lunar');
+ await expect(nav.locator('.nav-item').nth(1)).toContainText('القمر');
+ await expect(page.locator('.mx-section-tabs')).toHaveCount(0);
+ await nav.locator('[data-go="lunar"]').click();
+ await expect(page).toHaveURL(/#lunar$/);
+ await expect(page.locator('.lunar-premium-grid')).toBeVisible({timeout:75000});
 });
 
 test('Qwen3 automatically displays only one read-only text panel',async({page})=>{
@@ -413,9 +434,9 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('.mx-today-sky svg.chart-wheel')).toBeVisible({timeout:75000});
   await expect(page.locator('[data-today-gauge]')).toHaveCount(0);
   const nav=device==='iphone'?page.locator('.mobile-nav'):page.locator('.sidebar .nav');
-  await expect(nav.locator('[data-go]')).toHaveCount(7);
+  await expect(nav.locator('[data-go]')).toHaveCount(8);
   const routes=await nav.locator('[data-go]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-go')));
-  expect(routes).toEqual(['today','chart','people','go','travelmode','calendar','more']);
+  expect(routes).toEqual(['today','lunar','chart','people','go','travelmode','calendar','more']);
   await nav.locator('[data-go="go"]').click();
   await expect(page).toHaveURL(/#go$/);
   await expect(page.locator('#live-view-body [data-section="go"]')).toBeVisible({timeout:75000});
@@ -474,7 +495,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
    rows.map(row=>[row.getAttribute('data-indicator-id'),Number.parseInt(row.querySelector('b')?.textContent??'',10)])));
   const nav=device==='iphone'?page.locator('.mobile-nav'):page.locator('.sidebar .nav');
   const options=await nav.locator('[data-go]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-go')));
-  expect(options).toEqual(['today','chart','people','go','travelmode','calendar','more']);
+  expect(options).toEqual(['today','lunar','chart','people','go','travelmode','calendar','more']);
   await nav.locator('[data-go="travelmode"]').click();
   await expect(page).toHaveURL(/#travelmode$/);
   await expect(page.locator('[data-section="travelmode"]')).toBeVisible({timeout:75000});

@@ -21,28 +21,29 @@ test('Asteroid readings and evidence UI are narrative-first and confidential bir
 });
 
 
-test('main navigation exposes standalone Go Mode after People and preserves professional deep links',()=>{
+test('Moon is a full-sized main navigation item directly after Today on desktop and mobile',()=>{
  assert.match(main,/const primaryRoutes=\['today','chart','people','go','travelmode','calendar','more'\]/);
- assert.ok(main.includes("if(uiMode==='simple'&&current!=='today')return ''"));
- assert.ok(main.includes("function morePage()"));
- assert.ok(main.includes("localStorage.setItem('mx.uiMode',uiMode)"));
+ assert.match(main,/function nav\(names:string\[\],mobile=false\)/);
  assert.match(main,/nav\(primaryRoutes\)/);
  assert.match(main,/nav\(primaryRoutes,true\)/);
- assert.ok(main.includes('nav-subitem'),'Moon Timing must be visible as a child of Today');
- assert.ok(main.includes("!mobile&&n==='today'"),'Moon child must not add a primary mobile route');
- assert.ok(main.includes('data-go="lunar" class="nav-item nav-subitem'));
- assert.ok(!main.includes("nav(['today','signals','people','chart'])"));
- assert.ok(!main.includes("nav(['time','lunar','eclipses','asteroids','advanced','intel','evidence','ai','settings'])"));
+ assert.ok(main.includes("data-go=\"lunar\" class=\"nav-item"));
+ assert.ok(main.includes("if(n!=='today')return main"));
+ assert.ok(!main.includes('nav-subitem'));
+ assert.ok(main.includes("lunar:()=>t('القمر','Moon')"));
+ assert.ok(main.includes("if(uiMode==='simple'||current==='today')return ''"));
+ assert.ok(main.includes("card('signals'"),'Keep existing Signals page discoverable');
+ assert.ok(main.includes("function morePage()"));
+ assert.ok(main.includes("localStorage.setItem('mx.uiMode',uiMode)"));
 });
-test('Moon timing lives under Today in Simple and Professional modes, not Calendar or More',()=>{
+test('Moon deep link remains under Today category without top duplicate or calendar copy',()=>{
  assert.match(main,/if\(route==='signals'\|\|route==='lunar'\)return 'today'/);
- assert.match(main,/today:\['today','lunar','signals'\]/);
  assert.match(main,/calendar:\['calendar','time','eclipses','advanced'\]/);
- assert.ok(main.includes("uiMode==='simple'?['today','lunar']:sectionRoutes[current]"));
- assert.ok(main.includes('mx-today-section-tabs'));
+ assert.ok(!main.includes('mx-today-section-tabs'));
  const more=main.slice(main.indexOf('function morePage(){'),main.indexOf('function scoresHTML('));
- assert.ok(!more.includes("card('lunar'"),'Moon timing should not be duplicated in More');
+ assert.ok(!more.includes("card('lunar'"));
+ assert.ok(main.includes("case 'lunar':inner=lunarPage()"));
 });
+
 test('grouped feature tabs preserve old deep links and keep evidence contextual',()=>{
  for(const route of ["signals","asteroids","lunar","eclipses","advanced","ai","evidence"]){
   assert.ok(main.includes("case '"+route+"'"),route+' deep link remains');

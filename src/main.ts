@@ -161,7 +161,7 @@ function currentMansionWindow():LunarMansionWindow {
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const personHue=(id:string)=>{const ids=profiles.map(p=>p.id).sort();return Math.round((Math.max(0,ids.indexOf(id))*137.508+28)%360)};
 const icon=(name:string)=>({today:'✦',signals:'⌁',people:'♧',chart:'◎',settings:'⚙',time:'◷',lunar:'☾',eclipses:'◑',asteroids:'✧',advanced:'◈',intel:'✦',go:'➤',travelmode:'✈',calendar:'▦',more:'☷',ai:'✧',evidence:'⎔'}[name]??'·');
-const labels:Record<string,()=>string>={today:()=>t('اليوم','Today'),signals:()=>t('الإشارات','Signals'),people:()=>t('الناس','People'),chart:()=>t('خارطتي','My chart'),settings:()=>t('الإعدادات','Settings'),time:()=>t('آلة الزمن','Time Machine'),lunar:()=>t('توقيت القمر','Moon timing'),eclipses:()=>t('الكسوف والخسوف','Eclipses'),asteroids:()=>t('الكويكبات','Named asteroids'),advanced:()=>t('التوقيت المتقدم','Advanced timing'),calendar:()=>t('التقويم','Calendar'),more:()=>t('المزيد','More'),go:()=>t('Go Mode','Go Mode'),travelmode:()=>t('Travel Mode','Travel Mode'),intel:()=>t('Go Mode','Go Mode'),ai:()=>t('شرح Ai','Ai explanations'),evidence:()=>t('الدليل الفلكي','Astrological evidence')};
+const labels:Record<string,()=>string>={today:()=>t('اليوم','Today'),signals:()=>t('الإشارات','Signals'),people:()=>t('الناس','People'),chart:()=>t('خارطتي','My chart'),settings:()=>t('الإعدادات','Settings'),time:()=>t('آلة الزمن','Time Machine'),lunar:()=>t('القمر','Moon'),eclipses:()=>t('الكسوف والخسوف','Eclipses'),asteroids:()=>t('الكويكبات','Named asteroids'),advanced:()=>t('التوقيت المتقدم','Advanced timing'),calendar:()=>t('التقويم','Calendar'),more:()=>t('المزيد','More'),go:()=>t('Go Mode','Go Mode'),travelmode:()=>t('Travel Mode','Travel Mode'),intel:()=>t('Go Mode','Go Mode'),ai:()=>t('شرح Ai','Ai explanations'),evidence:()=>t('الدليل الفلكي','Astrological evidence')};
 let clockFormat: '24'|'12'=localStorage.getItem('mx.clockFormat')==='12'?'12':'24';
 let liveTimePinned=false,liveLastRender=0,liveMinute=-1,moonNarrativeLastMinute=-1,liveSkyLastTick=0;
 const LIVE_SKY_INTERVAL_MS=5000;
@@ -185,31 +185,31 @@ function primarySection(route:string):string{
  return primaryRoutes.includes(route)?route:'today';
 }
 const sectionRoutes:Record<string,string[]>={
- today:['today','lunar','signals'],
  chart:['chart','asteroids'],
  calendar:['calendar','time','eclipses','advanced'],
  more:['more','ai','evidence','settings']
 };
 function sectionTabs(){
+ // Today and Moon are full-sized navigation options, never duplicate page tabs.
  const current=primarySection(screen);
- // The Moon is a child of Today in both Simple and Professional modes.
- // Simple mode shows just these two choices; all other technical tabs stay hidden.
- if(uiMode==='simple'&&current!=='today')return '';
- const routes=uiMode==='simple'?['today','lunar']:sectionRoutes[current];
+ if(uiMode==='simple'||current==='today')return '';
+ const routes=sectionRoutes[current];
  if(!routes||routes.length<2)return '';
- return '<nav class="mx-section-tabs'+(current==='today'?' mx-today-section-tabs':'')+'" aria-label="'+t('تبويبات القسم','Section tabs')+'">'+routes.map(route=>
+ return '<nav class="mx-section-tabs" aria-label="'+t('تبويبات القسم','Section tabs')+'">'+routes.map(route=>
   '<button type="button" class="mx-section-tab '+(screen===route?'is-current':'')+'" data-go="'+route+'" '+(screen===route?'aria-current="page"':'')+'><span class="mx-tab-icon" aria-hidden="true">'+icon(route)+'</span>'+labels[route]()+'</button>'
  ).join('')+'</nav>';
 }
-function nav(names:string[],mobile=false){return `<nav class="${mobile?'mobile-nav':'nav'}" aria-label="${t('التنقل الرئيسي','Main navigation')}">${names.map(n=>{
- const active=primaryRoutes.includes(n)?primarySection(screen)===n:screen===n;
- const parentState=active?(n==='today'&&screen==='lunar'?'aria-current="true"':'aria-current="page"'):'';
- const main=`<button data-go="${n}" class="nav-item ${active?'active':''}" ${parentState}><span>${icon(n)}</span><b>${labels[n]()}</b></button>`;
- const child=!mobile&&n==='today'
-  ?`<button type="button" data-go="lunar" class="nav-item nav-subitem ${screen==='lunar'?'active':''}" ${screen==='lunar'?'aria-current="page"':''}><span>${icon('lunar')}</span><b>${labels.lunar()}</b></button>`
-  :'';
- return main+child;
- }).join('')}</nav>`}
+function nav(names:string[],mobile=false){
+ return `<nav class="${mobile?'mobile-nav':'nav'}" aria-label="${t('التنقل الرئيسي','Main navigation')}">${names.map(n=>{
+  // The Moon is a full-sized sibling immediately after Today on desktop and mobile.
+  const active=n==='today'?(screen==='today'||screen==='signals'):primarySection(screen)===n;
+  const main=`<button type="button" data-go="${n}" class="nav-item ${active?'active':''}" ${active?'aria-current="page"':''}><span>${icon(n)}</span><b>${labels[n]()}</b></button>`;
+  if(n!=='today')return main;
+  const moonActive=screen==='lunar';
+  const moon=`<button type="button" data-go="lunar" class="nav-item ${moonActive?'active':''}" ${moonActive?'aria-current="page"':''}><span>${icon('lunar')}</span><b>${labels.lunar()}</b></button>`;
+  return main+moon;
+ }).join('')}</nav>`;
+}
 function demoNotice(){
  if(!(active.id==='demo'&&active.name==='Demo'&&active.city==='Greenwich'&&active.date==='2000-01-01'))return '';
  return `<section class="demo-notice" role="note"><div><strong>${t('هذه خارطة تجربة، مو خارطتك الشخصية.','This is a demo chart, not your personal reading.')}</strong><p>${t('القراءة هسّه محسوبة لبيانات Greenwich التجريبية. أدخل بيانات ميلادك الحقيقية حتى تطلع حساباتك إنت؛ بياناتك تبقى بهذا المتصفح.','The current reading uses the Greenwich sample profile. Enter your birth details for your own calculation; your details stay in this browser.')}</p></div><button class="secondary" data-go="settings">${t('ضبط بيانات ميلادي','Set up my chart')} ↗</button></section>`;
@@ -399,6 +399,7 @@ function morePage(){
   card('time','آلة الزمن','Time Machine','تاريخ ووقت تختاره','Calculate a chosen moment')+
   card('eclipses','الكسوف والخسوف','Eclipses','الأحداث الفلكية المؤكدة','Certified astronomical events'))+
  group('القراءة والشرح','Reading & explanation',
+  card('signals','الإشارات','Signals','حركة الكواكب المؤثرة الآن','Current celestial signals')+
   card('ai','شرح Ai','Ai explanation','مختصر موثق والتفاصيل عند الطلب','Short grounded reading with optional detail')+
   card('evidence','الدليل الحسابي','Calculation evidence','درجة وزاوية ووزن الاتصال','Source contacts, orbs and weights'))+
  group('أدوات المحترفين والإعدادات','Professional tools & settings',
