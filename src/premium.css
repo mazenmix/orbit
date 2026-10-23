@@ -1,4 +1,170 @@
-undefined
+/* MX Astro — unified premium observatory design. */
+:root{--mx-royal:#bca1ff;--mx-gold:#f0ca88;--mx-aqua:#8de4d5;--mx-hairline:#4d436b}
+body{background:radial-gradient(ellipse 72% 42% at 50% -13%,#44305b23,transparent),#0b0d19}
+.workspace{min-width:0}
+.sidebar{background:linear-gradient(180deg,#101323 0%,#0d1020 70%,#0b0e1c 100%)!important;border-inline-end:1px solid #3b3252}
+.topbar{background:#111526f2;border-bottom:1px solid #3c3453;backdrop-filter:blur(18px)}
+.brand-wordmark i{color:#cfb0ff}
+.nav-caption{color:#969fbb;letter-spacing:.11em}
+.nav-item{border:1px solid transparent;border-radius:13px;transition:background .22s,border-color .22s,transform .22s}
+.nav-item:hover{background:#34304d85;border-color:#595071;transform:translateY(-1px)}
+.nav-item.active{background:linear-gradient(110deg,#3b2d5c80,#25253f90);border-color:#5e507f;box-shadow:inset 0 1px 0 #e6cbff20,0 7px 20px #09051630}
+.page-heading{padding-block:4px 10px;border-bottom:1px solid #322d46}
+.page-heading h1{color:#f4ecff;text-wrap:balance}
+.page-heading .eyebrow,.eyebrow{color:#c1aaf6}
+.panel,.signal-card,.score-card,.metric-card,.go-card,.meaning-card,.annual-card,.evidence-line,.lunation-item,.timeline-entry{background:radial-gradient(ellipse 75% 90% at 2% 0%,#60437713,transparent 80%),linear-gradient(138deg,#191d32,#121727 82%);border:1px solid #48405f;border-radius:18px;box-shadow:0 12px 28px #02030c25,inset 0 1px 0 #ffffff08}
+.panel,.signal-card,.score-card,.metric-card,.go-card{transition:border-color .2s,box-shadow .2s}
+.panel:hover,.signal-card:hover,.score-card:hover,.metric-card:hover,.go-card:hover{border-color:#766096;box-shadow:0 15px 34px #03051435,inset 0 1px 0 #d9b8ff12}
+.signal-card:hover,.score-card:hover,.metric-card:hover{transform:none}
+.section-title h2,.panel h2,.panel h3{letter-spacing:-.012em}
+.section-title{gap:12px}
+.primary{background:linear-gradient(120deg,#6541b0,#3c286a);border:1px solid #ae86f6;box-shadow:0 7px 18px #4d268134,inset 0 1px 0 #f1e4ff33}
+.secondary,.icon-button,.chip{border-color:#514667;background:linear-gradient(140deg,#28263e,#1b2032)}
+.primary,.secondary,.icon-button,.chip{transition:transform .17s,border-color .17s,background .17s,box-shadow .17s}
+.primary:hover,.secondary:hover,.icon-button:hover,.chip:hover{transform:translateY(-1px);border-color:#bf9bf4;box-shadow:0 7px 18px #5d38801a}
+input:not([type="checkbox"]),select,textarea{background-color:#171b2e;color:#f5efff;border-color:#53466c;border-radius:11px}
+select{max-width:100%;text-overflow:ellipsis}
+select option{background:#181b2e;color:#f4f0ff}
+input:focus,select:focus,textarea:focus{outline:1px solid #bc97ff;border-color:#a987eb;box-shadow:0 0 0 3px #936aea1d}
+#active-profile,.mx-chart-person-picker select,.soul-owner-picker select{font-weight:700;letter-spacing:.015em;color:#f4eaff;border-color:#796098;background-color:#1c1b34;box-shadow:inset 0 1px 0 #ffffff0e,0 5px 16px #07061322}
+.mx-chart-meta-card{background:linear-gradient(137deg,#231e3a,#181b30);border-color:#62537e}
+.mx-chart-meta-card:hover{border-color:#b68bea}
+.mx-chart-owner{box-shadow:0 15px 36px #07051455,inset 0 1px 0 #f0d8ff18!important}
+.soul-hero{background:radial-gradient(circle at 13% 40%,#6741a23b,transparent 33%),linear-gradient(140deg,#1a1936,#0e1429 72%)!important;border-color:#69518f}
+.soul-art{max-width:230px;filter:drop-shadow(0 0 20px #9a55e446)}
+.soul-art img{filter:drop-shadow(0 0 7px #a679ff20)}
+.soul-profile-strip,.soul-planet-grid,.soul-who{border-color:#5b4a7a}
+.soul-category,.soul-topic-rail button{transition:background .2s,border-color .2s,box-shadow .2s}
+.soul-category:hover,.soul-topic-rail button:hover{box-shadow:0 7px 22px #6b3da21a}
+.lunar-premium-card.mx-voc-status{transition:background .45s,border-color .45s,box-shadow .45s}
+.lunar-premium-card.mx-voc-status.is-clear{border:1px solid #4e5574;border-top:2px solid #7fbcac;background:linear-gradient(140deg,#1b2838,#141a2d 75%)}
+.lunar-premium-card.mx-voc-status.is-voc{border:1px solid #d06479;border-top:2px solid #ff8b9a;background:radial-gradient(ellipse at 95% 0%,#d958774a,transparent 65%),linear-gradient(140deg,#402037,#25182b 82%);box-shadow:0 0 0 1px #ff8da72b,0 0 32px #dc527933,inset 0 1px 0 #ffc7d32c}
+.mx-voc-status.is-voc .lunar-emblem.violet{background:#592b43;color:#ffbbcc;border-color:#c75a7b}
+.mx-voc-status.is-voc .lunar-state{color:#ffe1e8;border-color:#d87891;background:#783750}
+.mx-lunar-live-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 3px}
+.mx-lunar-live-indicator{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.12em;font-weight:800;color:#a5e4d3}
+.mx-lunar-live-indicator i{width:8px;height:8px;border-radius:50%;background:#77d6bd;box-shadow:0 0 9px #5bcfb5}
+.is-voc .mx-lunar-live-indicator{color:#ffd6df}.is-voc .mx-lunar-live-indicator i{background:#ff859a;box-shadow:0 0 9px #ff6d8d}
+.mx-lunar-countdown{color:#e1d6ed;font:700 12px/1.5 Manrope,'Noto Sans Arabic',sans-serif;font-variant-numeric:tabular-nums;unicode-bidi:plaintext;direction:ltr}
+.is-voc .mx-lunar-countdown{color:#ffe0e7}
+.lunar-premium-card.is-voc .premium-time-tile.lunar-violet{border-color:#a65374;background:linear-gradient(138deg,#46263b,#251c30)}
+@media(max-width:760px){.panel,.signal-card,.score-card{border-radius:17px}.page-heading{gap:12px}.heading-actions select{max-width:min(180px,40vw)!important}.mx-lunar-live-row{align-items:flex-start}.soul-art{max-width:150px}.topbar{backdrop-filter:none}}
+@media(max-width:410px){.mx-lunar-live-row{flex-direction:column;gap:5px}#active-profile{max-width:115px!important}}
+@media(prefers-reduced-motion:reduce){.nav-item,.panel,.signal-card,.score-card,.metric-card,.go-card,.primary,.secondary,.icon-button,.chip,.lunar-premium-card.mx-voc-status{transition:none!important}.nav-item:hover,.primary:hover,.secondary:hover,.icon-button:hover,.chip:hover{transform:none!important}}
+
+
+/* Six-section information architecture: deep features live in concise contextual tabs. */
+.mx-section-tabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0 14px;margin:0 0 20px;border-bottom:1px solid #3b3453}
+.mx-section-tab{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #514365;border-radius:12px;padding:10px 16px;background:linear-gradient(145deg,#191c30,#14182a);color:#c9c0dd;font-size:13px;font-weight:730;min-height:42px;transition:background .2s,border-color .2s,box-shadow .2s,color .2s}
+.mx-section-tab:hover{color:#f6ecff;border-color:#856cad;background:#29233c}
+.mx-section-tab.is-current{color:#ffefff;border-color:#ae85e6;background:linear-gradient(125deg,#503678,#2a2450);box-shadow:inset 0 1px 0 #ffffff22,0 4px 17px #6b3db333}
+.mx-tab-icon{color:#e3bbff;font-size:15px;line-height:1}
+.mx-reading-help{margin-inline-start:auto;position:relative;max-width:min(100%,320px)}
+.mx-reading-help summary{border:1px solid #5b4b73;border-radius:11px;padding:7px 12px;list-style:none;cursor:pointer;color:#d9c4fc;font-size:12px;font-weight:650;white-space:nowrap}
+.mx-reading-help summary:before{content:'ⓘ';margin-inline-end:8px;color:#e6ca94}
+.mx-reading-help summary::-webkit-details-marker{display:none}
+.mx-reading-help[open]{max-width:400px}
+.mx-reading-help p{font-size:12px;line-height:1.7;margin:9px 0 0}
+.mx-ai-context{font-size:12px!important;padding:9px 13px!important}
+.mx-tools-extra{border-top:1px solid #514162;margin-top:15px;padding-top:12px}
+.mx-tools-extra .nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.mx-tools-extra .nav-item{min-height:40px;padding:8px;gap:6px;font-size:12px}
+@media(max-width:760px){
+ .mx-section-tabs{gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;scroll-snap-type:x proximity;scroll-padding-inline:12px;overscroll-behavior-inline:contain;margin-bottom:16px}
+ .mx-section-tab{flex:none;white-space:nowrap;padding:9px 13px;scroll-snap-align:start;font-size:12px}
+ .mobile-nav .nav-item{min-width:0;padding-inline:1px}
+ .mobile-nav .nav-item b{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ .mobile-nav .nav-item span{font-size:21px}
+ .mx-tools-extra .nav{grid-template-columns:1fr 1fr}
+ .mx-reading-help{max-width:100%}
+}
+@media(max-width:375px){.mobile-nav .nav-item b{font-size:8px}.mobile-nav .nav-item span{font-size:19px}}
+@media(prefers-reduced-motion:reduce){.mx-section-tab{transition:none}}
+
+/* Dedicated lunar navigation fits alongside the six other main destinations. */
+@media(max-width:760px){.mobile-nav{gap:0}.mobile-nav .nav-item{min-width:0;max-width:none;flex:1 1 0}.mobile-nav .nav-item b{font-size:clamp(7px,1.85vw,9px);letter-spacing:-.035em}.mobile-nav .nav-item span{font-size:20px}}
+
+/* Qwen3 is now one content-first live card, without request buttons. */
+.mx-qwen-live{max-width:1050px;margin:12px auto 0;padding:clamp(24px,4vw,50px)!important;min-height:210px;border:1px solid #6d5489!important;background:radial-gradient(ellipse at 0% 0%,#7045ab24,transparent 58%),linear-gradient(145deg,#1b2036,#11172a)!important;box-shadow:0 18px 45px #0607153b,inset 0 1px 0 #fff2!important}
+.mx-qwen-live-copy{font-size:clamp(15px,1.25vw,18px);color:#f5f1fc;line-height:2.05;max-width:85ch;margin-inline:auto}
+.mx-qwen-live-copy .mx-qwen-paragraph{color:#f0ebfa;font-size:inherit;line-height:inherit;margin:0 0 24px}
+.mx-qwen-live-copy .mx-qwen-paragraph:last-child{margin-bottom:0}
+.mx-qwen-live-copy .mx-qwen-placeholder{color:#c6bad8;font-size:14px;line-height:1.9;min-height:75px;margin:0}
+@media(max-width:760px){.mx-qwen-live{min-height:180px;margin-top:4px;padding:22px 18px!important}.mx-qwen-live-copy{font-size:15px;line-height:2}}
+
+.mx-lunar-explained{font-size:14px!important;line-height:2!important;color:#e8e1f0!important;padding:16px 19px;border-inline-start:3px solid #ebc98f;background:linear-gradient(90deg,#a38b4220,transparent);border-radius:11px}
+.mx-lunar-timeline-lead{line-height:1.8;color:#cec3da;font-size:12px;margin-bottom:18px}
+.mx-lunar-aspect-story{margin-top:9px!important;font-size:12px!important;line-height:1.85!important;color:#e4d9ed!important;max-width:73ch}
+.mx-aspect-phase{display:inline-block;font-size:10px;border:1px solid #635173;border-radius:7px;padding:3px 7px;margin-inline:7px;color:#d7c2f0}
+.mx-aspect-upcoming .mx-aspect-phase{color:#a7edda;border-color:#3e937e}
+.mx-aspect-past{opacity:.84}
+.go-card .go-decision{font-size:12px;line-height:1.8;margin:12px 0 0;color:#ece3f7}
+
+/* Responsive precision chart interpretation, asteroid dossiers and live sign insight. */
+.mx-moon-sign-reading{display:grid;gap:7px;margin:17px 0 20px}
+.mx-moon-sign-line{display:flex;gap:9px;align-items:flex-start;color:#e7def5!important;font-size:12px!important;line-height:1.8!important;margin:0!important}
+.mx-moon-sign-line>span{color:#e4ba84;font-size:14px;flex:none}
+.mx-moon-sign-line.mx-moon-personal{background:#65518c35;border:1px solid #635079;padding:10px 12px;border-radius:10px;color:#f7e8fe!important}
+.mx-natal-asteroid-status p,.mx-asteroid-note{font-size:12px;line-height:1.8;color:#c9c0da}
+.mx-natal-asteroid-dossier>summary{font-weight:800;color:#f0dcff;cursor:pointer;line-height:1.8}
+.mx-asteroid-dossier-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:18px}
+.mx-asteroid-dossier-item{min-width:0;padding:12px;border:1px solid #5b4c73;border-radius:12px;background:#12182b}
+.mx-asteroid-dossier-item>div{display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:7px}
+.mx-asteroid-dossier-item b{font-size:12px;color:#e2c7fa}
+.mx-asteroid-dossier-item span,.mx-asteroid-dossier-item small{font-size:10px;color:#b8accd}
+.mx-asteroid-dossier-item p{font-size:11px;line-height:1.8;margin:7px 0}
+.mx-chart-fingerprint h3{font-size:16px;color:#ebd1fb}
+.mx-chart-fingerprint-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mx-chart-fingerprint-grid article{padding:13px;border:1px solid #53436e;border-radius:11px;background:#151a2d}
+.mx-chart-fingerprint-grid b{color:#ead6ff;font-size:12px}
+.mx-chart-fingerprint-grid p{font-size:12px;line-height:1.85;margin:7px 0 0}
+.mx-chart-disclaimer{margin-top:17px;font-size:11px!important}
+@media(max-width:850px){.mx-asteroid-dossier-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.mx-asteroid-dossier-grid,.mx-chart-fingerprint-grid{grid-template-columns:1fr}}
+/* MX Ai: fit more readable data into each viewport with clear hierarchy. */
+#live-view-body .go-grid{gap:8px!important;margin-top:12px}
+#live-view-body .go-card{padding:11px 12px!important;border-radius:11px;min-height:0}
+#live-view-body .go-card small{font-size:9px}
+#live-view-body .go-card h3{font-size:13px!important;margin:5px 0 1px!important;line-height:1.45}
+#live-view-body .go-card strong{font-size:26px!important;line-height:1.2}
+#live-view-body .go-card .go-decision{font-size:10.5px!important;line-height:1.6!important;margin:7px 0 0!important}
+#live-view-body .metrics-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:8px!important;margin:11px 0!important}
+#live-view-body .metric-card{padding:10px!important;border-radius:11px;min-height:0}
+#live-view-body .metric-card small{font-size:10px!important;line-height:1.5}
+#live-view-body .metric-card>b{font-size:21px!important;margin:4px 0!important;line-height:1.2}
+#live-view-body .metric-card .meter{margin:6px 0}
+#live-view-body .metric-card details{margin-top:4px;font-size:9px}
+@media(max-width:1250px){#live-view-body .metrics-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+@media(max-width:700px){#live-view-body .metrics-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}#live-view-body .go-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#live-view-body .go-card{padding:10px!important}}
+@media(max-width:360px){#live-view-body .metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+.mx-sky-enlarge{display:block;position:relative;width:100%;border:0;padding:0;background:transparent;cursor:zoom-in;border-radius:14px}
+.mx-sky-enlarge .chart-wheel{pointer-events:none}.mx-sky-enlarge:focus-visible{outline:2px solid #e3c8ff;outline-offset:4px}
+.mx-wheel-zoom-hint{position:absolute;inset-inline-end:9px;bottom:7px;padding:6px 10px;border:1px solid #806b9d;border-radius:10px;background:#101527de;color:#f7ebff;font-size:11px;font-weight:800;pointer-events:none}
+.mx-sky-buttons{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+dialog#detail:has(.mx-expanded-sky){width:min(96vw,1150px)!important;max-width:1150px!important;max-height:94dvh!important;overflow-y:auto!important;padding:clamp(13px,2vw,25px)!important;background:linear-gradient(145deg,#15182c,#0d1121)!important}
+dialog#detail:has(.mx-expanded-sky) #dialog-content{width:100%}
+.mx-expanded-sky h2{font-size:clamp(19px,2vw,29px);margin:7px 40px 0 0}
+.mx-expanded-sky-time{font-size:12px;color:#c8bdd6}
+.mx-expanded-wheel{display:flex;align-items:center;justify-content:center;width:min(100%,925px);margin:0 auto}
+.mx-expanded-wheel .chart-wheel,.mx-expanded-wheel svg{display:block;width:100%!important;max-width:none!important;height:auto!important;max-height:78dvh}
+.mx-expanded-sky-notes{color:#b9b3c8;font-size:11px}
+@media(max-width:680px){dialog#detail:has(.mx-expanded-sky){width:98vw!important;padding:12px!important}.mx-expanded-wheel svg{max-height:70dvh}.mx-expanded-sky h2{font-size:18px}.mx-wheel-zoom-hint{font-size:9px;padding:4px 6px}}
+
+/* Calculated Moon and VOC countdown rings — emerald MX Eye treatment. */
+.lunar-premium-grid .mx-lunar-gauge{display:flex;align-items:center;gap:12px;min-width:0;padding:10px 12px;margin:12px 0;border:1px solid #3a766b;border-radius:15px;background:linear-gradient(125deg,#15302fdb,#14272ddb);box-shadow:inset 0 1px 0 #b4ffe114}
+.mx-lunar-gauge-ring{width:76px;height:76px;flex:0 0 76px;position:relative;display:grid;place-items:center;direction:ltr}
+.mx-lunar-gauge-ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.mx-lunar-gauge-ring circle{fill:none;stroke-width:7;stroke-linecap:round}
+.mx-lunar-gauge-track{stroke:#48807850}
+.mx-lunar-gauge-progress{stroke:#32df9f;stroke-dasharray:188.495559;stroke-dashoffset:188.495559;transition:stroke-dashoffset .9s linear;filter:drop-shadow(0 0 4px #27d39b55)}
+.mx-lunar-gauge-ring strong{position:relative;z-index:1;color:#62efbe;font:800 17px/1 Manrope,'Noto Sans Arabic',sans-serif;font-variant-numeric:tabular-nums}
+.mx-lunar-gauge-copy{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.mx-lunar-gauge-copy span{color:#c2dcd7;font-size:12px;line-height:1.55;font-weight:650}
+.mx-lunar-gauge-copy strong{color:#f0fff9;font:800 16px/1.3 Manrope,'Noto Sans Arabic',sans-serif;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;align-self:flex-start}
+@media(max-width:430px){.lunar-premium-grid .mx-lunar-gauge{padding:8px 10px;gap:10px}.mx-lunar-gauge-ring{width:64px;height:64px;flex-basis:64px}.mx-lunar-gauge-copy span{font-size:11px}.mx-lunar-gauge-copy strong{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.mx-lunar-gauge-progress{transition:none}}
+
 
 /* Both the Moon-sign ring and the VOC ring turn crimson for the same
    computed [VOC start, next ingress) interval; revert to mint at ingress. */

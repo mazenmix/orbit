@@ -1,4 +1,574 @@
-undefined
+/* MX Astro Focus UI — information hierarchy only; ephemeris and scoring stay intact. */
+.mx-focused-dashboard{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(265px,.8fr);gap:16px;align-items:start}
+.mx-focus-main,.mx-focus-aside{display:grid;gap:14px;min-width:0}
+.mx-focus-hero{padding:22px!important;border-color:rgba(171,148,247,.35)!important;background:linear-gradient(130deg,rgba(105,73,185,.15),transparent 62%),var(--panel,#141827)!important}
+.mx-focus-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.mx-focus-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#b5a9ee}
+.mx-focus-hero h2{font-size:clamp(1.2rem,2.4vw,1.7rem);line-height:1.45;margin:6px 0 10px}
+.mx-focus-hero p{line-height:1.75;margin:8px 0;color:var(--text,#e9e8f5)}
+.mx-focus-proof{display:flex;gap:9px;align-items:center;flex-wrap:wrap;color:#b6bfda!important;font-size:.86rem;margin-top:10px}
+.mx-focus-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.mx-focus-actions button{min-height:38px}
+.mx-focus-panel{padding:17px!important}
+.mx-focus-panel>h2{font-size:1.04rem;margin:0 0 12px}
+.mx-focus-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mx-focus-metric{padding:13px 9px;border:1px solid rgba(166,173,205,.16);border-radius:13px;background:rgba(127,139,179,.045);min-width:0;text-align:center;color:inherit}
+.mx-focus-metric b{display:block;font-size:.84rem;margin-bottom:6px}
+.mx-focus-metric strong{display:block;font-size:1.15rem;font-variant-numeric:tabular-nums}
+.mx-focus-metric span{display:block;font-size:.68rem;color:#aab4ce;margin-top:4px}
+.mx-focus-metric i{display:block;height:3px;background:#6575a8;border-radius:9px;margin-top:10px;max-width:100%}
+.mx-focus-metric.good i{background:#37b78b}.mx-focus-metric.mid i{background:#ddb55f}.mx-focus-metric.low i{background:#d77779}
+.mx-focus-note{font-size:.77rem;color:#adb5cf;margin:11px 0 0;line-height:1.6}
+.mx-focus-event{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid rgba(175,175,220,.13)}
+.mx-focus-event:first-of-type{border-top:0}
+.mx-focus-event .mx-event-mark{font-size:1.3rem;flex:0 0 28px;text-align:center}
+.mx-focus-event div{flex:1;min-width:0}
+.mx-focus-event strong{display:block;font-size:.9rem}.mx-focus-event small{display:block;color:#aab4cf;margin-top:3px}
+.mx-focus-moon{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mx-focus-moon article{background:rgba(125,126,175,.075);border:1px solid rgba(170,167,218,.16);padding:15px;border-radius:15px;min-width:0}
+.mx-focus-moon small{display:block;color:#adb6d5;font-size:.76rem}
+.mx-focus-moon strong{display:block;margin:8px 0;font-size:1.03rem}
+.mx-focus-moon time{font-size:.8rem;color:#c6c6d9}
+.mx-focus-moon progress{display:block;width:100%;height:8px;margin-top:12px;accent-color:#36b78b}
+.mx-focus-subaction{margin-top:10px}
+.mx-more-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mx-more-grid button{text-align:start;border:1px solid rgba(159,157,195,.22);border-radius:14px;padding:16px;background:rgba(120,115,169,.065);color:inherit;cursor:pointer}
+.mx-more-grid button:hover{border-color:rgba(160,144,235,.65);background:rgba(120,115,169,.12)}
+.mx-more-grid button strong{display:block;font-size:1rem}.mx-more-grid button small{display:block;margin-top:5px;color:#aab3ca;line-height:1.5}
+.mx-mode-choices{display:flex;flex-wrap:wrap;gap:9px}
+.mx-mode-choices button{min-width:110px}
+.mx-mode-choices button[aria-pressed="true"]{border-color:#9687e8;box-shadow:0 0 0 1px rgba(150,135,232,.4) inset;background:rgba(121,104,196,.2)}
+.mx-simple .page-heading .eyebrow{display:none}
+.mx-simple .page-heading{margin-bottom:11px}
+.mx-simple .page-heading h1{font-size:1.25rem}
+.mx-simple .chart-stories,.mx-simple .mx-natal-asteroid-status,.mx-simple .chart-math,.mx-simple .mx-aspect-legend,.mx-simple .wheel-guide{display:none!important}
+.mx-simple .mx-calendar-compact:not(.is-expanded) .astro-cal-months .astro-cal-month:nth-child(n+3){display:none}
+.mx-focus-calendar-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.mx-focus-calendar-actions .secondary{min-height:38px}
+.mx-simple .astro-cal-toolbar .astro-eyebrow{display:none}
+.mx-simple .astro-cal-toolbar{gap:9px}
+.mx-simple .astro-cal-meta{flex-wrap:wrap}
+.mx-focus-advanced{margin-top:14px}
+.mx-simple .mx-section-tabs{display:none}
+.mx-simple .settings-layout{max-width:1100px}
+@media(max-width:1100px){.mx-focused-dashboard{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:670px){.mx-focus-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-focus-moon{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-more-grid{grid-template-columns:1fr}.mx-focus-hero{padding:16px!important}}
+@media(max-width:360px){.mx-focus-moon{grid-template-columns:1fr}}
+
+/* Priority & Quality Engine: calm summaries; advanced surfaces remain intact. */
+.mx-focus-quality{font-size:.82rem!important;line-height:1.6!important;color:#ebc486!important;margin-top:7px!important}
+.mx-focus-peak{margin-top:8px;font-size:.86rem;line-height:1.6;color:#b9dfd1}
+.mx-focus-peak:empty{display:none}
+.mx-partner-focus{padding:20px!important;margin-top:15px}
+.mx-partner-focus>h2{margin:0 0 14px;font-size:1.15rem}
+.mx-partner-focus-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.mx-partner-focus-grid article{padding:15px;border-radius:14px;border:1px solid rgba(165,160,208,.2);background:rgba(115,110,155,.075);min-width:0}
+.mx-partner-focus-grid article>small{display:block;color:#aeb9d4;font-size:.78rem;margin-bottom:9px}
+.mx-partner-focus-grid article>strong{display:block;line-height:1.6;font-size:.96rem}
+.mx-partner-focus-grid article>small:not(:first-child){margin:8px 0 0}
+.mx-partner-peaks{font-size:.84rem;color:#a8d9d3;line-height:1.65}
+.mx-partner-peaks p{margin:6px 0}
+.mx-partner-deep{margin-top:14px}
+.mx-partner-deep>summary{font-size:.95rem;font-weight:650;cursor:pointer;padding:4px 0;line-height:1.5}
+.mx-partner-deep>.partner-overview{margin-top:14px}
+.mx-partner-deep>.intimacy-section{margin-top:14px}
+.mx-ai-expanded{margin-top:14px;border-top:1px solid rgba(166,163,210,.2);padding-top:11px}
+.mx-ai-expanded>summary{font-size:.88rem;cursor:pointer;color:#c4b5f5}
+.mx-more-section-heading{margin:14px 0 10px;font-size:1rem;color:#cad1eb}
+@media(max-width:920px){.mx-partner-focus-grid{grid-template-columns:1fr}}
+
+/* Explain the relationship first. Numeric synastry evidence is a disclosure, not a headline. */
+.mx-partner-plain-card{display:flex;flex-direction:column;gap:9px;align-items:stretch}
+.mx-partner-plain-card h3{font-size:1.08rem;line-height:1.48;margin:0;color:#e8e3fc}
+.mx-partner-plain-card .mx-partner-meaning{line-height:1.85;color:#dae0ee;font-size:.91rem;margin:0}
+.mx-partner-plain-card .mx-partner-action{padding:10px 12px;border-radius:11px;background:rgba(85,138,132,.11);font-size:.85rem;line-height:1.78;color:#c1e0d4;margin:4px 0 0}
+.mx-partner-plain-card .mx-partner-action b{color:#e0f1e8}
+.mx-relationship-evidence{margin-top:auto;padding-top:10px;border-top:1px solid rgba(164,162,200,.15)}
+.mx-relationship-evidence>summary{font-size:.77rem;color:#acb9d2;cursor:pointer;line-height:1.5}
+.mx-relationship-evidence>p{font-size:.79rem;color:#aeb5c9;line-height:1.6;margin:8px 0 0;unicode-bidi:plaintext}
+.mx-partner-plain-card .mx-partner-intro{line-height:1.7;font-size:.86rem;margin:0;color:#b9c3db}
+.mx-partner-person-timing{border-top:1px solid rgba(158,158,194,.18);padding-top:10px;margin-top:7px}
+.mx-partner-person-timing>b{color:#e4d9ff;font-size:.87rem;display:block}
+.mx-partner-person-timing h4{font-size:.88rem;margin:5px 0;color:#e4e9f8}
+.mx-partner-person-timing p{font-size:.83rem;line-height:1.75;color:#bbc7df;margin:0}
+.mx-partner-observed{font-size:.72rem;color:#9faec9;line-height:1.5;margin:4px 0}
+.mx-partner-transit-card .mx-focus-subaction{align-self:flex-start}
+@media(max-width:1100px){.mx-partner-focus-grid{grid-template-columns:1fr}}
+
+/* Clean relationship snapshot: human interpretation first, technical proof on demand. */
+.mx-relationship-brief{padding:18px!important;margin-top:14px}
+.mx-brief-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+.mx-brief-head h2{margin:0!important;font-size:1.09rem!important;line-height:1.4}
+.mx-brief-head>small{color:#aeb5cf;font-size:.76rem}
+.mx-brief-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;align-items:stretch}
+.mx-brief-grid.mx-brief-nonromantic{grid-template-columns:repeat(2,minmax(0,1fr))}
+.mx-brief-card{display:flex;flex-direction:column;gap:7px;padding:15px!important;border:1px solid rgba(166,162,208,.2);border-radius:14px;background:rgba(128,121,182,.066);min-width:0}
+.mx-brief-card>small{display:block;color:#b9afd9;font-size:.72rem;font-weight:700;letter-spacing:.01em}
+.mx-brief-card h3{font-size:1rem!important;line-height:1.45;color:#efeaff;margin:0!important}
+.mx-brief-card p{font-size:.85rem;line-height:1.68;color:#d0d4e7;margin:0!important}
+.mx-brief-card .mx-brief-advice{margin-top:auto!important;padding-top:10px;border-top:1px solid rgba(163,161,205,.14);color:#a9d9c6}
+.mx-brief-fact{padding-top:8px;border-top:1px solid rgba(173,169,211,.15)}
+.mx-brief-fact b{display:block;font-size:.8rem;color:#eac4e3;margin-bottom:3px}
+.mx-brief-sexual{background:linear-gradient(150deg,rgba(116,73,140,.11),rgba(128,121,182,.04))}
+.mx-brief-bottom{display:flex;justify-content:space-between;align-items:start;gap:10px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(163,161,205,.18);font-size:.8rem}
+.mx-brief-bottom>span{font-weight:600;color:#c5cbe6}
+.mx-brief-details{max-width:75%;color:#adb6d0}
+.mx-brief-details>summary{cursor:pointer;font-size:.82rem;line-height:1.6;color:#bea9f3}
+.mx-brief-details>p{font-size:.79rem;line-height:1.6;margin:8px 0}
+.mx-brief-details>small{display:block;color:#a4b0c9;margin:8px 0}
+.mx-brief-details>.secondary{margin-top:7px}
+.mx-relationship-brief .mx-brief-footnote{font-size:.72rem;line-height:1.6;color:#929db8;margin:9px 0 0}
+@media(max-width:1090px){.mx-brief-grid{grid-template-columns:1fr}.mx-brief-grid.mx-brief-nonromantic{grid-template-columns:1fr}}
+@media(max-width:620px){.mx-relationship-brief{padding:13px!important}.mx-brief-head{align-items:start;flex-direction:column;gap:3px}.mx-brief-card{padding:13px!important}.mx-brief-bottom{flex-direction:column;gap:5px}.mx-brief-details{max-width:100%}}
+
+/* Four restored, calculated daily gauges: prominent, compact and responsive. */
+.mx-today-gauges{padding:15px 18px!important;margin:0 0 14px!important;border:1px solid rgba(173,147,235,.25)!important;border-radius:15px}
+.mx-today-gauge-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 11px}
+.mx-today-gauge-header h2{font-size:1rem;margin:0;color:#e8e0ff;font-weight:750}
+.mx-today-gauge-header .text-button{min-height:30px!important;font-size:12px!important}
+.mx-quick-gauges .mx-focus-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.mx-quick-gauges .mx-focus-metric{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:4px 8px;text-align:start;padding:13px 14px;border-radius:13px;background:rgba(115,103,175,.09);border:1px solid rgba(180,167,232,.22)}
+.mx-quick-gauges .mx-today-gauge-icon{grid-row:1/3;font-size:1.24rem;color:#c9b7f5;text-align:center}
+.mx-quick-gauges .mx-focus-metric b{font-size:.85rem;line-height:1.3;margin:0;white-space:nowrap;color:#e6e2f5}
+.mx-quick-gauges .mx-focus-metric strong{grid-column:3;grid-row:1/3;font-size:1.4rem;line-height:1.1;font-variant-numeric:tabular-nums;color:#f0f1fa}
+.mx-quick-gauges .mx-focus-metric strong small{font-size:.7rem;font-weight:500;color:#9fa9cc;margin-inline-start:1px}
+.mx-quick-gauges .mx-today-gauge-track{grid-column:1/-1;background:rgba(152,153,184,.18);height:7px;border-radius:50px;overflow:hidden;margin-top:7px}
+.mx-quick-gauges .mx-focus-metric .mx-today-gauge-track i{display:block;height:100%;margin:0;border-radius:50px;background:#d77f81}
+.mx-quick-gauges .mx-focus-metric.strong .mx-today-gauge-track i{background:#46c99a}
+.mx-quick-gauges .mx-focus-metric.steady .mx-today-gauge-track i{background:#8dccb0}
+.mx-quick-gauges .mx-focus-metric.caution .mx-today-gauge-track i{background:#dbb55e}
+.mx-quick-gauges .mx-focus-metric.low .mx-today-gauge-track i{background:#d98286}
+.mx-today-gauge-caption{font-size:.72rem!important;line-height:1.6!important;color:#aeb6d0!important;margin:10px 0 0!important}
+@media(max-width:880px){.mx-quick-gauges .mx-focus-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.mx-today-gauges{padding:12px!important}.mx-quick-gauges .mx-focus-metric{padding:10px 9px;grid-template-columns:20px 1fr auto;column-gap:5px}.mx-quick-gauges .mx-focus-metric strong{font-size:1.18rem}.mx-quick-gauges .mx-today-gauge-header h2{font-size:.9rem}.mx-quick-gauges .mx-focus-metric b{font-size:.77rem}}
+
+/* MX Intelligence: separate indicators and Go Mode without duplicating the matrix. */
+.mx-intel-tabs{display:flex;align-items:center;gap:9px;margin:2px 0 16px;flex-wrap:wrap}
+.mx-intel-tab{min-height:43px;border:1px solid rgba(179,159,235,.24);background:rgba(113,104,170,.08);color:#c8c4e0;border-radius:12px;padding:9px 19px;font-weight:750;cursor:pointer}
+.mx-intel-tab:hover{border-color:#9286d7;background:rgba(115,101,191,.14)}
+.mx-intel-tab.is-current{color:#f5eeff;border-color:#a38bea;background:linear-gradient(125deg,rgba(112,81,178,.46),rgba(87,75,155,.28));box-shadow:inset 0 0 0 1px rgba(184,157,255,.1)}
+.mx-intel-tab:focus-visible{outline:2px solid #bda3fa;outline-offset:3px}
+.mx-intel-go .mx-today-gauges{margin-bottom:13px!important}
+.mx-intel-go .go-grid{margin-top:12px}
+.mx-intel-go .go-card{min-width:0}
+@media(max-width:440px){.mx-intel-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px}.mx-intel-tab{padding:8px 6px;font-size:12px!important;min-width:0}.mx-intel-go .mx-today-gauge-header h2{font-size:.85rem}}
+
+/* A sixth primary destination is visible on mobile without overflowing. */
+@media(max-width:600px){
+ .mobile-nav .nav-item{min-width:0;max-width:none;flex:1 1 0}
+ .mobile-nav .nav-item span{font-size:clamp(17px,5vw,21px)}
+ .mobile-nav .nav-item b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:clamp(7px,2.15vw,8px)}
+}
+.mx-go-mode-page{min-width:0;display:grid;gap:12px}
+.mx-go-mode-page>.section-title{margin:0 0 3px}
+.mx-go-mode-page>.panel,.mx-go-mode-page>.mx-today-gauges{margin:0!important}
+.mx-go-mode-page .metrics-grid{min-width:0}
+.mx-go-mode-page .metric-card,.mx-go-mode-page .go-card{min-width:0}
+
+/* Philippines travel shortlist: the same calculated 12 indices, no second scoring engine. */
+.mx-travel-mode-page{min-width:0;display:grid;gap:13px}
+.mx-travel-mode-page>.section-title{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:0}
+.mx-travel-mode-page>.section-title h2{margin:4px 0 0}
+.mx-travel-mode-page>.section-title .mx-travel-all{min-height:37px}
+.mx-travel-intro{margin:0 0 4px;color:#bbc3d9;font-size:13px;line-height:1.8}
+.mx-travel-group{padding:15px 18px!important;margin:0!important;border:1px solid rgba(167,145,213,.2);border-radius:14px}
+.mx-travel-group .section-title{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mx-travel-group h2{font-size:1.03rem}
+.mx-travel-description{font-size:12px;line-height:1.7;color:#aeb9d5;margin:5px 0 14px!important}
+.mx-travel-grid{min-width:0}
+.mx-travel-metric{min-width:0}
+.mx-travel-mode-page .mx-focus-metric b{min-width:0;white-space:normal;overflow-wrap:anywhere}
+.mx-travel-note{margin:0!important;padding:14px 18px!important}
+.mx-travel-note h3{margin:0 0 8px}
+.mx-travel-note p{font-size:12px;line-height:1.75}
+.mx-travel-note small{display:block;color:#97a4bf;line-height:1.6}
+@media(max-width:750px){.mx-travel-mode-page>.section-title .mx-travel-all{font-size:11px!important}}
+@media(max-width:760px){.mx-travel-group{padding:15px 18px!important}}
+@media(max-width:420px){
+ .mobile-nav .nav-item{min-width:0;padding-inline:0}
+ .mobile-nav .nav-item span{font-size:17px}
+ .mobile-nav .nav-item b{font-size:clamp(6.6px,1.9vw,8px);letter-spacing:-.12px}
+ .mx-travel-group{padding:12px!important}
+ .mx-travel-mode-page>.section-title{align-items:flex-start}
+ .mx-travel-mode-page>.section-title h2{font-size:1.15rem}
+ .mx-travel-intro{font-size:12px}
+}
+
+/* Detailed Go Mode 29-indicator palette. Travel Mode intentionally uses
+   the compact quick-gauge component shown above instead. */
+#live-view-body .metric-card{
+ --metric-accent:#b6a6ed;
+ --metric-tint:rgba(118,102,166,.08);
+ --metric-glow:rgba(120,100,173,.16);
+ background:linear-gradient(150deg,var(--metric-tint),#16192b 78%);
+ border-color:color-mix(in srgb,var(--metric-accent) 37%,#343850);
+}
+#live-view-body .metric-card.strong{
+ --metric-accent:#68e0a6;
+ --metric-tint:rgba(68,192,131,.12);
+ --metric-glow:rgba(68,192,131,.19);
+}
+#live-view-body .metric-card.steady{
+ --metric-accent:#a7d98a;
+ --metric-tint:rgba(142,189,100,.11);
+ --metric-glow:rgba(142,189,100,.16);
+}
+#live-view-body .metric-card.caution{
+ --metric-accent:#ecbb6c;
+ --metric-tint:rgba(224,168,81,.12);
+ --metric-glow:rgba(224,168,81,.16);
+}
+#live-view-body .metric-card.low{
+ --metric-accent:#f08b83;
+ --metric-tint:rgba(222,106,104,.11);
+ --metric-glow:rgba(222,106,104,.18);
+}
+#live-view-body .metric-card>b{
+ color:var(--metric-accent);
+ font-variant-numeric:tabular-nums;
+ text-shadow:0 0 12px var(--metric-glow);
+}
+#live-view-body .metric-card>b em{color:#aeb5cc;text-shadow:none}
+#live-view-body .metric-card .meter{
+ height:6px;
+ border-radius:999px;
+ overflow:hidden;
+ background:rgba(130,143,181,.20);
+}
+#live-view-body .metric-card .meter>i{
+ background:linear-gradient(90deg,color-mix(in srgb,var(--metric-accent) 66%,#3c456c),var(--metric-accent))!important;
+ border-radius:999px;
+}
+
+
+
+/* TODAY ONLY. Compact Swiss-Ephemeris sky panel; the actual chart wheel
+ * remains identical to My Chart and re-renders in-place every five seconds. */
+#live-view-body .mx-today-sky-layout{
+ display:block!important;
+ width:min(100%,490px);
+ min-width:0;
+ margin:0 auto 10px!important;
+}
+#live-view-body .mx-today-sky-layout .mx-today-sky{
+ width:100%;
+ max-width:none;
+ margin:0!important;
+ padding:11px 14px 9px!important;
+ border-radius:15px;
+ background:radial-gradient(circle at 50% 38%,#26223d,#131a2b 70%,#0e1423)!important;
+ border:1px solid #5c4b80!important;
+ display:block;
+ text-align:center;
+}
+#live-view-body .mx-today-sky-heading{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:9px;
+ margin:0 0 2px;
+}
+#live-view-body .mx-today-sky-heading h2{
+ font-size:14px;
+ line-height:1.5;
+ margin:0;
+ font-weight:800;
+ color:#f1eaff;
+}
+#live-view-body .mx-today-sky-expand{
+ flex:none;
+ min-height:31px;
+ padding:4px 10px;
+ font-size:11px;
+ border-radius:9px;
+}
+#live-view-body .mx-today-sky-open{
+ display:block;
+ width:min(100%,350px);
+ height:auto;
+ padding:0!important;
+ margin:0 auto;
+ border:0!important;
+ border-radius:13px;
+ background:transparent!important;
+ box-shadow:none!important;
+ cursor:zoom-in;
+ min-height:0;
+ overflow:visible;
+}
+#live-view-body .mx-today-sky-open:focus-visible{
+ outline:2px solid #c8a6fa!important;
+ outline-offset:4px;
+}
+#live-view-body .mx-today-sky-open .chart-wheel{
+ display:block;
+ width:100%;
+ max-width:350px;
+ height:auto;
+ margin:0 auto!important;
+ overflow:visible;
+ transform-origin:center;
+ filter:drop-shadow(0 3px 11px #040613aa);
+}
+#live-view-body .mx-today-sky-time{
+ display:block;
+ margin:1px auto 0;
+ font-size:10px;
+ line-height:1.5;
+ font-variant-numeric:tabular-nums;
+ color:#afbcd6;
+}
+
+/* A calm mint/emerald design for both Moon and VOC time gauges. */
+#live-view-body .mx-focused-dashboard{
+ gap:10px;
+ grid-template-columns:minmax(0,1.35fr) minmax(258px,.8fr);
+}
+#live-view-body .mx-focused-dashboard .mx-focus-main,
+#live-view-body .mx-focused-dashboard .mx-focus-aside{gap:9px}
+#live-view-body .mx-focused-dashboard .panel{
+ margin:0!important;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-panel{padding:12px 14px!important}
+#live-view-body .mx-focused-dashboard .mx-focus-panel>h2{
+ font-size:14px;
+ margin:0 0 8px;
+ line-height:1.4;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-hero{padding:15px 16px!important}
+#live-view-body .mx-focused-dashboard .mx-focus-heading{margin:0 0 5px}
+#live-view-body .mx-focused-dashboard .mx-focus-hero h2{
+ font-size:clamp(17px,1.6vw,22px);
+ margin:3px 0 6px;
+ line-height:1.4;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-hero p{
+ font-size:12px;
+ line-height:1.65;
+ margin:5px 0 8px;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-actions{margin-top:9px}
+#live-view-body .mx-focused-dashboard .mx-focus-actions button{
+ min-height:33px;
+ padding:7px 11px;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-moon{
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:7px;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-moon article{
+ min-width:0;
+ padding:9px 10px 10px;
+ border-radius:11px;
+ border:1px solid rgba(96,225,170,.43);
+ background:linear-gradient(150deg,rgba(19,100,76,.30),rgba(15,48,47,.31) 80%);
+ box-shadow:inset 0 1px 0 rgba(176,255,214,.10),0 3px 14px rgba(9,81,58,.12);
+}
+#live-view-body .mx-focused-dashboard .mx-focus-moon small{
+ font-size:10px;
+ line-height:1.4;
+ color:#aeead2;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-moon strong{
+ margin:4px 0;
+ font-size:14px;
+ line-height:1.35;
+ color:#bffce0;
+ font-weight:800;
+ text-shadow:0 0 14px rgba(89,231,167,.19);
+}
+#live-view-body .mx-focused-dashboard .mx-focus-moon time{
+ display:block;
+ font-size:11px;
+ line-height:1.4;
+ color:#d0f5e4;
+ font-variant-numeric:tabular-nums;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-moon progress{
+ display:block;
+ width:100%;
+ height:7px;
+ margin:8px 0 0;
+ overflow:hidden;
+ border:0;
+ border-radius:999px;
+ color:#63e7ae;
+ accent-color:#63e7ae;
+ appearance:none;
+ -webkit-appearance:none;
+ background:rgba(80,132,115,.24);
+}
+#live-view-body .mx-focused-dashboard .mx-focus-moon progress::-webkit-progress-bar{
+ background:rgba(80,132,115,.24);
+ border-radius:999px;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-moon progress::-webkit-progress-value{
+ background:linear-gradient(90deg,#37bd84,#82f0b4);
+ border-radius:999px;
+ box-shadow:0 0 8px rgba(83,242,161,.26);
+}
+#live-view-body .mx-focused-dashboard .mx-focus-moon progress::-moz-progress-bar{
+ background:linear-gradient(90deg,#37bd84,#82f0b4);
+ border-radius:999px;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-note{
+ margin-top:6px;
+ font-size:10px;
+ line-height:1.55;
+}
+#live-view-body .mx-focused-dashboard .mx-moon-personal-summary{
+ margin:8px 0 4px!important;
+ line-height:1.55;
+ font-size:11px;
+}
+#live-view-body .mx-focused-dashboard .mx-focus-event{padding:6px 0;gap:8px}
+#live-view-body .mx-focused-dashboard .mx-focus-event .mx-event-mark{font-size:18px;flex-basis:24px}
+#live-view-body .mx-focused-dashboard .mx-focus-subaction{margin-top:7px;min-height:32px;padding:6px 11px}
+
+/* Professional Today is a separate layout: shrink card spacing, not the data. */
+#live-view-body .mx-today-compact{gap:12px}
+#live-view-body .mx-today-compact .panel{margin-bottom:10px!important}
+#live-view-body .mx-today-compact .hero{
+ min-height:0;
+ padding:14px 17px!important;
+}
+#live-view-body .mx-today-compact .hero-copy{
+ margin-top:8px;
+ max-width:85%;
+}
+#live-view-body .mx-today-compact .hero-copy h2{
+ font-size:clamp(17px,1.8vw,23px);
+ margin:5px 0;
+ line-height:1.48;
+}
+#live-view-body .mx-today-compact .hero-copy p{
+ margin:5px 0 10px;
+ line-height:1.6;
+}
+#live-view-body .mx-today-compact .hero-orbit{
+ transform:scale(.68) rotate(-22deg);
+ transform-origin:100% 0%;
+}
+#live-view-body .mx-today-compact .scores-grid{
+ gap:7px;
+ margin:0 0 13px;
+}
+#live-view-body .mx-today-compact .score-card{
+ min-height:78px;
+ padding:8px 10px;
+}
+#live-view-body .mx-today-compact .signal-list{gap:7px;margin-bottom:12px}
+#live-view-body .mx-today-compact .signal-card{padding:10px 12px}
+#live-view-body .mx-today-compact .rhythm{padding:12px 14px}
+#live-view-body .mx-today-compact .trend svg{height:115px}
+
+@media(max-width:1100px){
+ #live-view-body .mx-focused-dashboard{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:760px){
+ #live-view-body .mx-today-sky-layout{width:min(100%,440px);margin-bottom:8px!important}
+ #live-view-body .mx-today-sky-layout .mx-today-sky{padding:9px 7px 7px!important}
+ #live-view-body .mx-today-sky-open{width:min(100%,290px)}
+ #live-view-body .mx-today-sky-open .chart-wheel{width:100%;max-width:290px;margin:0 auto!important}
+ #live-view-body .mx-today-sky-time{font-size:9px}
+ #live-view-body .mx-focused-dashboard .mx-focus-moon{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #live-view-body .mx-focused-dashboard .mx-focus-panel{padding:10px 11px!important}
+ #live-view-body .mx-focused-dashboard .mx-focus-hero{padding:12px!important}
+ #live-view-body .mx-today-compact .hero-copy{max-width:100%}
+ #live-view-body .mx-today-compact .hero-orbit{opacity:.2}
+ #live-view-body .mx-today-compact .scores-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:360px){
+ #live-view-body .mx-today-sky-open{width:min(100%,245px)}
+ #live-view-body .mx-today-sky-open .chart-wheel{max-width:245px}
+ #live-view-body .mx-focused-dashboard .mx-focus-moon{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #live-view-body .mx-focused-dashboard .mx-focus-moon article{padding:8px}
+ #live-view-body .mx-focused-dashboard .mx-focus-moon small{font-size:9px}
+ #live-view-body .mx-focused-dashboard .mx-focus-moon strong{font-size:12px}
+}
+
+/* Expanding Today changes scale, not the calculation lifecycle.
+ * The same live ephemeris renderer continues running inside this dialog. */
+#detail:has(.mx-expanded-sky){
+ width:min(870px,calc(100vw - 24px));
+ max-width:870px;
+ max-height:92dvh;
+ padding:19px 20px 21px;
+ overflow:auto;
+}
+#detail .mx-expanded-sky h2{
+ font-size:clamp(17px,2.5vw,23px);
+ line-height:1.4;
+ margin:7px 0;
+}
+#detail .mx-expanded-sky-time{
+ display:block;
+ margin:3px 0 8px;
+ text-align:center;
+ font-variant-numeric:tabular-nums;
+ color:#b9e3d3;
+ font-size:12px;
+}
+#detail .mx-expanded-wheel{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ margin:auto;
+ width:100%;
+ min-width:0;
+}
+#detail .mx-expanded-wheel svg.chart-wheel{
+ display:block;
+ width:min(100%,750px);
+ max-width:750px;
+ height:auto;
+ max-height:none;
+ margin:auto;
+ overflow:visible;
+}
+#detail .mx-expanded-sky-notes{
+ margin:8px auto 0;
+ color:#aab6ca;
+ text-align:center;
+ font-size:11px;
+ line-height:1.6;
+}
+@media(max-width:760px){
+ #detail:has(.mx-expanded-sky){
+  width:calc(100vw - 12px);
+  max-width:100%;
+  padding:10px 9px 14px;
+  border-radius:15px;
+ }
+ #detail .mx-expanded-sky-time{font-size:10px}
+ #detail .mx-expanded-wheel svg.chart-wheel{width:100%;max-width:100%;margin:0 auto}
+ #detail .mx-expanded-sky-notes{font-size:10px}
+}
+
+/* People: full-width Go Mode-inspired meters and distinct identity circles. */
+#live-view-body .partner-overview .dimension-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+#live-view-body .partner-score{display:flex;flex-direction:column;gap:9px;min-width:0}
+#live-view-body .partner-score>span{font-weight:750;font-size:14px}
+#live-view-body .partner-insight{display:flex;flex-direction:column;gap:10px;min-width:0;padding:17px}
+#live-view-body .partner-insight>h3{font-size:15px;margin:0;line-height:1.5}
+#live-view-body .partner-insight .mx-partner-reading{margin:0;font-size:13px;line-height:1.8;color:#d4daed}
+#live-view-body .mx-partner-basis{margin-top:auto;display:block;font-size:11px;line-height:1.65;color:#b6c5de;border-top:1px solid #4e576877;padding-top:7px}
+#live-view-body .mx-people-gauge{--m:#9bd39c;width:100%;display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:0}
+#live-view-body .mx-people-gauge.strong{--m:#53d3a0}
+#live-view-body .mx-people-gauge.steady{--m:#9cce8d}
+#live-view-body .mx-people-gauge.caution{--m:#ecb268}
+#live-view-body .mx-people-gauge.low{--m:#e78178}
+#live-view-body .mx-people-gauge-number{display:flex;align-items:baseline;justify-content:flex-start;direction:ltr;gap:3px}
+#live-view-body .mx-people-gauge-number b{color:var(--m);font-weight:800;font-size:23px;line-height:1.1}
+#live-view-body .mx-people-gauge-number small{font-size:11px;color:#b1bfd2}
+#live-view-body .mx-people-gauge-track{width:100%;height:8px;border-radius:100px;overflow:hidden;background:#8896b83b}
+#live-view-body .mx-people-gauge-track i{display:block;height:100%;border-radius:100px;background:linear-gradient(90deg,color-mix(in srgb,var(--m) 70%,#33445e),var(--m));box-shadow:0 0 10px var(--m)}
+#live-view-body .partner-insights-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+#live-view-body .person-avatar,#live-view-body .mx-profile-avatar,.topbar .avatar{background:linear-gradient(135deg,hsl(var(--mx-avatar-hue,270) 73% 46%),hsl(var(--mx-avatar-hue,270) 68% 24%))!important;border-color:hsl(var(--mx-avatar-hue,270) 77% 73%)!important;color:#fff!important;box-shadow:0 0 0 3px hsl(var(--mx-avatar-hue,270) 75% 54% / .15)}
+#live-view-body .synastry-technical{margin-top:18px}
+@media(max-width:940px){#live-view-body .partner-insights-grid{grid-template-columns:1fr}}
+@media(max-width:650px){#live-view-body .partner-overview .dimension-grid{grid-template-columns:1fr}}
+
 
 /* Today: match the Lunar Void of Course crimson surface while VOC is active. */
 #live-view-body .mx-focused-dashboard .mx-focus-lunar-status.is-voc{
