@@ -258,7 +258,7 @@ test('simple home keeps four evidence-first cards, no repeated score tiles, and 
  assert.ok(focus.includes('mx-focus-moon'));
  assert.ok(focus.includes('Next 3 exact sky events'));
  assert.ok(!focus.includes('mx-focus-metrics')&&!focus.includes('Two additional signals'));
- assert.ok(main.includes('unique.find(x=>Math.abs(+x.at-+e.at)<60000)'));
+ assert.ok(main.includes('unique.find(x=>Math.abs(+x.at-+e.at)<60000&&x.reading.kind===e.reading.kind&&'));
  assert.ok(focus.includes('factor.orb.toFixed(2)'));
  assert.ok(main.includes('refineNatalTransit(f,selected,'));
  assert.ok(main.includes('function startFocusEventScan()'));
