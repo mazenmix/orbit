@@ -69,13 +69,13 @@ test('Live Today page consumes sky state, not a stale natal-contact headline',()
  const main=readFileSync('src/main.ts','utf8');
  const focus=main.slice(main.indexOf('function focusedToday(){'),main.indexOf('/** A stable daily scan',main.indexOf('function focusedToday(){')));
  const pro=main.slice(main.indexOf('function today(){'),main.indexOf('function trend(',main.indexOf('function today(){')));
- assert.match(focus,/todaySkyBrief\(r\.current\.points,w,selected,lang\)/);
- assert.match(focus,/brief\.recent/);
- assert.match(focus,/brief\.next/);
+ assert.match(focus,/brief=currentWholeSky\(\)/);
+ assert.match(focus,/brief\.upcoming/);
+ assert.match(focus,/brief\.latest/);
  assert.match(focus,/data-sky-reading-id/);
  assert.match(focus,/mx-sky-live-checked/);
  assert.doesNotMatch(focus,/orb\.toFixed|momentNarrative|momentProof|mx-focus-technical|focus-refine-peak|data-live-orb/);
- assert.match(pro,/todaySkyBrief\(r\.current\.points,moonWindow\(\),selected,lang\)/);
+ assert.match(pro,/sky=currentWholeSky\(\)/);
  assert.match(main,/const LIVE_CONTENT_INTERVAL_MS:Record<string,number>=\{today:10000/);
  assert.match(main,/setInterval\(\(\)=>refreshLiveView\(\),1000\)/);
  assert.match(main,/todayEventPlain\(e\.reading,lang\)/);

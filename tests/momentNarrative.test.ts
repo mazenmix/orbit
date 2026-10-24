@@ -33,7 +33,7 @@ test('No fabricated narrative for unsupported aspect or invalid ephemeris',()=>{
 });
 test('Today now derives its visible narrative from sky events, while detailed transit maths remain separate',()=>{
  const main=readFileSync('src/main.ts','utf8');
- assert.match(main,/todaySkyBrief\(r\.current\.points,w,selected,lang\)/);
+ assert.match(main,/wholeSkyBroadcast\(data!\.current\.points,verifiedWholeSkyEvents\(\),selected,lang\)/);
  assert.match(main,/const LIVE_CONTENT_INTERVAL_MS:Record<string,number>=\{today:10000/);
  assert.match(main,/setInterval\(\(\)=>refreshLiveView\(\),1000\)/);
  assert.match(main,/data-sky-reading-id=/);
