@@ -207,12 +207,12 @@ export function wholeSkyBroadcast(points:readonly Point[],events:readonly WholeS
  }else {
   // No event? Use truthful planetary motion and sign, not invented activity.
   const mercury=source.get('Mercury')!,venus=source.get('Venus')!;
-  title=lang==='ar'?'حركة السماء هسه: عطارد والزهرة':'Sky movement now: Mercury and Venus';
-  meaning=lang==='ar'?'عطارد بـ'+signText(signAt(mercury),lang)+' والزهرة بـ'+signText(signAt(venus),lang)+
-   '. ماكو اتصال قريب يبرّر تبديل العنوان، بس مواقع الكواكب دا تستمر بالحركة.':
-   'Mercury is in '+signText(signAt(mercury),lang)+' and Venus is in '+signText(signAt(venus),lang)+'. No close contact justifies a fabricated new headline.';
-  action=lang==='ar'?'تابع أقرب حدث محسوب وتحقق من التفاصيل قبل أي قرار.':'Watch the next verified event before making decisions.';
-  movement=lang==='ar'?'أكو حركة فعلية، بس ماكو حدث جديد مؤكد بهاللحظة.':'Planets are moving, with no new verified event right now.';
+  title=lang==='ar'?'هسه ركّز على وضوح كلامك وعلاقاتك':'Now: clear communication and relationships';
+  meaning=lang==='ar'?'إذا عندك اتصال أو موعد أو موضوع علاقة، رتّبه بهدوء. عطارد بـ'+signText(signAt(mercury),lang)+' والزهرة بـ'+signText(signAt(venus),lang)+
+   '؛ مو لازم تنتظر مناسبة خاصة حتى تحسم التفاصيل اللي بيدك.':
+   'For conversations, appointments or relationships, focus on what you can clarify. Mercury is in '+signText(signAt(mercury),lang)+' and Venus in '+signText(signAt(venus),lang)+'.';
+  action=lang==='ar'?'اختار رسالة أو موعد واحد وخلّ تفاصيله واضحة.':'Clarify one message or appointment.';
+  movement=lang==='ar'?'ماكو موضوع جديد طاغي بهاللحظة؛ ركّز على الشي اللي تگدر تسويه.':'No new dominant theme right now; focus on what you can control.';
  }
  const planetStatuses=FULL_SKY_BODIES.map(id=>{
   const p=source.get(id)!;
