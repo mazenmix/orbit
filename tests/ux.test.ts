@@ -152,13 +152,11 @@ test('live sky wheel is directly tappable and launches an expanded SVG modal',()
  assert.ok(main.includes('mx-expanded-wheel'));
  assert.ok(main.includes("on('expand-sky-wheel',expandSky)"));
 });
-test('fortune calendar color must come from genuine aspect weights and show transparent proof',()=>{
+test('fortune calendar score still derives from actual samples without the removed daily proof panel',()=>{
  assert.ok(main.includes('calendarDaySynthesis(samples)'));
  assert.ok(main.includes('calendarMomentEvidence(current,natal,sampledAt,active.known)'));
  assert.ok(main.includes("CALENDAR_SAMPLE_HOURS.map(hour=>"));
  assert.ok(!main.includes('colorizeAstroDay(r.scores)'));
- assert.ok(main.includes('snap.strongestSupport'));
- assert.ok(main.includes('snap.strongestChallenge'));
  assert.ok(main.includes("localValue(sampledAt,active.zone).slice(0,16)"));
  assert.ok(main.includes('calendarFailures.set(day.iso'));
 });
