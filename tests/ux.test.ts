@@ -259,10 +259,10 @@ test('simple home has the main focus, Moon and exact-event cards without duplica
  assert.ok(!focus.includes('aiSnippet'));
  assert.ok(main.includes('function aiPage()'),'Keep separate AI page available');
  assert.ok(focus.includes('mx-focus-moon'));
- assert.ok(focus.includes('Next 3 exact sky events'));
+ assert.ok(focus.includes('Upcoming events · all planets'));
  assert.ok(!focus.includes('mx-focus-metrics')&&!focus.includes('Two additional signals'));
  assert.ok(main.includes('unique.find(x=>Math.abs(+x.at-+e.at)<60000&&x.reading.kind===e.reading.kind&&'));
- assert.ok(focus.includes('todaySkyBrief(r.current.points,w,selected,lang)'));
+ assert.ok(focus.includes('currentWholeSky()'));
  assert.ok(focus.includes('data-sky-reading-id'));
  assert.ok(focus.includes('mx-sky-live-checked'));
  assert.ok(!focus.includes('orb.toFixed')&&!focus.includes('momentProof'));
