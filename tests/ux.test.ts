@@ -181,10 +181,14 @@ test('Tahoma style covers all application surfaces after prior feature styles',(
  assert.ok(font.includes('.mobile-nav'));
 });
 
-test('calendar shows only three numeric color bands and no methodology expander',()=>{
+test('calendar keeps three numeric color bands but removes the legend and explanatory subtitle',()=>{
  const calendar=readFileSync('src/astroCalendar.ts','utf8');
  assert.ok(calendar.includes("value<=30?'red':value<=70?'yellow':'green'"));
- assert.ok(main.includes("(['green','yellow','red'] as const).map(legend)"));
+ assert.ok(!main.includes('astro-legend-item'));
+ assert.ok(!main.includes('astro-cal-toolbar'));
+ assert.ok(!main.includes('كل الأشهر الاثني عشر ظاهرة'));
+ assert.ok(!main.includes('All twelve months are shown'));
+ assert.ok(main.includes('function calendarColorLabel('));
  assert.ok(!main.includes('شلون تحدد لون الحظ؟'));
  assert.ok(!main.includes('How is the fortune color determined?'));
  assert.ok(!calendar.includes("'orange'"));
