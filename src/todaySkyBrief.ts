@@ -1,5 +1,6 @@
 import type {Point} from './math.ts';
 import type {ExactEvent,LunarWindow} from './timing.ts';
+import type {FocusReadingInput} from './focusEventReading.ts';
 
 /** A human, short, NON-NUMERICAL Today reading tied to real Swiss-Ephemeris positions
  * and the lunar window's exact event times. No clock-based random wording or invented
@@ -140,7 +141,7 @@ export function todaySkyBrief(points:readonly Point[],moon:LunarWindow,at:Date,l
   action=next.action;
   movement=lang==='ar'?'اتصال قمري قادم خلال الساعات الجاية.':'A lunar contact is due in the coming hours.';
  }else{
-  title=lang==='ar'?'القمر بالحملات الحالية: '+signLabel:'Moon in '+signLabel;
+  title=lang==='ar'?'القمر حالياً ببرج '+signLabel:'Moon in '+signLabel;
   meaning=lang==='ar'?'القمر هسه ببرج '+signLabel+'؛ الموضوع الرمزي الأبرز هو '+choose(theme.theme,lang)+'.':
    'The Moon is currently in '+signLabel+'; the symbolic theme is '+choose(theme.theme,lang)+'.';
   action=choose(theme.step,lang);
@@ -154,4 +155,37 @@ export function todaySkyBrief(points:readonly Point[],moon:LunarWindow,at:Date,l
  const identity=[moon.sign,moon.isVoid?1:0,recent?.kind,recent?.time.toISOString(),next?.kind,next?.time.toISOString(),
    ...contacts.slice(0,3).map(c=>c.first+':'+c.second+':'+c.angle+':'+Number(c.applying))].join('|');
  return {title,meaning,action,movement,moonNote,recent,next,identity,activeContacts:contacts};
+}
+
+
+/** The Today event list uses plain-language names and topics. Angular geometry
+ * is preserved in the underlying calculations and detailed screens, NOT in prose.
+ */
+export function todayEventPlain(ev:FocusReadingInput,lang:SkyLanguage):{label:string;description:string;action:string}{
+ if(ev.kind==='moon-ingress'){
+  if(!Number.isInteger(ev.nextSign)||ev.nextSign!<0||ev.nextSign!>11)throw Error('Invalid Moon ingress');
+  return {label:lang==='ar'?'القمر يدخل '+choose(signNames[ev.nextSign!],lang):'Moon enters '+choose(signNames[ev.nextSign!],lang),
+   description:lang==='ar'?'يتبدل معنى القمر الرمزي إلى '+choose(signThemes[ev.nextSign!].theme,lang)+'.':
+    'The Moon shifts toward '+choose(signThemes[ev.nextSign!].theme,lang)+'.',
+   action:choose(signThemes[ev.nextSign!].step,lang)};
+ }
+ if(ev.kind==='voc-start'||ev.kind==='voc-end'){
+  const beginning=ev.kind==='voc-start';
+  return {label:lang==='ar'?(beginning?'بداية خلو مسار القمر':'نهاية خلو مسار القمر'):
+    (beginning?'Moon void-of-course begins':'Moon void-of-course ends'),
+   description:lang==='ar'?(beginning?'مرحلة مراجعة وهدوء ضمن التقليد الفلكي.':'القمر يغيّر برجه وتبدأ قراءة مختلفة.'):
+    (beginning?'A traditional phase of review and reflection.':'The Moon changes signs and a new reading begins.'),
+   action:lang==='ar'?(beginning?'راجع موعدك والخطوة المفتوحة قبل الالتزام.':'اختار خطوة بسيطة من الأمور اللي راجعتها.'):
+    (beginning?'Review your plans before committing.':'Act on one of the items you reviewed.')};
+ }
+ const first=ev.kind==='moon-aspect'?'Moon':ev.transit;
+ const second=ev.target,topic=second?planets[second]:null;
+ if(!first||!topic||!planets[first]||ev.angle===undefined||!aspectAngles.includes(ev.angle as 0))throw Error('Unsupported calculated sky event');
+ const label=lang==='ar'?
+  (ev.kind==='personal-aspect'?'عبور شخصي: ':'')+name(first,lang)+' ويّه '+name(second,lang):
+  (ev.kind==='personal-aspect'?'Personal transit: ':'')+name(first,lang)+' with '+name(second,lang);
+ const intro=ev.kind==='personal-aspect'?
+  (lang==='ar'?'هذه إشارة على خريطتك الشخصية، ضمن موضوع ':'This personal chart contact concerns '):
+  (lang==='ar'?'الاتصال القمري يركّز رمزياً على ':'The Moon contact symbolizes ');
+ return {label,description:intro+choose(topic.theme,lang)+'. '+contactMeaning(second,ev.angle,lang),action:choose(topic.step,lang)};
 }
