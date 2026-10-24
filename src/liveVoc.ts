@@ -18,3 +18,11 @@ export function remainingPercent(start:number,end:number,now:number):number{
  if(!Number.isFinite(start)||!Number.isFinite(end)||!Number.isFinite(now)||end<=start)return 0;
  return Math.max(0,Math.min(100,100*(end-now)/(end-start)));
 }
+
+/** Percentage of the calculated interval that has elapsed, strictly increasing.
+ * This is separate from seconds remaining shown alongside the gauge.
+ */
+export function elapsedPercent(start:number,end:number,now:number):number{
+ if(!Number.isFinite(start)||!Number.isFinite(end)||!Number.isFinite(now)||end<=start)return 0;
+ return Math.max(0,Math.min(100,100*(now-start)/(end-start)));
+}
