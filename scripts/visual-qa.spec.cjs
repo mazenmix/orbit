@@ -270,7 +270,7 @@ test('calendar shows twelve ordered month cards and dates on Monday-first LTR co
  if(Math.abs(layout.monthX[0]-layout.monthX[1])>5)expect(layout.monthX[0]).toBeLessThan(layout.monthX[1]);
  for(const item of layout.cells)expect(item.col).toBe((new Date(item.iso+'T00:00:00Z').getUTCDay()+6)%7+1);
  await page.locator('[data-calendar-date]').nth(1).click();
- await expect(page.locator('[data-section="time"]')).toBeVisible({timeout:75000});
+ await expect(page.locator('.mx-time-compact')).toBeVisible({timeout:75000});
 });
 test('MX Ai has new indicators and useful moon explanations',async({page})=>{
  await page.goto('/#intel',{waitUntil:'domcontentloaded'});
