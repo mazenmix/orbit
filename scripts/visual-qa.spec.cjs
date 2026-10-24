@@ -244,16 +244,33 @@ test('Qwen3 automatically displays only one read-only text panel',async({page})=
  await expect(page.locator('.sidebar [data-go="intel"]')).toHaveAttribute('aria-current','page');
 });
 
-test('twelve-month calendar is accessible and progress fills individual days',async({page})=>{
+test('calendar shows twelve ordered month cards and dates on Monday-first LTR columns',async({page})=>{
  await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
  await expect(page.locator('.astro-cal-toolbar')).toBeVisible({timeout:75000});
- const dates=await page.locator('[data-calendar-date]').count();
- expect(dates).toBeGreaterThanOrEqual(365);expect(dates).toBeLessThanOrEqual(366);
- await expect(page.locator('.astro-cal-month')).toHaveCount(13);
+ await expect(page.locator('.astro-cal-month')).toHaveCount(12);
+ await expect(page.locator('#astro-calendar-detail')).toHaveCount(0);
+ await expect(page.locator('#calendar-expand')).toHaveCount(0);
+ const count=await page.locator('[data-calendar-date]').count();
+ expect(count).toBeGreaterThan(300);
  await expect(page.locator('.astro-cal-day:not(.astro-pending)').first()).toBeVisible({timeout:75000});
+ const layout=await page.evaluate(()=>{
+  const months=[...document.querySelectorAll('.astro-cal-month')];
+  const first=months[0],second=months[1];
+  const start=first.querySelector('.astro-cal-weekdays>span'),end=first.querySelector('.astro-cal-weekdays>span:last-child');
+  const cells=[...first.querySelectorAll('[data-calendar-date]')];
+  return {
+   monthOrder: months.slice(0,2).map(m=>m.querySelector('.astro-cal-month-head h3')?.textContent),
+   monthX: [first.getBoundingClientRect().x,second.getBoundingClientRect().x],
+   firstWeekdayX:start.getBoundingClientRect().x,
+   lastWeekdayX:end.getBoundingClientRect().x,
+   cells:cells.slice(0,3).map(el=>({iso:el.getAttribute('data-calendar-date'),col:Number(getComputedStyle(el).gridColumnStart)}))
+  }
+ });
+ expect(layout.firstWeekdayX).toBeLessThan(layout.lastWeekdayX);
+ if(Math.abs(layout.monthX[0]-layout.monthX[1])>5)expect(layout.monthX[0]).toBeLessThan(layout.monthX[1]);
+ for(const item of layout.cells)expect(item.col).toBe((new Date(item.iso+'T00:00:00Z').getUTCDay()+6)%7+1);
  await page.locator('[data-calendar-date]').nth(1).click();
- await expect(page.locator('#astro-calendar-detail')).toBeVisible();
- await expect(page.locator('.astro-cal-day.is-selected')).toHaveCount(1);
+ await expect(page.locator('.mx-time-compact')).toBeVisible({timeout:75000});
 });
 test('MX Ai has new indicators and useful moon explanations',async({page})=>{
  await page.goto('/#intel',{waitUntil:'domcontentloaded'});

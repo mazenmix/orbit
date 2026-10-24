@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {astroCalendarDays,firstTwelveCalendarMonths,colorizeAstroDay,calendarColorForScore,fortuneContactWeight,fortuneContactTone} from '../src/astroCalendar.ts';
+import {astroCalendarDays,firstTwelveCalendarMonths,astroCalendarGridPosition,colorizeAstroDay,calendarColorForScore,fortuneContactWeight,fortuneContactTone} from '../src/astroCalendar.ts';
 const aspect=(angle:number,transit='Venus',orb=.1,weight=.9)=>({
  id:transit+'-'+angle+'-Sun',transit:{id:transit,symbol:'✦',longitude:100,speed:1},
  natal:{id:'Sun',symbol:'☉',longitude:100,speed:0},angle,orb,maximumOrb:2,applying:true,weight,exact:null
@@ -65,4 +65,22 @@ test('display limit handles the new year and leap February without reversing dat
  assert.equal(new Set(visible.map(x=>x.monthKey)).size,12);
  assert.ok(visible.some(x=>x.iso==='2028-02-29'));
  assert.ok(visible.every((v,i)=>i===0||v.iso>visible[i-1].iso));
+});
+
+test('calendar cells align to explicit Monday-through-Sunday columns even under RTL parent',()=>{
+ const october=astroCalendarDays('2026-10-24');
+ const first=october[0];
+ assert.equal(first.weekday,5); // Saturday
+ assert.deepEqual(astroCalendarGridPosition(first.weekday,0),{column:6,row:1}); // Sat Oct 24
+ assert.deepEqual(astroCalendarGridPosition(first.weekday,1),{column:7,row:1}); // Sun Oct 25
+ assert.deepEqual(astroCalendarGridPosition(first.weekday,2),{column:1,row:2}); // Mon Oct 26
+ const novFirst=october.find(x=>x.iso==='2026-11-01');
+ assert.equal(novFirst?.weekday,6);
+ assert.deepEqual(astroCalendarGridPosition(6,0),{column:7,row:1}); // Sun Nov 1
+ assert.deepEqual(astroCalendarGridPosition(6,1),{column:1,row:2}); // Mon Nov 2
+ for(let offset=0;offset<35;offset++){
+  const p=astroCalendarGridPosition(5,offset);
+  assert.ok(p.column>=1&&p.column<=7&&p.row>=1);
+ }
+ for(const args of [[-1,0],[7,0],[0,-1],[NaN,0],[2,1.5]])assert.throws(()=>astroCalendarGridPosition(args[0],args[1]));
 });

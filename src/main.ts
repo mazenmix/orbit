@@ -20,7 +20,7 @@ import './peopleCards.css';
 import './lifeGauges.css';
 import './moonMansions.css';
 import {lunarMansionWindow,type LunarMansionWindow} from './moonMansions.ts';
-import {astroCalendarDays,firstTwelveCalendarMonths,calendarDaySynthesis,calendarMomentEvidence,CALENDAR_SAMPLE_HOURS,type AstroCalendarDay,type AstroCalendarRating,type CalendarDayRating} from './astroCalendar.ts';
+import {astroCalendarDays,firstTwelveCalendarMonths,astroCalendarGridPosition,calendarDaySynthesis,calendarMomentEvidence,CALENDAR_SAMPLE_HOURS,type AstroCalendarDay,type AstroCalendarRating,type CalendarDayRating} from './astroCalendar.ts';
 import {optionalComparison,distinctParagraphs} from './reading.ts';
 import {narrativeEvidence} from './narrativeEvidence.ts';
 import {CALCULATION_VERSION} from './engine.ts';
@@ -829,44 +829,6 @@ function initializeAstroCalendar(){
  calendarVersion=version;calendarAnchor=today;calendarDays=firstTwelveCalendarMonths(astroCalendarDays(today));
  calendarSnapshots.clear();calendarFailures.clear();calendarNatal=null;calendarCursor=0;calendarGeneration++;calendarRunning=false;calendarSelected=today;
 }
-function astroCalendarDetail(iso:string){
- const snap=calendarSnapshots.get(iso);
- if(calendarFailures.has(iso))return '<p class="alert">'+t('حساب هذا اليوم غير متاح: ','Calculation unavailable for this day: ')+esc(calendarFailures.get(iso))+'</p>';
- if(!snap)return '<div class="astro-day-compact-empty"><b>'+esc(iso)+'</b><span>'+t('دا تنحسب مواضع هذا اليوم…','Calculating this day…')+'</span></div>';
- const {value,color,at}=snap;
- const date=new Intl.DateTimeFormat('en-US',{timeZone:active.zone,weekday:'short',day:'numeric',month:'short',year:'numeric',numberingSystem:'latn'}).format(at);
- const grade=color==='green'?t('مرتفع','High'):color==='yellow'?t('متوسط','Moderate'):t('منخفض','Low');
- const factor=(e:typeof snap.strongestSupport,kind:'good'|'check',hour:number|null)=>e?
-  '<span class="astro-compact-aspect '+kind+'"><span>'+(kind==='good'?t('✦ داعمة','✦ Favorable'):t('◇ متحدية','◇ Challenging'))+'</span><b>'+esc(planet(e.transit.id))+' '+aspect(e.angle)+' '+esc(planet(e.natal.id))+'</b><small dir="ltr">'+e.orb.toFixed(2)+'° · '+String(hour??12).padStart(2,'0')+':00</small></span>':'';
- const contacts=factor(snap.strongestSupport,'good',snap.strongestSupportHour)+factor(snap.strongestChallenge,'check',snap.strongestChallengeHour);
- const theme=(e:typeof snap.strongestSupport):string=>{
-  if(!e)return '';
-  const topics:Record<string,[string,string]>={
-   Sun:['ثقتك بنفسك وقراراتك','identity and priorities'],
-   Moon:['راحتك وردّة فعلك','comfort and emotional reactions'],
-   Mercury:['الحچي والرسائل والتفاهم','conversation and communication'],
-   Venus:['التقارب والتقدير','affection and values'],
-   Mars:['المبادرة والجهد','initiative and effort'],
-   Jupiter:['التوسع وتعلّم الجديد','learning and expansion'],
-   Saturn:['المسؤولية والالتزام','responsibility and commitments'],
-   Uranus:['التغيير والتجربة','change and experimentation'],
-   Neptune:['التوقعات والوضوح','expectations and clarity'],
-   Pluto:['الحدود والتغيير العميق','boundaries and deliberate change']
-  };
-  const topic=topics[e.natal.id]??['أولوياتك','personal priorities'];
-  return lang==='ar'?topic[0]:topic[1];
- };
- const easier=theme(snap.strongestSupport),challenging=theme(snap.strongestChallenge);
- const dayMeaning=easier&&challenging?
-  t('بموضوع '+easier+' عندك مجال للتعامل بهدوء وبخطوة واضحة، لكن '+challenging+' يحتاج مراجعة التفاصيل قبل الحسم. مثال: إذا تنتظر جواب أو قرار، جهّز البديل وتأكد من المعطيات بدل الاستعجال.',
-    'The sky samples emphasize '+easier+' as an easier symbolic theme, while '+challenging+' calls for care. Real actions matter more than the color.'):
-  easier?t('الجانب الأبرز رمزياً يخص '+easier+'. جرّب خطوة صغيرة وقيّم نتيجتها بالواقع.','The strongest symbolic theme involves '+easier+'. Try a small step and evaluate the result in real life.'):
-  challenging?t('الحساب يركز على '+challenging+'. راجع التفاصيل؛ هذا مو معناه اليوم كله سيّئ.','The chart highlights '+challenging+'. Review the details; this does not make the whole day bad.'):
-  t('ماكو اتصال قوي يبرر قصة شخصية لهاليوم، والرقم وحده ما يخبرك شنو راح يصير.','No strong aspect justifies a personal story; the index alone cannot predict what will happen.');
- return '<div class="astro-day-compact-head"><div class="astro-day-compact-title"><span class="astro-day-kicker">'+t('مؤشر رمزي · 3 أوقات','Symbolic index · 3 checkpoints')+'</span><h3 dir="ltr">'+esc(date)+'</h3><small>'+t('خلاصة مبنية على ثلاث مراجعات للوقت المختار','Summary based on three checkpoints during the selected day')+'</small></div><div class="astro-day-main-score astro-'+color+'"><b>'+value+'<small>/100</small></b><span>'+grade+'</span></div></div>'+
-  '<p class="astro-day-context">'+esc(dayMeaning)+'</p><details class="astro-day-compact-aspects"><summary>'+t('التفاصيل الحسابية','Calculation details')+'</summary>'+(contacts||'<span class="astro-compact-no-aspect">'+t('ماكو عامل قريب مهيمن بهالوقت.','No dominant nearby factor.')+'</span>')+'</details>'+
-  '<div class="astro-day-compact-footer"><small>'+t('الفحص: 04 / 12 / 20 · المدى ','Checks: 04 / 12 / 20 · range ')+snap.minimum+'–'+snap.maximum+' · '+t('مؤشر رمزي مو تنبؤ','Symbolic index, not a forecast')+'</small><button type="button" class="secondary astro-day-open-time" data-calendar-open="'+(+at)+'">'+t('لقطة الظهر بآلة الزمن','Noon snapshot in Time Machine')+' ↗</button></div>';
-}
 function calendarColorLabel(color:AstroCalendarRating['color']){
  return color==='green'?t('مرتفع · 71–99','High · 71–99'):color==='yellow'?t('متوسط · 31–70','Moderate · 31–70'):t('منخفض · 1–30','Low · 1–30');
 }
@@ -879,14 +841,15 @@ function astroCalendarPage(){
  const header='<div class="astro-cal-toolbar"><div class="astro-cal-toolbar-left"><span class="astro-eyebrow">☽  CELESTIAL INDEX</span><div class="astro-legend">'+(['green','yellow','red'] as const).map(legend).join('')+'</div></div><div class="astro-cal-meta"><span>✦ '+calendarDays.length+' DAYS</span><span>◷ '+esc(timezoneCityLabel(active.zone))+'</span><span id="astro-calendar-progress" role="status">'+calendarSnapshots.size+'/'+calendarTargetDays()+' '+t('محسوب فعلياً','verified')+'</span></div></div>';
  const groups=[...months.entries()].map(([key,days])=>{
   const initial=days[0],title=new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'long',year:'numeric',numberingSystem:'latn'}).format(new Date(Date.UTC(initial.year,initial.month-1,1)));
-  const blanks=Array.from({length:initial.weekday},()=>'<span class="astro-cal-blank" aria-hidden="true"></span>').join('');
-  return '<section class="astro-cal-month panel" dir="ltr" style="direction:ltr!important"><div class="astro-cal-month-head"><span>✦</span><h3>'+esc(title)+'</h3><small>'+String(initial.month).padStart(2,'0')+'/'+initial.year+'</small></div><div class="astro-cal-weekdays" dir="ltr" style="direction:ltr!important">'+weekdays.map(x=>'<span>'+x+'</span>').join('')+'</div><div class="astro-cal-days" dir="ltr" style="direction:ltr!important">'+blanks+days.map(d=>{
+  // Every date gets a fixed grid-column and grid-row, independent of Arabic RTL.
+  return '<section class="astro-cal-month panel" dir="ltr" style="direction:ltr!important"><div class="astro-cal-month-head"><span>✦</span><h3>'+esc(title)+'</h3><small>'+String(initial.month).padStart(2,'0')+'/'+initial.year+'</small></div><div class="astro-cal-weekdays" dir="ltr" style="direction:ltr!important">'+weekdays.map(x=>'<span>'+x+'</span>').join('')+'</div><div class="astro-cal-days" dir="ltr" style="direction:ltr!important;grid-auto-flow:row">'+days.map((d,dayIndex)=>{
    const v=calendarSnapshots.get(d.iso),color=v?.color??(calendarFailures.has(d.iso)?'unavailable':'pending'),selected=d.iso===calendarSelected,today=d.iso===calendarAnchor;
    const text=v?calendarColorLabel(v.color):calendarFailures.has(d.iso)?t('حساب غير متاح','Calculation unavailable'):t('قيد الحساب','Calculating');
-   return '<button class="astro-cal-day astro-'+color+(selected?' is-selected':'')+(today?' is-today':'')+'" type="button" data-calendar-date="'+d.iso+'" aria-pressed="'+(selected?'true':'false')+'" aria-label="'+d.iso+' · '+text+(v?' · '+v.value+'/100':'')+'" title="'+text+'"><span class="astro-cal-number">'+d.day+'</span><small class="astro-cal-index">'+(v?v.value:'·')+'</small></button>'
+   const position=astroCalendarGridPosition(initial.weekday,dayIndex);
+   return '<button class="astro-cal-day astro-'+color+(selected?' is-selected':'')+(today?' is-today':'')+'" type="button" data-calendar-date="'+d.iso+'" aria-pressed="'+(selected?'true':'false')+'" style="grid-column:'+position.column+';grid-row:'+position.row+';direction:ltr" aria-label="'+d.iso+' · '+text+(v?' · '+v.value+'/100':'')+' · '+t('افتح بآلة الزمن','Open in Time Machine')+'" title="'+t('افتح بآلة الزمن','Open in Time Machine')+' · '+text+'"><span class="astro-cal-number">'+d.day+'</span><small class="astro-cal-index">'+(v?v.value:'·')+'</small></button>'
   }).join('')+'</div></section>';
  }).join('');
- return header+'<section class="panel astro-calendar-detail" id="astro-calendar-detail" aria-live="polite">'+astroCalendarDetail(calendarSelected)+'</section><div class="astro-cal-months" dir="ltr" style="direction:ltr!important;grid-auto-flow:row">'+groups+'</div>';
+ return header+'<div class="astro-cal-months" dir="ltr" style="direction:ltr!important;grid-auto-flow:row">'+groups+'</div>';
 }
 /** Incrementally calculate three verified local-time checkpoints per day. DOM cells are patched
  * in place, so chart navigation, scrolling and month positions are not reset. */
@@ -921,8 +884,8 @@ function startCalendarWork(){
      el.title=calendarColorLabel(rating.color)+' · '+rating.value+'/100 · '+rating.minimum+'–'+rating.maximum;
      const index=el.querySelector('.astro-cal-index');if(index)index.textContent=String(rating.value);
     }
-    if(calendarSelected===day.iso){const area=root.querySelector<HTMLElement>('#astro-calendar-detail');if(area)area.innerHTML=astroCalendarDetail(day.iso);bindCalendarDayButtons()}
-   }catch(e){const message=String(e);calendarFailures.set(day.iso,message);const cell=root.querySelector<HTMLButtonElement>('[data-calendar-date="'+day.iso+'"]');if(cell){cell.classList.remove('astro-pending');cell.classList.add('astro-unavailable');cell.title=t('حساب غير متاح: ','Calculation unavailable: ')+message;cell.setAttribute('aria-label',day.iso+' · '+cell.title)}if(calendarSelected===day.iso){const area=root.querySelector<HTMLElement>('#astro-calendar-detail');if(area)area.innerHTML='<p class="alert">'+t('تعذر تدقيق حساب هذا اليوم. لا نعرض لوناً مختلقاً. ','This day could not be verified, so no invented fortune color is shown. ')+esc(message)+'</p>'}console.warn('Daily ephemeris unavailable',day.iso,e)}
+
+   }catch(e){const message=String(e);calendarFailures.set(day.iso,message);const cell=root.querySelector<HTMLButtonElement>('[data-calendar-date="'+day.iso+'"]');if(cell){cell.classList.remove('astro-pending');cell.classList.add('astro-unavailable');cell.title=t('حساب غير متاح: ','Calculation unavailable: ')+message;cell.setAttribute('aria-label',day.iso+' · '+cell.title)}console.warn('Daily ephemeris unavailable',day.iso,e)}
   }
   const progress=root.querySelector('#astro-calendar-progress');
   if(progress)progress.textContent=calendarSnapshots.size+'/'+calendarTargetDays()+' '+t('محسوب فعلياً','verified')+(calendarFailures.size?' · '+calendarFailures.size+' '+t('غير متاح','unavailable'):'');
@@ -931,23 +894,14 @@ function startCalendarWork(){
  };
  setTimeout(tick,10);
 }
-function bindCalendarDayButtons(){
- root.querySelectorAll<HTMLButtonElement>('[data-calendar-open]').forEach(btn=>btn.onclick=()=>{
-  const at=new Date(Number(btn.dataset.calendarOpen));
-  navigate('time');updateTime(at);
- });
-}
 function bindAstroCalendar(){
  root.querySelectorAll<HTMLButtonElement>('[data-calendar-date]').forEach(button=>button.onclick=()=>{
-  calendarSelected=button.dataset.calendarDate!;
-  root.querySelectorAll<HTMLElement>('[data-calendar-date]').forEach(cell=>{
-   cell.classList.toggle('is-selected',cell.dataset.calendarDate===calendarSelected);
-   cell.setAttribute('aria-pressed',String(cell.dataset.calendarDate===calendarSelected));
-  });
-  const details=root.querySelector<HTMLElement>('#astro-calendar-detail');
-  if(details){details.innerHTML=astroCalendarDetail(calendarSelected);bindCalendarDayButtons();details.scrollIntoView({behavior:'smooth',block:'nearest'})}
+  const iso=button.dataset.calendarDate;
+  if(!iso)return;
+  calendarSelected=iso;
+  const at=zonedInstant(iso+'T12:00',active.zone);
+  navigate('time');updateTime(at,true);
  });
- bindCalendarDayButtons();
 }
 
 function moonAspectNarrative(event:LunarWindow['events'][number]){

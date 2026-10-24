@@ -177,3 +177,14 @@ export function firstTwelveCalendarMonths(days:readonly AstroCalendarDay[]):Astr
  }
  return result;
 }
+
+/** Explicit Monday-first grid coordinates prevent RTL parent layouts from
+ * moving date cells under the wrong weekday header.
+ * weekday zero is Monday and six is Sunday.
+ */
+export function astroCalendarGridPosition(firstWeekday:number,dayOffset:number):{column:number;row:number}{
+ if(!Number.isInteger(firstWeekday)||firstWeekday<0||firstWeekday>6||
+    !Number.isInteger(dayOffset)||dayOffset<0)throw Error('Invalid calendar grid position');
+ const index=firstWeekday+dayOffset;
+ return {column:index%7+1,row:Math.floor(index/7)+1};
+}
