@@ -102,8 +102,9 @@ test('Planet sign entries and every sky event carry a distinct practical persona
 test('Live event cards show What to do in readable user-directed Arabic',()=>{
  const main=readFileSync('src/main.ts','utf8');
  const section=main.slice(main.indexOf('function wholeSkyEventItems('),main.indexOf('function planetLiveStatus('));
- assert.match(section,/line\.description/);
- assert.match(section,/line\.action/);
+ assert.match(section,/story\.now/);
+ assert.match(section,/story\.next/);
+ assert.match(section,/story\.action/);
  assert.match(section,/mx-sky-feed-action/);
  assert.match(section,/شنو تسوي؟/);
  const css=readFileSync('src/focus.css','utf8');
