@@ -457,8 +457,7 @@ function startFocusEventScan(){
 }
 function focusedCalendar(){
  const title=t('التقويم الفلكي','Astrological calendar');
- const sub=t('كل الأشهر الاثني عشر ظاهرة، من الشهر الحالي وبالترتيب من اليسار لليمين.','All twelve months are shown, starting with this month, left to right.');
- return '<section class="panel mx-focus-panel"><h2>'+title+'</h2><p class="mx-focus-note">'+sub+'</p><div class="mx-focus-calendar-actions"><button class="secondary" data-go="time">'+t('آلة الزمن','Time Machine')+' ↗</button><button class="secondary" data-go="eclipses">'+t('الكسوف والخسوف','Eclipses')+'</button></div></section>'+
+ return '<section class="panel mx-focus-panel"><h2>'+title+'</h2><div class="mx-focus-calendar-actions"><button class="secondary" data-go="time">'+t('آلة الزمن','Time Machine')+' ↗</button><button class="secondary" data-go="eclipses">'+t('الكسوف والخسوف','Eclipses')+'</button></div></section>'+
  '<div class="mx-calendar-compact is-expanded">'+astroCalendarPage()+'</div>';
 }
 function focusedTime(){
@@ -837,8 +836,6 @@ function astroCalendarPage(){
  const months=new Map<string,AstroCalendarDay[]>();
  for(const day of calendarDays){const items=months.get(day.monthKey)??[];items.push(day);months.set(day.monthKey,items)}
  const weekdays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
- const legend=(color:AstroCalendarRating['color'])=>'<span class="astro-legend-item"><i class="astro-legend-dot astro-'+color+'"></i>'+calendarColorLabel(color)+'</span>';
- const header='<div class="astro-cal-toolbar"><div class="astro-cal-toolbar-left"><span class="astro-eyebrow">☽  CELESTIAL INDEX</span><div class="astro-legend">'+(['green','yellow','red'] as const).map(legend).join('')+'</div></div><div class="astro-cal-meta"><span>✦ '+calendarDays.length+' DAYS</span><span>◷ '+esc(timezoneCityLabel(active.zone))+'</span><span id="astro-calendar-progress" role="status">'+calendarSnapshots.size+'/'+calendarTargetDays()+' '+t('محسوب فعلياً','verified')+'</span></div></div>';
  const groups=[...months.entries()].map(([key,days])=>{
   const initial=days[0],title=new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'long',year:'numeric',numberingSystem:'latn'}).format(new Date(Date.UTC(initial.year,initial.month-1,1)));
   // Every date gets a fixed grid-column and grid-row, independent of Arabic RTL.
@@ -849,7 +846,7 @@ function astroCalendarPage(){
    return '<button class="astro-cal-day astro-'+color+(selected?' is-selected':'')+(today?' is-today':'')+'" type="button" data-calendar-date="'+d.iso+'" aria-pressed="'+(selected?'true':'false')+'" style="grid-column:'+position.column+';grid-row:'+position.row+';direction:ltr" aria-label="'+d.iso+' · '+text+(v?' · '+v.value+'/100':'')+' · '+t('افتح بآلة الزمن','Open in Time Machine')+'" title="'+t('افتح بآلة الزمن','Open in Time Machine')+' · '+text+'"><span class="astro-cal-number">'+d.day+'</span><small class="astro-cal-index">'+(v?v.value:'·')+'</small></button>'
   }).join('')+'</div></section>';
  }).join('');
- return header+'<div class="astro-cal-months" dir="ltr" style="direction:ltr!important;grid-auto-flow:row">'+groups+'</div>';
+ return '<div class="astro-cal-months" dir="ltr" style="direction:ltr!important;grid-auto-flow:row">'+groups+'</div>';
 }
 /** Incrementally calculate three verified local-time checkpoints per day. DOM cells are patched
  * in place, so chart navigation, scrolling and month positions are not reset. */
