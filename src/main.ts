@@ -1654,7 +1654,18 @@ function navigate(value:string){screen=labels[value]?value:'today';if(!liveTimeP
 window.addEventListener('hashchange',()=>{const value=location.hash.slice(1);if(labels[value]&&value!==screen){screen=value;if(!liveTimePinned||screen==='today'||screen==='ai'){liveTimePinned=false;selected=new Date();recalculate()}render();if(screen==='ai'&&!aiConnection.checked)void refreshAIConnection()}});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
 render();
-initEngine().then(v=>{engineVersion=v;ready=true;recalculate();render();void refreshAIConnection();if('serviceWorker' in navigator&&import.meta.env.PROD){navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(reg=>{if(document.visibilityState==='visible')void reg.update().catch(()=>{});if(backgroundPushOptedIn()&&eyeSettings.enabled)void refreshBackgroundPushIfNeeded(eyeSettings,active.zone,moonPushSchedule()).catch(e=>console.warn('Background push renewal unavailable',e))}).catch(()=>toast(t('تعذر تفعيل العمل بدون إنترنت.','Offline support could not be activated.')))}}).catch(e=>{error=t('تعذر تحميل المحرك الفلكي: ','Could not load the calculation engine: ')+String(e);render()});
+initEngine().then(v=>{engineVersion=v;ready=true;recalculate();render();void refreshAIConnection();if('serviceWorker' in navigator&&import.meta.env.PROD){
+ let refreshingNewVersion=false;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{
+  if(refreshingNewVersion)return;
+  refreshingNewVersion=true;
+  // Preserve user input if a new release activates while a field is being edited.
+  const input=document.activeElement as HTMLElement|null;
+  if(input&&input.matches('input,textarea,select,[contenteditable="true"]')){
+   input.addEventListener('blur',()=>location.reload(),{once:true});
+  }else location.reload();
+ });
+ navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(reg=>{if(document.visibilityState==='visible')void reg.update().catch(()=>{});if(backgroundPushOptedIn()&&eyeSettings.enabled)void refreshBackgroundPushIfNeeded(eyeSettings,active.zone,moonPushSchedule()).catch(e=>console.warn('Background push renewal unavailable',e))}).catch(()=>toast(t('تعذر تفعيل العمل بدون إنترنت.','Offline support could not be activated.')))}}).catch(e=>{error=t('تعذر تحميل المحرك الفلكي: ','Could not load the calculation engine: ')+String(e);render()});
 setInterval(()=>refreshLiveView(),1000);
 window.addEventListener('focus',()=>refreshLiveView(true));
 function eyeClock(now:Date,zone:string):EyeClock{
