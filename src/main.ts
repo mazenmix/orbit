@@ -20,7 +20,7 @@ import './peopleCards.css';
 import './lifeGauges.css';
 import './moonMansions.css';
 import {lunarMansionWindow,type LunarMansionWindow} from './moonMansions.ts';
-import {astroCalendarDays,calendarDaySynthesis,calendarMomentEvidence,CALENDAR_SAMPLE_HOURS,type AstroCalendarDay,type AstroCalendarRating,type CalendarDayRating} from './astroCalendar.ts';
+import {astroCalendarDays,firstTwelveCalendarMonths,calendarDaySynthesis,calendarMomentEvidence,CALENDAR_SAMPLE_HOURS,type AstroCalendarDay,type AstroCalendarRating,type CalendarDayRating} from './astroCalendar.ts';
 import {optionalComparison,distinctParagraphs} from './reading.ts';
 import {narrativeEvidence} from './narrativeEvidence.ts';
 import {CALCULATION_VERSION} from './engine.ts';
@@ -97,7 +97,6 @@ let screen=location.hash.slice(1)||'today',selected=new Date(),data:Report|undef
 let aiConnection={checked:false,configured:false,provider:'none',model:'Qwen3'};
 async function refreshAIConnection(){try{const response=await fetch('/api/explain',{cache:'no-store',signal:AbortSignal.timeout(8000)});const result=await response.json();aiConnection={checked:true,configured:result.configured===true,provider:String(result.provider??'none'),model:String(result.model??'Qwen3')};}catch{aiConnection={checked:true,configured:false,provider:'none',model:'Qwen3'}}if(screen==='ai'){updateLiveQwenCard();void refreshLiveQwen(true)}}
 let uiMode:'simple'|'pro'=localStorage.getItem('mx.uiMode')==='pro'?'pro':'simple';
-let calendarExpanded=false;
 type FocusEvent={name:string;at:Date;mark:string;personal:boolean;reading:FocusReadingInput};
 let focusScan:{key:string;events:FocusEvent[];running:boolean;done:boolean}|null=null;
 let focusMoonEvents:FocusEvent[]=[];
@@ -458,9 +457,9 @@ function startFocusEventScan(){
 }
 function focusedCalendar(){
  const title=t('التقويم الفلكي','Astrological calendar');
- const sub=t('ابدأ بأقرب شهرين. افتح السنة أو آلة الزمن وقت ما تحتاج التفاصيل.','Start with the next two months. Expand the year or open Time Machine when needed.');
- return '<section class="panel mx-focus-panel"><h2>'+title+'</h2><p class="mx-focus-note">'+sub+'</p><div class="mx-focus-calendar-actions"><button class="secondary" data-go="time">'+t('آلة الزمن','Time Machine')+' ↗</button><button class="secondary" data-go="eclipses">'+t('الكسوف والخسوف','Eclipses')+'</button><button class="secondary" id="calendar-expand">'+(calendarExpanded?t('إظهار شهرين','Show two months'):t('إظهار كل الأشهر','Show all months'))+'</button></div></section>'+
- '<div class="mx-calendar-compact'+(calendarExpanded?' is-expanded':'')+'">'+astroCalendarPage()+'</div>';
+ const sub=t('كل الأشهر الاثني عشر ظاهرة، من الشهر الحالي وبالترتيب من اليسار لليمين.','All twelve months are shown, starting with this month, left to right.');
+ return '<section class="panel mx-focus-panel"><h2>'+title+'</h2><p class="mx-focus-note">'+sub+'</p><div class="mx-focus-calendar-actions"><button class="secondary" data-go="time">'+t('آلة الزمن','Time Machine')+' ↗</button><button class="secondary" data-go="eclipses">'+t('الكسوف والخسوف','Eclipses')+'</button></div></section>'+
+ '<div class="mx-calendar-compact is-expanded">'+astroCalendarPage()+'</div>';
 }
 function focusedTime(){
  const short=distinctPriority(rankPrioritySignals({signals:data!.signals,natal:data!.natal,knownBirthTime:active.known,complete:data!.complete}),3,copy).map(({signal,factor})=>{const info=copy(signal);return '<div class="mx-focus-event"><span class="mx-event-mark">'+categoryLabels[signal.category][2]+'</span><div><strong>'+esc(info.title)+'</strong><small>'+esc(info.action)+(factor?' · '+planet(factor.transit.id)+' '+aspect(factor.angle)+' '+planet(factor.natal.id)+' ('+factor.orb.toFixed(2)+'°)':'')+'</small></div></div>'}).join('');
@@ -827,7 +826,7 @@ function astroCalendarToday(){
 function initializeAstroCalendar(){
  const today=astroCalendarToday(),version=JSON.stringify([active,today]);
  if(version===calendarVersion)return;
- calendarVersion=version;calendarAnchor=today;calendarDays=astroCalendarDays(today);
+ calendarVersion=version;calendarAnchor=today;calendarDays=firstTwelveCalendarMonths(astroCalendarDays(today));
  calendarSnapshots.clear();calendarFailures.clear();calendarNatal=null;calendarCursor=0;calendarGeneration++;calendarRunning=false;calendarSelected=today;
 }
 function astroCalendarDetail(iso:string){
@@ -881,28 +880,17 @@ function astroCalendarPage(){
  const groups=[...months.entries()].map(([key,days])=>{
   const initial=days[0],title=new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'long',year:'numeric',numberingSystem:'latn'}).format(new Date(Date.UTC(initial.year,initial.month-1,1)));
   const blanks=Array.from({length:initial.weekday},()=>'<span class="astro-cal-blank" aria-hidden="true"></span>').join('');
-  return '<section class="astro-cal-month panel" dir="ltr"><div class="astro-cal-month-head"><span>✦</span><h3>'+esc(title)+'</h3><small>'+String(initial.month).padStart(2,'0')+'/'+initial.year+'</small></div><div class="astro-cal-weekdays" dir="ltr">'+weekdays.map(x=>'<span>'+x+'</span>').join('')+'</div><div class="astro-cal-days" dir="ltr">'+blanks+days.map(d=>{
+  return '<section class="astro-cal-month panel" dir="ltr" style="direction:ltr!important"><div class="astro-cal-month-head"><span>✦</span><h3>'+esc(title)+'</h3><small>'+String(initial.month).padStart(2,'0')+'/'+initial.year+'</small></div><div class="astro-cal-weekdays" dir="ltr" style="direction:ltr!important">'+weekdays.map(x=>'<span>'+x+'</span>').join('')+'</div><div class="astro-cal-days" dir="ltr" style="direction:ltr!important">'+blanks+days.map(d=>{
    const v=calendarSnapshots.get(d.iso),color=v?.color??(calendarFailures.has(d.iso)?'unavailable':'pending'),selected=d.iso===calendarSelected,today=d.iso===calendarAnchor;
    const text=v?calendarColorLabel(v.color):calendarFailures.has(d.iso)?t('حساب غير متاح','Calculation unavailable'):t('قيد الحساب','Calculating');
    return '<button class="astro-cal-day astro-'+color+(selected?' is-selected':'')+(today?' is-today':'')+'" type="button" data-calendar-date="'+d.iso+'" aria-pressed="'+(selected?'true':'false')+'" aria-label="'+d.iso+' · '+text+(v?' · '+v.value+'/100':'')+'" title="'+text+'"><span class="astro-cal-number">'+d.day+'</span><small class="astro-cal-index">'+(v?v.value:'·')+'</small></button>'
   }).join('')+'</div></section>';
  }).join('');
- return header+'<section class="panel astro-calendar-detail" id="astro-calendar-detail" aria-live="polite">'+astroCalendarDetail(calendarSelected)+'</section><div class="astro-cal-months" dir="ltr">'+groups+'</div>';
+ return header+'<section class="panel astro-calendar-detail" id="astro-calendar-detail" aria-live="polite">'+astroCalendarDetail(calendarSelected)+'</section><div class="astro-cal-months" dir="ltr" style="direction:ltr!important;grid-auto-flow:row">'+groups+'</div>';
 }
 /** Incrementally calculate three verified local-time checkpoints per day. DOM cells are patched
  * in place, so chart navigation, scrolling and month positions are not reset. */
-function calendarTargetDays():number{
- if(uiMode==='pro'||calendarExpanded)return calendarDays.length;
- const first=calendarDays[0]?.monthKey;
- if(!first)return 0;
- let second='';
- for(let i=0;i<calendarDays.length;i++){
-  if(calendarDays[i].monthKey===first)continue;
-  if(!second)second=calendarDays[i].monthKey;
-  if(calendarDays[i].monthKey!==second)return i;
- }
- return calendarDays.length;
-}
+function calendarTargetDays():number{return calendarDays.length;}
 function startCalendarWork(){
  if(calendarRunning||!ready||screen!=='calendar'||!calendarDays.length||calendarCursor>=calendarTargetDays())return;
  calendarRunning=true;
@@ -1270,7 +1258,7 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
  },30);
 });
  
- on('calendar-expand',()=>{calendarExpanded=!calendarExpanded;root.querySelector('.mx-calendar-compact')?.classList.toggle('is-expanded',calendarExpanded);const button=root.querySelector<HTMLButtonElement>('#calendar-expand');if(button)button.textContent=calendarExpanded?t('إظهار شهرين','Show two months'):t('إظهار كل الأشهر','Show all months');const p=root.querySelector('#astro-calendar-progress');if(p)p.textContent=calendarSnapshots.size+'/'+calendarTargetDays()+' '+t('محسوب فعلياً','verified');if(calendarExpanded&&!calendarRunning)startCalendarWork()});
+
  const expandSky=()=>{if(!data)return;showDialog('<div class="mx-expanded-sky"><time class="mx-expanded-sky-time" datetime="'+new Date().toISOString()+'">'+dateText(new Date(),{dateStyle:'full',timeStyle:'medium'})+'</time><div class="mx-expanded-wheel">'+wheel(data.current)+'</div></div>');liveSkyLastTick=Date.now();updateLiveSkyWheel(liveSkyLastTick);tickLiveClocks(liveSkyLastTick);};
  on('expand-sky-wheel',expandSky);on('expand-sky-wheel-link',expandSky);
  if(screen==='calendar')bindAstroCalendar();
