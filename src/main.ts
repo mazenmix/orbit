@@ -337,7 +337,7 @@ function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string){
 function planetLiveStatus(brief:WholeSkyBroadcast){
  return '<section class="panel mx-sky-planets"><h2>'+t('حركة كل الكواكب هسه','Every planet right now')+'</h2>'+
   '<div class="mx-sky-planet-grid">'+brief.planets.map(item=>
-  '<article class="mx-sky-planet"><strong>'+esc(item.label)+'</strong><span>'+esc(item.sign)+'</span><small>'+esc(item.motion)+'</small></article>').join('')+
+  '<article class="mx-sky-planet"><strong>'+esc(item.label)+'</strong><span>'+esc(item.sign)+'</span><small class="'+(item.motion==='متراجع'||item.motion==='retrograde'?'is-retrograde':item.motion==='شبه ثابت'||item.motion==='near station'?'is-station':'is-direct')+'">'+esc(item.motion)+'</small></article>').join('')+
   '</div></section>';
 }
 function focusedToday(){

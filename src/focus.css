@@ -722,6 +722,19 @@
 #live-view-body .mx-full-sky-today .mx-sky-planet strong{font-size:.81rem;line-height:1.4;color:#f3edff}
 #live-view-body .mx-full-sky-today .mx-sky-planet span{font-size:.74rem;color:#d1dbeb}
 #live-view-body .mx-full-sky-today .mx-sky-planet small{font-size:.69rem;color:#8fe0c5}
+#live-view-body .mx-full-sky-today .mx-sky-planet small.is-retrograde{
+ color:#ff870a;
+ font-weight:900;
+ text-shadow:0 0 8px rgba(255,122,0,.65),0 0 16px rgba(255,122,0,.24);
+}
+#live-view-body .mx-full-sky-today .mx-sky-planet small.is-station{
+ color:#ffe07a;
+ font-weight:800;
+}
+#live-view-body .mx-full-sky-today .mx-sky-planet small.is-direct{
+ color:#8fe0c5;
+}
+
 @media(max-width:810px){#live-view-body .mx-full-sky-today .mx-sky-planet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:410px){#live-view-body .mx-full-sky-today .mx-sky-planet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
