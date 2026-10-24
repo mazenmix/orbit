@@ -705,3 +705,22 @@
  #live-view-body .mx-sky-activity{grid-template-columns:1fr;gap:7px}
  #live-view-body .mx-sky-activity-card{padding:9px 11px}
 }
+
+
+/* Real whole-sky broadcast: event stream and ten independent planetary statuses. */
+#live-view-body .mx-full-sky-today .mx-sky-events-panel h2{font-size:1.01rem;line-height:1.5}
+#live-view-body .mx-full-sky-today .mx-sky-feed{display:grid;gap:8px;min-width:0}
+#live-view-body .mx-full-sky-today .mx-sky-feed-item{margin:0;padding:10px 12px;border:1px solid rgba(160,160,210,.19);background:rgba(115,105,177,.065);border-radius:12px;min-width:0}
+#live-view-body .mx-full-sky-today .mx-sky-feed-item>div{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#live-view-body .mx-full-sky-today .mx-sky-feed-item strong{font-size:.85rem;color:#f0e9ff;line-height:1.55}
+#live-view-body .mx-full-sky-today .mx-sky-feed-item time{font-size:.71rem;color:#a5e2d1;font-variant-numeric:tabular-nums;white-space:nowrap}
+#live-view-body .mx-full-sky-today .mx-sky-feed-item p{margin:6px 0 0;font-size:.76rem;line-height:1.65;color:#c9d3e9}
+#live-view-body .mx-full-sky-today .mx-sky-planets{padding:15px 16px!important}
+#live-view-body .mx-full-sky-today .mx-sky-planets h2{font-size:1rem;margin:0 0 13px;color:#f0e8ff}
+#live-view-body .mx-full-sky-today .mx-sky-planet-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+#live-view-body .mx-full-sky-today .mx-sky-planet{display:flex;flex-direction:column;gap:5px;min-width:0;padding:12px 8px;border-radius:12px;border:1px solid rgba(149,138,208,.24);background:linear-gradient(155deg,rgba(91,75,146,.18),rgba(35,43,73,.17));}
+#live-view-body .mx-full-sky-today .mx-sky-planet strong{font-size:.81rem;line-height:1.4;color:#f3edff}
+#live-view-body .mx-full-sky-today .mx-sky-planet span{font-size:.74rem;color:#d1dbeb}
+#live-view-body .mx-full-sky-today .mx-sky-planet small{font-size:.69rem;color:#8fe0c5}
+@media(max-width:810px){#live-view-body .mx-full-sky-today .mx-sky-planet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:410px){#live-view-body .mx-full-sky-today .mx-sky-planet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
