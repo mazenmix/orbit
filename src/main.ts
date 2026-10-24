@@ -56,7 +56,7 @@ import {soulCategories,soulTopics} from './soulData.ts';
 import {relationshipWindows,bestWindows} from './relationshipWindows.ts';
 import {relationshipDayReading} from './relationshipDayNarrative.ts';
 import {lunarWindow,type LunarWindow} from './timing.ts';
-import {vocPhase,vocColorState,vocRemaining,remainingPercent} from './liveVoc.ts';
+import {vocPhase,vocColorState,vocRemaining,elapsedPercent} from './liveVoc.ts';
 import {calendarEvent,calendarDownload} from './calendar.ts';
 import {encryptBackup,decryptBackup} from './secureBackup.ts';
 import {isVaultConfigured,vaultOpened,setupVault,flushVault,vaultPending,unlockVaultWithUI} from './vault.ts';
@@ -349,10 +349,10 @@ function focusedToday(){
  try{
   const w=moonWindow(),now=+selected;
   moonIsVoid=w.isVoid;moonVocStart=+w.vocStartsAt;moonVocEnd=+w.ingressAt;
-  const percent=(from:Date,to:Date)=>Math.max(0,Math.min(100,Math.round(100*(+to-now)/Math.max(1,+to-(+from)))));
+  const percent=(from:Date,to:Date)=>Math.round(elapsedPercent(+from,+to,now));
   const vocEnd=w.isVoid?w.ingressAt:w.vocStartsAt,vocStart=w.isVoid?w.vocStartsAt:w.enteredAt;
-  moon='<div class="mx-focus-moon"><article><small>☾ '+t('القمر الآن','Current Moon')+'</small><strong>'+signName(w.sign*30)+'</strong><small>'+t('الانتقال القادم','Next ingress')+'</small><time datetime="'+w.ingressAt.toISOString()+'">'+time(w.ingressAt)+'</time><progress max="100" value="'+percent(w.enteredAt,w.ingressAt)+'"></progress></article>'+
-   '<article><small>◌ VOID OF COURSE</small><strong>'+(w.isVoid?t('خالي المسار','VOC active'):t('ماشي عدل','Moon on course'))+'</strong><small>'+(w.isVoid?t('نهاية الفترة','Period ends'):t('بداية الفترة','Period begins'))+'</small><time datetime="'+vocEnd.toISOString()+'">'+time(vocEnd)+'</time><progress max="100" value="'+percent(vocStart,vocEnd)+'"></progress></article></div>';
+  moon='<div class="mx-focus-moon"><article><small>☾ '+t('القمر الآن','Current Moon')+'</small><strong>'+signName(w.sign*30)+'</strong><small>'+t('الانتقال القادم','Next ingress')+'</small><time datetime="'+w.ingressAt.toISOString()+'">'+time(w.ingressAt)+'</time><progress max="100" data-moon-progress="sign" data-progress-start="'+(+w.enteredAt)+'" data-progress-end="'+(+w.ingressAt)+'" value="'+percent(w.enteredAt,w.ingressAt)+'"></progress></article>'+
+   '<article><small>◌ VOID OF COURSE</small><strong>'+(w.isVoid?t('خالي المسار','VOC active'):t('ماشي عدل','Moon on course'))+'</strong><small>'+(w.isVoid?t('نهاية الفترة','Period ends'):t('بداية الفترة','Period begins'))+'</small><time datetime="'+vocEnd.toISOString()+'">'+time(vocEnd)+'</time><progress max="100" data-moon-progress="voc" data-progress-start="'+(+vocStart)+'" data-progress-end="'+(+vocEnd)+'" value="'+percent(vocStart,vocEnd)+'"></progress></article></div>';
  }catch(e){console.warn('Moon timing unavailable',e)}
  const eventCard=(label:string,event:WholeSkyOccurrence|null)=>{
   if(!event)return '<div class="mx-sky-activity-card"><small>'+label+'</small><strong>'+t('ماكو حدث مؤكد ضمن نطاق البحث','No verified event in the search window')+'</strong></div>';
@@ -881,13 +881,13 @@ function astroCalendarPage(){
  const groups=[...months.entries()].map(([key,days])=>{
   const initial=days[0],title=new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'long',year:'numeric',numberingSystem:'latn'}).format(new Date(Date.UTC(initial.year,initial.month-1,1)));
   const blanks=Array.from({length:initial.weekday},()=>'<span class="astro-cal-blank" aria-hidden="true"></span>').join('');
-  return '<section class="astro-cal-month panel"><div class="astro-cal-month-head"><span>✦</span><h3>'+esc(title)+'</h3><small>'+String(initial.month).padStart(2,'0')+'/'+initial.year+'</small></div><div class="astro-cal-weekdays">'+weekdays.map(x=>'<span>'+x+'</span>').join('')+'</div><div class="astro-cal-days">'+blanks+days.map(d=>{
+  return '<section class="astro-cal-month panel" dir="ltr"><div class="astro-cal-month-head"><span>✦</span><h3>'+esc(title)+'</h3><small>'+String(initial.month).padStart(2,'0')+'/'+initial.year+'</small></div><div class="astro-cal-weekdays" dir="ltr">'+weekdays.map(x=>'<span>'+x+'</span>').join('')+'</div><div class="astro-cal-days" dir="ltr">'+blanks+days.map(d=>{
    const v=calendarSnapshots.get(d.iso),color=v?.color??(calendarFailures.has(d.iso)?'unavailable':'pending'),selected=d.iso===calendarSelected,today=d.iso===calendarAnchor;
    const text=v?calendarColorLabel(v.color):calendarFailures.has(d.iso)?t('حساب غير متاح','Calculation unavailable'):t('قيد الحساب','Calculating');
    return '<button class="astro-cal-day astro-'+color+(selected?' is-selected':'')+(today?' is-today':'')+'" type="button" data-calendar-date="'+d.iso+'" aria-pressed="'+(selected?'true':'false')+'" aria-label="'+d.iso+' · '+text+(v?' · '+v.value+'/100':'')+'" title="'+text+'"><span class="astro-cal-number">'+d.day+'</span><small class="astro-cal-index">'+(v?v.value:'·')+'</small></button>'
   }).join('')+'</div></section>';
  }).join('');
- return header+'<section class="panel astro-calendar-detail" id="astro-calendar-detail" aria-live="polite">'+astroCalendarDetail(calendarSelected)+'</section><div class="astro-cal-months">'+groups+'</div>';
+ return header+'<section class="panel astro-calendar-detail" id="astro-calendar-detail" aria-live="polite">'+astroCalendarDetail(calendarSelected)+'</section><div class="astro-cal-months" dir="ltr">'+groups+'</div>';
 }
 /** Incrementally calculate three verified local-time checkpoints per day. DOM cells are patched
  * in place, so chart navigation, scrolling and month positions are not reset. */
@@ -1015,7 +1015,7 @@ function lunarUiIcon(type:'moon'|'void'|'entered'|'next'|'voc-start'|'voc-end'){
 
 /** Ring data is derived exclusively from computed Moon timing boundaries. */
 function lunarGaugeMarkup(kind:'moon'|'voc',start:Date,end:Date,signStart:Date=start,vocStart:Date=start){
- const label=kind==='moon'?t('المتبقي حتى البرج القادم','Until next sign'):t('المتبقي حتى بداية خلو المسار','Until VOC begins');
+ const label=kind==='moon'?t('تقدّم القمر بالبرج الحالي','Current sign progress'):t('تقدّم القمر حتى خلو المسار','Progress toward VOC');
  return '<div class="mx-lunar-gauge '+vocColorState(+vocStart,+end,+selected)+'" data-gauge-voc-start="'+(+vocStart)+'" data-lunar-gauge="'+kind+'" data-gauge-start="'+(+start)+'" data-gauge-end="'+(+end)+'" data-gauge-sign-start="'+(+signStart)+'">'+
   '<div class="mx-lunar-gauge-ring" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">'+
   '<svg viewBox="0 0 76 76" aria-hidden="true" focusable="false"><circle class="mx-lunar-gauge-track" cx="38" cy="38" r="30"/><circle class="mx-lunar-gauge-progress" cx="38" cy="38" r="30"/></svg><strong data-gauge-percent>—</strong></div>'+
@@ -1427,10 +1427,10 @@ function updateLunarGauge(kind:'moon'|'voc',now:number){
  const phase=kind==='voc'?vocPhase(start,end,now):'active';
  const a=kind==='voc'&&phase==='upcoming'?signStart:start;
  const b=kind==='voc'&&phase==='upcoming'?start:end;
- const percentage=phase==='elapsed'?0:remainingPercent(a,b,now),rounded=Math.round(percentage);
- const label=kind==='moon'?t('المتبقي حتى البرج القادم','Until next sign'):phase==='active'
-  ?t('المتبقي حتى نهاية خلو المسار','Until VOC ends')
-  :phase==='upcoming'?t('المتبقي حتى بداية خلو المسار','Until VOC begins'):t('انتهى خلو المسار','VOC ended');
+ const percentage=elapsedPercent(a,b,now),rounded=Math.round(percentage);
+ const label=kind==='moon'?t('تقدّم القمر بالبرج الحالي','Current sign progress'):phase==='active'
+  ?t('تقدّم مرحلة خلو المسار','Void-of-course progress')
+  :phase==='upcoming'?t('تقدّم القمر حتى خلو المسار','Progress toward VOC'):t('اكتمل خلو المسار','VOC complete');
  const remaining=Math.max(0,Math.ceil((b-now)/1000));
  const timer=[Math.floor(remaining/3600),Math.floor(remaining%3600/60),remaining%60].map(n=>String(n).padStart(2,'0')).join(':');
  const pct=el.querySelector<HTMLElement>('[data-gauge-percent]'),lbl=el.querySelector<HTMLElement>('[data-gauge-label]');
@@ -1451,6 +1451,12 @@ function updateTodayVocStatus(now:number):boolean{
  const phase=vocPhase(start,end,now),active=vocColorState(start,end,now)==='is-voc';
  const changed=card.classList.contains('is-voc')!==active;
  if(changed){card.classList.toggle('is-voc',active);card.classList.toggle('is-clear',!active)}
+ // The two Today gauges rise continuously through the real sign/VOC phase.
+ card.querySelectorAll<HTMLProgressElement>('progress[data-moon-progress]').forEach(progress=>{
+  const from=Number(progress.dataset.progressStart),to=Number(progress.dataset.progressEnd);
+  const value=elapsedPercent(from,to,now);
+  if(Math.abs(progress.value-value)>.001)progress.value=value;
+ });
  // An expired sign window must be recalculated, even if it is now green.
  return changed||phase==='elapsed';
 }

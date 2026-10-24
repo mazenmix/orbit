@@ -1,6 +1,7 @@
+import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {vocPhase,vocColorState,vocRemaining,remainingPercent} from '../src/liveVoc.ts';
+import {vocPhase,vocColorState,vocRemaining,remainingPercent,elapsedPercent} from '../src/liveVoc.ts';
 test('Void of Course begins and ends at the exact calculated boundaries',()=>{
  const start=Date.UTC(2026,9,18,19,23,0),end=start+77*60*1000;
  assert.equal(vocPhase(start,end,start-1),'upcoming');
@@ -39,4 +40,41 @@ test('Today card and both lunar gauges share the exact VOC red interval',()=>{
  assert.equal(vocColorState(start,end,end-1),'is-voc');
  assert.equal(vocColorState(start,end,end),'is-clear');
  assert.equal(vocColorState(NaN,end,start),'is-clear');
+});
+
+
+test('ascending lunar gauges move from empty to full, never backwards within a phase',()=>{
+ const start=Date.UTC(2026,9,24,17),end=start+16*3600000;
+ assert.equal(elapsedPercent(start,end,start-1),0);
+ assert.equal(elapsedPercent(start,end,start),0);
+ assert.equal(elapsedPercent(start,end,start+4*3600000),25);
+ assert.equal(elapsedPercent(start,end,start+8*3600000),50);
+ assert.equal(elapsedPercent(start,end,start+12*3600000),75);
+ assert.equal(elapsedPercent(start,end,end),100);
+ assert.equal(elapsedPercent(start,end,end+10000),100);
+ assert.equal(elapsedPercent(start,start,start),0);
+ assert.equal(elapsedPercent(NaN,end,start),0);
+});
+test('VOC progress rises before, during, and after the exact red interval, with green on expiry',()=>{
+ const signStart=0,vocStart=8000,ingress=12000;
+ assert.equal(elapsedPercent(signStart,vocStart,4000),50);
+ assert.equal(vocColorState(vocStart,ingress,7999),'is-clear');
+ assert.equal(elapsedPercent(vocStart,ingress,vocStart),0);
+ assert.equal(vocColorState(vocStart,ingress,vocStart),'is-voc');
+ assert.equal(elapsedPercent(vocStart,ingress,10000),50);
+ assert.equal(vocColorState(vocStart,ingress,ingress-1),'is-voc');
+ assert.equal(elapsedPercent(vocStart,ingress,ingress),100);
+ assert.equal(vocColorState(vocStart,ingress,ingress),'is-clear');
+});
+test('Both Today and lunar page bind elapsed percentages to their calculated intervals',()=>{
+ const main=readFileSync('src/main.ts','utf8');
+ const today=main.slice(main.indexOf('function focusedToday(){'),main.indexOf('/** A stable daily scan'));
+ const gauge=main.slice(main.indexOf('function updateLunarGauge('),main.indexOf('function updateTodayVocStatus('));
+ const status=main.slice(main.indexOf('function updateTodayVocStatus('),main.indexOf('function updateLiveVocClock('));
+ assert.match(today,/elapsedPercent\(\+from,\+to,now\)/);
+ assert.match(today,/data-moon-progress/);
+ assert.match(gauge,/elapsedPercent\(a,b,now\)/);
+ assert.doesNotMatch(gauge,/remainingPercent\(/);
+ assert.match(status,/progress\[data-moon-progress\]/);
+ assert.match(status,/elapsedPercent\(from,to,now\)/);
 });
