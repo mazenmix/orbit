@@ -1,6 +1,6 @@
 module.exports={
  testDir:'./',
- testMatch:'visual-qa.spec.cjs',
+ testMatch:['visual-qa.spec.cjs','today-live-qa.spec.cjs'],
  timeout:90000,
  expect:{timeout:70000},
  reporter:'list',
