@@ -370,3 +370,21 @@ test('the year calendar stays left-to-right for Arabic and English, preserving w
  assert.match(css,/\.astro-cal-days\{/);
  assert.match(css,/direction:ltr!important/);
 });
+
+test('Calendar shows all twelve months immediately and has no show-more control',()=>{
+ const main=readFileSync('src/main.ts','utf8');
+ const focus=readFileSync('src/focus.css','utf8');
+ const cal=readFileSync('src/astroCalendar.css','utf8');
+ const surface=main.slice(main.indexOf('function focusedCalendar(){'),main.indexOf('function focusedTime(){'));
+ assert.doesNotMatch(surface,/calendar-expand|calendarExpanded|إظهار شهرين|إظهار كل الأشهر/);
+ assert.match(surface,/mx-calendar-compact is-expanded/);
+ assert.match(main,/calendarDays=firstTwelveCalendarMonths\(astroCalendarDays\(today\)\)/);
+ assert.match(main,/function calendarTargetDays\(\):number\{return calendarDays\.length;\}/);
+ assert.doesNotMatch(focus,/astro-cal-month:nth-child\(n\+3\)\{display:none\}/);
+ assert.match(cal,/\.astro-cal-months\[dir="ltr"\]/);
+ const render=main.slice(main.indexOf('function astroCalendarPage(){'),main.indexOf('function calendarTargetDays()'));
+ for(const className of ['astro-cal-months','astro-cal-month panel','astro-cal-weekdays','astro-cal-days']){
+   assert.match(render,new RegExp('class="'+className+'" dir="ltr" style="direction:ltr!important'));
+ }
+ assert.match(render,/const blanks=Array\.from\(\{length:initial\.weekday\}/);
+});
