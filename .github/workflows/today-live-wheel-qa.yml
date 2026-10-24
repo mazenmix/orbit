@@ -8,6 +8,8 @@ on:
       - 'src/focus.css'
       - 'src/chart.ts'
       - 'scripts/visual-qa.spec.cjs'
+      - 'scripts/today-live-qa.spec.cjs'
+      - 'scripts/playwright.config.cjs'
   workflow_dispatch:
 permissions:
   contents: read
