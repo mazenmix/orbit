@@ -616,8 +616,8 @@
 .mx-focus-hero .mx-live-movement{font-size:.88rem;line-height:1.7;color:#a7e3dc;border-inline-start:2px solid rgba(108,214,206,.58);padding-inline-start:.75rem;margin:.55rem 0 1rem;overflow-wrap:anywhere}
 
 
-/* GO MODE: local-time history explorer above every score and decision card. */
-#live-view-body .mx-go-mode-page .mx-go-time-nav{
+/* GO MODE and TRAVEL MODE: shared historical time explorer above every gauge. */
+#live-view-body .mx-go-time-nav{
  display:grid;gap:12px;padding:clamp(12px,2vw,19px);
  border:1px solid rgba(174,148,251,.33);
  background:linear-gradient(120deg,rgba(113,81,168,.13),rgba(19,27,46,.45));
