@@ -31,6 +31,7 @@ import {shiftGoTime,type GoTimeStep} from './goTimeNavigation.ts';
 
 import {todaySkyBrief,todayEventPlain,type TodaySkyBrief} from './todaySkyBrief.ts';
 import {scanWholeSky,wholeSkyBroadcast,occurrenceLanguage,type WholeSkyOccurrence,type WholeSkyBroadcast} from './wholeSkyBroadcast.ts';
+import {personalSkyStory,type PersonalSkyStory} from './personalSkyNarrative.ts';
 import type {FocusReadingInput} from './focusEventReading.ts';
 import {refineNatalTransit} from './precision.ts';
 import {scanLunations,type Lunation} from './eclipse.ts';
@@ -292,15 +293,45 @@ function verifiedWholeSkyEvents():WholeSkyOccurrence[]{
  return events;
 }
 function currentWholeSky(){return wholeSkyBroadcast(data!.current.points,verifiedWholeSkyEvents(),selected,lang)}
+// Exact event sky positions are stable across live ticks; avoid recomputing
+// ten ephemeris bodies for every card on every dashboard refresh.
+const skyEventPositionsCache=new Map<string,Chart['points']>();
+function personalEventStory(event:WholeSkyOccurrence,precomputed?:Chart['points']):PersonalSkyStory{
+ const key=JSON.stringify(active)+':'+event.at.toISOString();
+ let points=precomputed??skyEventPositionsCache.get(key);
+ if(!points){
+  points=chart(event.at,active,false,false).points;
+  skyEventPositionsCache.set(key,points);
+  if(skyEventPositionsCache.size>70)skyEventPositionsCache.delete(skyEventPositionsCache.keys().next().value!);
+ }
+ return personalSkyStory({
+  event,at:selected,natal:data!.natal,skyAtEvent:points,knownBirthTime:active.known,lang
+ });
+}
+function mainPersonalEvent(brief:WholeSkyBroadcast):PersonalSkyStory|null{
+ const now=+selected,earlier=brief.recent,later=brief.next;
+ const past=earlier&&now-+earlier.at<=6*3600000?earlier:null;
+ const next=later&&+later.at-now<=6*3600000?later:null;
+ const event=past&&(!next||now-+past.at<+next.at-now)?past:
+   next??(brief.contacts[0]?{
+    kind:'aspect' as const,at:selected,first:brief.contacts[0].first as WholeSkyOccurrence['first'],
+    second:brief.contacts[0].second as WholeSkyOccurrence['second'],angle:brief.contacts[0].angle
+   }:null);
+ if(!event)return null;
+ try{return personalEventStory(event,event.at.valueOf()===selected.valueOf()?data!.current.points:undefined)}
+ catch(err){console.warn('Personal sky context unavailable',err);return null}
+}
 function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string){
  if(!events.length)return '<p class="mx-focus-note">'+empty+'</p>';
  return events.map(e=>{
-  const line=occurrenceLanguage(e,lang);
+  const story=personalEventStory(e);
   const time=dateText(e.at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
   return '<article class="mx-sky-feed-item" data-sky-event="'+esc(e.kind+':'+e.first+':'+(e.second??''))+'">'+
-   '<div><strong>'+esc(line.title)+'</strong><time datetime="'+e.at.toISOString()+'">'+esc(time)+'</time></div>'+
-   '<p>'+esc(line.description)+'</p>'+
-   '<p class="mx-sky-feed-action"><strong>'+t('شنو تسوي؟','What to do:')+'</strong> '+esc(line.action)+'</p></article>';
+   '<div><strong>'+esc(story.title)+'</strong><time datetime="'+e.at.toISOString()+'">'+esc(time)+'</time></div>'+
+   '<p class="mx-sky-feed-context">'+esc(story.focus)+'</p>'+
+   '<p class="mx-sky-feed-now"><b>'+t('هسه:','Now:')+'</b> '+esc(story.now)+'</p>'+
+   '<p class="mx-sky-feed-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(story.next)+'</p>'+
+   '<p class="mx-sky-feed-action"><strong>'+t('شنو تسوي؟','What to do:')+'</strong> '+esc(story.action)+'</p></article>';
  }).join('');
 }
 function planetLiveStatus(brief:WholeSkyBroadcast){
@@ -331,14 +362,16 @@ function focusedToday(){
  const activity=brief?'<div class="mx-sky-activity">'+
   eventCard(t('آخر حدث بالسماء','Last sky event'),brief.recent)+eventCard(t('أقرب حدث بالسماء','Next sky event'),brief.next)+'</div>':'';
  const clock=t('الحساب الفلكي: ','Sky calculated: ')+dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
- const message=brief?.meaning??t('تعذّر التحقق من موقع واحد أو أكثر من الكواكب؛ ما راح نعرض حدث غير محسوب.','One or more sky positions could not be verified. Unverified events are not shown.');
+ const personalized=brief?mainPersonalEvent(brief):null;
+ const message=personalized?.now??brief?.meaning??t('تعذّر التحقق من موقع واحد أو أكثر من الكواكب؛ ما راح نعرض حدث غير محسوب.','One or more sky positions could not be verified. Unverified events are not shown.');
  return todaySkyWheel(r)+'<div class="mx-focused-dashboard mx-full-sky-today"><div class="mx-focus-main">'+
  '<section class="panel mx-focus-hero" data-sky-reading-id="'+esc(brief?.identity??'unavailable')+'">'+
  '<div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('بث حركة السماء هسه','WHOLE-SKY LIVE')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'):'LIVE')+'</span></div>'+
  '<h2>'+esc(brief?.title??t('رصد السماء غير متاح','Sky report unavailable'))+'</h2>'+
  '<p class="mx-sky-movement">'+esc(brief?.movement??t('بانتظار الحساب','Awaiting verification'))+'</p>'+
- '<p class="mx-sky-meaning">'+esc(message)+'</p>'+
- (brief?'<p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(brief.action)+'</p>':'')+
+ '<p class="mx-sky-meaning"><b>'+t('هسه: ','Now: ')+'</b>'+esc(message)+'</p>'+
+ (personalized?'<p class="mx-sky-reading-next"><b>'+t('المرحلة الجاية: ','Next: ')+'</b>'+esc(personalized.next)+'</p>':'')+
+ (brief?'<p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(personalized?.action??brief.action)+'</p>':'')+
  activity+'<small class="mx-sky-live-checked" aria-label="'+t('وقت آخر حساب','Last calculation')+'">'+esc(clock)+'</small>'+
  '</section>'+
  (brief?planetLiveStatus(brief):'<p role="status">'+esc(skyFailure)+'</p>')+
@@ -464,7 +497,7 @@ function scoresHTML(r:Report){
  return '<div class="scores-grid rich-scores">'+categories.map(c=>{const signal=r.signals.find(s=>s.category===c),v=r.scores[c],line=signal?copy(signal).action:t(...fallback[c]);return '<button class="score-card '+gaugeLevel(v)+'" data-category="'+c+'"><span class="score-symbol '+c+'">'+categoryLabels[c][2]+'</span><span class="score-number">'+v+'<small>/100</small></span><b>'+cat(c)+'</b><p>'+esc(line)+'</p><div class="meter"><i style="width:'+v+'%"></i></div></button>'}).join('')+'</div>';
 }
 function signalCard(s:Signal,index:number){const text=copy(s);return `<button class="signal-card ${s.tone}" data-signal="${index}"><span class="signal-icon">${categoryLabels[s.category][2]}</span><div><div class="signal-meta">${cat(s.category)} <span>·</span> ${tone(s)}</div><h3>${text.title}</h3><div class="direct-advice"><p class="good"><b>${t("الزين","Good")}</b>${text.good}</p><p class="careful"><b>${t("انتبه","Watch out")}</b>${text.careful}</p><p class="do"><b>${t("سوي هالشي","Do this")}</b>${text.action}</p></div><small>${t('اعرض الدليل','See evidence')} <span class="arrow">↗</span></small></div></button>`}
-function today(){const r=data!,primary=r.signals[0],text=primary?copy(primary):null;let sky:WholeSkyBroadcast|null=null;try{sky=currentWholeSky()}catch(e){console.warn('Pro Today whole-sky brief unavailable',e)}return `${todaySkyWheel(r)}<div class="dashboard-grid mx-today-compact"><div class="main-column"><section class="hero panel"><div class="hero-top"><span class="live-label"><i class="status-dot"></i>${t('بث السماء كلها · الآن','WHOLE-SKY LIVE')}</span><span class="subtle">${dateText(selected,{hour:'2-digit',minute:'2-digit'})}</span></div><div class="hero-copy">${tag(t('مرحباً','Welcome')+' '+esc(active.name),'violet')}<h2>${esc(sky?.title??t('القراءة الفلكية غير متاحة هسه','Sky brief unavailable'))}</h2><p>${esc(sky?.meaning??t('رصد السماء ما اكتمل؛ ما نعرض قراءة قديمة على أنها مباشرة.','Sky verification is unavailable; no old reading is presented as live.'))}</p><p class="mx-focus-story-action"><b>${t('شنو تسوي؟','What to do:')}</b> ${esc(sky?.action??t('ارجع بعد تحديث الحسابات.','Retry once calculations are available.'))}</p><small class="mx-sky-live-checked">${t('آخر حساب للسماء:','Sky calculated:')} ${dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</small><div class="hero-bottom"><button class="primary" data-go="evidence">${t('ليش هاي القراءة؟','Why this reading?')} <span>↗</span></button><button class="secondary mx-ai-context" data-go="ai">✧ ${t('شرح Ai','Explain with Ai')}</button></div></div><div class="hero-orbit" aria-hidden="true"><i></i><i></i><i></i><span>✦</span><b>☾</b><em>·</em></div></section>${scoresHTML(r)}<div class="section-title"><h2>${t('إشارات تستحق انتباهك','Signals worth your attention')}</h2><button class="text-button" data-go="signals">${t('كل الإشارات','All signals')} ↗</button></div><div class="signal-list">${distinctHighlights(r.signals,copy,3,1).map(({item,index})=>signalCard(item,index)).join('')||`<p class="empty panel">${t('ماكو إشارات إضافية مختلفة عن القراءة الرئيسية ضمن الأورب المحدد.','No additional distinct signals beyond the headline reading within the configured orbs.')}</p>`}</div></div><aside class="right-column"><section class="panel lunar-card"><span class="moon-glyph">☾</span><span class="eyebrow">${t('القمر وخارطتك','THE MOON & YOUR CHART')}</span><h3>${signName(r.current.points.find(p=>p.id==='Moon')!.longitude)}</h3><p>${esc(moonPersonalSummary(r,active.known,lang))}</p><button class="text-button" data-go="evidence">${t('شوف التفاصيل','View details')} ↗</button></section><button class="panel time-shortcut" data-go="time"><span>◷</span><div><b>${t('آلة الزمن','Time Machine')}</b><p>${t('أي تاريخ. منظور جديد.','Another date. A new perspective.')}</p></div><b>↗</b></button></aside></div>`}
+function today(){const r=data!,primary=r.signals[0],text=primary?copy(primary):null;let sky:WholeSkyBroadcast|null=null;try{sky=currentWholeSky()}catch(e){console.warn('Pro Today whole-sky brief unavailable',e)}const personal=sky?mainPersonalEvent(sky):null;return `${todaySkyWheel(r)}<div class="dashboard-grid mx-today-compact"><div class="main-column"><section class="hero panel"><div class="hero-top"><span class="live-label"><i class="status-dot"></i>${t('بث السماء كلها · الآن','WHOLE-SKY LIVE')}</span><span class="subtle">${dateText(selected,{hour:'2-digit',minute:'2-digit'})}</span></div><div class="hero-copy">${tag(t('مرحباً','Welcome')+' '+esc(active.name),'violet')}<h2>${esc(sky?.title??t('القراءة الفلكية غير متاحة هسه','Sky brief unavailable'))}</h2><p><b>${t('هسه:','Now:')}</b> ${esc(personal?.now??sky?.meaning??t('رصد السماء ما اكتمل؛ ما نعرض قراءة قديمة على أنها مباشرة.','Sky verification is unavailable; no old reading is presented as live.'))}</p>${personal?'<p class="mx-sky-reading-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(personal.next)+'</p>':''}<p class="mx-focus-story-action"><b>${t('شنو تسوي؟','What to do:')}</b> ${esc(personal?.action??sky?.action??t('ارجع بعد تحديث الحسابات.','Retry once calculations are available.'))}</p><small class="mx-sky-live-checked">${t('آخر حساب للسماء:','Sky calculated:')} ${dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</small><div class="hero-bottom"><button class="primary" data-go="evidence">${t('ليش هاي القراءة؟','Why this reading?')} <span>↗</span></button><button class="secondary mx-ai-context" data-go="ai">✧ ${t('شرح Ai','Explain with Ai')}</button></div></div><div class="hero-orbit" aria-hidden="true"><i></i><i></i><i></i><span>✦</span><b>☾</b><em>·</em></div></section>${scoresHTML(r)}<div class="section-title"><h2>${t('إشارات تستحق انتباهك','Signals worth your attention')}</h2><button class="text-button" data-go="signals">${t('كل الإشارات','All signals')} ↗</button></div><div class="signal-list">${distinctHighlights(r.signals,copy,3,1).map(({item,index})=>signalCard(item,index)).join('')||`<p class="empty panel">${t('ماكو إشارات إضافية مختلفة عن القراءة الرئيسية ضمن الأورب المحدد.','No additional distinct signals beyond the headline reading within the configured orbs.')}</p>`}</div></div><aside class="right-column"><section class="panel lunar-card"><span class="moon-glyph">☾</span><span class="eyebrow">${t('القمر وخارطتك','THE MOON & YOUR CHART')}</span><h3>${signName(r.current.points.find(p=>p.id==='Moon')!.longitude)}</h3><p>${esc(moonPersonalSummary(r,active.known,lang))}</p><button class="text-button" data-go="evidence">${t('شوف التفاصيل','View details')} ↗</button></section><button class="panel time-shortcut" data-go="time"><span>◷</span><div><b>${t('آلة الزمن','Time Machine')}</b><p>${t('أي تاريخ. منظور جديد.','Another date. A new perspective.')}</p></div><b>↗</b></button></aside></div>`}
 function trend(hours:number){const rows=Array.from({length:9},(_,i)=>{const at=new Date(Math.min(Date.UTC(2399,11,31,23,59),+selected+i*hours/8*3600000));return {at,value:average(getReport(at))}});const pts=rows.map((r,i)=>`${i*75},${130-r.value}`).join(' ');return `<div class="trend"><svg viewBox="0 0 600 150" role="img" aria-label="${t('مؤشر رمزي محسوب عبر الوقت','Calculated symbolic index over time')}"><defs><linearGradient id="area" x2="0" y2="1"><stop stop-color="#8272df" stop-opacity=".25"/><stop offset="1" stop-color="#8272df" stop-opacity="0"/></linearGradient></defs>${[25,50,75,100].map(v=>`<line x1="0" x2="600" y1="${130-v}" y2="${130-v}" stroke="#292d43" stroke-dasharray="3 5"/><text x="3" y="${126-v}" fill="#727993" font-size="8">${v}</text>`).join('')}<polygon points="0,140 ${pts} 600,140" fill="url(#area)"/><polyline points="${pts}" stroke="#a79aef" stroke-width="2" fill="none"/>${rows.map((r,i)=>`<circle cx="${i*75}" cy="${130-r.value}" r="3" fill="#c6bbff"><title>${dateText(r.at,{hour:'2-digit',minute:'2-digit'})}: ${r.value}/100</title></circle>`).join('')}</svg><div class="trend-labels" dir="ltr">${rows.filter((_,i)=>i%2===0).map(r=>`<span>${dateText(r.at,{hour:'2-digit',minute:'2-digit'})}</span>`).join('')}</div></div>`}
 function signalsPage(){const r=data!;return `<div class="filter-row">${(['all',...categories] as const).map(c=>`<button data-filter="${c}" class="chip ${filter===c?'selected':''}">${c==='all'?t('الكل','All'):cat(c)}</button>`).join('')}</div><div class="signal-list wide">${r.signals.map((s,i)=>filter==='all'||filter===s.category?signalCard(s,i):'').join('')||`<div class="empty panel">${t('ماكو إشارة لهالمجال ضمن الأورب المحدد.','No signal in this category within the configured orbs.')}</div>`}</div>`}
 const soulCharts=new Map<string,Chart>();
@@ -1621,7 +1654,18 @@ function navigate(value:string){screen=labels[value]?value:'today';if(!liveTimeP
 window.addEventListener('hashchange',()=>{const value=location.hash.slice(1);if(labels[value]&&value!==screen){screen=value;if(!liveTimePinned||screen==='today'||screen==='ai'){liveTimePinned=false;selected=new Date();recalculate()}render();if(screen==='ai'&&!aiConnection.checked)void refreshAIConnection()}});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
 render();
-initEngine().then(v=>{engineVersion=v;ready=true;recalculate();render();void refreshAIConnection();if('serviceWorker' in navigator&&import.meta.env.PROD){navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(reg=>{if(document.visibilityState==='visible')void reg.update().catch(()=>{});if(backgroundPushOptedIn()&&eyeSettings.enabled)void refreshBackgroundPushIfNeeded(eyeSettings,active.zone,moonPushSchedule()).catch(e=>console.warn('Background push renewal unavailable',e))}).catch(()=>toast(t('تعذر تفعيل العمل بدون إنترنت.','Offline support could not be activated.')))}}).catch(e=>{error=t('تعذر تحميل المحرك الفلكي: ','Could not load the calculation engine: ')+String(e);render()});
+initEngine().then(v=>{engineVersion=v;ready=true;recalculate();render();void refreshAIConnection();if('serviceWorker' in navigator&&import.meta.env.PROD){
+ let refreshingNewVersion=false;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{
+  if(refreshingNewVersion)return;
+  refreshingNewVersion=true;
+  // Preserve user input if a new release activates while a field is being edited.
+  const input=document.activeElement as HTMLElement|null;
+  if(input&&input.matches('input,textarea,select,[contenteditable="true"]')){
+   input.addEventListener('blur',()=>location.reload(),{once:true});
+  }else location.reload();
+ });
+ navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(reg=>{if(document.visibilityState==='visible')void reg.update().catch(()=>{});if(backgroundPushOptedIn()&&eyeSettings.enabled)void refreshBackgroundPushIfNeeded(eyeSettings,active.zone,moonPushSchedule()).catch(e=>console.warn('Background push renewal unavailable',e))}).catch(()=>toast(t('تعذر تفعيل العمل بدون إنترنت.','Offline support could not be activated.')))}}).catch(e=>{error=t('تعذر تحميل المحرك الفلكي: ','Could not load the calculation engine: ')+String(e);render()});
 setInterval(()=>refreshLiveView(),1000);
 window.addEventListener('focus',()=>refreshLiveView(true));
 function eyeClock(now:Date,zone:string):EyeClock{

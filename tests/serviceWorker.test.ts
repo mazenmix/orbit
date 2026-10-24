@@ -17,3 +17,11 @@ test('new SW cache deletes stale MX Orbit caches without removing user asteroid 
  assert.ok(build.includes("startsWith('mx-orbit-')"));
  assert.ok(!build.includes("caches.delete('mx-asteroid-se1-v1')"));
 });
+
+test('Newly activated web app version refreshes stale Today only after active editing finishes',()=>{
+ const main=readFileSync('src/main.ts','utf8');
+ assert.match(main,/navigator\.serviceWorker\.addEventListener\('controllerchange'/);
+ assert.match(main,/refreshingNewVersion/);
+ assert.match(main,/input\.addEventListener\('blur',\(\)=>location\.reload\(\),\{once:true\}\)/);
+ assert.match(main,/register\('\/sw\.js',\{updateViaCache:'none'\}\)/);
+});

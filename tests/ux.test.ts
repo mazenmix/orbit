@@ -118,7 +118,8 @@ test('real-time redraw retains open details, wheel DOM and Time Machine selectio
  assert.ok(main.includes('function refreshLiveBody('));
  assert.ok(main.includes('if(liveTimePinned)return;'));
  assert.ok(!main.includes('region.innerHTML=content()'));
- assert.ok(!main.includes('location.reload('));
+ const redraw=main.slice(main.indexOf('function reconcileLiveNode('),main.indexOf('function refreshLiveView('));
+ assert.ok(!redraw.includes('location.reload('),'Live sky ticks must not reload the page; only a new installed release may reload');
 });
 test('live ephemeris updates main, chart, and enlarged sky wheels independently of full content',()=>{
  assert.ok(main.includes('LIVE_SKY_INTERVAL_MS=5000'));
