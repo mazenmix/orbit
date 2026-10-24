@@ -23,15 +23,17 @@ test('Moving one calendar day keeps wall time through Denver daylight-saving tra
 
 test('Go Mode renders timestamp picker and all quick jumps before its gauges',()=>{
  const go=source.slice(source.indexOf('function goModePage(){'),source.indexOf('function travelSymbol(',source.indexOf('function goModePage(){')));
- assert.match(go,/id="go-time-form"/);
- assert.match(go,/id="go-time-input"/);
- assert.match(go,/type="datetime-local"/);
- assert.match(go,/localValue\(selected,active\.zone\)/);
- assert.match(go,/data-go-time-shift="-day"/);
- assert.match(go,/data-go-time-shift="-hour"/);
- assert.match(go,/data-go-time-shift="\+day"/);
- assert.match(go,/data-go-time-shift="\+hour"/);
- assert.match(go,/data-now/);
+ const nav=source.slice(source.indexOf('function sharedModeTimeNavigation(){'),source.indexOf('function goModePage(){'));
+ assert.match(nav,/id="go-time-form"/);
+ assert.match(nav,/id="go-time-input"/);
+ assert.match(nav,/type="datetime-local"/);
+ assert.match(nav,/localValue\(selected,active\.zone\)/);
+ assert.match(nav,/data-go-time-shift="-day"/);
+ assert.match(nav,/data-go-time-shift="-hour"/);
+ assert.match(nav,/data-go-time-shift="\+day"/);
+ assert.match(nav,/data-go-time-shift="\+hour"/);
+ assert.match(nav,/data-now/);
+ assert.match(go,/const timeNav=sharedModeTimeNavigation\(\)/);
  assert.match(go,/timeNav\+gauges\+goCards\+renderGoLifeGauges\(r\.scores\)\+allIndicators/);
 });
 
@@ -50,4 +52,22 @@ test('Go Mode time picker recalculates every indicator using selected timezone a
 test('Go time navigation uses IANA zones, not browser zone',()=>{
  assert.throws(()=>shiftGoTime(new Date(NaN),'Asia/Baghdad','-day'));
  assert.notEqual(shiftGoTime(new Date('2026-10-24T12:00:00Z'),'Asia/Baghdad','+hour').valueOf(),new Date('2026-10-24T12:00:00Z').valueOf());
+});
+
+test('Travel Mode has identical time selector above its 12 recalculated gauges',()=>{
+ const go=source.slice(source.indexOf('function goModePage(){'),source.indexOf('function travelSymbol(',source.indexOf('function goModePage(){')));
+ const travel=source.slice(source.indexOf('function travelModePage(){'),source.indexOf('function asteroidsPage(){'));
+ const nav=source.slice(source.indexOf('function sharedModeTimeNavigation(){'),source.indexOf('function goModePage(){'));
+ assert.match(go,/const timeNav=sharedModeTimeNavigation\(\)/);
+ assert.match(travel,/sharedModeTimeNavigation\(\)\+sections/);
+ assert.match(nav,/id="go-time-form"/);
+ assert.match(nav,/data-now/);
+ assert.match(nav,/data-go-time-shift="-day"/);
+ assert.match(nav,/data-go-time-shift="-hour"/);
+ assert.match(nav,/data-go-time-shift="\+hour"/);
+ assert.match(nav,/data-go-time-shift="\+day"/);
+ assert.match(travel,/derivedMetrics\(data!\.scores\)/);
+ assert.match(travel,/quickGaugeCard\(metric,travelSymbol\(id\),undefined,id\)/);
+ const src=readFileSync('src/focus.css','utf8');
+ assert.match(src,/#live-view-body \.mx-go-time-nav\{/);
 });
