@@ -724,3 +724,11 @@
 #live-view-body .mx-full-sky-today .mx-sky-planet small{font-size:.69rem;color:#8fe0c5}
 @media(max-width:810px){#live-view-body .mx-full-sky-today .mx-sky-planet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:410px){#live-view-body .mx-full-sky-today .mx-sky-planet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* The event feed speaks to the person, not the ephemeris internals. */
+#live-view-body .mx-full-sky-today .mx-sky-feed-item .mx-sky-feed-action{
+ margin:9px 0 0;padding:8px 10px;border-radius:9px;
+ background:rgba(53,150,119,.12);border:1px solid rgba(93,201,164,.22);
+ color:#cdf2e2;line-height:1.7;font-size:.79rem;
+}
+#live-view-body .mx-full-sky-today .mx-sky-feed-action strong{color:#8de5c3;margin-inline-end:5px}
