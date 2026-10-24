@@ -196,8 +196,8 @@ export function todayEventPlain(ev:FocusReadingInput,lang:SkyLanguage):{label:st
  const second=ev.target,topic=second?planets[second]:null;
  if(!first||!topic||!planets[first]||ev.angle===undefined||!aspectAngles.includes(ev.angle as 0))throw Error('Unsupported calculated sky event');
  const label=lang==='ar'?
-  (ev.kind==='personal-aspect'?'عبور شخصي: ':'')+name(first,lang)+' ويّه '+name(second,lang):
-  (ev.kind==='personal-aspect'?'Personal transit: ':'')+name(first,lang)+' with '+name(second,lang);
+  (ev.kind==='personal-aspect'?'عبور شخصي: ':'')+name(first,lang)+' ويّه '+name(second!,lang):
+  (ev.kind==='personal-aspect'?'Personal transit: ':'')+name(first,lang)+' with '+name(second!,lang);
  const intro=ev.kind==='personal-aspect'?
   (lang==='ar'?'هذه إشارة على خريطتك الشخصية، ضمن موضوع ':'This personal chart contact concerns '):
   (lang==='ar'?'الاتصال القمري يركّز رمزياً على ':'The Moon contact symbolizes ');
