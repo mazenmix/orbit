@@ -614,3 +614,58 @@
 
 /* Live ephemeris evidence in Today's primary card. */
 .mx-focus-hero .mx-live-movement{font-size:.88rem;line-height:1.7;color:#a7e3dc;border-inline-start:2px solid rgba(108,214,206,.58);padding-inline-start:.75rem;margin:.55rem 0 1rem;overflow-wrap:anywhere}
+
+
+/* GO MODE: local-time history explorer above every score and decision card. */
+#live-view-body .mx-go-mode-page .mx-go-time-nav{
+ display:grid;gap:12px;padding:clamp(12px,2vw,19px);
+ border:1px solid rgba(174,148,251,.33);
+ background:linear-gradient(120deg,rgba(113,81,168,.13),rgba(19,27,46,.45));
+ min-width:0;
+}
+#live-view-body .mx-go-time-heading{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;
+}
+#live-view-body .mx-go-time-heading>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 11px;min-width:0}
+#live-view-body .mx-go-time-heading strong{font-size:clamp(13px,1.75vw,16px);color:#f4ecff;line-height:1.6}
+#live-view-body .mx-go-time-heading small{font-size:11px;color:#b5c0d7}
+#live-view-body .mx-go-time-status{
+ font-size:10px;font-weight:800;letter-spacing:.02em;border:1px solid #957bcf6a;
+ border-radius:30px;padding:4px 10px;color:#dac8ff;background:#6c4eac27;
+}
+#live-view-body .mx-go-time-status.is-live{color:#8ae9c3;background:#2c85633b;border-color:#5cd9aa68}
+#live-view-body .mx-go-now{flex-shrink:0;min-height:38px;padding:8px 13px}
+#live-view-body .mx-go-time-jumps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+#live-view-body .mx-go-time-jumps button{
+ min-width:0;min-height:41px;padding:7px 6px;border-radius:11px;
+ border:1px solid rgba(174,148,251,.36);color:#e6d9ff;
+ background:linear-gradient(135deg,rgba(102,75,158,.30),rgba(35,43,69,.53));
+ font-weight:750;font-size:12px;cursor:pointer;transition:border-color .2s,background .2s;
+}
+#live-view-body .mx-go-time-jumps button:hover{border-color:#bca4ff;background:#684c944f}
+#live-view-body .mx-go-time-jumps button:focus-visible,#live-view-body .mx-go-time-form :focus-visible{outline:2px solid #cfbaff;outline-offset:2px}
+#live-view-body .mx-go-time-form{
+ display:grid;grid-template-columns:auto minmax(170px,1fr) auto;align-items:center;gap:9px;min-width:0;
+}
+#live-view-body .mx-go-time-form label{font-size:12px;font-weight:750;color:#d4d3e7}
+#live-view-body .mx-go-time-form input{
+ box-sizing:border-box;min-width:0;width:100%;min-height:43px;padding:8px 12px;border-radius:10px;
+ background:rgba(13,18,35,.85);color:#f4f0ff;border:1px solid rgba(166,153,219,.45);
+ color-scheme:dark;direction:ltr;font:inherit;font-size:14px;
+}
+#live-view-body .mx-go-time-form button{min-height:43px;white-space:nowrap}
+@media(max-width:690px){
+ #live-view-body .mx-go-time-form{grid-template-columns:minmax(0,1fr) auto}
+ #live-view-body .mx-go-time-form label{grid-column:1/-1}
+}
+@media(max-width:420px){
+ #live-view-body .mx-go-time-heading{align-items:flex-start}
+ #live-view-body .mx-go-time-heading>div{gap:4px 8px}
+ #live-view-body .mx-go-time-heading strong{width:100%;font-size:12px}
+ #live-view-body .mx-go-now{padding:7px 9px;min-height:37px;font-size:11px}
+ #live-view-body .mx-go-time-jumps{gap:5px}
+ #live-view-body .mx-go-time-jumps button{font-size:11px;min-height:41px}
+ #live-view-body .mx-go-time-form{grid-template-columns:minmax(0,1fr);gap:7px}
+ #live-view-body .mx-go-time-form label{grid-column:1}
+ #live-view-body .mx-go-time-form button{width:100%}
+}
