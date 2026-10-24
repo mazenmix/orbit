@@ -70,7 +70,7 @@ export type TodaySkyBrief={
  moonNote:string;recent:SkyEventBrief|null;next:SkyEventBrief|null;
  identity:string;activeContacts:SkyAspect[];
 };
-const name=(id:string,lang:SkyLanguage)=>choose(planets[id]?.name??[id,id],lang);
+const name=(id:string,lang:SkyLanguage)=>planets[id]?choose(planets[id].name,lang):id;
 function eventTitle(ev:ExactEvent,lang:SkyLanguage):string{
  return lang==='ar'?'القمر ويّه '+name(ev.target,lang):'Moon with '+name(ev.target,lang);
 }
