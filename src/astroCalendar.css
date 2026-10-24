@@ -122,3 +122,18 @@
  .astro-compact-aspect{gap:5px;padding:5px 7px}
  .astro-day-compact-footer{gap:6px}
 }
+
+
+/* Calendar chronology never reverses with site language:
+ * month one at top-left, Monday at left, Sunday at right. */
+#live-view-body .astro-cal-months,
+#live-view-body .astro-cal-month,
+#live-view-body .astro-cal-weekdays,
+#live-view-body .astro-cal-days{
+ direction:ltr!important;
+}
+#live-view-body .astro-cal-days>.astro-cal-day,
+#live-view-body .astro-cal-weekdays>span{
+ direction:ltr;
+ unicode-bidi:isolate;
+}
