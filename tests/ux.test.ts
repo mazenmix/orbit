@@ -355,3 +355,18 @@ test('People cards inherit Go Mode classes and break down to readable mobile col
  const css=readFileSync('src/peopleCards.css','utf8');
  for(const label of ['--metric-accent:#68e0a6','height:6px','@media(max-width:590px)','@media(max-width:410px)','@media(prefers-reduced-motion:reduce)','min-height:44px'])assert.ok(css.includes(label));
 });
+
+
+test('the year calendar stays left-to-right for Arabic and English, preserving weekday chronology',()=>{
+ const main=readFileSync('src/main.ts','utf8');
+ const css=readFileSync('src/astroCalendar.css','utf8');
+ const render=main.slice(main.indexOf('function astroCalendarPage(){'),main.indexOf('function calendarTargetDays()'));
+ assert.match(render,/const weekdays=\['Mon','Tue','Wed','Thu','Fri','Sat','Sun'\]/);
+ assert.match(render,/class="astro-cal-weekdays" dir="ltr"/);
+ assert.match(render,/class="astro-cal-days" dir="ltr"/);
+ assert.match(render,/class="astro-cal-months" dir="ltr"/);
+ assert.match(render,/class="astro-cal-month panel" dir="ltr"/);
+ assert.match(css,/\.astro-cal-months,/);
+ assert.match(css,/\.astro-cal-days\{/);
+ assert.match(css,/direction:ltr!important/);
+});
