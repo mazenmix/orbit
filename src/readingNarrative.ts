@@ -125,8 +125,11 @@ function houseOf(e:Evidence,natal:Chart|undefined,known:boolean):number{
  return houseNumber(e.natal.longitude,natal.cusps);
 }
 export type SignalStory={title:string;good:string;careful:string;action:string;basis:string};
-export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,language:Language):SignalStory|null{
- const factors=rankedFactors(s.allFactors??s.factors),e=factors[0];
+export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,language:Language,preferred?:Evidence):SignalStory|null{
+ const factors=rankedFactors(s.allFactors??s.factors);
+ // Interpret the EXACT priority contact shown in the technical evidence.
+ // Do not silently switch back to the category's highest generic factor.
+ const e=preferred?factors.find(f=>f.id===preferred.id&&f.transit.id===preferred.transit.id&&f.natal.id===preferred.natal.id&&f.angle===preferred.angle):factors[0];
  if(!e||e.weight<.30)return null;
  const p=index(language),a=meanings[e.angle]?.[p]??'',angle=aspects[e.angle]?.[p]??String(e.angle);
  const area=domains[s.category][p],first=name(e.transit.id,language),second=name(e.natal.id,language);

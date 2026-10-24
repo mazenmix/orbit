@@ -611,3 +611,6 @@
 #live-view-body .mx-focused-dashboard .mx-focus-event-body p b{font-weight:800;color:#e1c5ff}
 #live-view-body .mx-focused-dashboard .mx-focus-event-body .mx-focus-event-step{color:#bdebdc}
 #live-view-body .mx-focused-dashboard .mx-focus-event-body .mx-focus-event-step b{color:#78e0b9}
+
+/* Live ephemeris evidence in Today's primary card. */
+.mx-focus-hero .mx-live-movement{font-size:.88rem;line-height:1.7;color:#a7e3dc;border-inline-start:2px solid rgba(108,214,206,.58);padding-inline-start:.75rem;margin:.55rem 0 1rem;overflow-wrap:anywhere}
