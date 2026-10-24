@@ -40,7 +40,7 @@ test('An actual nonlunar event can drive the headline while all planets remain v
  const events:WholeSkyOccurrence[]=[{kind:'aspect',at:new Date(+at+HOUR),first:'Mercury',second:'Venus',angle:60}];
  const briefing=wholeSkyBroadcast(sample(at),events,at,'ar');
  assert.match(briefing.title,/عطارد.*الزهرة/);
- assert.match(briefing.movement,/يقترب/);
+ assert.match(briefing.title,/دا يقترب/);
  assert.equal(briefing.next?.first,'Mercury');
  assert.equal(briefing.planets.length,10);
  assert.doesNotMatch(briefing.title+' '+briefing.meaning+' '+briefing.action,/°|[0-9]\.[0-9]|تربيع|تسديس|تثليث/);
