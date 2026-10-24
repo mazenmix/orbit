@@ -68,7 +68,9 @@ test('reader interfaces keep exact calculations inside optional disclosures',()=
  assert.ok(main.includes('moonHumanReading(sign,r,active.known,lang)'));
  assert.ok(main.includes('humanPartner(brief.attractionContact'));
  assert.ok(main.includes('natalPortrait(r.natal,person.known,lang)')); // Retained personalized natal reading
- assert.ok(main.includes('mx-focus-technical'));
+ assert.ok(main.includes('case \'evidence\':inner=evidencePage()'));
+ const focused=main.slice(main.indexOf('function focusedToday(){'),main.indexOf('/** A stable daily scan'));
+ assert.ok(!focused.includes('mx-focus-technical'),'Today should not show raw orbital math in its primary narrative');
  assert.ok(soul.includes('humanSoul(reading)'));
  assert.ok(soul.includes('soul-evidence'));
 });
