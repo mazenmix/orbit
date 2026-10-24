@@ -137,3 +137,19 @@
  direction:ltr;
  unicode-bidi:isolate;
 }
+
+/* Always show the full 12-card chronological atlas in every UI language. */
+#live-view-body .astro-cal-months[dir="ltr"]{
+ direction:ltr!important;
+ grid-auto-flow:row;
+ justify-content:stretch;
+}
+#live-view-body .astro-cal-months[dir="ltr"]>.astro-cal-month{
+ direction:ltr!important;
+ text-align:start;
+}
+#live-view-body .astro-cal-month .astro-cal-weekdays[dir="ltr"],
+#live-view-body .astro-cal-month .astro-cal-days[dir="ltr"]{
+ direction:ltr!important;
+ grid-auto-flow:row;
+}
