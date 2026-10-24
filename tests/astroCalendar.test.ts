@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {astroCalendarDays,colorizeAstroDay,calendarColorForScore,fortuneContactWeight,fortuneContactTone} from '../src/astroCalendar.ts';
+import {astroCalendarDays,firstTwelveCalendarMonths,colorizeAstroDay,calendarColorForScore,fortuneContactWeight,fortuneContactTone} from '../src/astroCalendar.ts';
 const aspect=(angle:number,transit='Venus',orb=.1,weight=.9)=>({
  id:transit+'-'+angle+'-Sun',transit:{id:transit,symbol:'✦',longitude:100,speed:1},
  natal:{id:'Sun',symbol:'☉',longitude:100,speed:0},angle,orb,maximumOrb:2,applying:true,weight,exact:null
@@ -46,4 +46,23 @@ test('threshold boundary and monotonic color grade',()=>{
  const colors=['red','red','red','red','yellow','yellow','yellow','yellow','green','green','green'];
  assert.deepEqual(samples.map(calendarColorForScore),colors);
  for(const invalid of [NaN,-1,0,100,15.5,Infinity])assert.throws(()=>calendarColorForScore(invalid));
+});
+
+test('exactly 12 visible chronological month cards, October left through September, no thirteenth October',()=>{
+ const rolling=astroCalendarDays('2026-10-24');
+ const visible=firstTwelveCalendarMonths(rolling);
+ const keys=[...new Set(visible.map(x=>x.monthKey))];
+ assert.equal(keys.length,12);
+ assert.deepEqual(keys,['2026-10','2026-11','2026-12','2027-01','2027-02','2027-03','2027-04','2027-05','2027-06','2027-07','2027-08','2027-09']);
+ assert.equal(visible[0].iso,'2026-10-24');
+ assert.equal(visible.at(-1)?.iso,'2027-09-30');
+ assert.equal(visible.find(x=>x.iso==='2026-10-24')?.weekday,5); // Saturday in Monday-first grid
+ assert.equal(visible.find(x=>x.iso==='2026-11-01')?.weekday,6); // Sunday remains at right
+ assert.ok(visible.length<rolling.length);
+});
+test('display limit handles the new year and leap February without reversing dates',()=>{
+ const visible=firstTwelveCalendarMonths(astroCalendarDays('2027-10-24'));
+ assert.equal(new Set(visible.map(x=>x.monthKey)).size,12);
+ assert.ok(visible.some(x=>x.iso==='2028-02-29'));
+ assert.ok(visible.every((v,i)=>i===0||v.iso>visible[i-1].iso));
 });
