@@ -110,42 +110,56 @@ export function todaySkyBrief(points:readonly Point[],moon:LunarWindow,at:Date,l
   action:lang==='ar'?'راجع التفاصيل قبل أي خطوة مهمة.':'Review details before an important step.'};
  const allEvents=[...moonEvents,ingressPast,nextIngress,...(+moon.vocStartsAt>+moon.enteredAt&&+moon.vocStartsAt<+moon.ingressAt?[vocStart]:[])];
  const recent=mostRecent(allEvents,now),next=soonest(allEvents,now);
- const active=contacts[0]??null;
+ const activeMoon=contacts.find(c=>c.first==='Moon'||c.second==='Moon')??null;
+ const activeBackground=contacts.find(c=>c.first!=='Moon'&&c.second!=='Moon')??null;
  let title:string,meaning:string,action:string,movement:string;
  if(moon.isVoid){
   title=lang==='ar'?'القمر خالي المسار: وقت للمراجعة':'Moon void of course: review first';
   meaning=lang==='ar'?'بعد آخر اتصال قمري رئيسي، القراءة الرمزية تميل للهدوء ومراجعة المفتوح، لحد انتقال القمر لبرجه الجديد.':
-   'After the last exact classical lunar contact, the traditional theme is to review open matters until the next sign.';
+   'After the final exact classical lunar contact, the traditional theme is review until the next sign.';
   action=lang==='ar'?'دقّق موعد أو اتفاق مهم قبل ما تعتمد عليه.':'Confirm an important appointment or agreement.';
-  movement=lang==='ar'?'حالة القمر تغيّرت وصارت خلو مسار.':'The Moon is in its void-of-course phase.';
- }else if(active){
-  const withMoon=active.first==='Moon'||active.second==='Moon',other=active.first==='Moon'?active.second:active.first;
-  const pair=withMoon?eventTitle({transit:'Moon',target:other,angle:active.angle,phase:active.angle,time:at},lang):
-    (name(active.first,lang)+(lang==='ar'?' ويّه ':' with ')+name(active.second,lang));
-  const stage=active.orb<=.07?(lang==='ar'?'هسه اتصال قريب جداً من ذروته.':'An aspect is very close to exact.'):
-    active.applying?(lang==='ar'?'هذا الاتصال دا يقترب من ذروته.':'This aspect is approaching exactness.'):
-    (lang==='ar'?'هذا الاتصال بدأ يبتعد عن ذروته.':'This aspect is moving away from exactness.');
-  title=pair+' · '+choose((planets[withMoon?other:active.second]??planets.Moon).theme,lang);
-  meaning=contactMeaning(withMoon?other:active.second,active.angle,lang);
-  action=choose((planets[withMoon?other:active.second]??planets.Moon).step,lang);
+  movement=lang==='ar'?'حالة القمر صارت خلو مسار.':'The Moon is in its void-of-course phase.';
+ }else if(activeMoon){
+  const other=activeMoon.first==='Moon'?activeMoon.second:activeMoon.first;
+  const stage=activeMoon.orb<=.07?(lang==='ar'?'الاتصال القمري قريب جداً من ذروته.':'The Moon contact is very close to exact.'):
+   activeMoon.applying?(lang==='ar'?'القمر دا يقترب من اتصال جديد.':'The Moon is approaching an exact contact.'):
+   (lang==='ar'?'القمر دا يبتعد عن اتصال صار قبل شوي.':'The Moon is separating from a contact.');
+  title=(lang==='ar'?'القمر بـ'+signLabel+' · ':'Moon in '+signLabel+' · ')+eventTitle({transit:'Moon',target:other,angle:activeMoon.angle,phase:activeMoon.angle,time:at},lang);
+  meaning=contactMeaning(other,activeMoon.angle,lang);
+  action=choose((planets[other]??planets.Moon).step,lang);
   movement=stage;
  }else if(recent?.kind==='moon-contact'&&now-(+recent.time)<=3*3600000){
-  title=lang==='ar'?'بعد '+recent.label:'After '+recent.label;
+  title=lang==='ar'?'القمر بـ'+signLabel+' · بعد '+recent.label:'Moon in '+signLabel+' · After '+recent.label;
   meaning=recent.description;
   action=recent.action;
-  movement=lang==='ar'?'حدث قمري دقيق صار قبل فترة قريبة.':'A verified lunar contact occurred recently.';
+  movement=lang==='ar'?'حدث قمري محسوب صار قبل فترة قريبة.':'A calculated Moon contact occurred recently.';
  }else if(next?.kind==='moon-contact'&&+next.time-now<=3*3600000){
-  title=lang==='ar'?'القمر يقترب من '+name(moon.events.find(e=>+e.time===+next.time)?.target??'Moon',lang):
-   'Moon approaching '+name(moon.events.find(e=>+e.time===+next.time)?.target??'Moon',lang);
+  const who=moon.events.find(e=>+e.time===+next.time)?.target??'Moon';
+  title=lang==='ar'?'القمر بـ'+signLabel+' · يقترب من '+name(who,lang):
+   'Moon in '+signLabel+' · approaching '+name(who,lang);
   meaning=next.description;
   action=next.action;
-  movement=lang==='ar'?'اتصال قمري قادم خلال الساعات الجاية.':'A lunar contact is due in the coming hours.';
+  movement=lang==='ar'?'اتصال قمري قادم خلال الساعات الجاية.':'An exact lunar contact is due in the coming hours.';
+ }else if(activeBackground){
+  const first=name(activeBackground.first,lang),second=name(activeBackground.second,lang);
+  title=(lang==='ar'?'القمر بـ'+signLabel+' · ':'Moon in '+signLabel+' · ')+
+    first+(lang==='ar'?' ويّه ':' with ')+second;
+  meaning=(lang==='ar'?'بينما القمر يسلّط الضوء رمزياً على '+choose(theme.theme,lang)+
+   '، أكو اتصال كوكبي قريب يرتبط بـ'+choose(planets[activeBackground.second]?.theme??theme.theme,lang)+'. ':
+   'While the Moon highlights '+choose(theme.theme,lang)+', another close sky contact concerns '+
+   choose(planets[activeBackground.second]?.theme??theme.theme,lang)+'. ')+
+   (tense(activeBackground.angle)?(lang==='ar'?'التأني أفضل من رد سريع.':'Take your time rather than react fast.'):
+    (lang==='ar'?'تعامل وياه بخطوة واقعية.':'Keep the next step practical.'));
+  action=choose(theme.step,lang);
+  movement=lang==='ar'?'قراءة القمر تتغيّر مع برجه وأحداثه؛ هذا اتصال إضافي بالسماء.':
+   'The Moon changes with its sign and events; this is an additional sky contact.';
  }else{
   title=lang==='ar'?'القمر حالياً ببرج '+signLabel:'Moon in '+signLabel;
   meaning=lang==='ar'?'القمر هسه ببرج '+signLabel+'؛ الموضوع الرمزي الأبرز هو '+choose(theme.theme,lang)+'.':
    'The Moon is currently in '+signLabel+'; the symbolic theme is '+choose(theme.theme,lang)+'.';
   action=choose(theme.step,lang);
-  movement=lang==='ar'?'ماكو اتصال قمري قريب كافي حتى نغيّر التفسير بغير حساب.':'No sufficiently close lunar contact justifies a new headline.';
+  movement=lang==='ar'?'ماكو حدث قريب يستدعي تبديل التفسير بغير دليل.':
+   'There is no nearby calculated event that justifies a new headline.';
  }
  const moonNote=lang==='ar'?
    (moon.isVoid?'القمر خالي المسار هسه. بعد دخوله البرج القادم تتبدل قراءة الصفحة.':
@@ -187,5 +201,5 @@ export function todayEventPlain(ev:FocusReadingInput,lang:SkyLanguage):{label:st
  const intro=ev.kind==='personal-aspect'?
   (lang==='ar'?'هذه إشارة على خريطتك الشخصية، ضمن موضوع ':'This personal chart contact concerns '):
   (lang==='ar'?'الاتصال القمري يركّز رمزياً على ':'The Moon contact symbolizes ');
- return {label,description:intro+choose(topic.theme,lang)+'. '+contactMeaning(second,ev.angle,lang),action:choose(topic.step,lang)};
+ return {label,description:intro+choose(topic.theme,lang)+'. '+(tense(ev.angle)?(lang==='ar'?'الأفضل تهدأ قبل القرار.':'Pause before deciding.'):(lang==='ar'?'التفاصيل والرد الفعلي أهم من التوقع.':'Check real details before expecting an outcome.')),action:choose(topic.step,lang)};
 }
