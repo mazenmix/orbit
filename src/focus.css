@@ -732,3 +732,28 @@
  color:#cdf2e2;line-height:1.7;font-size:.79rem;
 }
 #live-view-body .mx-full-sky-today .mx-sky-feed-action strong{color:#8de5c3;margin-inline-end:5px}
+
+/* Today forecast: concrete present situation, what to watch next, actionable step. */
+#live-view-body .mx-full-sky-today .mx-sky-feed-item .mx-sky-feed-context{
+ display:inline-flex;max-width:100%;padding:4px 9px;border-radius:20px;
+ font-size:.7rem;color:#c8b9f0;background:rgba(144,106,198,.14);
+ border:1px solid rgba(159,140,217,.22);line-height:1.55;margin:7px 0 0;
+}
+#live-view-body .mx-full-sky-today .mx-sky-feed-item .mx-sky-feed-now{
+ line-height:1.8;color:#e3e9f5;font-size:.83rem;margin:10px 0 0;
+}
+#live-view-body .mx-full-sky-today .mx-sky-feed-item .mx-sky-feed-next{
+ border-inline-start:2px solid rgba(180,151,235,.56);
+ padding-inline-start:10px;margin:9px 0 0;
+ font-size:.82rem;line-height:1.8;color:#d6c6f3;
+}
+#live-view-body .mx-full-sky-today .mx-sky-feed-item .mx-sky-feed-now b,
+#live-view-body .mx-full-sky-today .mx-sky-feed-item .mx-sky-feed-next b{
+ color:#efe5ff;font-weight:700;
+}
+#live-view-body .mx-full-sky-today .mx-sky-reading-next,
+#live-view-body .mx-today-compact .mx-sky-reading-next{
+ font-size:.87rem;line-height:1.85;color:#dac8ff;margin:9px 0;
+}
+#live-view-body .mx-full-sky-today .mx-sky-reading-next b,
+#live-view-body .mx-today-compact .mx-sky-reading-next b{color:#eedfff}
