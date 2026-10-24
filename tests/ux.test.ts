@@ -192,19 +192,21 @@ test('calendar shows only three numeric color bands and no methodology expander'
  assert.ok(!calendar.includes("'orange'"));
 });
 
-test('calendar focused-day card is compact, with core evidence but no verbose breakdown',()=>{
- const begin=main.indexOf('function astroCalendarDetail(iso:string){'),end=main.indexOf('function calendarColorLabel(',begin);
- const detail=main.slice(begin,end);
- assert.ok(detail.includes('astro-day-compact-head'));
- assert.ok(detail.includes('astro-day-compact-aspects'));
- assert.ok(detail.includes('astro-day-compact-footer'));
- assert.ok(detail.includes('snap.strongestSupport')&&detail.includes('snap.strongestChallenge'));
- assert.ok(detail.includes('data-calendar-open'));
- assert.ok(!detail.includes('astro-fortune-proof'));
- assert.ok(!detail.includes('astro-day-summary'));
- assert.ok(!detail.includes('شلون تحدد لون الحظ'));
- const styles=readFileSync('src/astroCalendar.css','utf8');
- assert.match(styles, /#live-view-body \.astro-calendar-detail\{\s*padding:14px 18px!important;/);
+test('calendar omits the entire unwanted daily summary, labels and technical appendix',()=>{
+ const calendar=main.slice(main.indexOf('function astroCalendarPage(){'),main.indexOf('function calendarTargetDays()'));
+ assert.ok(!main.includes('function astroCalendarDetail('));
+ assert.ok(!calendar.includes('id="astro-calendar-detail"'));
+ for(const text of ['خلاصة مبنية على ثلاث مراجعات للوقت المختار','مؤشر رمزي · 3 أوقات','الفحص: 04 / 12 / 20','مؤشر رمزي مو تنبؤ']){
+  assert.ok(!main.includes(text),text);
+ }
+ assert.ok(!calendar.includes('astro-day-compact-head'));
+ assert.ok(!calendar.includes('astro-day-compact-aspects'));
+ assert.ok(!calendar.includes('astro-day-main-score'));
+ assert.match(calendar,/class="astro-cal-months"/);
+ assert.match(calendar,/class="astro-cal-days"/);
+ const click=main.slice(main.indexOf('function bindAstroCalendar(){'),main.indexOf('function moonAspectNarrative('));
+ assert.match(click,/zonedInstant\(iso\+'T12:00',active\.zone\)/);
+ assert.match(click,/navigate\('time'\)/);
 });
 
 test('precision calendar samples 3 separately calculated local chart times',()=>{
@@ -214,13 +216,11 @@ test('precision calendar samples 3 separately calculated local chart times',()=>
  assert.ok(source.includes('aspects([transit.get(id)!],fixed,at)'));
  assert.ok(main.includes('rating.minimum'));
  assert.ok(main.includes('rating.maximum'));
- assert.ok(main.includes('snap.minimum'));
- assert.ok(main.includes('snap.maximum'));
  assert.ok(!main.includes('colorizeAstroDay(r.evidence)'));
 });
 
 test('calendar computations reuse one verified natal chart and never use truncated report data',()=>{
- const start=main.indexOf('function startCalendarWork(){'),end=main.indexOf('function bindCalendarDayButtons(){',start);
+ const start=main.indexOf('function startCalendarWork(){'),end=main.indexOf('function bindAstroCalendar(){',start);
  const task=main.slice(start,end);
  assert.ok(task.includes('calendarNatal=chart(birthInstant(active),active)'));
  assert.ok(task.includes('chart(sampledAt,active,false,false)'));
@@ -386,5 +386,8 @@ test('Calendar shows all twelve months immediately and has no show-more control'
  for(const className of ['astro-cal-months','astro-cal-month panel','astro-cal-weekdays','astro-cal-days']){
    assert.match(render,new RegExp('class="'+className+'" dir="ltr" style="direction:ltr!important'));
  }
- assert.match(render,/const blanks=Array\.from\(\{length:initial\.weekday\}/);
+ assert.match(render,/astroCalendarGridPosition\(initial\.weekday,dayIndex\)/);
+ assert.match(render,/grid-column:'\+position\.column/);
+ assert.match(render,/grid-row:'\+position\.row/);
+ assert.doesNotMatch(render,/const blanks=/);
 });
