@@ -46,7 +46,7 @@ test('Moon deep link remains under Today category without top duplicate or calen
 
 test('Today exact events show calculated event-specific impact and next action, without disclaimer line',()=>{
  assert.ok(!main.includes('اتصالات شخصية وقمرية محسوبة؛ ما نعرض تواريخ مستقبلية بلا تحقق.'));
- assert.ok(main.includes("focusEventReading(e.reading,lang)"));
+ assert.ok(main.includes("todayEventPlain(e.reading,lang)"));
  assert.ok(main.includes("t('دلالته:','Meaning:')"));
  assert.ok(main.includes("t('شنو تسوي:','What to do:')"));
  assert.ok(main.includes("reading:{kind:'personal-aspect',transit:e.transit.id,target:e.natal.id,angle:e.angle}"));
@@ -262,8 +262,10 @@ test('simple home has the main focus, Moon and exact-event cards without duplica
  assert.ok(focus.includes('Next 3 exact sky events'));
  assert.ok(!focus.includes('mx-focus-metrics')&&!focus.includes('Two additional signals'));
  assert.ok(main.includes('unique.find(x=>Math.abs(+x.at-+e.at)<60000&&x.reading.kind===e.reading.kind&&'));
- assert.ok(focus.includes('factor.orb.toFixed(3)'));
- assert.ok(focus.includes('data-live-orb'));
+ assert.ok(focus.includes('todaySkyBrief(r.current.points,w,selected,lang)'));
+ assert.ok(focus.includes('data-sky-reading-id'));
+ assert.ok(focus.includes('mx-sky-live-checked'));
+ assert.ok(!focus.includes('orb.toFixed')&&!focus.includes('momentProof'));
  assert.ok(main.includes('refineNatalTransit(f,selected,'));
  assert.ok(main.includes('function startFocusEventScan()'));
  assert.ok(main.includes('function focusEventMarkup(events:FocusEvent[])'));

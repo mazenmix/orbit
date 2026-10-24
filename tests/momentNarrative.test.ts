@@ -31,10 +31,11 @@ test('No fabricated narrative for unsupported aspect or invalid ephemeris',()=>{
  assert.equal(momentNarrative(factor('Jupiter',31,.4,true),'ar'),null);
  assert.equal(momentNarrative(factor('Jupiter',60,NaN,true),'ar'),null);
 });
-test('Home reading consumes calculated phase and orb; content refresh stays at most 15 seconds',()=>{
+test('Today now derives its visible narrative from sky events, while detailed transit maths remain separate',()=>{
  const main=readFileSync('src/main.ts','utf8');
- assert.match(main,/momentNarrative\(factor,lang\)/);
- assert.match(main,/const LIVE_CONTENT_INTERVAL_MS:Record<string,number>=\{today:15000/);
+ assert.match(main,/todaySkyBrief\(r\.current\.points,w,selected,lang\)/);
+ assert.match(main,/const LIVE_CONTENT_INTERVAL_MS:Record<string,number>=\{today:10000/);
  assert.match(main,/setInterval\(\(\)=>refreshLiveView\(\),1000\)/);
- assert.match(main,/data-live-orb=/);
+ assert.match(main,/data-sky-reading-id=/);
+ assert.doesNotMatch(main.slice(main.indexOf('function focusedToday(){'),main.indexOf('/** A stable daily scan')),/data-live-orb|momentNarrative/);
 });

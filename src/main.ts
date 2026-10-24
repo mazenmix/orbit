@@ -28,8 +28,9 @@ import {distinctHighlights} from './highlights.ts';
 import {rankPrioritySignals,distinctPriority,conciseInterpretation} from './focusPriority.ts';
 import {currentFocus} from './liveFocus.ts';
 import {shiftGoTime,type GoTimeStep} from './goTimeNavigation.ts';
-import {momentNarrative} from './momentNarrative.ts';
-import {focusEventReading,type FocusReadingInput} from './focusEventReading.ts';
+
+import {todaySkyBrief,todayEventPlain,type TodaySkyBrief} from './todaySkyBrief.ts';
+import type {FocusReadingInput} from './focusEventReading.ts';
 import {refineNatalTransit} from './precision.ts';
 import {scanLunations,type Lunation} from './eclipse.ts';
 import type {ConfirmedEclipse} from './realEclipses.ts';
@@ -169,7 +170,7 @@ const labels:Record<string,()=>string>={today:()=>t('اليوم','Today'),signal
 let clockFormat: '24'|'12'=localStorage.getItem('mx.clockFormat')==='12'?'12':'24';
 let liveTimePinned=false,liveLastRender=0,liveMinute=-1,moonNarrativeLastMinute=-1,liveSkyLastTick=0;
 const LIVE_SKY_INTERVAL_MS=5000;
-const LIVE_CONTENT_INTERVAL_MS:Record<string,number>={today:15000,signals:20000,go:15000,intel:15000,travelmode:15000,lunar:15000,chart:20000,people:30000,time:30000,eclipses:60000,asteroids:45000,advanced:60000,evidence:25000,ai:30000,more:60000};
+const LIVE_CONTENT_INTERVAL_MS:Record<string,number>={today:10000,signals:20000,go:15000,intel:15000,travelmode:15000,lunar:15000,chart:20000,people:30000,time:30000,eclipses:60000,asteroids:45000,advanced:60000,evidence:25000,ai:30000,more:60000};
 
 const natalAsteroidHtmlCache=new Map<string,string>();
 const dateText=(d:Date,options:Intl.DateTimeFormatOptions={dateStyle:'full',timeStyle:'short'})=>new Intl.DateTimeFormat('en-GB',{...options,timeZone:active.zone,numberingSystem:'latn',hour12:clockFormat==='12'}).format(d);
@@ -280,41 +281,52 @@ function todaySkyWheel(r:Report){
   '</section></div>';
 }
 function focusedToday(){
- const r=data!,priority=currentFocus(rankPrioritySignals({signals:r.signals,natal:r.natal,knownBirthTime:active.known,complete:r.complete}),r.evidence);
- const main=priority?.signal,factor=priority?.factor,reading=main?copy(main,factor):null;
- const currentMoment=factor?momentNarrative(factor,lang):null;
- const evidence=factor?planet(factor.transit.id)+' '+aspect(factor.angle)+' '+planet(factor.natal.id)+' · '+(currentMoment?.orbText??factor.orb.toFixed(3)+'°'):t('لا توجد زاوية رئيسية مهيمنة ضمن الأورب الحالي','No dominant major aspect in the current orb');
- const phase=currentMoment?.phase??(factor?(factor.applying?t('يقترب من الدقة','Applying'):t('يبتعد عن الدقة','Separating')):'');
- const moonNow=r.current.points.find(p=>p.id==='Moon');
- const moonDegree=moonNow?((moonNow.longitude%30+30)%30).toFixed(2):null;
- const momentProof=(moonNow?'☾ '+t('القمر الآن','Moon now')+' '+signName(moonNow.longitude)+' '+moonDegree+'° · ':'')+
-  t('العبور على خريطتك الولادية','Transit to natal chart')+': '+evidence+(phase?' · '+phase:'')+' · '+t('حُسب الساعة','Calculated at')+' '+dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
- const quality=priority?.status==='mixed'?'':
-  priority?.limitation==='unknown-time'?t('وقت الميلاد مو مؤكد؛ البيوت والطالع مو داخلين بالترجيح.','Birth time unknown; house and ascendant relevance excluded.'):
-  priority?.limitation==='missing-ephemeris'?t('بعض البيانات الفلكية الثانوية مو متوفرة؛ ما تم تعويضها بتخمين.','Some supplementary ephemerides are unavailable; missing positions were not invented.'):'';
- const time=(at:Date)=>dateText(at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
- let moon='<p class="mx-focus-note">'+t('توقيت القمر غير متاح حالياً.','Moon calculation unavailable.')+'</p>';
- let futureEvents:FocusEvent[]=[];
+ const r=data!,at=+selected;
+ const time=(date:Date)=>dateText(date,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+ let moon='<p class="mx-focus-note">'+t('توقيت القمر غير متاح حالياً.','Moon timing temporarily unavailable.')+'</p>';
  let moonIsVoid=false,moonVocStart=NaN,moonVocEnd=NaN;
+ let futureEvents:FocusEvent[]=[];
+ let brief:TodaySkyBrief|null=null;
  try{
-  const w=moonWindow(),now=+selected;
+  const w=moonWindow();
   moonIsVoid=w.isVoid;moonVocStart=+w.vocStartsAt;moonVocEnd=+w.ingressAt;
-  const percent=(from:Date,to:Date)=>Math.max(0,Math.min(100,Math.round(100*(+to-now)/Math.max(1,+to-(+from)))));
+  brief=todaySkyBrief(r.current.points,w,selected,lang);
+  const percent=(from:Date,to:Date)=>Math.max(0,Math.min(100,Math.round(100*(+to-at)/Math.max(1,+to-(+from)))));
   const vocEnd=w.isVoid?w.ingressAt:w.vocStartsAt,vocStart=w.isVoid?w.vocStartsAt:w.enteredAt;
   moon='<div class="mx-focus-moon"><article><small>☾ '+t('القمر الآن','Current Moon')+'</small><strong>'+signName(w.sign*30)+'</strong><small>'+t('الانتقال القادم','Next ingress')+'</small><time datetime="'+w.ingressAt.toISOString()+'">'+time(w.ingressAt)+'</time><progress max="100" value="'+percent(w.enteredAt,w.ingressAt)+'"></progress></article>'+
    '<article><small>◌ VOID OF COURSE</small><strong>'+(w.isVoid?t('خالي المسار','VOC active'):t('ماشي عدل','Moon on course'))+'</strong><small>'+(w.isVoid?t('نهاية الفترة','Period ends'):t('بداية الفترة','Period begins'))+'</small><time datetime="'+vocEnd.toISOString()+'">'+time(vocEnd)+'</time><progress max="100" value="'+percent(vocStart,vocEnd)+'"></progress></article></div>';
-  const moonIngress:FocusEvent={name:t('انتقال القمر للبرج التالي','Moon ingress')+' · '+signName(((w.sign+1)%12)*30),at:w.ingressAt,mark:'☾',personal:false,reading:{kind:'moon-ingress',nextSign:(w.sign+1)%12}};
+  const moonIngress:FocusEvent={name:t('انتقال القمر للبرج التالي','Next Moon sign'),at:w.ingressAt,mark:'☾',personal:false,reading:{kind:'moon-ingress',nextSign:(w.sign+1)%12}};
   const voc:FocusEvent={name:w.isVoid?t('نهاية خلو المسار','VOC ends'):t('بداية خلو المسار','VOC begins'),at:w.isVoid?w.ingressAt:w.vocStartsAt,mark:'◌',personal:false,reading:{kind:w.isVoid?'voc-end':'voc-start'}};
-  futureEvents=[moonIngress,voc,...w.events.filter(e=>+e.time>now).map(e=>({name:planet(e.transit)+' '+aspect(e.angle)+' '+planet(e.target),at:e.time,mark:'✧',personal:false,reading:{kind:'moon-aspect' as const,target:e.target,angle:e.angle}}))].filter(e=>+e.at>now);
- }catch(e){futureEvents=[];moon='<p class="mx-focus-note">'+t('تعذر التحقق من بيانات القمر: ','Moon ephemeris unavailable: ')+esc(String(e))+'</p>'}
+  futureEvents=[moonIngress,voc,...w.events.filter(e=>+e.time>at).map(e=>({name:planet(e.transit)+' '+planet(e.target),at:e.time,mark:'✧',personal:false,reading:{kind:'moon-aspect' as const,target:e.target,angle:e.angle}}))].filter(e=>+e.at>at);
+ }catch(e){
+  futureEvents=[];
+  moon='<p class="mx-focus-note">'+t('ما أمكن التحقق من حركة القمر الآن؛ القراءة القديمة ما تنعرض كأنها جديدة.','Moon positions could not be verified; the last reading is not passed off as live.')+'</p>';
+  console.warn('Today sky-brief calculation unavailable',e);
+ }
  focusMoonEvents=futureEvents;
  const personal=focusScan?.done&&focusScan.key===focusEventKey()?focusScan.events:[];
  const eventMarkup=focusEventMarkup([...personal,...futureEvents]);
+ const card=(label:string,event:TodaySkyBrief['recent'])=>
+  '<div class="mx-sky-activity-card"><small>'+label+'</small>'+(event?'<strong>'+esc(event.label)+'</strong><time datetime="'+event.time.toISOString()+'">'+time(event.time)+'</time>':
+  '<strong>'+t('ماكو حدث دقيق ضمن النافذة','No exact event in this window')+'</strong>')+'</div>';
+ const headline=brief?.title??t('رصد السماء غير متاح هسه','Sky reading currently unavailable');
+ const meaning=brief?.meaning??t('ننتظر حسابات موثوقة حتى نعرض قراءة جديدة.','Waiting for verified sky positions before displaying a reading.');
+ const action=brief?.action??t('ارجع افتح الصفحة بعد التأكد من الاتصال.','Revisit after the calculation engine is available.');
+ const activity=brief?'<div class="mx-sky-activity" aria-label="'+t('تغيّرات السماء','Sky events')+'">'+
+  card(t('آخر حدث محسوب','Most recent event'),brief.recent)+card(t('الحدث القادم','Next event'),brief.next)+'</div>':'';
+ const updated=t('آخر حساب للسماء: ','Sky calculated: ')+dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
  return todaySkyWheel(r)+'<div class="mx-focused-dashboard"><div class="mx-focus-main">'+
- '<section class="panel mx-focus-hero"><div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('شنو الأهم إلك هسه؟','YOUR MAIN FOCUS')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'): 'LIVE')+'</span></div><h2>'+esc(currentMoment?.title??reading?.title??t('ماكو اتصال مهيمن الآن','No dominant aspect at this moment'))+'</h2><p class="mx-live-movement" data-live-orb="'+(factor?factor.orb.toFixed(6):'')+'">'+esc(momentProof)+'</p><p>'+esc(currentMoment?.effect??reading?.good??t('ماكو اتصال فلكي قوي يدعم قراءة شخصية بهذه اللحظة.','No strong astrological contact supports a personal reading at this moment.'))+'</p>'+(currentMoment||reading?'<p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(currentMoment?.action??reading!.action)+'</p>':'')+(quality?'<p class="mx-focus-quality">'+quality+'</p>':'')+'<details class="mx-focus-technical"><summary>'+t('أساس الحساب (اختياري)','Calculation basis (optional)')+'</summary><p>'+esc(evidence)+'</p><small>'+dateText(selected,{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+(phase?' · '+phase:'')+'</small></details>'+
- '<div class="mx-focus-actions"><button class="primary" data-go="evidence">'+t('ليش هاي القراءة؟','Why this reading?')+' ↗</button>'+(factor?'<button class="secondary" id="focus-refine-peak">'+t('احسب وقت الذروة','Verify exact peak')+' ⏱</button>':'')+'</div><div class="mx-focus-peak" id="focus-peak-result" aria-live="polite"></div></section>'+
- '</div>'+
- '<aside class="mx-focus-aside"><section class="panel mx-focus-panel mx-focus-lunar-status '+(moonIsVoid?'is-voc':'is-clear')+'" data-voc-start="'+moonVocStart+'" data-voc-end="'+moonVocEnd+'"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+'<p class="mx-moon-personal-summary">'+esc(moonPersonalSummary(r,active.known,lang))+'</p><button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
+ '<section class="panel mx-focus-hero" data-sky-reading-id="'+esc(brief?.identity??'unavailable')+'">'+
+ '<div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('شنو متغيّر بالسما هسه؟','WHAT IS CHANGING IN THE SKY?')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'): 'LIVE')+'</span></div>'+
+ '<h2>'+esc(headline)+'</h2><p class="mx-sky-movement">'+esc(brief?.movement??t('الحساب غير متاح حالياً','Calculation unavailable'))+'</p>'+
+ '<p class="mx-sky-meaning">'+esc(meaning)+'</p>'+
+ '<p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(action)+'</p>'+
+ activity+'<div class="mx-sky-live-checked" role="status">'+esc(updated)+'</div>'+
+ '<div class="mx-focus-actions"><button class="primary" data-go="lunar">'+t('تابع أحداث القمر','Explore Moon events')+' ↗</button></div>'+
+ '</section></div>'+
+ '<aside class="mx-focus-aside"><section class="panel mx-focus-panel mx-focus-lunar-status '+(moonIsVoid?'is-voc':'is-clear')+'" data-voc-start="'+moonVocStart+'" data-voc-end="'+moonVocEnd+'"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+
+ (brief?'<p class="mx-moon-personal-summary">'+esc(brief.moonNote)+'</p>':'')+
+ '<button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
  '<section class="panel mx-focus-panel"><h2>'+t('أقرب 3 أحداث فلكية دقيقة','Next 3 exact sky events')+'</h2><div id="focus-events">'+eventMarkup+'</div><button class="secondary mx-focus-subaction" data-go="calendar">'+t('فتح التقويم','Open calendar')+' ↗</button></section></aside></div>';
 }
 
@@ -352,10 +364,10 @@ function focusEventMarkup(events:FocusEvent[]){
   unique.push({...e});
  }
  return unique.slice(0,3).map(e=>{
-  const reading=focusEventReading(e.reading,lang);
-  return '<div class="mx-focus-event"><span class="mx-event-mark" aria-hidden="true">'+e.mark+'</span><div class="mx-focus-event-body"><strong>'+esc(e.name)+'</strong>'+
+  const reading=todayEventPlain(e.reading,lang);
+  return '<div class="mx-focus-event"><span class="mx-event-mark" aria-hidden="true">'+e.mark+'</span><div class="mx-focus-event-body"><strong>'+esc(reading.label)+'</strong>'+
    '<small>'+dateText(e.at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+' · '+esc(timezoneCityLabel(active.zone))+(e.personal?' · '+t('شخصي','Personal'):'')+'</small>'+
-   '<p class="mx-focus-event-meaning"><b>'+t('دلالته:','Meaning:')+'</b> '+esc(reading.effect)+'</p>'+
+   '<p class="mx-focus-event-meaning"><b>'+t('دلالته:','Meaning:')+'</b> '+esc(reading.description)+'</p>'+
    '<p class="mx-focus-event-step"><b>'+t('شنو تسوي:','What to do:')+'</b> '+esc(reading.action)+'</p></div></div>';
  }).join('')||'<p>'+t('ماكو أحداث دقيقة ضمن فترة البحث الحالية.','No exact events found in the current search interval.')+'</p>';
 }
@@ -430,7 +442,7 @@ function scoresHTML(r:Report){
  return '<div class="scores-grid rich-scores">'+categories.map(c=>{const signal=r.signals.find(s=>s.category===c),v=r.scores[c],line=signal?copy(signal).action:t(...fallback[c]);return '<button class="score-card '+gaugeLevel(v)+'" data-category="'+c+'"><span class="score-symbol '+c+'">'+categoryLabels[c][2]+'</span><span class="score-number">'+v+'<small>/100</small></span><b>'+cat(c)+'</b><p>'+esc(line)+'</p><div class="meter"><i style="width:'+v+'%"></i></div></button>'}).join('')+'</div>';
 }
 function signalCard(s:Signal,index:number){const text=copy(s);return `<button class="signal-card ${s.tone}" data-signal="${index}"><span class="signal-icon">${categoryLabels[s.category][2]}</span><div><div class="signal-meta">${cat(s.category)} <span>·</span> ${tone(s)}</div><h3>${text.title}</h3><div class="direct-advice"><p class="good"><b>${t("الزين","Good")}</b>${text.good}</p><p class="careful"><b>${t("انتبه","Watch out")}</b>${text.careful}</p><p class="do"><b>${t("سوي هالشي","Do this")}</b>${text.action}</p></div><small>${t('اعرض الدليل','See evidence')} <span class="arrow">↗</span></small></div></button>`}
-function today(){const r=data!,primary=r.signals[0],text=primary?copy(primary):null;return `${todaySkyWheel(r)}<div class="dashboard-grid mx-today-compact"><div class="main-column"><section class="hero panel"><div class="hero-top"><span class="live-label"><i class="status-dot"></i>${t('هسّه · إيقاع اللحظة','NOW · THE MOMENT')}</span><span class="subtle">${dateText(selected,{hour:'2-digit',minute:'2-digit'})}</span></div><div class="hero-copy">${tag(t('مرحباً','Welcome')+' '+esc(active.name),'violet')}<h2>${text?.title??t('خذ مساحة وشوف الصورة','Make room for the bigger picture')}</h2><p>${text?.action??t('ماكو إشارة مهيمنة ضمن الأورب المحدد.','No dominant contact within the configured orbs.')}</p><div class="hero-bottom"><button class="primary" data-go="evidence">${t('ليش هاي القراءة؟','Why this reading?')} <span>↗</span></button><button class="secondary mx-ai-context" data-go="ai">✧ ${t('شرح Ai','Explain with Ai')}</button></div></div><div class="hero-orbit" aria-hidden="true"><i></i><i></i><i></i><span>✦</span><b>☾</b><em>·</em></div></section>${scoresHTML(r)}<div class="section-title"><h2>${t('إشارات تستحق انتباهك','Signals worth your attention')}</h2><button class="text-button" data-go="signals">${t('كل الإشارات','All signals')} ↗</button></div><div class="signal-list">${distinctHighlights(r.signals,copy,3,1).map(({item,index})=>signalCard(item,index)).join('')||`<p class="empty panel">${t('ماكو إشارات إضافية مختلفة عن القراءة الرئيسية ضمن الأورب المحدد.','No additional distinct signals beyond the headline reading within the configured orbs.')}</p>`}</div></div><aside class="right-column"><section class="panel lunar-card"><span class="moon-glyph">☾</span><span class="eyebrow">${t('القمر وخارطتك','THE MOON & YOUR CHART')}</span><h3>${signName(r.current.points.find(p=>p.id==='Moon')!.longitude)}</h3><p>${esc(moonPersonalSummary(r,active.known,lang))}</p><button class="text-button" data-go="evidence">${t('شوف التفاصيل','View details')} ↗</button></section><button class="panel time-shortcut" data-go="time"><span>◷</span><div><b>${t('آلة الزمن','Time Machine')}</b><p>${t('أي تاريخ. منظور جديد.','Another date. A new perspective.')}</p></div><b>↗</b></button></aside></div>`}
+function today(){const r=data!,primary=r.signals[0],text=primary?copy(primary):null;let sky:TodaySkyBrief|null=null;try{sky=todaySkyBrief(r.current.points,moonWindow(),selected,lang)}catch(e){console.warn('Pro Today sky brief unavailable',e)}return `${todaySkyWheel(r)}<div class="dashboard-grid mx-today-compact"><div class="main-column"><section class="hero panel"><div class="hero-top"><span class="live-label"><i class="status-dot"></i>${t('هسّه · إيقاع اللحظة','NOW · THE MOMENT')}</span><span class="subtle">${dateText(selected,{hour:'2-digit',minute:'2-digit'})}</span></div><div class="hero-copy">${tag(t('مرحباً','Welcome')+' '+esc(active.name),'violet')}<h2>${esc(sky?.title??t('القراءة الفلكية غير متاحة هسه','Sky brief unavailable'))}</h2><p>${esc(sky?.meaning??t('رصد السماء ما اكتمل؛ ما نعرض قراءة قديمة على أنها مباشرة.','Sky verification is unavailable; no old reading is presented as live.'))}</p><p class="mx-focus-story-action"><b>${t('شنو تسوي؟','What to do:')}</b> ${esc(sky?.action??t('ارجع بعد تحديث الحسابات.','Retry once calculations are available.'))}</p><small class="mx-sky-live-checked">${t('آخر حساب للسماء:','Sky calculated:')} ${dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</small><div class="hero-bottom"><button class="primary" data-go="evidence">${t('ليش هاي القراءة؟','Why this reading?')} <span>↗</span></button><button class="secondary mx-ai-context" data-go="ai">✧ ${t('شرح Ai','Explain with Ai')}</button></div></div><div class="hero-orbit" aria-hidden="true"><i></i><i></i><i></i><span>✦</span><b>☾</b><em>·</em></div></section>${scoresHTML(r)}<div class="section-title"><h2>${t('إشارات تستحق انتباهك','Signals worth your attention')}</h2><button class="text-button" data-go="signals">${t('كل الإشارات','All signals')} ↗</button></div><div class="signal-list">${distinctHighlights(r.signals,copy,3,1).map(({item,index})=>signalCard(item,index)).join('')||`<p class="empty panel">${t('ماكو إشارات إضافية مختلفة عن القراءة الرئيسية ضمن الأورب المحدد.','No additional distinct signals beyond the headline reading within the configured orbs.')}</p>`}</div></div><aside class="right-column"><section class="panel lunar-card"><span class="moon-glyph">☾</span><span class="eyebrow">${t('القمر وخارطتك','THE MOON & YOUR CHART')}</span><h3>${signName(r.current.points.find(p=>p.id==='Moon')!.longitude)}</h3><p>${esc(moonPersonalSummary(r,active.known,lang))}</p><button class="text-button" data-go="evidence">${t('شوف التفاصيل','View details')} ↗</button></section><button class="panel time-shortcut" data-go="time"><span>◷</span><div><b>${t('آلة الزمن','Time Machine')}</b><p>${t('أي تاريخ. منظور جديد.','Another date. A new perspective.')}</p></div><b>↗</b></button></aside></div>`}
 function trend(hours:number){const rows=Array.from({length:9},(_,i)=>{const at=new Date(Math.min(Date.UTC(2399,11,31,23,59),+selected+i*hours/8*3600000));return {at,value:average(getReport(at))}});const pts=rows.map((r,i)=>`${i*75},${130-r.value}`).join(' ');return `<div class="trend"><svg viewBox="0 0 600 150" role="img" aria-label="${t('مؤشر رمزي محسوب عبر الوقت','Calculated symbolic index over time')}"><defs><linearGradient id="area" x2="0" y2="1"><stop stop-color="#8272df" stop-opacity=".25"/><stop offset="1" stop-color="#8272df" stop-opacity="0"/></linearGradient></defs>${[25,50,75,100].map(v=>`<line x1="0" x2="600" y1="${130-v}" y2="${130-v}" stroke="#292d43" stroke-dasharray="3 5"/><text x="3" y="${126-v}" fill="#727993" font-size="8">${v}</text>`).join('')}<polygon points="0,140 ${pts} 600,140" fill="url(#area)"/><polyline points="${pts}" stroke="#a79aef" stroke-width="2" fill="none"/>${rows.map((r,i)=>`<circle cx="${i*75}" cy="${130-r.value}" r="3" fill="#c6bbff"><title>${dateText(r.at,{hour:'2-digit',minute:'2-digit'})}: ${r.value}/100</title></circle>`).join('')}</svg><div class="trend-labels" dir="ltr">${rows.filter((_,i)=>i%2===0).map(r=>`<span>${dateText(r.at,{hour:'2-digit',minute:'2-digit'})}</span>`).join('')}</div></div>`}
 function signalsPage(){const r=data!;return `<div class="filter-row">${(['all',...categories] as const).map(c=>`<button data-filter="${c}" class="chip ${filter===c?'selected':''}">${c==='all'?t('الكل','All'):cat(c)}</button>`).join('')}</div><div class="signal-list wide">${r.signals.map((s,i)=>filter==='all'||filter===s.category?signalCard(s,i):'').join('')||`<div class="empty panel">${t('ماكو إشارة لهالمجال ضمن الأورب المحدد.','No signal in this category within the configured orbs.')}</div>`}</div>`}
 const soulCharts=new Map<string,Chart>();

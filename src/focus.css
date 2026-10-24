@@ -669,3 +669,39 @@
  #live-view-body .mx-go-time-form label{grid-column:1}
  #live-view-body .mx-go-time-form button{width:100%}
 }
+
+
+/* Today sky briefing: readable event chronology, never numeric orbital prose. */
+#live-view-body .mx-focus-hero .mx-sky-movement{
+ display:inline-flex;align-items:center;gap:7px;margin:3px 0 10px;
+ color:#a5d9cc;font-size:.79rem;line-height:1.6;
+}
+#live-view-body .mx-focus-hero .mx-sky-movement:before{
+ content:"";width:6px;height:6px;border-radius:50%;background:#6ee0bc;
+ box-shadow:0 0 11px rgba(109,239,187,.55);flex-shrink:0;
+}
+#live-view-body .mx-focus-hero .mx-sky-meaning{
+ font-size:clamp(.89rem,1.45vw,1rem);line-height:1.8;color:#e4e9f6;margin:4px 0 10px;
+}
+#live-view-body .mx-focus-hero .mx-focus-story-action{
+ padding:11px 13px;border-radius:12px;line-height:1.7;
+ background:rgba(73,154,127,.12);border:1px solid rgba(107,205,170,.22);color:#d2f6e8;
+}
+#live-view-body .mx-focus-hero .mx-focus-story-action strong{color:#90f3cc}
+#live-view-body .mx-sky-activity{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px;
+}
+#live-view-body .mx-sky-activity-card{
+ min-width:0;display:flex;flex-direction:column;gap:5px;padding:11px 13px;
+ background:rgba(107,94,157,.12);border-radius:12px;border:1px solid rgba(167,155,211,.23);
+}
+#live-view-body .mx-sky-activity-card small{font-size:.71rem;color:#b7bcdd}
+#live-view-body .mx-sky-activity-card strong{font-size:.83rem;font-weight:700;line-height:1.55;color:#ede7ff;overflow-wrap:anywhere}
+#live-view-body .mx-sky-activity-card time{font-size:.74rem;color:#a3dccc;line-height:1.5}
+#live-view-body .mx-sky-live-checked{display:block;font-size:.7rem;color:#9caecc;margin-top:12px;line-height:1.5}
+#live-view-body .mx-focus-hero .mx-focus-actions{margin-top:11px}
+#live-view-body .mx-today-compact .hero-copy>.mx-sky-live-checked{margin-bottom:9px}
+@media(max-width:460px){
+ #live-view-body .mx-sky-activity{grid-template-columns:1fr;gap:7px}
+ #live-view-body .mx-sky-activity-card{padding:9px 11px}
+}
