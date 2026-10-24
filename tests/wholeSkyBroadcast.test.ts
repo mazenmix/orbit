@@ -66,3 +66,55 @@ test('Today UI uses whole-sky stream in simple and Pro, not lunar-only selection
  assert.match(main,/const LIVE_CONTENT_INTERVAL_MS:Record<string,number>=\{today:10000/);
  assert.doesNotMatch(focus,/momentNarrative\(|todaySkyBrief\(|orb.toFixed/);
 });
+
+
+test('Mercury retrograde addresses reader with message and booking advice, no mechanical explanations',()=>{
+ const mercury=occurrenceLanguage({kind:'station',at:new Date(BASE),first:'Mercury',retrograde:true},'ar');
+ assert.match(mercury.title,/عطارد.*التراجع/);
+ assert.match(mercury.description,/المواعيد|المراسلات/);
+ assert.match(mercury.action,/موعد|رسالة/);
+ assert.doesNotMatch(mercury.description,/جهة الحركة|ظاهرية|تبدّل فلكي محسوب|المواضع|الرياضيات|الزاوية|درج/);
+ const venus=occurrenceLanguage({kind:'station',at:new Date(BASE),first:'Venus',retrograde:true},'ar');
+ assert.match(venus.description,/العلاقات|المصاريف/);
+ assert.notEqual(mercury.description,venus.description);
+});
+
+test('Planet sign entries and every sky event carry a distinct practical personal step',()=>{
+ const at=new Date(BASE);
+ const events=[
+  {kind:'ingress',first:'Venus',sign:6,at},
+  {kind:'aspect',first:'Moon',second:'Jupiter',angle:120,at},
+  {kind:'aspect',first:'Mercury',second:'Venus',angle:60,at},
+  {kind:'station',first:'Mars',retrograde:false,at}
+ ] as const;
+ const readings=events.map(e=>occurrenceLanguage(e,'ar'));
+ assert.equal(readings.length,4);
+ for(const row of readings){
+  assert.ok(row.description.length>36);
+  assert.ok(row.action.length>12);
+  assert.doesNotMatch(row.description+' '+row.action,/تغيّرت جهة الحركة|الحركة الظاهرية|تبدّل فلكي محسوب|اتصال فلكي بين|الفكرة الرمزية|حركة كوكبية|المعادلة|رياضيات|تسديس|تثليث|تربيع|°/);
+ }
+ assert.notEqual(readings[0].description,readings[1].description);
+ assert.notEqual(readings[1].description,readings[2].description);
+ assert.notEqual(readings[2].description,readings[3].description);
+});
+
+test('Live event cards show What to do in readable user-directed Arabic',()=>{
+ const main=readFileSync('src/main.ts','utf8');
+ const section=main.slice(main.indexOf('function wholeSkyEventItems('),main.indexOf('function planetLiveStatus('));
+ assert.match(section,/line\.description/);
+ assert.match(section,/line\.action/);
+ assert.match(section,/mx-sky-feed-action/);
+ assert.match(section,/شنو تسوي؟/);
+ const css=readFileSync('src/focus.css','utf8');
+ assert.match(css,/mx-sky-feed-action/);
+});
+
+test('English event readings remain available for direct guidance',()=>{
+ const texts=[
+  occurrenceLanguage({kind:'station',first:'Mercury',at:new Date(BASE),retrograde:true},'en'),
+  occurrenceLanguage({kind:'ingress',first:'Venus',sign:6,at:new Date(BASE)},'en'),
+  occurrenceLanguage({kind:'aspect',first:'Sun',second:'Saturn',angle:90,at:new Date(BASE)},'en')
+ ];
+ for(const x of texts){assert.ok(x.description.length>20&&x.action.length>10)}
+});

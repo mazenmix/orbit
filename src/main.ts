@@ -299,7 +299,8 @@ function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string){
   const time=dateText(e.at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
   return '<article class="mx-sky-feed-item" data-sky-event="'+esc(e.kind+':'+e.first+':'+(e.second??''))+'">'+
    '<div><strong>'+esc(line.title)+'</strong><time datetime="'+e.at.toISOString()+'">'+esc(time)+'</time></div>'+
-   '<p>'+esc(line.description)+'</p></article>';
+   '<p>'+esc(line.description)+'</p>'+
+   '<p class="mx-sky-feed-action"><strong>'+t('شنو تسوي؟','What to do:')+'</strong> '+esc(line.action)+'</p></article>';
  }).join('');
 }
 function planetLiveStatus(brief:WholeSkyBroadcast){
