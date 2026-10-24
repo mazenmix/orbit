@@ -160,3 +160,20 @@ export function astroCalendarDays(today:string):AstroCalendarDay[]{
  }
  return days;
 }
+
+/** The 12 visible calendar cards start with the current month and end with
+ * the eleventh following month, in chronological order. A rolling 365-day
+ * source may include a thirteenth partial month; that extra card is omitted.
+ */
+export function firstTwelveCalendarMonths(days:readonly AstroCalendarDay[]):AstroCalendarDay[]{
+ const monthKeys=new Set<string>();
+ const result:AstroCalendarDay[]=[];
+ for(const day of days){
+  if(!monthKeys.has(day.monthKey)){
+   if(monthKeys.size===12)break;
+   monthKeys.add(day.monthKey);
+  }
+  result.push(day);
+ }
+ return result;
+}
