@@ -119,3 +119,18 @@ test('English event readings remain available for direct guidance',()=>{
  ];
  for(const x of texts){assert.ok(x.description.length>20&&x.action.length>10)}
 });
+
+test('Retrograde status is vivid orange; direct and station remain separately legible',()=>{
+ const main=readFileSync('src/main.ts','utf8');
+ const css=readFileSync('src/focus.css','utf8');
+ const grid=main.slice(main.indexOf('function planetLiveStatus('),main.indexOf('function focusedToday(){'));
+ assert.match(grid,/item\.motion==='متراجع'\|\|item\.motion==='retrograde'/);
+ assert.match(grid,/is-retrograde/);
+ assert.match(grid,/is-station/);
+ assert.match(grid,/is-direct/);
+ assert.match(css,/\.mx-sky-planet small\.is-retrograde\{/);
+ assert.match(css,/color:#ff870a/);
+ assert.match(css,/font-weight:900/);
+ assert.match(css,/\.mx-sky-planet small\.is-station\{/);
+ assert.match(css,/\.mx-sky-planet small\.is-direct\{/);
+});
