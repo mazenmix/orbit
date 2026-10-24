@@ -88,34 +88,84 @@ export function scanWholeSky(at:Date,read:WholeSkyReader,hoursBack=18,hoursAhead
  }
  return events.sort((a,b)=>+a.at-+b.at||a.first.localeCompare(b.first));
 }
+/** Planetary events have their calculations elsewhere. Here we speak to the
+ * reader directly, with practical examples rather than orbital descriptions.
+ * These are interpretations of themes; do not promise real-world outcomes. */
+type ActionGuide={ar:string;en:string;doAr:string;doEn:string};
+const guides:Record<SkyBodyId,ActionGuide>={
+ Sun:{ar:'إذا بين إيدك قرار أو شغل مهم، خلّ أولويتك واضحة بدل ما تشتت نفسك.',en:'For an important decision, focus on one priority.',doAr:'حدد أهم خطوة تحتاج تنجزها اليوم.',doEn:'Choose the most important next step.'},
+ Moon:{ar:'إذا عندك موقف مؤثر، فرّق بين شعورك والوقائع قبل الرد.',en:'Separate feelings from facts before responding.',doAr:'خلي ردك هادئ وواضح.',doEn:'Keep your response calm and clear.'},
+ Mercury:{ar:'إذا عندك رسائل أو حجوزات أو معاملات، لا تفترض أن الكل فاهم نفس التفاصيل.',en:'For messages, bookings or paperwork, confirm what others actually understood.',doAr:'تأكد من موعد أو رسالة مهمة.',doEn:'Confirm one important message or appointment.'},
+ Venus:{ar:'إذا عندك موضوع علاقة أو تعارف، خلي الاهتمام واضح بدون ضغط أو افتراضات.',en:'For romance or friendship, communicate interest without pressure or assumptions.',doAr:'احچي عن اهتمام واحد بصراحة ولطف.',doEn:'Express one interest honestly and gently.'},
+ Mars:{ar:'إذا متحمس أو متضايق من موقف، خلّ طاقتك بخطوة مفيدة بدل مواجهة مستعجلة.',en:'Channel excitement or frustration into a useful step instead of a rushed confrontation.',doAr:'خلص مهمة صغيرة قبل ما ترد بانفعال.',doEn:'Finish one small task before responding emotionally.'},
+ Jupiter:{ar:'إذا تفكر بفرصة شغل أو سفر أو تعلّم، لا توعد بشي قبل ما تعرف وقته وكلفته.',en:'For work, travel or learning opportunities, check time and cost before committing.',doAr:'راجع فائدة فرصة واحدة وتكاليفها.',doEn:'Review one opportunity and its costs.'},
+ Saturn:{ar:'إذا ضاغطتك مسؤوليات أو مواعيد، تأكد شنو مطلوب منك فعلاً.',en:'When obligations or deadlines press, clarify what is actually expected.',doAr:'حدد التزام واحد ووقت إنجازه.',doEn:'Clarify one obligation and deadline.'},
+ Uranus:{ar:'إذا تريد تغيّر شي بروتينك، جرّب تعديل صغير بدل قرار مفاجئ.',en:'Try one small reversible routine change rather than a sudden decision.',doAr:'اختبر تغيير بسيط قابل للتراجع.',doEn:'Test one reversible change.'},
+ Neptune:{ar:'إذا عندك خبر أو وعد مبهم، لا تبني عليه قرار قبل ما تتأكد.',en:'Do not base a decision on a vague promise or unverified news.',doAr:'تأكد من معلومة مهمة من مصدرها.',doEn:'Verify one important fact.'},
+ Pluto:{ar:'إذا تريد تحسم خلاف أو تفرض نتيجة، ركّز على القرار اللي بيدك واحترم خيارات غيرك.',en:'In a conflict, focus on what you control and respect others’ choices.',doAr:'حدد حدودك بوضوح بدون تصعيد.',doEn:'State your boundaries without escalating.'}
+};
+const retro:Record<SkyBodyId,string>={
+ Sun:'راجع أولوياتك إذا تتزاحم مسؤولياتك.',
+ Moon:'تمهّل بردودك إذا حسّيت مشاعرك متداخلة.',
+ Mercury:'ارجع دقّق بالمواعيد والمراسلات والاتفاقات القديمة، خصوصاً إذا بيها نقطة مبهمة.',
+ Venus:'راجع توقعاتك بالعلاقات والمصاريف قبل ما ترجع لموضوع قديم.',
+ Mars:'إذا مشروعك متأخر، عدّل خطتك ولا تعوّض التأخير بعصبية.',
+ Jupiter:'راجع فرصة سفر أو شغل قديمة وتأكد من شروطها قبل ما تتوسع.',
+ Saturn:'رتّب مسؤولياتك من جديد وراجع الوعود اللي ما عاد تناسب وقتك.',
+ Uranus:'إذا تريد تغيير كبير، خلّ عندك خيار ترجع للوراء.',
+ Neptune:'إذا الصورة مو واضحة، ميّز الواقع عن الأمنية قبل ما تقرر.',
+ Pluto:'راجع دوافعك وحدودك قبل الدخول بنقاش يحتاج حسم.'
+};
+const signsAdvice:readonly string[]=[
+ 'بداية جديدة تخططلها بلا استعجال','استقرارك ومصاريفك وراحتك اليومية',
+ 'المراسلات والمكالمات والتفاصيل','بيتك وراحتك وأقرب الناس إلك',
+ 'التعبير عن نفسك وشغلك بثقة','ترتيب التفاصيل والمهام المؤجلة',
+ 'التوازن بالعلاقات والاتفاقات','الخصوصية والحدود والثقة',
+ 'السفر والتعلّم والخطط الجديدة','الشغل والمسؤوليات والنتائج',
+ 'الأصدقاء والأفكار اللي تشتغلون عليها سوا','الراحة ومراجعة الخيارات بهدوء'
+];
+const pairDetails:Record<string,{ar:string;en:string;doAr:string;doEn:string}>={
+ 'Mercury|Venus':{ar:'إذا تفكر تراسل شخص أو تصفي سوء فهم، خَلّ الكلام مباشر ولطيف. لا تفسر السكوت على كيفك.',en:'For a message or misunderstanding, speak clearly and let the reply inform you.',doAr:'اكتب رسالة قصيرة بلا تلميحات.',doEn:'Write a short message without hints.'},
+ 'Jupiter|Moon':{ar:'إذا صارت عندك رغبة بطلعة أو تجربة جديدة، استمتع بيها بدون وعود أكبر من وقتك.',en:'Enjoy a new plan without overcommitting your time.',doAr:'اختار نشاط يناسب وقتك وميزانيتك.',doEn:'Choose a plan that fits your time and budget.'},
+ 'Mars|Mercury':{ar:'إذا أحد استفزك بحچي، لا تخلي أول رد يضيع النقطة الأساسية.',en:'If a message irritates you, keep the main point clear.',doAr:'راجع ردك قبل لا ترسله.',doEn:'Review your reply before sending.'},
+ 'Mercury|Saturn':{ar:'إذا عندك معاملة أو شغل، لا تعتمد على الوعود العامة؛ التفاصيل مهمة.',en:'For work or paperwork, avoid relying on vague promises.',doAr:'ثبّت شنو المطلوب وموعده.',doEn:'Confirm the deliverable and deadline.'},
+ 'Jupiter|Mercury':{ar:'إذا تفكر بسفر أو تعلّم جديد، جمع المعلومات قبل الحجز أو الموافقة.',en:'For travel or learning plans, verify details before committing.',doAr:'تأكد من السعر والموعد والشروط.',doEn:'Confirm cost, timing and conditions.'},
+ 'Mercury|Neptune':{ar:'إذا سمعت خبر مو واضح، لا تبني توقعات على كلام ناقص.',en:'Do not build expectations on incomplete information.',doAr:'راجع المصدر بنفسك.',doEn:'Check the source yourself.'},
+ 'Mars|Venus':{ar:'إذا تريد تبادر بعلاقة أو صلح، لا تخلي الحماس يتحول لضغط.',en:'In romance or reconciliation, keep enthusiasm from becoming pressure.',doAr:'ابدأ حوار هادئ واترك مساحة للرد.',doEn:'Start calmly and allow room for a reply.'},
+ 'Sun|Venus':{ar:'إذا تريد تقوي علاقة أو تقدم نفسك، لا تحاول ترضي الجميع على حساب رغبتك.',en:'In relationships, be clear without trying to please everyone.',doAr:'عبّر عن شي يهمك بوضوح ولطف.',doEn:'State one need clearly and kindly.'},
+ 'Mars|Moon':{ar:'إذا مزاجك متوتر، لا تحوّل استفزاز بسيط إلى مشكلة أكبر.',en:'If tense, avoid escalating a small irritation.',doAr:'تأنّى قبل الرد على موقف حساس.',doEn:'Pause before responding to a sensitive issue.'},
+ 'Moon|Venus':{ar:'إذا تحتاج اهتمام من شخص، احچي عن احتياجك بدل اختبار مشاعره.',en:'If you need affection, ask clearly rather than testing feelings.',doAr:'اقترح وقت مناسب لحچي هادئ.',doEn:'Suggest a calm time to talk.'},
+ 'Jupiter|Venus':{ar:'إذا عندك طلعة أو تعارف أو شراء، استمتع بالخطة بدون مبالغة بالصرف.',en:'Enjoy social plans without overspending.',doAr:'حدد ميزانية قبل الموعد.',doEn:'Set a budget before the outing.'},
+ 'Saturn|Venus':{ar:'إذا علاقة أو اتفاق مو محسوم، لا تكتفي بالوعود؛ وضّح التوقعات.',en:'Clarify expectations instead of relying on vague promises.',doAr:'اسأل عن التزام محدد.',doEn:'Ask about one concrete commitment.'},
+ 'Jupiter|Saturn':{ar:'إذا عندك فرصة كبيرة، وازن بين حماسك والوقت المتاح عندك.',en:'Balance ambition with the time you have.',doAr:'جرّب خطوة صغيرة قبل الالتزام.',doEn:'Test one small step before committing.'},
+ 'Saturn|Uranus':{ar:'إذا تفكر تغير الشغل أو الروتين، لا تلغي كل خطتك دفعة وحدة.',en:'Change work or routine gradually rather than all at once.',doAr:'جرب تعديل بسيط وخلي خيار رجوع.',doEn:'Try a reversible adjustment.'}
+};
 export function occurrenceLanguage(e:WholeSkyOccurrence,lang:SkyLanguage):{title:string;description:string;action:string}{
- const base=dictionary[e.first];
+ const base=dictionary[e.first],human=guides[e.first],arabic=lang==='ar';
  if(e.kind==='ingress'){
   if(e.sign===undefined||e.sign<0||e.sign>11)throw Error('Invalid verified zodiac sign');
-  return {
-   title:lang==='ar'?base.ar+' دخل '+signText(e.sign,lang):base.en+' entered '+signText(e.sign,lang),
-   description:lang==='ar'?'تغيّر موقع '+base.ar+' إلى برج جديد. محور القراءة الرمزية يرتبط بـ'+base.theme+'.':
-    base.en+' entered a new sign; the symbolic focus concerns '+base.englishTheme+'.',
-   action:lang==='ar'?base.action:base.englishAction
-  };
+  return {title:arabic?base.ar+' دخل '+signText(e.sign,lang):base.en+' entered '+signText(e.sign,lang),
+   description:arabic?'هالفترة خَلّ تركيزك على '+signsAdvice[e.sign]+'. '+human.ar:
+    'This period, focus on '+signText(e.sign,lang)+' themes. '+human.en,
+   action:arabic?human.doAr:human.doEn};
  }
- if(e.kind==='station'){
-  return {
-   title:lang==='ar'?base.ar+(e.retrograde?' بدأ التراجع':' رجع للحركة المباشرة'):base.en+(e.retrograde?' stationed retrograde':' stationed direct'),
-   description:lang==='ar'?'تغيّرت جهة الحركة الظاهرية لـ'+base.ar+'؛ هذا تبدّل فلكي محسوب.':
-    base.en+' changed its apparent direction, a computed sky transition.',
-   action:lang==='ar'?base.action:base.englishAction
-  };
- }
- if(e.angle===undefined||!angs.includes(e.angle as 0)||!e.second)throw Error('Invalid sky aspect');
- const other=dictionary[e.second];
- const difficult=e.angle===90||e.angle===180;
- return {
-  title:pair(e.first,e.second,lang),
-  description:lang==='ar'?'اتصال فلكي بين '+base.theme+' و'+other.theme+'. '+(difficult?'بالتفسير الرمزي أكو شدّ يحتاج هدوء.':'بالتفسير الرمزي يصير مجال للتنسيق بهالموضوعين.'):
-   'A sky contact linking '+base.englishTheme+' and '+other.englishTheme+'. '+(difficult?'The symbolic theme is tension to manage.':'The symbolic theme is easier coordination.'),
-  action:lang==='ar'?other.action:other.englishAction
+ if(e.kind==='station')return {
+  title:arabic?base.ar+(e.retrograde?' بدأ التراجع':' انتهى تراجعه'):base.en+(e.retrograde?' began retrograde':' ended retrograde'),
+  description:arabic?(e.retrograde?retro[e.first]:human.ar):
+   (e.retrograde?'Take another look at past decisions. ':'It may be useful to move forward carefully. ')+human.en,
+  action:arabic?human.doAr:human.doEn
  };
+ if(e.angle===undefined||!angs.includes(e.angle as 0)||!e.second)throw Error('Invalid sky aspect');
+ const another=e.second,second=guides[another];
+ const key=[e.first,another].sort().join('|');
+ const detail=pairDetails[key];
+ const tense=e.angle===90||e.angle===180;
+ const context=detail?(arabic?detail.ar:detail.en):
+  arabic?'إذا عندك موضوع يجمع '+base.theme+' و'+dictionary[another].theme+'، خلّ اهتمامك بالخطوة اللي تگدر تسويها فعلاً.':
+   'For matters involving '+base.englishTheme+' and '+dictionary[another].englishTheme+', focus on a step you can actually take.';
+ return {title:pair(e.first,another,lang),
+  description:context+(tense?(arabic?' لا تستعجل بالحسم.':' Avoid a rushed decision.'):(arabic?' جرّب خطوة صغيرة وواضحة.':' Take one small, clear step.')),
+  action:detail?(arabic?detail.doAr:detail.doEn):(arabic?second.doAr:second.doEn)};
 }
 export type WholeSkyBroadcast={
  title:string;meaning:string;action:string;movement:string;identity:string;
@@ -143,17 +193,17 @@ export function wholeSkyBroadcast(points:readonly Point[],events:readonly WholeS
   const item=occurrenceLanguage(veryRecent,lang);
   title=lang==='ar'?'صار هسه: '+item.title:'Just occurred: '+item.title;
   meaning=item.description;action=item.action;
-  movement=lang==='ar'?'هذا حدث محسوب صار خلال الساعات الأخيرة.':'Verified sky event from the past few hours.';
+  movement=lang==='ar'?'هذا الموضوع صار الأبرز خلال الساعات الأخيرة.':'This theme was prominent in the past few hours.';
  }else if(veryNext){
   const item=occurrenceLanguage(veryNext,lang);
   title=lang==='ar'?'دا يقترب: '+item.title:'Approaching: '+item.title;
   meaning=item.description;action=item.action;
-  movement=lang==='ar'?'الاتصال أو الانتقال قرب وقته الدقيق.':'A calculated event is approaching its exact time.';
+  movement=lang==='ar'?'الموضوع قريب؛ شوف شنو تگدر تسوي عملياً.':'This theme is approaching; look for a practical next step.';
  }else if(strong){
   const a=strong.first as SkyBodyId,b=strong.second as SkyBodyId,item=occurrenceLanguage({kind:'aspect',at,first:a,second:b,angle:strong.angle},lang);
   title=item.title;meaning=item.description;action=item.action;
-  movement=strong.applying?(lang==='ar'?'دا يقترب من ذروته.':'Approaching exactness.'):
-    (lang==='ar'?'دا يبتعد عن ذروته.':'Separating from exactness.');
+  movement=strong.applying?(lang==='ar'?'هالموضوع دا يصير أوضح هسه.':'This theme is becoming more prominent.'):
+    (lang==='ar'?'هالموضوع كان أقوى قبل شوي؛ راجع خطوتك الجاية.':'This theme was recently stronger; review your next step.');
  }else {
   // No event? Use truthful planetary motion and sign, not invented activity.
   const mercury=source.get('Mercury')!,venus=source.get('Venus')!;
