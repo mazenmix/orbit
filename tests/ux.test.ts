@@ -50,8 +50,8 @@ test('Today exact events show calculated event-specific impact and next action, 
  assert.ok(main.includes("t('دلالته:','Meaning:')"));
  assert.ok(main.includes("t('شنو تسوي:','What to do:')"));
  assert.ok(main.includes("reading:{kind:'personal-aspect',transit:e.transit.id,target:e.natal.id,angle:e.angle}"));
- assert.ok(main.includes("reading:{kind:'moon-aspect' as const,target:e.target,angle:e.angle}"));
- assert.ok(main.includes("reading:{kind:'moon-ingress',nextSign:(w.sign+1)%12}"));
+ assert.ok(main.includes('scanWholeSky(selected,at=>chart(at,active,false,false).points)'));
+ assert.ok(main.includes('wholeSkyEventItems(brief.upcoming'));
 });
 test('grouped feature tabs preserve old deep links and keep evidence contextual',()=>{
  for(const route of ["signals","asteroids","lunar","eclipses","advanced","ai","evidence"]){
