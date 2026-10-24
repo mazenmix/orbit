@@ -626,11 +626,9 @@ function indicatorGaugeCard(m:MetricResult,travelId?:string){
   '<div class="meter" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+m.value+'"><i style="width:'+m.value+'%"></i></div>'+
   '</div>';
 }
-function goModePage(){
- const indicators=derivedMetrics(data!.scores),go=goModes(indicators),r=data!,decisions=resolveDecisions(r.evidence,r.signals);
- const names:Record<GoDomain,[string,string]>={work:['العمل','Work'],social:['التواصل الاجتماعي','Social'],relationships:['العلاقات','Relationships'],travel:['السفر','Travel']};
- const gauges=todayQuickGauges(r,true);
- const timeNav='<section class="panel mx-go-time-nav" aria-label="'+t('اختيار وقت المؤشرات','Indicator time selection')+'">'+
+/** Both Go Mode and Travel Mode share one date/time selector, the same calculation engine, and the same actions. */
+function sharedModeTimeNavigation(){
+ return '<section class="panel mx-go-time-nav" aria-label="'+t('اختيار وقت المؤشرات','Indicator time selection')+'">'+
   '<div class="mx-go-time-heading"><div><span class="mx-go-time-status '+(liveTimePinned?'is-selected':'is-live')+'">'+(liveTimePinned?t('وقت مختار','Selected time'):t('مباشر الآن','Live now'))+'</span>'+
   '<strong>'+dateText(selected,{weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})+'</strong>'+
   '<small>'+esc(timezoneCityLabel(active.zone))+'</small></div>'+
@@ -645,6 +643,12 @@ function goModePage(){
   '<input id="go-time-input" name="moment" type="datetime-local" min="1800-01-01T00:00" max="2399-12-31T23:59" step="60" required value="'+localValue(selected,active.zone)+'">'+
   '<button class="primary" type="submit">'+t('اعرض المؤشرات','Show gauges')+'</button></form>'+
   '</section>';
+}
+function goModePage(){
+ const indicators=derivedMetrics(data!.scores),go=goModes(indicators),r=data!,decisions=resolveDecisions(r.evidence,r.signals);
+ const names:Record<GoDomain,[string,string]>={work:['العمل','Work'],social:['التواصل الاجتماعي','Social'],relationships:['العلاقات','Relationships'],travel:['السفر','Travel']};
+ const gauges=todayQuickGauges(r,true);
+ const timeNav=sharedModeTimeNavigation();
  const goCards='<section class="panel mx-go-mode-decisions">'+
   '<div class="go-grid">'+go.map(d=>{const memo=reviewGoMode(d,indicators,decisions),state=memo.state;return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><p class="go-decision">'+mxGoNarrative(d.domain,state,memo)+'</p></div>'}).join('')+'</div>'+
   '</section>';
@@ -672,7 +676,7 @@ function travelModePage(){
   '<div class="mx-focus-metrics mx-travel-grid">'+group.rows.map(({id,metric})=>quickGaugeCard(metric,travelSymbol(id),undefined,id)).join('')+'</div></section>'
  ).join('');
  return '<div class="mx-travel-mode-page mx-quick-gauges" data-section="travelmode">'+
-  sections+
+  sharedModeTimeNavigation()+sections+
   '</div>';
 }
 function asteroidsPage(){
