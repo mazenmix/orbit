@@ -49,5 +49,6 @@ test('compact romance cards show attraction, sexual chemistry and practical syna
  assert.ok(!ui.includes('mx-brief-bottom')&&!ui.includes('mx-brief-details'));
  assert.ok(main.slice(end,main.indexOf('function aiPayload(){',end)).includes('synastry-technical'));
  assert.ok(!ui.includes('mx-partner-plain-card'));
- assert.ok(ui.includes("person.kind==='dating'||person.kind==='friend'"));
+ assert.ok(ui.includes('const romantic=c.romantic;'),'Relationship cards must obey actual romantic classification');
+ assert.ok(!ui.includes("person.kind==='dating'||person.kind==='friend'"),'Friend profiles cannot receive unrequested sexual narratives');
 });
