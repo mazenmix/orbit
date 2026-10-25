@@ -235,7 +235,7 @@ function render(){
  if(screen==='lunar'&&ready)updateLiveVocClock(+selected);
  if(screen==='ai'&&ready)void refreshLiveQwen(false);
  if(screen==='calendar'&&ready)startCalendarWork();
- if(screen==='asteroids'&&ready&&!asteroidAutoAttempted&&mountedAsteroidCount()<namedAsteroids.length){asteroidAutoAttempted=true;void refreshAsteroidEphemerides();}
+ if(['asteroids','go','travelmode'].includes(screen)&&ready&&!asteroidAutoAttempted&&mountedAsteroidCount()<namedAsteroids.length&&location.hostname.endsWith('.pages.dev')){asteroidAutoAttempted=true;void refreshAsteroidEphemerides();}
 }
 function content(){if(!data)return screen==='settings'?settingsPage():screen==='more'?morePage():'<section class="panel"><p>'+t('الحساب غير متاح لهذي البيانات. راجع الملف قبل عرض نتائج جديدة.','Calculation unavailable for these inputs. Review the profile before showing new results.')+'</p><button class="secondary" data-go="settings">'+t('مراجعة بيانات الميلاد','Review birth details')+'</button></section>';let inner:string;switch(screen){case 'today':inner=uiMode==='simple'?focusedToday():today();break;case 'signals':inner=signalsPage();break;case 'chart':inner=chartPage();break;case 'time':inner=uiMode==='simple'?focusedTime():timePage();break;case 'lunar':inner=lunarPage();break;case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage();break;case 'eclipses':inner=eclipsesPage();break;case 'asteroids':inner=asteroidsPage();break;case 'advanced':inner=advancedPage();break;case 'intel':case 'go':inner=goModePage();break;case 'travelmode':inner=travelModePage();break;case 'people':inner=peoplePage();break;case 'evidence':inner=evidencePage();break;case 'ai':inner=aiPage();break;case 'settings':inner=settingsPage();break;case 'more':inner=morePage();break;default:screen='today';inner=today()}return sectionTabs()+(data.current.missing.length&&screen!=='settings'?'<p class="subtle" role="status">'+t('بيانات إضافية غير متاحة وتم استبعادها: ','Unavailable supplementary bodies omitted: ')+data.current.missing.map(id=>esc(planet(id))).join(' · ')+'</p>':'')+inner}
 function tag(text:string,cls=''){return `<span class="tag ${cls}">${text}</span>`}
@@ -718,6 +718,28 @@ function sharedModeTimeNavigation(){
   '<button class="primary" type="submit">'+t('اعرض المؤشرات','Show gauges')+'</button></form>'+
   '</section>';
 }
+/** Optional, computed minor-body evidence. Never invent contacts or mix
+ * all 56 into the score as if they were independent predictions. */
+function liveAsteroidContacts(limit=6):string{
+ if(!mountedAsteroidCount())return '';
+ try{
+  const points=namedAsteroidPositions(asteroidSwissRuntime(),selected);
+  const natalTargets=targets(data!.natal).filter(p=>active.known||!['Moon','Ascendant','MC'].includes(p.id));
+  const contacts=namedAsteroidContacts(points,natalTargets,selected);
+  const distinct=new Set<string>();
+  const strongest=contacts.filter(c=>{
+   if(distinct.has(c.transit.id))return false;
+   distinct.add(c.transit.id);return true;
+  }).slice(0,limit);
+  if(!strongest.length)return '<section class="panel mx-live-asteroid-hits"><h2>'+t('اتصالات الكويكبات مع خارطتك','Asteroid contacts with your chart')+'</h2><p>'+t('انحسبت المواضع، بس ماكو زاوية قريبة ضمن 1.5° بهالوقت.','Positions are computed; no natal aspect falls within 1.5° at this time.')+'</p></section>';
+  return '<section class="panel mx-live-asteroid-hits"><h2>'+t('الكويكبات الأقرب إلى خارطتك','Closest asteroid contacts with your chart')+'</h2>'+
+   '<div class="mx-live-asteroid-hit-grid">'+strongest.map(c=>{
+    const a=namedAsteroids.find(a=>a.name===c.transit.id)!;
+    const reading=asteroidReading(a,c,lang==='en');
+    return '<article><strong>'+esc(a.name)+'</strong><small>'+esc(planet(c.natal.id))+' · '+aspect(c.angle)+' · '+c.orb.toFixed(2)+'°</small><p>'+esc(reading.action)+'</p></article>';
+   }).join('')+'</div></section>';
+ }catch(e){console.warn('Named asteroid context unavailable',e);return ''}
+}
 function goModePage(){
  const sky=liveGaugeSky(),indicators=derivedMetrics(sky.scores),go=goModes(indicators),r=data!,decisions=resolveDecisions(r.evidence,r.signals);
  const names:Record<GoDomain,[string,string]>={work:['العمل','Work'],social:['التواصل الاجتماعي','Social'],relationships:['العلاقات','Relationships'],travel:['السفر','Travel']};
@@ -736,7 +758,7 @@ function goModePage(){
  const allIndicators='<section class="panel mx-go-mode-indicators"><div class="metrics-grid">'+
   indicators.map(m=>indicatorGaugeCard(m)).join('')+
   '</div></section>';
- return '<div class="mx-go-mode-page" data-section="go">'+timeNav+gauges+goCards+renderGoLifeGauges(sky.scores,categories)+allIndicators+'</div>';
+ return '<div class="mx-go-mode-page" data-section="go">'+timeNav+gauges+goCards+renderGoLifeGauges(sky.scores,categories)+allIndicators+liveAsteroidContacts()+'</div>';
 }
 /** Simple glyphs that correspond to the exact travel domains and keep the
  * same single-icon layout as the four quick Go Mode gauges. */
@@ -757,7 +779,7 @@ function travelModePage(){
   '<div class="mx-focus-metrics mx-travel-grid">'+group.rows.map(({id,metric})=>quickGaugeCard(metric,travelSymbol(id),undefined,id)).join('')+'</div></section>'
  ).join('');
  return '<div class="mx-travel-mode-page mx-quick-gauges" data-section="travelmode">'+
-  sharedModeTimeNavigation()+sections+
+  sharedModeTimeNavigation()+sections+liveAsteroidContacts(5)+
   '</div>';
 }
 async function refreshAsteroidEphemerides(){
