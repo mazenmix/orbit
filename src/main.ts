@@ -300,7 +300,9 @@ let fullSkyCache:{key:string;events:WholeSkyOccurrence[]}|null=null;
 function verifiedWholeSkyEvents():WholeSkyOccurrence[]{
  const key=JSON.stringify(active)+':'+Math.floor(+selected/360000);
  if(fullSkyCache?.key===key)return fullSkyCache.events;
- const events=scanWholeSky(selected,at=>chart(at,active,false,false).points);
+ // Include genuine recent sky changes across three days, not just 18 hours.
+ // Keep the 48-hour future window; the renderer creates one card per verified event.
+ const events=scanWholeSky(selected,at=>chart(at,active,false,false).points,72,48);
  fullSkyCache={key,events};
  return events;
 }

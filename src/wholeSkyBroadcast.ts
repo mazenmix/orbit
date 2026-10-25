@@ -187,8 +187,10 @@ function nearestEvent(events:readonly WholeSkyOccurrence[],ms:number,direction:'
 export function wholeSkyBroadcast(points:readonly Point[],events:readonly WholeSkyOccurrence[],at:Date,lang:SkyLanguage):WholeSkyBroadcast{
  if(!Number.isFinite(+at))throw Error('Invalid report instant');
  const source=valid(points),now=+at,sorted=[...events].sort((a,b)=>+a.at-+b.at);
- const latest=sorted.filter(e=>+e.at<=now).slice(-4).reverse();
- const upcoming=sorted.filter(e=>+e.at>now).slice(0,6);
+ // Show every verified event in the scanned time range; never pad or truncate
+ // a row to an arbitrary card count. Grid layout handles incomplete rows.
+ const latest=sorted.filter(e=>+e.at<=now).reverse();
+ const upcoming=sorted.filter(e=>+e.at>now);
  const recent=nearestEvent(sorted,now,'past'),next=nearestEvent(sorted,now,'future');
  // Rank every planet on proximity, not a hard-coded preference for Moon.
  const contacts=currentSkyContacts(points).sort((a,b)=>a.orb-b.orb||a.first.localeCompare(b.first));

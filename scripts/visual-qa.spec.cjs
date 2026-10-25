@@ -677,6 +677,11 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   expect(recentLayout.columns,'Recent sky changes responsive columns').toBe(expectedColumns);
   expect(recentLayout.excess,'Recent grid does not scroll horizontally').toBeLessThanOrEqual(2);
   const recentCards=recent.locator('.mx-sky-feed-compact');
+  // No artificial blank cells, placeholders or capped list: one card per event.
+  const currentRecentCount=await recentCards.count();
+  const recentPlaceholders=await recent.locator('.mx-sky-feed-item:not(.mx-sky-feed-compact)').count();
+  expect(recentPlaceholders,'Every recent event card is an actual detailed event').toBe(0);
+  if(currentRecentCount>0)await expect(recent.locator('.mx-focus-note')).toHaveCount(0);
   if(await recentCards.count()>=2){
    const firstRecent=await recentCards.nth(0).boundingBox(),secondRecent=await recentCards.nth(1).boundingBox();
    if(expectedColumns>1){

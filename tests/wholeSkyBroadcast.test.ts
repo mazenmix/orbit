@@ -17,6 +17,31 @@ test('All ten major bodies must come from actual valid ephemeris points',()=>{
  assert.ok(out.planets.some(p=>p.id==='Pluto'));
  assert.throws(()=>wholeSkyBroadcast(points.filter(p=>p.id!=='Saturn'),[],new Date(BASE),'ar'),/Saturn/);
 });
+test('Whole-sky streams render exactly the verified 2, 3, 5 or 10+ events, without filler or 4/6 caps',()=>{
+ const at=new Date(BASE),past=(n:number):WholeSkyOccurrence[]=>Array.from({length:n},(_,i)=>({
+  kind:'aspect',at:new Date(+at-(i+1)*HOUR),first:'Sun',second:'Moon',angle:0
+ }));
+ const future=(n:number):WholeSkyOccurrence[]=>Array.from({length:n},(_,i)=>({
+  kind:'aspect',at:new Date(+at+(i+1)*HOUR),first:'Moon',second:'Venus',angle:120
+ }));
+ for(const n of [0,2,3,5,10,13]){
+  const sky=wholeSkyBroadcast(sample(at),[...past(n),...future(n)],at,'ar');
+  assert.equal(sky.latest.length,n,'Recent list must have precisely the calculated events');
+  assert.equal(sky.upcoming.length,n,'Upcoming list must have precisely the calculated events');
+  assert.ok(sky.latest.every(x=>+x.at<=+at));
+  assert.ok(sky.upcoming.every(x=>+x.at>+at));
+  if(n>0){
+   assert.equal(+sky.latest[0].at,+at-HOUR,'Recent events newest first');
+   assert.equal(+sky.upcoming[0].at,+at+HOUR,'Upcoming events earliest first');
+  }
+ }
+});
+test('Today scans sufficient actual sky history for the recent-events grid',()=>{
+ const main=readFileSync('src/main.ts','utf8');
+ assert.match(main,/scanWholeSky\(selected,at=>chart\(at,active,false,false\)\.points,72,48\)/);
+ const focus=main.slice(main.indexOf('function focusedToday(){'),main.indexOf('/** A stable daily scan'));
+ assert.match(focus,/wholeSkyEventItems\(brief\.latest,[^\n]*,true\)/);
+});
 test('Exact whole-sky roots include NON-lunar Mercury-Venus contact and Mercury sign ingress',()=>{
  const events=scanWholeSky(new Date(BASE+3*HOUR),sample,5,9);
  const contact=events.find(x=>x.kind==='aspect'&&x.first==='Mercury'&&x.second==='Venus'&&x.angle===60);
