@@ -109,15 +109,16 @@ export function calendarMomentEvidence(current:CalendarChart,natal:CalendarChart
  }
  return results;
 }
-/** Mean of verified checkpoints, with the sampled range shown to users.
- * This preserves a neutral score for no evidence and exposes intraday
- * variation instead of claiming the local-noon value describes 24 hours.
+/** Average only checkpoints with actual relevant contacts. A checkpoint
+ * without evidence is unavailable, not a neutral 50; no evidence across all
+ * samples yields a hidden (considered=0) internal unavailable sentinel.
  */
 export function calendarDaySynthesis(samples:readonly CalendarSample[]):CalendarDayRating{
  if(samples.length!==CALENDAR_SAMPLE_HOURS.length||
     samples.some((s,i)=>s.hour!==CALENDAR_SAMPLE_HOURS[i]))throw Error('Incomplete or unordered calendar day samples');
  const rated=samples.map(s=>colorizeAstroDay(s.evidence));
- const value=Math.round(rated.reduce((sum,r)=>sum+r.value,0)/rated.length);
+ const supported=rated.filter(r=>r.considered>0);
+ const value=supported.length?Math.round(supported.reduce((sum,r)=>sum+r.value,0)/supported.length):0;
  let strongestSupport:Evidence|null=null,strongestChallenge:Evidence|null=null;
  let strongestSupportHour:number|null=null,strongestChallengeHour:number|null=null;
  let supportWeight=0,challengeWeight=0;
@@ -133,11 +134,12 @@ export function calendarDaySynthesis(samples:readonly CalendarSample[]):Calendar
   }
  }
  return {
-  value,color:calendarColorForScore(value),
-  sampleHours:samples.map(s=>s.hour),sampleScores:rated.map(r=>r.value),
-  minimum:Math.min(...rated.map(r=>r.value)),maximum:Math.max(...rated.map(r=>r.value)),
-  favorableWeight:Number((rated.reduce((sum,r)=>sum+r.favorableWeight,0)/rated.length).toFixed(3)),
-  challengingWeight:Number((rated.reduce((sum,r)=>sum+r.challengingWeight,0)/rated.length).toFixed(3)),
+  value,color:supported.length?calendarColorForScore(value):'yellow',
+  sampleHours:samples.map(s=>s.hour),sampleScores:rated.map(r=>r.considered>0?r.value:0),
+  minimum:supported.length?Math.min(...supported.map(r=>r.value)):0,
+  maximum:supported.length?Math.max(...supported.map(r=>r.value)):0,
+  favorableWeight:Number((supported.length?supported.reduce((sum,r)=>sum+r.favorableWeight,0)/supported.length:0).toFixed(3)),
+  challengingWeight:Number((supported.length?supported.reduce((sum,r)=>sum+r.challengingWeight,0)/supported.length:0).toFixed(3)),
   considered:rated.reduce((sum,r)=>sum+r.considered,0),
   strongestSupport,strongestChallenge,strongestSupportHour,strongestChallengeHour
  };
