@@ -1108,7 +1108,12 @@ function peoplePage(){
   analysis='<section class="panel partner-overview mx-people-section"><div class="section-title"><div><h2>'+esc(active.name)+' × '+esc(partner.name)+'</h2></div><div class="big-score '+(c.overallCovered?gaugeLevel(c.overall):'mx-unavailable')+'">'+(c.overallCovered?c.overall+'<small>/100</small>':'—')+'</div></div><h3>'+t('خلاصة العلاقة اليوم','Today’s relationship snapshot')+'</h3>'+(partner.known?'':'<p class="alert">'+t('وقت ميلاد هذا الشخص مو معروف؛ بعض الاتصالات مستبعدة من الحساب.','Birth time is unknown; some lunar and angle contacts are excluded.')+'</p>')+'<div class="dimension-grid clear-gauges">'+classic+'</div></section>'+
  (c.romantic&&c.overallCovered?'<section class="panel intimacy-section mx-people-section"><div class="partner-insights-grid">'+extended+'</div></section>':'')+
   '';
-  technical='<details class="panel synastry-technical"><summary>'+t('التفاصيل الحسابية الفلكية للمتخصصين','Advanced mathematical aspect details')+' · '+c.evidence.length+'</summary>'+c.evidence.map(e=>'<p class="technical">'+planet(e.first.id)+' · '+aspect(e.angle)+' · '+planet(e.second.id)+' — '+e.orb.toFixed(3)+'°</p>').join('')+'</details>';
+  technical='<details class="panel synastry-technical"><summary>'+t('التفاصيل الحسابية الفلكية للمتخصصين','Advanced mathematical aspect details')+' · '+(c.evidence.length+c.supplementalEvidence.length)+'</summary>'+
+   c.evidence.map(e=>'<p class="technical">'+esc(planet(e.first.id))+' · '+aspect(e.angle)+' · '+esc(planet(e.second.id))+' — '+e.orb.toFixed(3)+'°</p>').join('')+
+   (c.supplementalEvidence.length?'<p class="subtle">'+t('اتصالات الأجرام الثانوية والنقاط المحسوبة، مو داخلة بدرجات التوافق:','Supplementary body/point contacts, excluded from compatibility scores:')+'</p>':'')+
+   c.supplementalEvidence.map(e=>'<p class="technical">'+esc(auxiliaryName(e.first.id,lang==='ar')===e.first.id?planet(e.first.id):auxiliaryName(e.first.id,lang==='ar'))+' · '+aspect(e.angle)+' · '+esc(auxiliaryName(e.second.id,lang==='ar')===e.second.id?planet(e.second.id):auxiliaryName(e.second.id,lang==='ar'))+' — '+e.orb.toFixed(3)+'°</p>').join('')+
+   (c.additionalMissing.first.length||c.additionalMissing.second.length?'<p class="subtle">'+t('بيانات ثانوية غير متاحة لواحدة من الخارطتين: ','Missing supplementary ephemerides for one or both charts: ')+esc([...new Set([...c.additionalMissing.first,...c.additionalMissing.second])].join('، '))+'</p>':'')+
+   '</details>';
  }
  if(partner&&uiMode==='simple'){
   analysis=focusSummary+
