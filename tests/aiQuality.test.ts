@@ -37,3 +37,20 @@ test('a negated guarantee cannot hide another certainty claim even in the same s
  assert.equal(hasSymbolicFraming('هذه قراءة رمزية للمراجعة.'),true);
  assert.equal(hasSymbolicFraming('These are established personality facts.'),false);
 });
+
+test('AI cannot present an uncalculated job, promotion or soulmate reunion as a certain outcome',()=>{
+ for(const text of [
+  'You will meet your soulmate next week.',
+  'You will get promoted in November.',
+  'Your ex will come back this month.',
+  'راح تترقى بالشغل قريباً.',
+  'راح تلتقي بحب حياتك هذا الأسبوع.',
+  'راح تحصل على وظيفة جديدة.'
+ ]){
+  assert.ok(unsupportedOutcomeClaims(text).includes('unsupported-future-outcome'),text);
+ }
+ for(const text of [
+  'A promotion might be worth discussing with your manager.',
+  'إذا تنتظر وظيفة، راجع طلبك والمعلومات الفعلية.'
+ ])assert.deepEqual(unsupportedOutcomeClaims(text),[]);
+});
