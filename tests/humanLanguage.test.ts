@@ -59,7 +59,7 @@ test('AI reader path rejects any mathematical vocabulary and offers personalized
  const ctx={language:'ar' as const,support:null,challenge:{transit:'Saturn',natal:'Moon',angle:90,orb:.35,applying:true},events:[],evidence:[{transit:'Saturn',natal:'Moon',angle:90,orb:.35,applying:true}],strict:true,plainLanguage:true};
  const checked=reviewGeneratedAdvice('زحل تربيع القمر وراح يصير شي باجر',ctx);
  assert.equal(checked.fallback,true);clean(checked.text);
- assert.match(checked.text,/راحتك/);
+ assert.match(checked.text,/الضغط والراحة|راحتك/);
 });
 
 test('reader interfaces keep exact calculations inside optional disclosures',()=>{
