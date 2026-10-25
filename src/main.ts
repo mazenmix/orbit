@@ -390,14 +390,14 @@ function planetLiveStatus(brief:WholeSkyBroadcast){
    const actualSpeed=data!.current.points.find(p=>p.id===item.id)?.speed;
    const isRetro=isPermanent?false:(actualSpeed??0)<0;
    const motionColor=isRetro?'is-retrograde':'is-direct';
-   const motionText=isPermanent?t('مباشر دائماً','Always direct'):isRetro?t('متراجع','Retrograde'):t('مباشر','Direct');
+   const motionText=isRetro?t('متراجع','Retrograde'):t('مباشر','Direct');
    let gauge='';
    if(!isPermanent&&period?.startedAt&&period?.endsAt&&+period.startedAt<=at&&at<+period.endsAt){
     const pct=remainingMotionPercent(+period.startedAt,+period.endsAt,at)!;
     gauge='<div class="mx-motion-meter" data-motion-start="'+(+period.startedAt)+'" data-motion-end="'+(+period.endsAt)+'" data-motion-mode="'+(isRetro?'retro':'direct')+'">'+
-     '<div class="mx-motion-meter-head"><span>'+t('المتبقي من الفترة','Phase remaining')+'</span><b data-motion-percent>'+pct+'%</b></div>'+
+     '<div class="mx-motion-meter-head"><b data-motion-percent>'+pct+'%</b></div>'+
      '<progress max="100" value="'+pct+'" aria-label="'+t('النسبة المتبقية من الحركة الحالية','Current motion period remaining')+'"></progress>'+
-     '<div class="mx-motion-countdown"><small>'+(isRetro?t('يرجع مباشر خلال','Turns direct in'):t('يبدأ التراجع خلال','Turns retrograde in'))+'</small>'+
+     '<div class="mx-motion-countdown">'+
      '<time data-motion-countdown datetime="'+period.endsAt.toISOString()+'">'+esc(motionTimeRemaining(at,+period.endsAt,lang))+'</time></div></div>';
    }else if(!isPermanent){
     gauge='<div class="mx-motion-meter mx-motion-loading" role="status">'+
@@ -406,7 +406,7 @@ function planetLiveStatus(brief:WholeSkyBroadcast){
        :t('دا أحسب موعد تغيّر الاتجاه…','Calculating verified station…'))+'</div>';
    }
    return '<article class="mx-sky-planet '+motionColor+(isPermanent?' is-permanent':'')+'"><strong>'+esc(item.label)+'</strong><span>'+esc(item.sign)+'</span>'+
-    '<small class="'+motionColor+'">'+motionText+'</small>'+gauge+'</article>';
+    (isPermanent?'':'<small class="'+motionColor+'">'+motionText+'</small>')+gauge+'</article>';
   }).join('')+'</div></section>';
 }
 /** Update the numerical display every second without recalculating ephemeris. */
