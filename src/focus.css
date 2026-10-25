@@ -771,6 +771,26 @@
 #live-view-body .mx-today-compact .mx-sky-reading-next b{color:#eedfff}
 
 
+/* Simple Today: the sky wheel belongs to the RTL left rail, not a
+   standalone centered row. Keep it aligned with Time Machine and Moon/VOC. */
+#live-view-body .mx-full-sky-today .mx-focus-aside > .mx-today-sky-layout{
+ width:100%!important;
+ max-width:100%;
+ margin:0!important;
+ min-width:0;
+}
+#live-view-body .mx-full-sky-today .mx-focus-aside > .mx-today-time-shortcut{
+ width:100%;
+ min-width:0;
+ padding:12px 14px;
+}
+@media(max-width:1100px){
+ #live-view-body .mx-full-sky-today .mx-focus-aside > .mx-today-sky-layout{
+  width:min(100%,440px)!important;
+  margin-inline:auto!important;
+ }
+}
+
 /* Today desktop layout: no standalone centered chart row or wasted blank columns.
    In RTL, dashboard column 2 is the visual LEFT rail. */
 #live-view-body .mx-today-compact{
