@@ -11,7 +11,7 @@ export function renderGoLifeGauges(scores:Record<Category,number>,supportedCateg
  const gauges=goLifeGauges(scores),supported=new Set(supportedCategories);
  return '<section class="panel mx-go-life"><div class="section-title"><h2>'+t('قرارات الحياة اليومية','Daily decision lenses')+'</h2></div>'+
   '<div class="metrics-grid mx-go-life-grid">'+gauges.map(m=>{
-   const label=t(m.name.ar,m.name.en),available=m.source.every(part=>supported.has(part.category));
+   const label=t(m.name.ar,m.name.en),advice=t(m.advice.ar,m.advice.en),available=m.source.every(part=>supported.has(part.category));
    return '<article class="metric-card mx-go-life-card '+(available?gaugeLevel(m.value):'mx-unavailable')+'" data-life-gauge="'+m.id+'">'+
     '<small>'+escapeHTML(label)+'</small><b>'+(available?m.value:'—')+(available?'<em>/100</em>':'')+'</b>'+
     (available?'<div class="meter" role="progressbar" aria-label="'+escapeHTML(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+m.value+'"><i style="width:'+m.value+'%"></i></div>':
