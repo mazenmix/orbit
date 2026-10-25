@@ -103,3 +103,34 @@ export function asteroidReading(item:NamedAsteroid,contact:NamedContact|undefine
   (item.name+' '+aspectAr[contact.angle]+' ويا '+natalName+' (فارق '+contact.orb.toFixed(2)+'°). هالمعنى يرتبط بموضوع '+(natalArea[contact.natal.id]?.[0]??'أولوياتك')+'. '+angleMeaning);
  return {theme,action,emphasis};
 }
+
+
+/** The visible asteroid card must be based on a successfully calculated position.
+ * The broad mythology is not an individualized transit. Without a close natal
+ * aspect we report the measured sky state and explicitly withhold an effect claim.
+ */
+export function currentAsteroidReading(item:NamedAsteroid,position:Point|undefined,contact:NamedContact|undefined,english=false){
+ if(!position||!Number.isFinite(position.longitude)||!Number.isFinite(position.speed))return {
+  theme:english?'Position unavailable: the Swiss ephemeris for '+item.name+' has not been verified.':
+   'موقع '+item.name+' بعده غير محسوب؛ لازم يكتمل تحميل ملفه الفلكي أولاً.',
+  action:'',
+  emphasis:english?'No current or personal interpretation without ephemeris data.':'ماكو قراءة حالية أو شخصية بدون بيانات الموقع.'
+ };
+ const base=asteroidReading(item,contact,english);
+ const namesAr=['الحمل','الثور','الجوزاء','السرطان','الأسد','العذراء','الميزان','العقرب','القوس','الجدي','الدلو','الحوت'];
+ const namesEn=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+ const lon=((position.longitude%360)+360)%360;
+ const sign=Math.floor(lon/30),degree=(lon%30).toFixed(2);
+ const movement=position.speed<-.00001?(english?'retrograde':'متراجع'):
+  position.speed>.00001?(english?'direct':'مباشر'):(english?'stationary':'شبه ثابت');
+ const sky=english?
+  item.name+' is at '+degree+'° '+namesEn[sign]+' ('+movement+').':
+  item.name+' هسه بالـ'+namesAr[sign]+' عند '+degree+'° وحركته '+movement+'.';
+ return {
+  theme:sky+' '+(english?'Its traditional theme is ':'موضوعه بالتأويل التنجيمي: ')+base.theme+'.',
+  emphasis:base.emphasis,
+  action:contact?base.action:(english?
+   'No tight contact with your natal chart (within 1.5°) was calculated for this time; a specific personal effect is not established.':
+   'بهالوقت ماكو اتصال قريب ويا خارطتك ضمن 1.5°؛ لذلك ما ننسب إلك تأثير شخصي محدد.')
+ };
+}
