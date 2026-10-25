@@ -74,7 +74,18 @@ export function balancedFactors(input:readonly Evidence[],limit:number):Evidence
  return [...selected.values()].sort((a,b)=>b.weight-a.weight||a.orb-b.orb||a.id.localeCompare(b.id));
 }
 export function category(e:Evidence):Category{
- switch(e.natal.id){case 'Ascendant':case 'Venus':return 'love';case 'MC':case 'Sun':case 'Jupiter':case 'Saturn':return 'career';case 'Mercury':return 'communication';case 'Mars':return 'energy';case 'Moon':return challenging(e)?'emotions':'recovery';case 'Uranus':return 'timing';case 'Neptune':return 'emotions';default:return 'overview'}
+ // The natal planet identifies the TOPIC; supportive/challenging angles
+ // describe its tone. They must not change an emotional subject into sleep
+ // or falsely make Sun/Jupiter/Ascendant into career/romance evidence.
+ switch(e.natal.id){
+  case 'Venus':return 'love';
+  case 'MC':return 'career';
+  case 'Mercury':return 'communication';
+  case 'Mars':return 'energy';
+  case 'Moon':case 'Neptune':return 'emotions';
+  case 'Uranus':return 'timing';
+  default:return 'overview';
+ }
 }
 export function signals(evidence:Evidence[]):Signal[]{
  const out:Signal[]=[];
