@@ -41,7 +41,7 @@ test('Go Mode contains all 29 metrics, all four daily gauges and all four decisi
  assert.ok(start>0&&end>start);
  assert.match(view,/data-section="go"/);
  assert.match(view,/todayQuickGauges\(r,true\)/);
- assert.match(view,/derivedMetrics\(data!\.scores\)/);
+ assert.match(view,/derivedMetrics\(sky\.scores\)/);
  assert.match(view,/goModes\(indicators\)/);
  assert.match(view,/mx-go-mode-decisions/);
  assert.match(view,/mx-go-mode-indicators/);
@@ -50,7 +50,7 @@ test('Go Mode contains all 29 metrics, all four daily gauges and all four decisi
  assert.match(view,/indicators\.map\(m=>/);
  assert.match(view,/go\.map\(d=>/);
  assert.match(view,/mxGoNarrative/);
- assert.match(view,/goCards\+renderGoLifeGauges\(r\.scores,r\.signals\.map\(s=>s\.category\)\)\+allIndicators/);
+ assert.match(view,/goCards\+renderGoLifeGauges\(sky\.scores,categories\)\+allIndicators/);
  for(const id of indicatorIds)assert.ok(main.includes("id:'"+id+"'"),id);
  const metrics=derivedMetrics(inputs);
  assert.equal(metrics.length,29,'All 29 computed indices are available');
