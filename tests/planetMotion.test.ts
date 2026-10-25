@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {motionTimeRemaining,remainingMotionPercent,scanMotionCycles,STATION_BODIES} from '../src/planetMotion.ts';
 const DAY=86400000,START=Date.parse('2026-01-01T00:00:00Z');
 test('Eight real retrograde-capable bodies; Sun and Moon cannot be assigned retrograde periods',()=>{
@@ -36,6 +37,17 @@ test('When a true station does not exist in the search window, no false percenta
  assert.equal(phases[0].retrograde,false);
  assert.equal(phases[0].startedAt,null);
  assert.equal(phases[0].endsAt,null);
+});
+test('Compact countdown units fit into narrow planet cards and preserve live timing',()=>{
+ const start=Date.parse('2026-01-01T00:00:00Z');
+ const fortyFive=Date.parse('2026-02-15T02:20:00Z');
+ assert.equal(motionTimeRemaining(start,fortyFive,'ar',true),'1ش · 14ي · 2س');
+ assert.equal(motionTimeRemaining(start,start+2*3600000+25*60000,'ar',true),'2س · 25د');
+ assert.equal(motionTimeRemaining(start,start+2*3600000+25*60000,'en',true),'2h · 25m');
+ assert.equal(motionTimeRemaining(start+3600000,start,'ar',true),'انتهى');
+ const main=readFileSync('src/main.ts','utf8');
+ assert.match(main,/motionTimeRemaining\(at,\+period\.endsAt,lang,true\)/);
+ assert.match(main,/motionTimeRemaining\(now,end,lang,true\)/);
 });
 test('Countdown uses calendar months rather than 30-day approximations',()=>{
  assert.match(motionTimeRemaining(START,START+2*3600000+25*60000,'ar'),/2 ساعة/);
