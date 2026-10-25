@@ -829,7 +829,7 @@ function initializeAstroCalendar(){
  calendarSnapshots.clear();calendarFailures.clear();calendarNatal=null;calendarCursor=0;calendarGeneration++;calendarRunning=false;calendarSelected=today;
 }
 function calendarColorLabel(color:AstroCalendarRating['color']){
- return color==='green'?t('مرتفع · 71–99','High · 71–99'):color==='yellow'?t('متوسط · 31–70','Moderate · 31–70'):t('منخفض · 1–30','Low · 1–30');
+ return color==='green'?t('مرتفع · 71–99','High · 71–99'):color==='yellow'?t('متوسط · 30–70','Moderate · 30–70'):t('منخفض · 1–29','Low · 1–29');
 }
 function astroCalendarPage(){
  initializeAstroCalendar();
@@ -1039,7 +1039,7 @@ function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
  const brief=relationshipBrief(c.evidence);
  const peopleMeaning={attraction:humanPartner(brief.attractionContact,'attraction'),sexual:humanPartner(brief.sexualContact,'sexual'),harmony:humanPartner(brief.harmonyContact,'harmony'),challenge:humanPartner(brief.challengeContact,'challenge')};
  const text=(v:{ar:string;en:string})=>esc(t(v.ar,v.en));
- const romantic=person.kind==='dating'||person.kind==='friend';
+ const romantic=c.romantic;
  const card=(icon:string,labelAr:string,labelEn:string,title:string,meaning:string,advice:string)=>
   '<article class="mx-brief-card metric-card"><small>'+icon+' '+t(labelAr,labelEn)+'</small><h3>'+title+'</h3><p>'+meaning+'</p>'+(advice?'<p class="mx-brief-advice">'+advice+'</p>':'')+'</article>';
  const attraction=romantic?
