@@ -62,6 +62,9 @@ test('Today replaces its top gauges with a professional current-sky wheel in bot
  const sky=main.slice(main.indexOf('function todaySkyWheel('),main.indexOf('function focusedToday()'));
  const live=main.slice(main.indexOf('function updateLiveSkyWheel('),main.indexOf('function refreshLiveBody('));
  assert.match(focused,/todaySkyWheel\(r\)/);
+ assert.ok(focused.indexOf('mx-focus-aside') < focused.indexOf('todaySkyWheel(r)'), 'Simple Today wheel must live inside the left rail');
+ assert.ok(focused.indexOf('todaySkyWheel(r)') < focused.indexOf('mx-today-time-shortcut'), 'Wheel precedes Time Machine');
+ assert.ok(focused.indexOf('mx-today-time-shortcut') < focused.indexOf('mx-focus-lunar-status'), 'Moon/VOC follows Time Machine');
  assert.match(classic,/todaySkyWheel\(r\)/);
  assert.ok(classic.indexOf('right-column') < classic.indexOf('todaySkyWheel(r)'), 'Today wheel is placed inside the left-side rail, not in a separate top row');
  assert.match(css,/#live-view-body \.mx-today-compact\{/);
