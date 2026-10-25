@@ -186,7 +186,7 @@ dialog#detail:has(.mx-expanded-sky) #dialog-content{width:100%}
 /* MX lunar countdown visibility refresh — make the ticking time the focal point.
    Shared by Current Moon Sign and Void of Course; live clock logic is unchanged. */
 .lunar-premium-grid .mx-lunar-gauge{
-  min-height:106px;
+  min-height:102px;
   padding:12px 13px;
   gap:14px;
 }
@@ -214,7 +214,7 @@ dialog#detail:has(.mx-expanded-sky) #dialog-content{width:100%}
   box-shadow:inset 0 1px 0 #b8ffed15,0 3px 13px #020b1430;
   color:#f1fff9;
   font-family:Manrope,'Noto Sans Arabic',sans-serif;
-  font-size:clamp(30px,3vw,36px);
+  font-size:clamp(28px,2.8vw,33px);
   font-weight:900;
   line-height:1.15;
   letter-spacing:.3px;
@@ -232,18 +232,18 @@ dialog#detail:has(.mx-expanded-sky) #dialog-content{width:100%}
   text-shadow:0 0 16px #ff86a05e;
 }
 @media(max-width:550px){
-  .lunar-premium-grid .mx-lunar-gauge{min-height:96px;padding:10px;gap:10px}
+  .lunar-premium-grid .mx-lunar-gauge{min-height:93px;padding:10px;gap:10px}
   .lunar-premium-grid .mx-lunar-gauge-copy{gap:7px}
   .lunar-premium-grid .mx-lunar-gauge-copy [data-gauge-label]{font-size:12px}
   .lunar-premium-grid .mx-lunar-gauge-copy strong[data-gauge-time]{
-    font-size:clamp(24px,7.2vw,30px);
+    font-size:clamp(23px,6.8vw,28px);
     padding:7px 9px;
     letter-spacing:.35px;
   }
 }
 @media(max-width:360px){
   .lunar-premium-grid .mx-lunar-gauge-copy strong[data-gauge-time]{
-    font-size:23px;
+    font-size:22px;
     padding:7px 8px;
     letter-spacing:0;
   }
