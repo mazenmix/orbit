@@ -1053,3 +1053,40 @@
   #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-ring{width:46px!important;height:46px!important;flex-basis:46px!important}
   #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-copy strong[data-gauge-time]{font-size:14px!important}
 }
+
+
+/* Travel Mode: concise interpretations beneath the same shared quick-gauge
+   header, numbers, and progress bars used by Today/Go Mode. */
+.mx-travel-mode-page .mx-focus-metric[data-travel-metric]{
+ align-content:start;
+ grid-template-rows:auto auto auto minmax(0,1fr) auto;
+}
+.mx-travel-mode-page .mx-focus-metric[data-travel-metric] .mx-metric-coverage{
+ grid-column:1/-1;min-width:0;display:block;
+ white-space:normal;overflow-wrap:anywhere;
+ font-size:.65rem;line-height:1.4;color:#b6b5d5;
+ margin-top:0;
+}
+.mx-travel-mode-page .mx-travel-gauge-summary{
+ grid-column:1/-1;min-width:0;align-self:start;
+ margin:5px 0 0!important;
+ font-size:.73rem;line-height:1.5;color:#e0def1;
+ text-wrap:pretty;
+}
+.mx-travel-mode-page .mx-travel-gauge-detail{
+ grid-column:1/-1;min-width:0;margin-top:3px;
+ border-top:1px solid rgba(179,163,225,.15);
+ padding-top:5px;
+}
+.mx-travel-mode-page .mx-travel-gauge-detail summary{
+ display:list-item;cursor:pointer;width:max-content;max-width:100%;
+ font-size:.7rem;line-height:1.5;color:#bda8fa;
+}
+.mx-travel-mode-page .mx-travel-gauge-detail p{
+ margin:5px 0 0!important;font-size:.71rem;
+ line-height:1.65;color:#bac0d5;overflow-wrap:anywhere;
+}
+.mx-travel-mode-page .mx-travel-score-direction{
+ margin:0 0 9px!important;color:#b6b8d4;
+ font-size:.72rem;line-height:1.55;
+}
