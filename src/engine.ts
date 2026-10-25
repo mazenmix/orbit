@@ -61,11 +61,13 @@ export function report(p:Profile,at:Date){
  return {at,natal,current,evidence,signals:items,scores:scores(items,house),house,complete:current.missing.length===0};
 }
 export type Report=ReturnType<typeof report>;
-export function compatibility(a:Profile,b:Profile){const ac=chart(birthInstant(a),a),bc=chart(birthInstant(b),b);const ap=targets(ac).filter(p=>p.id!=='MC'&&(a.known||p.id!=='Moon')),bp=targets(bc).filter(p=>p.id!=='MC'&&(b.known||p.id!=='Moon'));const evidence=synastry(ap,bp);
+export function compatibility(a:Profile,b:Profile){validateProfile(a);validateProfile(b);const ac=chart(birthInstant(a),a),bc=chart(birthInstant(b),b);const ap=targets(ac).filter(p=>p.id!=='MC'&&(a.known||p.id!=='Moon')),bp=targets(bc).filter(p=>p.id!=='MC'&&(b.known||p.id!=='Moon'));const evidence=synastry(ap,bp);
  const bonus={attraction:0,sexual:0,emotional:0,stability:0},overlays:{owner:string;planet:string;house:number}[]=[];
  for(const [points,cusps,owner] of [[bp,ac.cusps,a.name],[ap,bc.cusps,b.name]] as const)for(const point of points.filter(p=>['Venus','Mars','Moon','Pluto','Sun'].includes(p.id))){const h=houseNumber(point.longitude,[...cusps]);if([5,7,8].includes(h)){overlays.push({owner,planet:point.id,house:h});if(h===5)bonus.attraction+=2.5;if(h===7){bonus.attraction+=2;bonus.stability+=1.8}if(h===8){bonus.sexual+=3.2;bonus.emotional+=.8}}}
  const dimensions=Object.fromEntries((['attraction','sexual','emotional','communication','stability','conflict'] as Dimension[]).map(d=>[d,compatibilityScore(d,evidence,d==='emotional'&&(!a.known||!b.known)?.68:1,bonus[d as keyof typeof bonus]??0)])) as Record<Dimension,number>;
- const d=dimensions,romantic=a.kind==='dating'||b.kind==='dating';
+ // Role 'dating' describes the person's relationship to the profile owner,
+ // not a romantic relationship between two arbitrary saved contacts.
+ const d=dimensions,romantic=(a.kind==='self'&&b.kind==='dating')||(b.kind==='self'&&a.kind==='dating');
  const kinds:Dimension[]=['attraction','sexual','emotional','communication','stability','conflict'];
  const coverage=Object.fromEntries(kinds.map(kind=>{
   const viaAspect=compatibilityHasEvidence(kind,evidence);
