@@ -123,6 +123,12 @@ const travelStories:Record<TravelCardId,TravelStory>={
   high:['مؤشر توقيت الراحة مرتفع؛ استثمر فرصة الهدوء ونظّم نومك.','Rest timing is high; make use of a quiet window and protect your sleep routine.']
  }
 };
+const activityFocus:Record<TravelCardId,Category>={
+ dating:'love',newpeople:'communication',social:'communication',
+ attraction:'energy',romance:'emotions',chemistry:'communication',
+ sexuality:'love',desire:'energy',nightlife:'energy',
+ travel:'timing',risk:'timing',sleep:'recovery'
+};
 const sourceLabels:Record<Category,Pair>={
  overview:['الصورة العامة','overview'],career:['العمل','work'],love:['العلاقات','relationships'],
  communication:['التواصل','communication'],energy:['النشاط','energy'],emotions:['المزاج','emotions'],
@@ -157,7 +163,9 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
  const pair=travelStories[metric.id as TravelCardId][band];
  const basis=entries.map(e=>sourceLabels[e.category][english?1:0]+' '+e.score).join(' · ');
  const ranked=[...entries].sort((a,b)=>Math.abs(b.score-50)-Math.abs(a.score-50)||source.indexOf(a.category)-source.indexOf(b.category));
- const active=ranked.find(e=>e.contacts.some(c=>c.strength>0&&c.tone!==0));
+ const preferred=entries.find(e=>e.category===activityFocus[metric.id as TravelCardId]);
+ const active=(preferred?.contacts.some(c=>c.strength>0&&c.tone!==0)?preferred:undefined)??
+  ranked.find(e=>e.contacts.some(c=>c.strength>0&&c.tone!==0));
  let evidence='';
  if(active){
   const sign=Math.sign(active.score-50);
