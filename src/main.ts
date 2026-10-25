@@ -66,7 +66,7 @@ import {subscribeBackgroundPush,unsubscribeBackgroundPush,sendBackgroundPushTest
 import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './progressions.ts';
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
 import {derivedMetrics,goModes,reviewGoMode,type GoDomain,type GoReview,type MetricResult} from './metrics.ts';
-import {skyContext,contextGaugeBasis,type SkyContext} from './skyContext.ts';
+import {skyContext,contextGaugeBasis,contextGaugeNarrative,type SkyContext} from './skyContext.ts';
 import {travelMetricsByGroup} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
 import {supportive,difficult} from './math.ts';
@@ -768,8 +768,7 @@ function goModePage(){
    const memo=reviewGoMode(d,indicators,decisions),state=memo.state;
    const basis=contextGaugeBasis(sky,memo.sourceCategories,lang==='en');
    // The broad-sky index is available even when there is no tight GO verdict.
-   const narrative=memo.strongest?mxGoNarrative(d.domain,state,memo):
-    t('التقدير هنا مبني على هندسة المواضع الحالية والزوايا الأوسع، مو دليل على وقوع حدث محدد.','This is a positional/aspect context index, not evidence that a particular event will occur.');
+   const narrative=contextGaugeNarrative(sky,memo.sourceCategories,lang==='en');
    return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><small class="mx-metric-coverage">'+esc(basis)+'</small><p class="go-decision">'+narrative+'</p></div>'
   }).join('')+'</div>'
   '</section>';
