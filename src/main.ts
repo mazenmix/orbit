@@ -912,8 +912,8 @@ function moonAspectNarrative(event:LunarWindow['events'][number]){
  };
  const item=topics[event.target]??['موضوع يحتاج انتباه','a topic worth attention','خلّي الواقع هو المعيار.','Use reality as the yardstick.'];
  const tension=event.angle===90||event.angle===180;
- return t('اليوم راقب '+item[0]+'. '+(tension?'قد تتزاحم عندك أولويتان؛ لا تحسم وأنت مستعجل. ':'تگدر تتعامل وياه بخطوة هادئة. ')+item[2],
-  'Pay attention to '+item[1]+'. '+(tension?'Two priorities may pull against each other; avoid rushing. ':'A measured approach may help. ')+item[3]);
+ return t('بهذا الاتصال يبرز رمزياً موضوع '+item[0]+'. '+(tension?'قد تتزاحم أولويتان؛ لا تتسرع بالحسم. ':'يمكنك التعامل مع الموضوع بخطوة هادئة. ')+item[2],
+  'This aspect symbolically concerns '+item[1]+'. '+(tension?'Two priorities may pull against each other; avoid rushing. ':'A measured approach may help. ')+item[3]);
 }
 function moonMomentNarrative(window:LunarWindow){
  const future=window.events.find(e=>+e.time>+selected);
