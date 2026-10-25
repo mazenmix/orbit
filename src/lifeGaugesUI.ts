@@ -7,15 +7,16 @@ import {goLifeGauges,travelActivity,travelChecks,travelCompletion} from './lifeG
 const escapeHTML=(value:string)=>value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 
 /** A separate group: the original 29 calculated indicators are unchanged. */
-export function renderGoLifeGauges(scores:Record<Category,number>):string{
- const gauges=goLifeGauges(scores);
+export function renderGoLifeGauges(scores:Record<Category,number>,supportedCategories:readonly Category[]=[]):string{
+ const gauges=goLifeGauges(scores),supported=new Set(supportedCategories);
  return '<section class="panel mx-go-life"><div class="section-title"><h2>'+t('قرارات الحياة اليومية','Daily decision lenses')+'</h2></div>'+
   '<div class="metrics-grid mx-go-life-grid">'+gauges.map(m=>{
-   const label=t(m.name.ar,m.name.en),advice=t(m.advice.ar,m.advice.en);
-   return '<article class="metric-card mx-go-life-card '+gaugeLevel(m.value)+'" data-life-gauge="'+m.id+'">'+
-    '<small>'+escapeHTML(label)+'</small><b>'+m.value+'<em>/100</em></b>'+
-    '<div class="meter" role="progressbar" aria-label="'+escapeHTML(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+m.value+'"><i style="width:'+m.value+'%"></i></div>'+
-    '<p>'+escapeHTML(advice)+'</p></article>';
+   const label=t(m.name.ar,m.name.en),available=m.source.every(part=>supported.has(part.category));
+   return '<article class="metric-card mx-go-life-card '+(available?gaugeLevel(m.value):'mx-unavailable')+'" data-life-gauge="'+m.id+'">'+
+    '<small>'+escapeHTML(label)+'</small><b>'+(available?m.value:'—')+(available?'<em>/100</em>':'')+'</b>'+
+    (available?'<div class="meter" role="progressbar" aria-label="'+escapeHTML(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+m.value+'"><i style="width:'+m.value+'%"></i></div>':
+     '<div class="meter" aria-label="'+t('بيانات شخصية غير كافية','Insufficient personal evidence')+'"><i style="width:0%"></i></div>')+
+    '<p>'+escapeHTML(available?advice:t('ماكو دليل محسوب كافي لهذا المجال.','Insufficient calculated evidence for this area.'))+'</p></article>';
   }).join('')+'</div></section>';
 }
 
