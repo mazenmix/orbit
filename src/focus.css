@@ -709,9 +709,9 @@
 /* Real whole-sky broadcast: event stream and ten independent planetary statuses. */
 #live-view-body .mx-full-sky-today .mx-sky-events-panel h2{font-size:1.01rem;line-height:1.5}
 #live-view-body .mx-full-sky-today .mx-sky-feed{display:grid;gap:8px;min-width:0}
-/* Upcoming whole-sky events: responsive THREE-column grid immediately
-   below the planet movement card. No horizontal carousel/side scrolling. */
-#live-view-body .mx-full-sky-today .mx-sky-feed-upcoming{
+/* Both recent and upcoming event streams: compact 3-column responsive grid.
+   No horizontal carousel; detailed readings remain expandable. */
+#live-view-body .mx-full-sky-today .mx-sky-feed-grid{
  display:grid;
  grid-template-columns:repeat(3,minmax(0,1fr));
  grid-auto-flow:row;
@@ -723,29 +723,29 @@
  padding:0;
  align-items:stretch;
 }
-#live-view-body .mx-full-sky-today .mx-sky-feed-upcoming .mx-sky-feed-compact{
+#live-view-body .mx-full-sky-today .mx-sky-feed-grid .mx-sky-feed-compact{
  min-width:0;
  display:flex;
  flex-direction:column;
  gap:0;
 }
-#live-view-body .mx-full-sky-today .mx-sky-feed-upcoming .mx-sky-feed-compact > div{
+#live-view-body .mx-full-sky-today .mx-sky-feed-grid .mx-sky-feed-compact > div{
  display:flex;
  flex-direction:column;
  align-items:flex-start;
  gap:3px;
 }
-#live-view-body .mx-full-sky-today .mx-sky-feed-upcoming .mx-sky-feed-compact strong{
+#live-view-body .mx-full-sky-today .mx-sky-feed-grid .mx-sky-feed-compact strong{
  overflow-wrap:anywhere;
 }
-#live-view-body .mx-full-sky-today .mx-sky-feed-upcoming .mx-sky-feed-compact .mx-sky-feed-context{
+#live-view-body .mx-full-sky-today .mx-sky-feed-grid .mx-sky-feed-compact .mx-sky-feed-context{
  display:block;
  font-size:.71rem;
  line-height:1.6;
  margin:7px 0 0;
  border-radius:9px;
 }
-#live-view-body .mx-full-sky-today .mx-sky-feed-upcoming .mx-sky-event-details{
+#live-view-body .mx-full-sky-today .mx-sky-feed-grid .mx-sky-event-details{
  padding:9px 0 0!important;
  margin:9px 0 0!important;
  border-top:1px solid rgba(156,150,210,.20);
@@ -758,18 +758,18 @@
  cursor:pointer;
  line-height:1.5;
 }
-#live-view-body .mx-full-sky-today .mx-sky-feed-upcoming .mx-sky-event-details p{
+#live-view-body .mx-full-sky-today .mx-sky-feed-grid .mx-sky-event-details p{
  overflow-wrap:anywhere;
  font-size:.73rem;
  line-height:1.6;
 }
 @media(max-width:1000px){
- #live-view-body .mx-full-sky-today .mx-sky-feed-upcoming{
+ #live-view-body .mx-full-sky-today .mx-sky-feed-grid{
   grid-template-columns:repeat(2,minmax(0,1fr));
  }
 }
 @media(max-width:640px){
- #live-view-body .mx-full-sky-today .mx-sky-feed-upcoming{
+ #live-view-body .mx-full-sky-today .mx-sky-feed-grid{
   grid-template-columns:minmax(0,1fr);
  }
 }

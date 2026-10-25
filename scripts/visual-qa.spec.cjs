@@ -651,12 +651,19 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   expect(panel.width,'Today sky should be a compact panel').toBeLessThanOrEqual(500);
   // Regression: upcoming items follow the planet movement card, 3/2/1 across viewports.
   const planetPanel=page.locator('.mx-full-sky-today .mx-focus-main > .mx-sky-planets');
-  const upcomingPanel=page.locator('.mx-full-sky-today .mx-focus-main > .mx-sky-events-panel');
+  const eventPanels=page.locator('.mx-full-sky-today .mx-focus-main > .mx-sky-events-panel');
+  await expect(eventPanels).toHaveCount(2);
+  const upcomingPanel=eventPanels.nth(0),recentPanel=eventPanels.nth(1);
   const upcoming=upcomingPanel.locator('.mx-sky-feed-upcoming');
+  const recent=recentPanel.locator('.mx-sky-feed-recent');
   await expect(planetPanel).toBeVisible();
   await expect(upcomingPanel).toBeVisible();
   const planetBounds=await planetPanel.boundingBox(),upcomingBounds=await upcomingPanel.boundingBox();
   expect(upcomingBounds.y,'Upcoming block starts below planet movement').toBeGreaterThanOrEqual(planetBounds.y+planetBounds.height-2);
+  await expect(recentPanel).toBeVisible();
+  const recentBounds=await recentPanel.boundingBox();
+  expect(recentBounds.y,'Recent changes must follow upcoming events').toBeGreaterThanOrEqual(upcomingBounds.y+upcomingBounds.height-2);
+  await expect(page.locator('.mx-full-sky-today .mx-focus-aside .mx-sky-feed-recent')).toHaveCount(0);
   await expect(page.locator('.mx-full-sky-today .mx-focus-aside .mx-sky-feed-upcoming')).toHaveCount(0);
   const eventCards=upcoming.locator('.mx-sky-feed-compact');
   const count=await eventCards.count();
@@ -665,6 +672,24 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   expect(layout.flow,'Upcoming events fill grid by rows').toContain('row');
   expect(layout.columns,'Upcoming events responsive grid columns').toBe(expectedColumns);
   expect(layout.excess,'No horizontal scroll inside upcoming events').toBeLessThanOrEqual(2);
+  const recentLayout=await recent.evaluate(el=>({flow:getComputedStyle(el).gridAutoFlow,columns:getComputedStyle(el).gridTemplateColumns.split(/\s+/).filter(Boolean).length,excess:el.scrollWidth-el.clientWidth}));
+  expect(recentLayout.flow,'Recent sky stream fills grid by rows').toContain('row');
+  expect(recentLayout.columns,'Recent sky changes responsive columns').toBe(expectedColumns);
+  expect(recentLayout.excess,'Recent grid does not scroll horizontally').toBeLessThanOrEqual(2);
+  const recentCards=recent.locator('.mx-sky-feed-compact');
+  if(await recentCards.count()>=2){
+   const firstRecent=await recentCards.nth(0).boundingBox(),secondRecent=await recentCards.nth(1).boundingBox();
+   if(expectedColumns>1){
+    expect(Math.abs(firstRecent.y-secondRecent.y),'Recent events sit side by side').toBeLessThan(4);
+    expect(secondRecent.x,'Recent cards follow RTL reading order').toBeLessThan(firstRecent.x);
+   }else{
+    expect(secondRecent.y,'Mobile recent cards stack').toBeGreaterThan(firstRecent.y);
+   }
+   const detail=recentCards.first().locator('details.mx-sky-event-details');
+   await detail.locator('summary').click();
+   await expect(detail).toHaveAttribute('open','');
+   await expect(detail.locator('.mx-sky-feed-now')).toBeVisible();
+  }
   if(count>=2){
    const first=await eventCards.nth(0).boundingBox(),second=await eventCards.nth(1).boundingBox();
    if(expectedColumns>1){

@@ -64,6 +64,9 @@ test('Today replaces its top gauges with a professional current-sky wheel in bot
  assert.match(focused,/todaySkyWheel\(r\)/);
  assert.ok(focused.indexOf('planetLiveStatus(brief)') < focused.indexOf('mx-sky-feed-upcoming'), 'Upcoming events follow planet status');
  assert.ok(focused.indexOf('mx-sky-feed-upcoming') < focused.indexOf('mx-focus-aside'), 'Upcoming events stay in the main column, not the left rail');
+ assert.ok(focused.indexOf('mx-sky-feed-upcoming') < focused.indexOf('mx-sky-feed-recent'), 'Recent sky changes immediately follow upcoming sky events');
+ assert.ok(focused.indexOf('mx-sky-feed-recent') < focused.indexOf('mx-focus-aside'), 'Recent sky changes remain in the main column');
+ assert.match(focused,/wholeSkyEventItems\(brief\.latest,[^\n]*,true\)/);
  assert.ok(focused.indexOf('mx-focus-aside') < focused.indexOf('todaySkyWheel(r)'), 'Simple Today wheel must live inside the left rail');
  assert.ok(focused.indexOf('todaySkyWheel(r)') < focused.indexOf('mx-today-time-shortcut'), 'Wheel precedes Time Machine');
  assert.ok(focused.indexOf('mx-today-time-shortcut') < focused.indexOf('mx-focus-lunar-status'), 'Moon/VOC follows Time Machine');
