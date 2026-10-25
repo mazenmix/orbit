@@ -10,6 +10,16 @@ test('exact Sun trine: source weight formula, applying state and score',()=>{con
 test('instantaneous applying direction never fabricates an exact timestamp',()=>{const date=new Date('2026-01-01T00:00:00Z');const e=aspects([point('Sun',119,1)],[point('Sun',0)],date)[0];assert.equal(e.applying,true);assert.equal(e.exact,null);assert.equal(e.orb,1);assert.equal(aspects([point('Moon',1,13)],[point('Sun',0)],date).length,0)});
 test('orb boundary included, just outside omitted; stationary body has no peak',()=>{const at=new Date();assert.equal(aspects([point('Moon',.8,0)],[point('Sun',0)],at).length,1);assert.equal(aspects([point('Moon',.80001,0)],[point('Sun',0)],at).length,0);assert.equal(aspects([point('Saturn',0,.001)],[point('Sun',0)],at)[0].exact,null)});
 test('source synastry exact Venus/Mars trine vector',()=>{const evidence=synastry([point('Venus',0)],[point('Mars',120)]);assert.equal(evidence.length,1);assert.equal(evidence[0].influence,1);assert.equal(compatibilityScore('attraction',evidence),63);assert.equal(compatibilityScore('sexual',evidence),64);assert.equal(compatibilityScore('communication',evidence),50)});
+test('Moon-Mars synastry contributes to sexual rubric with identical results in both profile directions',()=>{
+ const forward=synastry([point('Moon',0)],[point('Mars',120)]);
+ const reverse=synastry([point('Mars',120)],[point('Moon',0)]);
+ assert.equal(forward.length,1);assert.equal(reverse.length,1);
+ assert.equal(compatibilityHasEvidence('sexual',forward),true);
+ assert.equal(compatibilityHasEvidence('sexual',reverse),true);
+ assert.equal(compatibilityScore('sexual',forward),58);
+ assert.equal(compatibilityScore('sexual',reverse),58);
+});
+
 test('cyclic unequal-house boundaries include start and exclude end',()=>{const cusps=[350,20,50,80,110,140,170,200,230,260,290,320];assert.equal(houseNumber(350,cusps),1);assert.equal(houseNumber(0,cusps),1);assert.equal(houseNumber(20,cusps),2);assert.equal(houseNumber(349,cusps),12)});
 test('annual profection uses completed years at the birth-time anniversary',()=>{assert.equal(annualHouse(defaultProfile,new Date('2026-01-01T11:59:59Z')),2);assert.equal(annualHouse(defaultProfile,new Date('2026-01-01T12:00:00Z')),3)});
 
