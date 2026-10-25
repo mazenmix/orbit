@@ -769,3 +769,58 @@
 }
 #live-view-body .mx-full-sky-today .mx-sky-reading-next b,
 #live-view-body .mx-today-compact .mx-sky-reading-next b{color:#eedfff}
+
+
+/* Today desktop layout: no standalone centered chart row or wasted blank columns.
+   In RTL, dashboard column 2 is the visual LEFT rail. */
+#live-view-body .mx-today-compact{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) minmax(256px,30%)!important;
+ gap:12px!important;
+ align-items:start;
+}
+#live-view-body .mx-today-compact .main-column,
+#live-view-body .mx-today-compact .right-column{min-width:0}
+#live-view-body .mx-today-compact .right-column{
+ display:flex;
+ flex-direction:column;
+ gap:10px;
+}
+#live-view-body .mx-today-compact .right-column>.panel{margin:0!important}
+#live-view-body .mx-today-compact .right-column .mx-today-sky-layout{
+ display:block!important;
+ width:100%!important;
+ max-width:none;
+ margin:0!important;
+}
+#live-view-body .mx-today-compact .right-column .mx-today-sky-layout .mx-today-sky{
+ padding:11px 10px 8px!important;
+}
+#live-view-body .mx-today-compact .right-column .mx-today-sky-heading h2{
+ font-size:12px;
+ line-height:1.45;
+}
+#live-view-body .mx-today-compact .right-column .mx-today-sky-expand{
+ min-height:30px;
+ padding:4px 7px;
+ font-size:10px;
+}
+#live-view-body .mx-today-compact .right-column .mx-today-sky-open{
+ width:min(100%,280px);
+}
+#live-view-body .mx-today-compact .right-column .mx-today-sky-open .chart-wheel{
+ max-width:280px;
+}
+#live-view-body .mx-today-compact .right-column .mx-today-sky-time{
+ font-size:9px;
+ overflow-wrap:anywhere;
+}
+@media(max-width:1120px){
+ #live-view-body .mx-today-compact{grid-template-columns:minmax(0,1fr)!important}
+ #live-view-body .mx-today-compact .right-column{grid-row:1}
+ #live-view-body .mx-today-compact .main-column{grid-row:2}
+ #live-view-body .mx-today-compact .right-column .mx-today-sky-layout{
+  width:min(100%,440px)!important;
+  margin-inline:auto!important;
+ }
+}
