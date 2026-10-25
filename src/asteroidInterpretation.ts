@@ -16,7 +16,9 @@ export function namedAsteroidContacts(transits:readonly Point[],natal:readonly P
    out.push({id:'named-'+asteroid.number+'-'+angle+'-'+n.id,transit:t,natal:n,angle,orb,maximumOrb:limit,applying,weight:Math.min(1,(1-orb/limit)*.62+asteroid.baseWeight*.20+importance(n.id)*.18),exact:null});
   }
  }
- return out.sort((a,b)=>b.weight-a.weight||a.orb-b.orb).slice(0,100);
+ // Return the entire eligible contact set; callers may shorten presentation,
+ // never silently discard the rest before per-body interpretation or audit.
+ return out.sort((a,b)=>b.weight-a.weight||a.orb-b.orb||a.id.localeCompare(b.id));
 }
 export type AsteroidMeaning={arTheme:string;arAction:string;enTheme:string;enAction:string};
 export const meanings:Readonly<Record<string,AsteroidMeaning>>={
