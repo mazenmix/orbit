@@ -12,3 +12,12 @@ test('orb boundary included, just outside omitted; stationary body has no peak',
 test('source synastry exact Venus/Mars trine vector',()=>{const evidence=synastry([point('Venus',0)],[point('Mars',120)]);assert.equal(evidence.length,1);assert.equal(evidence[0].influence,1);assert.equal(compatibilityScore('attraction',evidence),63);assert.equal(compatibilityScore('sexual',evidence),64);assert.equal(compatibilityScore('communication',evidence),50)});
 test('cyclic unequal-house boundaries include start and exclude end',()=>{const cusps=[350,20,50,80,110,140,170,200,230,260,290,320];assert.equal(houseNumber(350,cusps),1);assert.equal(houseNumber(0,cusps),1);assert.equal(houseNumber(20,cusps),2);assert.equal(houseNumber(349,cusps),12)});
 test('annual profection uses completed years at the birth-time anniversary',()=>{assert.equal(annualHouse(defaultProfile,new Date('2026-01-01T11:59:59Z')),2);assert.equal(annualHouse(defaultProfile,new Date('2026-01-01T12:00:00Z')),3)});
+
+test('annual profection cannot create an unsupported category bonus',()=>{
+ const empty=scores([],10);
+ assert.equal(empty.career,50,'Without an aspect there is no career-specific signal to boost');
+ const onlyLove=signals(aspects([point('Venus',120)],[point('Venus',0)],new Date('2026-01-01T00:00:00Z')));
+ assert.ok(onlyLove.some(s=>s.category==='love'));
+ assert.equal(scores(onlyLove,10).career,50,'Career stays at baseline even while another category has evidence');
+ assert.equal(scores(onlyLove,7).love,Math.min(99,onlyLove.find(s=>s.category==='love')!.score+5));
+});
