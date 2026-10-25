@@ -1,6 +1,7 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {calculateEclipses,type EclipseAPI} from './realEclipses.ts';
 import type {AsteroidSwiss} from './asteroidRuntime.ts';
+import {auxiliaryNodes,natalDerivedAngles} from './auxiliaryPoints.ts';
 import {bodies,normalize,aspects,signals,scores,houseNumber,synastry,compatibilityScore,compatibilityHasEvidence,type Point,type Dimension} from './math.ts';
 export type Profile={id:string;name:string;date:string;time:string;zone:string;lat:number;lon:number;city:string;known:boolean;kind:'self'|'dating'|'work'|'friend'|'family';sex?:'male'|'female'};
 export const defaultProfile:Profile={id:'demo',name:'Demo',date:'2000-01-01',time:'12:00',zone:'Etc/UTC',lat:51.4779,lon:0,city:'Greenwich',known:true,kind:'self'};
@@ -26,7 +27,7 @@ export function confirmedEclipses(at:Date,count=2,coords?:{lat:number;lon:number
 export function julianDay(date:Date){if(!Number.isFinite(+date))throw Error('Invalid date');return +date/86400000+2440587.5}
 function checkDate(at:Date){if(!Number.isFinite(+at)||at.getUTCFullYear()<1800||at.getUTCFullYear()>2399)throw Error('Supported dates: 1800–2399.')}
 export function sunMoonState(at:Date){if(at.getUTCFullYear()<1800||at.getUTCFullYear()>2399)throw Error('Supported dates: 1800–2399');const jd=julianDay(at),flags=2|256;const sun=swiss.calc_ut(jd,0,flags),moon=swiss.calc_ut(jd,1,flags);if(!sun||!moon||![sun[0],moon[0],moon[1]].every(Number.isFinite))throw Error('Sun or Moon ephemeris unavailable');return {sunLongitude:normalize(sun[0]),moonLongitude:normalize(moon[0]),moonLatitude:moon[1]}}
-export type Chart={date:Date;points:Point[];cusps:number[];asc:number|null;mc:number|null;missing:string[]};
+export type Chart={date:Date;points:Point[];cusps:number[];asc:number|null;mc:number|null;vertex?:number|null;missing:string[]};
 export function chart(at:Date,p:Profile,minor=false,withHouses=p.known):Chart{
  checkDate(at);
  if(!Number.isFinite(p.lat)||!Number.isFinite(p.lon)||Math.abs(p.lat)>90||Math.abs(p.lon)>180)throw Error('Invalid chart coordinates');
@@ -41,7 +42,7 @@ export function chart(at:Date,p:Profile,minor=false,withHouses=p.known):Chart{
    missing.push(name);
   }
  }
- let cusps:number[]=[],asc:number|null=null,mc:number|null=null;
+ let cusps:number[]=[],asc:number|null=null,mc:number|null=null,vertex:number|null=null;
  // Placidus is undefined at polar latitudes: never silently substitute a house system.
  if(withHouses&&p.known&&Math.abs(p.lat)<66){
   const h=swiss.houses(jd,p.lat,p.lon,'P');
@@ -49,9 +50,11 @@ export function chart(at:Date,p:Profile,minor=false,withHouses=p.known):Chart{
   const raw=Array.from(h.cusps).slice(1,13);
   if(raw.length!==12||!raw.every(Number.isFinite)||![h.ascmc[0],h.ascmc[1]].every(Number.isFinite))throw Error('Invalid Placidus cusps or angles');
   cusps=raw.map(normalize);asc=normalize(h.ascmc[0]);mc=normalize(h.ascmc[1]);
+  // Swiss houses() ascmc[3] contains the astronomical Vertex, when present.
+  vertex=Number.isFinite(h.ascmc[3])?normalize(h.ascmc[3]):null;
   if(new Set(cusps).size!==12)throw Error('Degenerate Placidus cusps');
  }
- return {date:at,points,cusps,asc,mc,missing};
+ return {date:at,points,cusps,asc,mc,vertex,missing};
 }
 export const targets=(c:Chart)=>[...c.points,...(c.asc===null?[]:[{id:'Ascendant',symbol:'ASC',longitude:c.asc,speed:0}]),...(c.mc===null?[]:[{id:'MC',symbol:'MC',longitude:c.mc,speed:0}])];
 export function annualHouse(p:Profile,at:Date){if(!p.known||+at<+birthInstant(p))return 0;const birth=Temporal.Instant.fromEpochMilliseconds(+birthInstant(p)).toZonedDateTimeISO(p.zone),moment=Temporal.Instant.fromEpochMilliseconds(+at).toZonedDateTimeISO(p.zone);return (birth.until(moment,{largestUnit:'years'}).years%12)+1}
@@ -66,9 +69,18 @@ export function report(p:Profile,at:Date){
  const current=chart(at,p,true);
  const evidence=aspects(current.points,targets(natal).filter(point=>p.known||point.id!=='Moon'),at);
  const supplementalEvidence=aspects(current.points,natalMinor,at);
+ const nodeReader=(moment:Date)=>(id:number)=>swiss.calc_ut(julianDay(moment),id,2|256);
+ const natalNodes=auxiliaryNodes(nodeReader(natalAll.date)),currentNodes=auxiliaryNodes(nodeReader(at));
+ const angles=natalDerivedAngles(natalAll,p.known);
+ const auxiliaryNatal=[...natalNodes.points,...angles.points];
+ // Additional verified longitudinal contacts are kept separate from the
+ // existing symbolic index model until weights and meanings are specified.
+ const auxiliaryEvidence=aspects(current.points,auxiliaryNatal,at);
  const items=signals(evidence),house=natal.asc===null?0:annualHouse(p,at);
  return {at,natal,current,evidence,supplementalNatal:natalMinor,
   supplementalEvidence,supplementalMissing:{natal:natalAll.missing,transit:current.missing},
+  auxiliaryNatal,auxiliaryCurrent:currentNodes.points,auxiliaryEvidence,
+  auxiliaryMissing:{natal:[...natalNodes.missing,...angles.missing],transit:currentNodes.missing},
   signals:items,scores:scores(items,house),house,
   complete:current.missing.length===0&&natalAll.missing.length===0};
 }
