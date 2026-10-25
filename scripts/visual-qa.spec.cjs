@@ -719,7 +719,7 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   await expect(page.locator('.mx-full-sky-today .mx-sky-planet.is-permanent')).toHaveCount(2);
   await expect(page.locator('.mx-full-sky-today .mx-sky-planet.is-permanent .mx-motion-meter')).toHaveCount(0);
   await expect(page.locator('.mx-full-sky-today .mx-sky-planet.is-permanent progress')).toHaveCount(0);
-  await expect(page.locator('.mx-full-sky-today .mx-sky-planet.is-permanent [data-motion-countdown]')).toHaveCount(0);
+  await expect(page.locator('.mx-full-sky-today .mx-sky-planet.is-permanent [data-motion-station]')).toHaveCount(0);
   const motionMeters=page.locator('.mx-full-sky-today .mx-sky-planet .mx-motion-meter[data-motion-start]');
   const sampleMeter=motionMeters.first();
   if(await motionMeters.count()){
@@ -728,13 +728,15 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
     end:Number(el.getAttribute('data-motion-end')),
     percent:Number(el.querySelector('[data-motion-percent]')?.textContent?.replace('%','')),
     value:Number(el.querySelector('progress')?.value),
-    timer:el.querySelector('[data-motion-countdown]')?.textContent?.trim()??''
+    station:el.querySelector('[data-motion-station]')?.textContent?.trim()??''
    }));
    expect(fields.start).toBeLessThan(fields.end);
    expect(fields.percent).toBeGreaterThanOrEqual(0);
    expect(fields.percent).toBeLessThanOrEqual(100);
    expect(fields.value).toBe(fields.percent);
-   expect(fields.timer.length).toBeGreaterThan(0);
+   expect(fields.station).toMatch(/^\d{2}\/\d{2}\/\d{2} · \d{2}:\d{2}$/);
+   const stationFits=await sampleMeter.locator('[data-motion-station]').evaluate(el=>el.scrollWidth<=el.clientWidth+1);
+   expect(stationFits,'Station date must stay inside planet card').toBe(true);
   }
   const leftRail=page.locator('.mx-full-sky-today .mx-focus-aside');
   await expect(leftRail.locator('.mx-today-sky-layout')).toHaveCount(1);
