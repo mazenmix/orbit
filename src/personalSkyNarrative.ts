@@ -1,4 +1,4 @@
-import {aspects,houseNumber,type Point} from './math.ts';
+import {aspects,distance,houseNumber,type Point} from './math.ts';
 import type {Chart} from './engine.ts';
 import {occurrenceLanguage,type SkyBodyId,type WholeSkyOccurrence} from './wholeSkyBroadcast.ts';
 import type {SkyLanguage} from './todaySkyBrief.ts';
@@ -158,6 +158,20 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
    later=lunar?(lang==='ar'?'التأويل يخص الفترة القريبة من وقت الاتصال القمري فقط؛ لا يمتد لأسابيع من دون عامل فلكي منفصل.':
     'The interpretation concerns the short Moon-aspect window, not weeks ahead without separate calculated evidence.'):
     (houseTopic?txt(houseTopic.later,lang):txt(second.later,lang))+' '+caution;
+  }
+ }
+ // A full Moon is a Sun–Moon opposition across two actual natal houses,
+ // not merely a solar event in one house. Verify the ephemeris separation.
+ if(event.kind==='aspect'&&event.angle===180&&
+    ((event.first==='Sun'&&event.second==='Moon')||(event.first==='Moon'&&event.second==='Sun'))&&
+    knownBirthTime&&natal.cusps.length===12){
+  const sun=skyAtEvent.find(p=>p.id==='Sun'),moon=skyAtEvent.find(p=>p.id==='Moon');
+  if(sun&&moon&&Math.abs(distance(sun.longitude,moon.longitude)-180)<=0.1){
+   const sunHouse=houseNumber(sun.longitude,natal.cusps),moonHouse=houseNumber(moon.longitude,natal.cusps);
+   if(sunHouse>0&&moonHouse>0&&sunHouse!==moonHouse){
+    later+=lang==='ar'?' والبدر يربط رمزياً بين '+houses[sunHouse-1].area.ar+' و'+houses[moonHouse-1].area.ar+'، مو دليل على حدث واقعي.':
+     ' The Full Moon symbolically relates '+houses[sunHouse-1].area.en+' to '+houses[moonHouse-1].area.en+'; this is not evidence of an external event.';
+   }
   }
  }
  // Only a verified close transit to a natal planet can add a second personal
