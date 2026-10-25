@@ -57,8 +57,20 @@ export const targets=(c:Chart)=>[...c.points,...(c.asc===null?[]:[{id:'Ascendant
 export function annualHouse(p:Profile,at:Date){if(!p.known||+at<+birthInstant(p))return 0;const birth=Temporal.Instant.fromEpochMilliseconds(+birthInstant(p)).toZonedDateTimeISO(p.zone),moment=Temporal.Instant.fromEpochMilliseconds(+at).toZonedDateTimeISO(p.zone);return (birth.until(moment,{largestUnit:'years'}).years%12)+1}
 export function report(p:Profile,at:Date){
  validateProfile(p);
- const natal=chart(birthInstant(p),p),current=chart(at,p,true),evidence=aspects(current.points,targets(natal).filter(point=>p.known||point.id!=='Moon'),at),items=signals(evidence),house=natal.asc===null?0:annualHouse(p,at);
- return {at,natal,current,evidence,signals:items,scores:scores(items,house),house,complete:current.missing.length===0};
+ // Calculate the six built-in minor-body natal positions in the same Swiss
+ // snapshot as the major bodies. Keep the original ten-body indicator rubric
+ // unchanged: extra evidence is available for inspection, not invented scoring.
+ const natalAll=chart(birthInstant(p),p,true),major=new Set(bodies.slice(0,10).map(b=>b[1]));
+ const natal={...natalAll,points:natalAll.points.filter(point=>major.has(point.id as typeof bodies[number][1])),missing:[] as string[]};
+ const natalMinor=natalAll.points.filter(point=>!major.has(point.id as typeof bodies[number][1]));
+ const current=chart(at,p,true);
+ const evidence=aspects(current.points,targets(natal).filter(point=>p.known||point.id!=='Moon'),at);
+ const supplementalEvidence=aspects(current.points,natalMinor,at);
+ const items=signals(evidence),house=natal.asc===null?0:annualHouse(p,at);
+ return {at,natal,current,evidence,supplementalNatal:natalMinor,
+  supplementalEvidence,supplementalMissing:{natal:natalAll.missing,transit:current.missing},
+  signals:items,scores:scores(items,house),house,
+  complete:current.missing.length===0&&natalAll.missing.length===0};
 }
 export type Report=ReturnType<typeof report>;
 export function compatibility(a:Profile,b:Profile){validateProfile(a);validateProfile(b);const ac=chart(birthInstant(a),a),bc=chart(birthInstant(b),b);const ap=targets(ac).filter(p=>p.id!=='MC'&&(a.known||p.id!=='Moon')),bp=targets(bc).filter(p=>p.id!=='MC'&&(b.known||p.id!=='Moon'));const evidence=synastry(ap,bp);
