@@ -51,7 +51,7 @@ function describe(e:AIContact,kind:'support'|'challenge',ar:boolean):string{
  const area=pick(target.subject,ar),lens=pick(driver,ar),scene=pick(target.example,ar),action=pick(target.check,ar);
  const closer=e.orb<=.5,hard=kind==='challenge';
  if(ar){
-  return (hard?'نقطة الانتباه الثانية':'أبرز مجال تگدر تشتغل عليه')+' هو '+area+'؛ الحساب يجمعه ويه '+lens+'. '+
+  return (hard?'الجانب اللي يحتاج انتباه':'أبرز مجال تگدر تشتغل عليه')+' هو '+area+'؛ الحساب يجمعه ويه '+lens+'. '+
    'إذا عندك '+scene+'، '+(hard?'لا تعتمد على أول انطباع ولا تستعجل بالحسم':'استثمر الوضوح الموجود من دون ما تفترض أن النتيجة مضمونة')+'. '+
    (closer?'هذا الاتصال قريب جداً من دقته الحسابية؛ ':'')+action+'.';
  }
