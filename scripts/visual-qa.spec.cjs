@@ -649,6 +649,16 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   await expect(page.locator('#live-view-body .mx-today-gauges')).toHaveCount(0);
   const panel=await page.locator('.mx-today-sky').boundingBox();
   expect(panel.width,'Today sky should be a compact panel').toBeLessThanOrEqual(500);
+  const leftRail=page.locator('.mx-full-sky-today .mx-focus-aside');
+  await expect(leftRail.locator('.mx-today-sky-layout')).toHaveCount(1);
+  await expect(leftRail.locator('.mx-today-time-shortcut')).toBeVisible();
+  await expect(page.locator('#live-view-body > .mx-today-sky-layout')).toHaveCount(0);
+  if(device==='desktop'){
+   const mainBounds=await page.locator('.mx-full-sky-today .mx-focus-main').boundingBox();
+   const railBounds=await leftRail.boundingBox();
+   expect(railBounds.x+railBounds.width,'Sky rail must stay LEFT of reading column').toBeLessThanOrEqual(mainBounds.x+2);
+   expect(Math.abs(railBounds.y-mainBounds.y),'Top of sky rail aligns with reading').toBeLessThan(24);
+  }
   const progress=page.locator('.mx-focus-moon progress');
   await expect(progress).toHaveCount(2);
   const theme=await page.locator('.mx-focus-lunar-status').evaluate(card=>{
