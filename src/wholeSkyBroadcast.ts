@@ -144,13 +144,14 @@ export function occurrenceLanguage(e:WholeSkyOccurrence,lang:SkyLanguage):{title
  const base=dictionary[e.first],human=guides[e.first],arabic=lang==='ar';
  if(e.kind==='ingress'){
   if(e.sign===undefined||e.sign<0||e.sign>11)throw Error('Invalid verified zodiac sign');
-  return {title:arabic?base.ar+(e.retrograde?' رجع متراجعاً إلى ':' دخل ')+signText(e.sign,lang):base.en+(e.retrograde?' returned retrograde to ':' entered ')+signText(e.sign,lang),
+  const feminine=e.first==='Venus'||e.first==='Sun';
+  return {title:arabic?base.ar+(e.retrograde?(feminine?' عادت متراجعة إلى ':' عاد متراجعاً إلى '):(feminine?' دخلت ':' دخل '))+signText(e.sign,lang):base.en+(e.retrograde?' returned retrograde to ':' entered ')+signText(e.sign,lang),
    description:arabic?(e.retrograde?'العودة التراجعية رمزياً تفتح مجال مراجعة '+signsAdvice[e.sign]+'. ':'الدخول يبرز رمزياً موضوع '+signsAdvice[e.sign]+'. ')+human.ar:
     (e.retrograde?'A retrograde return symbolically revisits ':'The ingress symbolically highlights ')+signText(e.sign,lang)+' themes. '+human.en,
    action:arabic?human.doAr:human.doEn};
  }
  if(e.kind==='station')return {
-  title:arabic?base.ar+(e.retrograde?' بدأ التراجع':' انتهى تراجعه'):base.en+(e.retrograde?' began retrograde':' ended retrograde'),
+  title:arabic?base.ar+(e.first==='Venus'||e.first==='Sun'?(e.retrograde?' بدأت التراجع':' انتهى تراجعها'):(e.retrograde?' بدأ التراجع':' انتهى تراجعه')):base.en+(e.retrograde?' began retrograde':' ended retrograde'),
   description:arabic?(e.retrograde?retro[e.first]:human.ar):
    (e.retrograde?'Take another look at past decisions. ':'It may be useful to move forward carefully. ')+human.en,
   action:arabic?human.doAr:human.doEn
