@@ -95,3 +95,39 @@ export function contextGaugeBasis(context:SkyContext,sources:readonly Category[]
    (english?'Distant geometry, neutral baseline':'أقرب زاوية بعيدة · مؤشر محايد');
  return prefix+' · '+name+' '+relation+' '+target+' · '+p.orb.toFixed(1)+'°';
 }
+
+/** Concise interpretation based on an actual calculated contact.
+ * This is a traditional astrological reading, not an observed life event. */
+export function contextGaugeNarrative(context:SkyContext,sources:readonly Category[],english=false):string{
+ const rows=[...new Set(sources)].map(c=>context.domains[c]).filter(Boolean);
+ if(!rows.length)return english?'No usable planetary positions.':'ماكو مواقع كوكبية كافية.';
+ rows.sort((a,b)=>a.primary.orb-b.primary.orb);
+ const row=rows[0],p=row.primary;
+ const name=english?p.transit:(arNames[p.transit]??p.transit);
+ const target=english?p.natal:(arNames[p.natal]??p.natal);
+ const aspectName=english?enAngles[p.angle]:arAngles[p.angle];
+ const subjects:Record<string,[string,string]>={
+  Sun:['أولوياتك وثقتك بالقرار','decisions and personal priorities'],
+  Moon:['مزاجك واحتياجك للراحة','emotional responses and comfort'],
+  Mercury:['المعلومات وطريقة التواصل','information and communication'],
+  Venus:['التقارب والقيم الشخصية','affection and personal values'],
+  Mars:['المبادرة وحدود الاندفاع','initiative and impulse control'],
+  Jupiter:['التوسع وموازنة الخيارات','growth and weighing options'],
+  Saturn:['المسؤوليات وحدود الوقت والجهد','responsibility, time and effort limits'],
+  Uranus:['التغيير والتكيف','change and flexibility'],
+  Neptune:['التوقعات وما هو واضح فعلاً','expectations versus facts'],
+  Ascendant:['الانطباع الأول والحضور','presence and first impressions'],
+  MC:['العمل والمسؤوليات العامة','career and public roles']
+ };
+ if(row.scope==='background')return english?
+  'The nearest '+name+'–'+target+' aspect is '+p.orb.toFixed(1)+'° away. No close aspect was calculated; the 50-point reading is a neutral context marker, not a forecast.':
+  'أقرب زاوية بين '+name+' و'+target+' فارقها '+p.orb.toFixed(1)+'°. ماكو اتصال ضمن 8°؛ الدرجة حيادية مو توقع.';
+ const subject=subjects[p.natal]?.[english?1:0]??(english?'your priorities':'أولوياتك');
+ const challenging=p.angle===90||p.angle===180;
+ const tip=challenging?
+  (english?'Review one concrete detail before taking action.':'دقّق معلومة مهمة قبل ما تتخذ خطوة.'):
+  (english?'Use this as a prompt for one specific, reversible step.':'استثمرها بخطوة صغيرة قابلة للتعديل.');
+ return english?
+  name+' '+aspectName+' natal '+target+' ('+p.orb.toFixed(1)+'°): this astrological lens concerns '+subject+'. '+tip:
+  name+' '+aspectName+' '+target+' (فارق '+p.orb.toFixed(1)+'°): القراءة تربط هالزاوية بموضوع '+subject+'. '+tip;
+}
