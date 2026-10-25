@@ -768,7 +768,14 @@ function goModePage(){
    const memo=reviewGoMode(d,indicators,decisions),state=memo.state;
    const basis=contextGaugeBasis(sky,memo.sourceCategories,lang==='en');
    // The broad-sky index is available even when there is no tight GO verdict.
-   const narrative=contextGaugeNarrative(sky,memo.sourceCategories,lang==='en');
+   const contextualAdvice:Record<GoDomain,[string,string]>={
+    work:['حدد مهمة العمل الأهم وخلي قرارك مرتبط بنتيجتها الفعلية.','Prioritize a concrete work task and judge its actual outcome.'],
+    social:['تواصل برسالة محددة وخلي الرد الفعلي يحدد الخطوة الجاية.','Send a specific message and use the actual reply to decide what comes next.'],
+    relationships:['اسأل عن التوقعات بشكل واضح بدون افتراض مشاعر الطرف الثاني.','Discuss expectations directly without assuming the other person’s feelings.'],
+    travel:['راجع الحجز والنقل والوقت قبل ما تثبّت أي قرار.','Verify booking, transport and timing before committing.']
+   };
+   const advice=memo.strongest?mxGoNarrative(d.domain,state,memo):t(...contextualAdvice[d.domain]);
+   const narrative=contextGaugeNarrative(sky,memo.sourceCategories,lang==='en')+' '+advice;
    return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><small class="mx-metric-coverage">'+esc(basis)+'</small><p class="go-decision">'+narrative+'</p></div>'
   }).join('')+'</div>'
   '</section>';
