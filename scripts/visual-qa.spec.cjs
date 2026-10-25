@@ -126,6 +126,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
    ];
    localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify(people));
    localStorage.setItem('mx.active','qa-self');
+   localStorage.setItem('mx.uiMode','pro');
   });
   await page.reload({waitUntil:'domcontentloaded'});
   await expect(page.locator('#soul-person-select option')).toHaveCount(3);
@@ -169,12 +170,12 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await page.goto('/#today',{waitUntil:'domcontentloaded'});
   await page.evaluate(()=>localStorage.setItem('mx.active','qa-self'));
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.locator('.mx-moon-personal-summary').first().waitFor({state:'visible',timeout:75000});
-  const ownMoon=await page.locator('.mx-moon-personal-summary').first().textContent();
+  await page.locator('.lunar-card p').first().waitFor({state:'visible',timeout:75000});
+  const ownMoon=await page.locator('.lunar-card p').first().textContent();
   await page.evaluate(()=>localStorage.setItem('mx.active','qa-person'));
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.locator('.mx-moon-personal-summary').first().waitFor({state:'visible',timeout:75000});
-  const partnerMoon=await page.locator('.mx-moon-personal-summary').first().textContent();
+  await page.locator('.lunar-card p').first().waitFor({state:'visible',timeout:75000});
+  const partnerMoon=await page.locator('.lunar-card p').first().textContent();
   expect(partnerMoon,'Moon and your chart must use the newly selected birth profile').not.toEqual(ownMoon);
   expect(errors).toEqual([]);
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
@@ -498,7 +499,9 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
     fill=getComputedStyle(row.querySelector('.mx-today-gauge-track i'));
    return [row.getAttribute('data-indicator-id'),{
     level:['low','caution','steady','strong'].find(k=>row.classList.contains(k)),
-    value:Number(row.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')),
+    available:!row.classList.contains('mx-unavailable'),
+    value:row.querySelector('[role="progressbar"]')?Number(row.querySelector('[role="progressbar"]').getAttribute('aria-valuenow')):null,
+    displayed:row.querySelector('strong')?.textContent?.trim()??'',
     width:Math.round(row.getBoundingClientRect().width*10)/10,
     padding:el.padding,radius:el.borderRadius,border:el.borderColor,background:el.backgroundColor,
     labelFont:label.fontSize,numberFont:number.fontSize,numberColor:number.color,
@@ -522,6 +525,11 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   const reference=goQuick.sexuality;
   expect(reference).toBeTruthy();
   for(const [id,seen] of Object.entries(travelStyle)){
+   if(!seen.available){
+    expect(seen.value,'Unavailable indicator must not present a fabricated numerical score: '+id).toBeNull();
+    expect(seen.displayed,'Missing evidence must display a dash: '+id).toBe('—');
+    continue;
+   }
    expect(seen.value,'Travel index '+id+' differs from Go Mode').toEqual(goMetricValues[id]);
    for(const property of ['padding','radius','border','background','labelFont','numberFont','numberColor','iconFont','iconColor','trackHeight','trackBg']){
     expect(seen[property],'Travel compact card differs from the four Go Mode quick gauges: '+id+' / '+property).toEqual(reference[property]);
@@ -534,13 +542,20 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   const ids=await page.locator('[data-travel-metric]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-travel-metric')));
   expect(ids).toEqual(['dating','newpeople','social','attraction','romance','chemistry','sexuality','desire','nightlife','travel','risk','sleep']);
   for(const id of ids){
-   const number=Number(await page.locator('[data-travel-metric="'+id+'"] [role="progressbar"]').getAttribute('aria-valuenow'));
+   const card=page.locator('[data-travel-metric="'+id+'"]');
+   const bar=card.locator('[role="progressbar"]');
+   if(await card.evaluate(el=>el.classList.contains('mx-unavailable'))){
+    await expect(bar,'Missing evidence must not render fake progress').toHaveCount(0);
+    await expect(card.locator('strong')).toHaveText('—');
+    continue;
+   }
+   const number=Number(await bar.getAttribute('aria-valuenow'));
    expect(Number.isFinite(number)).toBe(true);
    expect(number).toBeGreaterThanOrEqual(1);
    expect(number).toBeLessThanOrEqual(99);
   }
   // Compact cards retain the quick gauge's level-driven bar colors.
-  const levels=Object.values(travelStyle).map(x=>x.level);
+  const levels=Object.values(travelStyle).filter(x=>x.available).map(x=>x.level);
   expect(levels.every(Boolean)).toBe(true);
   const expectedColors=new Set(Object.values(travelStyle).map(x=>x.fillColor));
   expect(expectedColors.size).toBeGreaterThanOrEqual(1);
