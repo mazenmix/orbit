@@ -85,7 +85,27 @@ export function report(p:Profile,at:Date){
   complete:current.missing.length===0&&natalAll.missing.length===0};
 }
 export type Report=ReturnType<typeof report>;
-export function compatibility(a:Profile,b:Profile){validateProfile(a);validateProfile(b);const ac=chart(birthInstant(a),a),bc=chart(birthInstant(b),b);const ap=targets(ac).filter(p=>p.id!=='MC'&&(a.known||p.id!=='Moon')),bp=targets(bc).filter(p=>p.id!=='MC'&&(b.known||p.id!=='Moon'));const evidence=synastry(ap,bp);
+export function compatibility(a:Profile,b:Profile){
+ validateProfile(a);validateProfile(b);
+ const allA=chart(birthInstant(a),a,true),allB=chart(birthInstant(b),b,true);
+ const major=new Set(bodies.slice(0,10).map(body=>body[1]));
+ const ac={...allA,points:allA.points.filter(p=>major.has(p.id as typeof bodies[number][1])),missing:[] as string[]};
+ const bc={...allB,points:allB.points.filter(p=>major.has(p.id as typeof bodies[number][1])),missing:[] as string[]};
+ const ap=targets(ac).filter(p=>p.id!=='MC'&&(a.known||p.id!=='Moon'));
+ const bp=targets(bc).filter(p=>p.id!=='MC'&&(b.known||p.id!=='Moon'));
+ const evidence=synastry(ap,bp);
+ // Secondary contacts are mathematically inspectable but must not silently
+ // change the old six compatibility scores or claim partner intentions.
+ const supplement=(owner:Profile,all:Chart,core:Chart)=>{
+  if(!owner.known)return [] as Point[];
+  const nodes=auxiliaryNodes(id=>swiss.calc_ut(julianDay(all.date),id,2|256)).points;
+  const angles=natalDerivedAngles(all,true).points;
+  const omittedMC=targets(core).filter(p=>p.id==='MC');
+  return [...all.points.filter(p=>!major.has(p.id as typeof bodies[number][1])),...nodes,...angles,...omittedMC];
+ };
+ const extrasA=supplement(a,allA,ac),extrasB=supplement(b,allB,bc);
+ const supplementalEvidence=synastry([...ap,...extrasA],[...bp,...extrasB])
+   .filter(e=>extrasA.some(p=>p.id===e.first.id)||extrasB.some(p=>p.id===e.second.id));
  const bonus={attraction:0,sexual:0,emotional:0,stability:0},overlays:{owner:string;planet:string;house:number}[]=[];
  for(const [points,cusps,owner] of [[bp,ac.cusps,a.name],[ap,bc.cusps,b.name]] as const)for(const point of points.filter(p=>['Venus','Mars','Moon','Pluto','Sun'].includes(p.id))){const h=houseNumber(point.longitude,[...cusps]);if([5,7,8].includes(h)){overlays.push({owner,planet:point.id,house:h});if(h===5)bonus.attraction+=2.5;if(h===7){bonus.attraction+=2;bonus.stability+=1.8}if(h===8){bonus.sexual+=3.2;bonus.emotional+=.8}}}
  const dimensions=Object.fromEntries((['attraction','sexual','emotional','communication','stability','conflict'] as Dimension[]).map(d=>[d,compatibilityScore(d,evidence,d==='emotional'&&(!a.known||!b.known)?.68:1,bonus[d as keyof typeof bonus]??0)])) as Record<Dimension,number>;
@@ -105,5 +125,5 @@ export function compatibility(a:Profile,b:Profile){validateProfile(a);validatePr
  // required relationship dimension has no contributing chart evidence.
  const overallCovered=(romantic?kinds:kinds.filter(x=>!['attraction','sexual'].includes(x))).every(x=>coverage[x]);const overall=Math.round(romantic?d.attraction*.2+d.sexual*.2+d.emotional*.2+d.communication*.16+d.stability*.16+(100-d.conflict)*.08:d.emotional*.30+d.communication*.35+d.stability*.25+(100-d.conflict)*.10);
  if(!romantic){dimensions.attraction=0;dimensions.sexual=0}
- return {a:ac,b:bc,evidence,overlays,dimensions,overall,romantic,coverage,overallCovered};
+ return {a:ac,b:bc,evidence,supplementalEvidence,additionalMissing:{first:allA.missing,second:allB.missing},overlays,dimensions,overall,romantic,coverage,overallCovered};
 }
