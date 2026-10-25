@@ -61,3 +61,14 @@ test('existing evidence view does not hide newly calculated node and angle data'
  const pane=source.slice(source.indexOf('function evidencePage(){'),source.indexOf('function zoneChoices('));
  for(const part of ['r.auxiliaryNatal.map','r.auxiliaryCurrent.map','r.auxiliaryEvidence.map','r.auxiliaryMissing.natal'])assert.ok(pane.includes(part),part);
 });
+
+test('extended coverage identifies auxiliary vs separately loaded numbered asteroids',()=>{
+ const result=report(defaultProfile,new Date('2026-10-25T10:00:00Z'));
+ assert.equal(result.extendedCoverage.builtIn,result.complete);
+ assert.equal(result.extendedCoverage.namedAsteroids,'optional-separately-loaded');
+ assert.equal(result.extendedCoverage.auxiliary,result.auxiliaryMissing.natal.length===0&&result.auxiliaryMissing.transit.length===0);
+ assert.deepEqual(result.extendedCoverage.missing,[
+  ...result.supplementalMissing.natal,...result.supplementalMissing.transit,
+  ...result.auxiliaryMissing.natal,...result.auxiliaryMissing.transit
+ ]);
+});
