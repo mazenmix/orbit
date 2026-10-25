@@ -11,12 +11,19 @@ export function renderGoLifeGauges(scores:Record<Category,number>,supportedCateg
  const gauges=goLifeGauges(scores),supported=new Set(supportedCategories);
  return '<section class="panel mx-go-life"><div class="section-title"><h2>'+t('قرارات الحياة اليومية','Daily decision lenses')+'</h2></div>'+
   '<div class="metrics-grid mx-go-life-grid">'+gauges.map(m=>{
-   const label=t(m.name.ar,m.name.en),advice=t(m.advice.ar,m.advice.en),available=m.source.every(part=>supported.has(part.category));
-   return '<article class="metric-card mx-go-life-card '+(available?gaugeLevel(m.value):'mx-unavailable')+'" data-life-gauge="'+m.id+'">'+
-    '<small>'+escapeHTML(label)+'</small><b>'+(available?m.value:'—')+(available?'<em>/100</em>':'')+'</b>'+
-    (available?'<div class="meter" role="progressbar" aria-label="'+escapeHTML(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+m.value+'"><i style="width:'+m.value+'%"></i></div>':
+   const label=t(m.name.ar,m.name.en),advice=t(m.advice.ar,m.advice.en);
+   const present=m.source.filter(part=>supported.has(part.category));
+   const weight=present.reduce((sum,part)=>sum+part.weight,0);
+   // Renormalize only real, supported source scores: never blend default 50s.
+   const value=weight>0?Math.round(present.reduce((sum,part)=>sum+scores[part.category]*part.weight,0)/weight):null;
+   const available=value!==null,complete=present.length===m.source.length;
+   const coverage=complete?'':available?t('قراءة جزئية','Partial reading')+' '+present.length+'/'+m.source.length:t('لا يوجد اتصال قريب محسوب','No close calculated aspect');
+   return '<article class="metric-card mx-go-life-card '+(available?gaugeLevel(value):'mx-unavailable')+'" data-life-gauge="'+m.id+'">'+
+    '<small>'+escapeHTML(label)+'</small><b>'+(available?value:t('لا اتصال','No aspect'))+(available?'<em>/100</em>':'')+'</b>'+
+    (available?'<div class="meter" role="progressbar" aria-label="'+escapeHTML(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+value+'"><i style="width:'+value+'%"></i></div>':
      '<div class="meter" aria-label="'+t('بيانات شخصية غير كافية','Insufficient personal evidence')+'"><i style="width:0%"></i></div>')+
-    '<p>'+escapeHTML(available?advice:t('ماكو دليل محسوب كافي لهذا المجال.','Insufficient calculated evidence for this area.'))+'</p></article>';
+    (coverage?'<small class="mx-metric-coverage">'+escapeHTML(coverage)+'</small>':'')+
+    '<p>'+escapeHTML(available?advice:t('ماكو زاوية شخصية قريبة بهذا المجال للوقت المختار.','No close natal aspect was calculated in this area for the selected time.'))+'</p></article>';
   }).join('')+'</div></section>';
 }
 
