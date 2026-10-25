@@ -1,7 +1,7 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {calculateEclipses,type EclipseAPI} from './realEclipses.ts';
 import type {AsteroidSwiss} from './asteroidRuntime.ts';
-import {bodies,normalize,aspects,signals,scores,houseNumber,synastry,compatibilityScore,type Point,type Dimension} from './math.ts';
+import {bodies,normalize,aspects,signals,scores,houseNumber,synastry,compatibilityScore,compatibilityHasEvidence,type Point,type Dimension} from './math.ts';
 export type Profile={id:string;name:string;date:string;time:string;zone:string;lat:number;lon:number;city:string;known:boolean;kind:'self'|'dating'|'work'|'friend'|'family';sex?:'male'|'female'};
 export const defaultProfile:Profile={id:'demo',name:'Demo',date:'2000-01-01',time:'12:00',zone:'Etc/UTC',lat:51.4779,lon:0,city:'Greenwich',known:true,kind:'self'};
 export const CALCULATION_VERSION='2026-10-19.2';
@@ -65,7 +65,19 @@ export function compatibility(a:Profile,b:Profile){const ac=chart(birthInstant(a
  const bonus={attraction:0,sexual:0,emotional:0,stability:0},overlays:{owner:string;planet:string;house:number}[]=[];
  for(const [points,cusps,owner] of [[bp,ac.cusps,a.name],[ap,bc.cusps,b.name]] as const)for(const point of points.filter(p=>['Venus','Mars','Moon','Pluto','Sun'].includes(p.id))){const h=houseNumber(point.longitude,[...cusps]);if([5,7,8].includes(h)){overlays.push({owner,planet:point.id,house:h});if(h===5)bonus.attraction+=2.5;if(h===7){bonus.attraction+=2;bonus.stability+=1.8}if(h===8){bonus.sexual+=3.2;bonus.emotional+=.8}}}
  const dimensions=Object.fromEntries((['attraction','sexual','emotional','communication','stability','conflict'] as Dimension[]).map(d=>[d,compatibilityScore(d,evidence,d==='emotional'&&(!a.known||!b.known)?.68:1,bonus[d as keyof typeof bonus]??0)])) as Record<Dimension,number>;
- const d=dimensions,romantic=b.kind==='dating';const overall=Math.round(romantic?d.attraction*.2+d.sexual*.2+d.emotional*.2+d.communication*.16+d.stability*.16+(100-d.conflict)*.08:d.emotional*.30+d.communication*.35+d.stability*.25+(100-d.conflict)*.10);
+ const d=dimensions,romantic=b.kind==='dating';
+ const kinds:Dimension[]=['attraction','sexual','emotional','communication','stability','conflict'];
+ const coverage=Object.fromEntries(kinds.map(kind=>{
+  const viaAspect=compatibilityHasEvidence(kind,evidence);
+  const viaHouse=kind==='attraction'?overlays.some(e=>e.house===5||e.house===7):
+   kind==='sexual'?overlays.some(e=>e.house===8):
+   kind==='emotional'?overlays.some(e=>e.house===8):
+   kind==='stability'?overlays.some(e=>e.house===7):false;
+  return [kind,romantic||!['attraction','sexual'].includes(kind)?viaAspect||viaHouse:false];
+ })) as Record<Dimension,boolean>;
+ // An overall percentage would silently incorporate default 50s when a
+ // required relationship dimension has no contributing chart evidence.
+ const overallCovered=(romantic?kinds:kinds.filter(x=>!['attraction','sexual'].includes(x))).every(x=>coverage[x]);const overall=Math.round(romantic?d.attraction*.2+d.sexual*.2+d.emotional*.2+d.communication*.16+d.stability*.16+(100-d.conflict)*.08:d.emotional*.30+d.communication*.35+d.stability*.25+(100-d.conflict)*.10);
  if(!romantic){dimensions.attraction=0;dimensions.sexual=0}
- return {a:ac,b:bc,evidence,overlays,dimensions,overall,romantic};
+ return {a:ac,b:bc,evidence,overlays,dimensions,overall,romantic,coverage,overallCovered};
 }
