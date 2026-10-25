@@ -87,7 +87,7 @@ test('Today UI uses whole-sky stream in simple and Pro, not lunar-only selection
  for(const key of ['currentWholeSky()','planetLiveStatus(brief)','wholeSkyEventItems(brief.upcoming','wholeSkyEventItems(brief.latest'])assert.ok(focus.includes(key),key);
  assert.match(pro,/sky=currentWholeSky\(\)/);
  assert.match(focus,/الأحداث الفلكية القادمة · كل الكواكب/);
- assert.match(main,/scanWholeSky\(selected,at=>chart\(at,active,false,false\)\.points\)/);
+ assert.match(main,/scanWholeSky\(selected,at=>chart\(at,active,false,false\)\.points,72,48\)/);
  assert.match(main,/const LIVE_CONTENT_INTERVAL_MS:Record<string,number>=\{today:10000/);
  assert.doesNotMatch(focus,/momentNarrative\(|todaySkyBrief\(|orb.toFixed/);
 });
