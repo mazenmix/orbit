@@ -65,7 +65,8 @@ import {createSyncCode,parseSyncCode,uploadEncrypted,downloadEncrypted,syncStatu
 import {subscribeBackgroundPush,unsubscribeBackgroundPush,sendBackgroundPushTest,getPushStatus,pushAvailableOnThisDevice,backgroundPushOptedIn,refreshBackgroundPushIfNeeded,type MoonPushEvent} from './pushClient.ts';
 import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './progressions.ts';
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
-import {derivedMetrics,goModes,reviewGoMode,metricCoverage,observedMetric,type GoDomain,type GoReview,type MetricResult} from './metrics.ts';
+import {derivedMetrics,goModes,reviewGoMode,type GoDomain,type GoReview,type MetricResult} from './metrics.ts';
+import {skyContext,contextGaugeBasis,type SkyContext} from './skyContext.ts';
 import {travelMetricsByGroup} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
 import {supportive,difficult} from './math.ts';
@@ -243,25 +244,27 @@ function tag(text:string,cls=''){return `<span class="tag ${cls}">${text}</span>
  * Their values must track the selected person's report, not a hard-coded score. */
 /** One compact gauge component is used by Today, Go Mode's four primary
  * meters and all twelve Travel Mode cards. */
+let lastSkyContext:{key:string;value:SkyContext}|null=null;
+function liveGaugeSky():SkyContext{
+ const r=data!;
+ const key=JSON.stringify([active,r.at.toISOString(),r.natal.points.length,r.current.points.length]);
+ if(!lastSkyContext||lastSkyContext.key!==key)lastSkyContext={key,value:skyContext(r.natal,r.current,active.known)};
+ return lastSkyContext.value;
+}
 function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,string],travelId?:string){
- const label=override?t(override[0],override[1]):t(m.ar,m.en);
- const source=observedMetric(m,data!.scores,data?.signals??[]),amount=source.value??0;
- const supported=source.value!==null;
- const coverage=source.coverage==='partial'?
-  t('قراءة جزئية','Partial reading')+' '+source.present+'/'+source.total:
-  t('لا يوجد اتصال قريب محسوب','No close calculated aspect');
- return '<article class="mx-focus-metric '+(supported?gaugeLevel(amount):'mx-unavailable')+'"'+
+ const label=override?t(override[0],override[1]):t(m.ar,m.en),amount=m.value;
+ const basis=contextGaugeBasis(liveGaugeSky(),m.source,lang==='en');
+ return '<article class="mx-focus-metric '+gaugeLevel(amount)+'"'+
   (travelId?' data-travel-metric="'+travelId+'"':' data-today-gauge="'+m.id+'"')+
   ' data-indicator-id="'+m.id+'">'+
   '<span class="mx-today-gauge-icon" aria-hidden="true">'+symbol+'</span><b>'+label+'</b>'+
-  '<strong>'+(supported?amount:t('لا اتصال','No aspect'))+(supported?'<small>/100</small>':'')+'</strong>'+
-  (supported?'<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>':
-    '<div class="mx-today-gauge-track" aria-label="'+t('لا توجد أدلة محسوبة كافية','Insufficient calculated evidence')+'"><i style="width:0%"></i></div>')+
-  (source.coverage!=='complete'?'<small class="mx-metric-coverage">'+esc(coverage)+'</small>':'')+
+  '<strong>'+amount+'<small>/100</small></strong>'+
+  '<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
+  '<small class="mx-metric-coverage" title="'+esc(basis)+'">'+esc(basis)+'</small>'+
   '</article>';
 }
 function todayQuickGauges(r:Report,insideGo=false){
- const available=derivedMetrics(r.scores);
+ const available=derivedMetrics(liveGaugeSky().scores);
  const items=[
   {id:'sexuality',ar:'الجنس',en:'Sex / intimacy',symbol:'✧'},
   {id:'love',ar:'الحب',en:'Love',symbol:'♥'},
@@ -689,19 +692,13 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:GoReview){
 }
 /** Compact Go Mode indicator gauge: label, score and progress bar only. */
 function indicatorGaugeCard(m:MetricResult,travelId?:string){
- const label=t(m.ar,m.en),source=observedMetric(m,data!.scores,data?.signals??[]);
- const supported=source.value!==null,amount=source.value??0;
- const coverage=source.coverage==='partial'?
-  t('قراءة جزئية','Partial reading')+' '+source.present+'/'+source.total:
-  t('لا يوجد اتصال قريب محسوب','No close calculated aspect');
- return '<div class="metric-card '+(travelId?'mx-travel-metric ':'')+(supported?gaugeLevel(amount):'mx-unavailable')+'" data-indicator-id="'+m.id+'"'+
+ const label=t(m.ar,m.en),amount=m.value;
+ const basis=contextGaugeBasis(liveGaugeSky(),m.source,lang==='en');
+ return '<div class="metric-card '+(travelId?'mx-travel-metric ':'')+gaugeLevel(amount)+'" data-indicator-id="'+m.id+'"'+
    (travelId?' data-travel-metric="'+travelId+'"':'')+'>'+
-   '<small>'+label+'</small>'+
-   '<b>'+(supported?amount:t('لا اتصال','No aspect'))+(supported?'<em>/100</em>':'')+'</b>'+
-   (supported?'<div class="meter" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>':
-    '<div class="meter" aria-label="'+t('بيانات شخصية غير كافية','Insufficient personal evidence')+'"><i style="width:0%"></i></div>')+
-   (source.coverage!=='complete'?'<small class="mx-metric-coverage">'+esc(coverage)+'</small>':'')+
-   '</div>';
+   '<small>'+label+'</small><b>'+amount+'<em>/100</em></b>'+
+   '<div class="meter" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
+   '<small class="mx-metric-coverage" title="'+esc(basis)+'">'+esc(basis)+'</small></div>';
 }
 /** Both Go Mode and Travel Mode share one date/time selector, the same calculation engine, and the same actions. */
 function sharedModeTimeNavigation(){
@@ -722,26 +719,24 @@ function sharedModeTimeNavigation(){
   '</section>';
 }
 function goModePage(){
- const indicators=derivedMetrics(data!.scores),go=goModes(indicators),r=data!,decisions=resolveDecisions(r.evidence,r.signals);
+ const sky=liveGaugeSky(),indicators=derivedMetrics(sky.scores),go=goModes(indicators),r=data!,decisions=resolveDecisions(r.evidence,r.signals);
  const names:Record<GoDomain,[string,string]>={work:['العمل','Work'],social:['التواصل الاجتماعي','Social'],relationships:['العلاقات','Relationships'],travel:['السفر','Travel']};
  const gauges=todayQuickGauges(r,true);
  const timeNav=sharedModeTimeNavigation();
  const goCards='<section class="panel mx-go-mode-decisions">'+
   '<div class="go-grid">'+go.map(d=>{
- const memo=reviewGoMode(d,indicators,decisions),state=memo.state;
- const observed=memo.sourceCategories.filter(c=>r.signals.some(s=>s.category===c));
- const partialValue=observed.length?Math.round(observed.reduce((sum,c)=>sum+r.scores[c],0)/observed.length):null;
- const score=memo.complete?d.value:partialValue;
- const status=memo.complete?'':observed.length?
-  t('قراءة جزئية','Partial reading')+' '+observed.length+'/'+memo.sourceCategories.length:
-  t('لا يوجد اتصال قريب محسوب','No close calculated aspect');
- return '<div class="go-card '+state+' '+(score!==null?gaugeLevel(score):'mx-unavailable')+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+(score!==null?score:t('لا اتصال','No aspect'))+(score!==null?'<em>/100</em>':'')+'</strong>'+(status?'<small class="mx-metric-coverage">'+status+'</small>':'')+'<p class="go-decision">'+mxGoNarrative(d.domain,state,memo)+'</p></div>'
-}).join('')+'</div>'+
+   const memo=reviewGoMode(d,indicators,decisions),state=memo.state;
+   const basis=contextGaugeBasis(sky,memo.sourceCategories,lang==='en');
+   // The broad-sky index is available even when there is no tight GO verdict.
+   const narrative=memo.strongest?mxGoNarrative(d.domain,state,memo):
+    t('التقدير هنا مبني على هندسة المواضع الحالية والزوايا الأوسع، مو دليل على وقوع حدث محدد.','This is a positional/aspect context index, not evidence that a particular event will occur.');
+   return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><small class="mx-metric-coverage">'+esc(basis)+'</small><p class="go-decision">'+narrative+'</p></div>'
+  }).join('')+'</div>'
   '</section>';
  const allIndicators='<section class="panel mx-go-mode-indicators"><div class="metrics-grid">'+
   indicators.map(m=>indicatorGaugeCard(m)).join('')+
   '</div></section>';
- return '<div class="mx-go-mode-page" data-section="go">'+timeNav+gauges+goCards+renderGoLifeGauges(r.scores,r.signals.map(s=>s.category))+allIndicators+'</div>';
+ return '<div class="mx-go-mode-page" data-section="go">'+timeNav+gauges+goCards+renderGoLifeGauges(sky.scores,categories)+allIndicators+'</div>';
 }
 /** Simple glyphs that correspond to the exact travel domains and keep the
  * same single-icon layout as the four quick Go Mode gauges. */
@@ -755,7 +750,7 @@ function travelSymbol(id:string){
 /** Travel Mode is a concise Philippines-focused selection of the same live
  * twelve calculated indicators, not a new probability model. */
 function travelModePage(){
- const calculated=derivedMetrics(data!.scores),groups=travelMetricsByGroup(calculated);
+ const calculated=derivedMetrics(liveGaugeSky().scores),groups=travelMetricsByGroup(calculated);
  const sections=groups.map(group=>
   '<section class="panel mx-travel-group" data-travel-group="'+group.id+'">'+
   (group.id==='social'?'':'<div class="section-title"><h2>'+t(group.titleAr,group.titleEn)+'</h2>'+tag(group.rows.length+' '+t('مؤشرات','indicators'))+'</div>')+
