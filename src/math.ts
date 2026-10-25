@@ -115,7 +115,7 @@ export function synastry(a:Point[],b:Point[]):SynastryEvidence[]{const out:Synas
 export type Dimension='attraction'|'sexual'|'emotional'|'communication'|'stability'|'conflict';
 const relevance:Record<Dimension,Record<string,number>>={
  attraction:{'Mars|Venus':1.55,'Ascendant|Venus':1.45,'Sun|Venus':1.22,'Moon|Venus':1.10,'Venus|Venus':1,'Ascendant|Mars':1.05,'Pluto|Venus':1.18,'Mars|Pluto':.95},
- sexual:{'Mars|Venus':1.65,'Mars|Mars':1.18,'Pluto|Venus':1.34,'Mars|Pluto':1.35,'Ascendant|Mars':1.10,'Moon|Mars':1.02,'Uranus|Venus':.90},
+ sexual:{'Mars|Venus':1.65,'Mars|Mars':1.18,'Pluto|Venus':1.34,'Mars|Pluto':1.35,'Ascendant|Mars':1.10,'Mars|Moon':1.02,'Uranus|Venus':.90},
  emotional:{'Moon|Moon':1.55,'Moon|Sun':1.38,'Moon|Venus':1.35,'Jupiter|Moon':1.05,'Moon|Saturn':1.04,'Moon|Neptune':.92},
  communication:{'Mercury|Mercury':1.52,'Mercury|Moon':1.30,'Mercury|Sun':1.22,'Mercury|Venus':1.08,'Jupiter|Mercury':.90,'Mercury|Saturn':.92},
  stability:{'Saturn|Sun':1.30,'Moon|Saturn':1.35,'Saturn|Venus':1.42,'Mars|Saturn':.92,'Sun|Sun':.92,'Moon|Moon':1.05,'Jupiter|Saturn':.84},
