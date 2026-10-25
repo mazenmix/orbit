@@ -216,8 +216,7 @@ test('Compact planetary gauges show exact localized station date and minute with
  assert.match(ui,/<time data-motion-station/);
  assert.match(main,/timeZone:active.zone,numberingSystem:'latn'/);
  assert.match(main,/hourCycle:'h23'/);
- assert.match(ui,/نهاية التراجع/);
- assert.match(ui,/نهاية المباشر/);
+ assert.doesNotMatch(ui,/نهاية التراجع|نهاية المباشر|Retrograde ends|Direct phase ends/);
  assert.match(css,/\.mx-motion-meter-head\{[\s\S]*?justify-content:center/);
  assert.match(css,/\.mx-motion-end time\{[\s\S]*?white-space:nowrap/);
  assert.match(main,/tickPlanetMotionGauges/);
