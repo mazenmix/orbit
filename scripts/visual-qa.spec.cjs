@@ -649,6 +649,23 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   await expect(page.locator('#live-view-body .mx-today-gauges')).toHaveCount(0);
   const panel=await page.locator('.mx-today-sky').boundingBox();
   expect(panel.width,'Today sky should be a compact panel').toBeLessThanOrEqual(500);
+  // Regression: upcoming event cards are SIDE BY SIDE, never a vertical stack.
+  const upcoming=page.locator('.mx-full-sky-today .mx-sky-feed-upcoming');
+  await expect(upcoming).toBeVisible();
+  const eventCards=upcoming.locator('.mx-sky-feed-compact');
+  const count=await eventCards.count();
+  const flow=await upcoming.evaluate(el=>getComputedStyle(el).gridAutoFlow);
+  expect(flow,'Upcoming stream uses horizontal grid flow').toContain('column');
+  if(count>=2){
+   const first=await eventCards.nth(0).boundingBox();
+   const second=await eventCards.nth(1).boundingBox();
+   expect(Math.abs(first.y-second.y),'Upcoming cards stay in the same visual row').toBeLessThan(4);
+   expect(second.x,'RTL places the following event to the left').toBeLessThan(first.x);
+   const details=eventCards.first().locator('details.mx-sky-event-details');
+   await details.locator('summary').click();
+   await expect(details).toHaveAttribute('open','');
+   await expect(details.locator('.mx-sky-feed-now')).toBeVisible();
+  }
   const leftRail=page.locator('.mx-full-sky-today .mx-focus-aside');
   await expect(leftRail.locator('.mx-today-sky-layout')).toHaveCount(1);
   await expect(leftRail.locator('.mx-today-time-shortcut')).toBeVisible();
