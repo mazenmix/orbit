@@ -1121,7 +1121,7 @@ function lunarMansionMarkup(){
   const arrival=dateText(interval.exitsAt,{weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
   return '<section class="mx-mansion-panel" data-mansion-end="'+(+interval.exitsAt)+'" aria-label="'+t('منزلة القمر الحالية','Current lunar mansion')+'">'+
    '<div class="mx-mansion-identity">'+
-    '<div class="mx-mansion-heading"><span class="mx-mansion-number">'+m.number+' / 28</span><span class="mx-mansion-live">'+(liveTimePinned?t('وقت مختار','SELECTED TIME'):'LIVE')+'</span></div>'+
+
     '<div class="mx-mansion-name"><h3>'+esc(t(m.arName,m.enName))+'</h3><span class="mx-mansion-english" lang="en">'+esc(m.enName)+'</span></div>'+
     '<div class="mx-mansion-transition"><span>'+t('المنزل القادم','Next mansion')+'</span><time datetime="'+interval.exitsAt.toISOString()+'">'+esc(arrival)+'</time><strong class="mx-mansion-clock" data-mansion-clock>—</strong></div>'+
    '</div>'+
