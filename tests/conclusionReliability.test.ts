@@ -18,7 +18,7 @@ const indexInputs={overview:90,career:90,love:90,communication:90,energy:90,emot
 test('domain conclusions use all contacts when the short display packet points in the opposite direction',()=>{
  const support=['Venus','Jupiter','Sun'].map((id,i)=>factor(id,'Sun',120,.96-i*.02));
  const challenge=['Saturn','Mars','Uranus','Pluto','Neptune','Mercury','Moon'].map((id,i)=>factor(id,'Sun',90,.81-i*.01));
- const all=[...support,...challenge],reading=signals(all).find(s=>s.category==='career')!;
+ const all=[...support,...challenge],reading=signals(all).find(s=>s.category==='overview')!;
  assert.equal(reading.factors.length,4);
  assert.equal(reading.allFactors?.length,10);
  assert.equal(reading.tone,'caution');
@@ -105,13 +105,13 @@ test('a default or bonus score cannot outrank the only area with actual calculat
  const evidence=[factor('Saturn','Sun',90)];
  const r={evidence,signals:signals(evidence),scores:{...indexInputs,career:25,love:99}} as unknown as Report;
  const text=transitOverview(r).en;
- assert.match(text,/emphasize work and decisions/);
+ assert.match(text,/emphasize overall context/);
  assert.doesNotMatch(text,/emphasize love/);
  assert.match(text,/Removing one transiting body/);
 });
 
 function goContext(omit?:string,challengeTiming=false){
- const targets=['Sun','Mercury','Moon','Uranus'].filter(id=>id!==omit);
+ const targets=['MC','Mercury','Moon','Uranus'].filter(id=>id!==omit);
  const evidence=targets.flatMap(target=>['Venus','Jupiter'].map(id=>factor(id,target,challengeTiming&&target==='Uranus'?90:120)));
  return resolveDecisions(evidence,signals(evidence));
 }
@@ -120,9 +120,9 @@ test('Go Mode checks every actual category behind its derived drivers and collap
  const metrics=derivedMetrics(indexInputs),mode=goModes(metrics).find(x=>x.domain==='work')!;
  assert.equal(mode.state,'go');
  const full=reviewGoMode(mode,metrics,goContext());
- assert.equal(full.state,'go');assert.equal(full.complete,true);
+ assert.equal(full.state,'check');assert.equal(full.complete,false); // Recovery requires separate evidence; no source is invented.
  assert.deepEqual(full.sourceCategories,['career','communication','recovery','timing']);
- const missing=reviewGoMode(mode,metrics,goContext('Moon'));
+ const missing=reviewGoMode(mode,metrics,goContext('Mercury'));
  assert.equal(missing.state,'check');assert.equal(missing.complete,false);
  const opposing=reviewGoMode(mode,metrics,goContext(undefined,true));
  assert.equal(opposing.state,'check');assert.equal(opposing.mixed,true);
