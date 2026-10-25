@@ -91,7 +91,7 @@ export function signals(evidence:Evidence[]):Signal[]{
  const rank={S:4,A:3,B:2,C:1};return out.sort((a,b)=>rank[b.tier]-rank[a.tier]||b.score-a.score);
 }
 export function profectionCategory(house:number):Category{return [2,6,10].includes(house)?'career':[5,7,8].includes(house)?'love':[3,9].includes(house)?'communication':house===1?'energy':[4,12].includes(house)?'emotions':house===11?'timing':'overview'}
-export function scores(items:Signal[],house:number){const out=Object.fromEntries(categories.map(c=>[c,50])) as Record<Category,number>;for(const s of items)out[s.category]=s.score;if(Number.isInteger(house)&&house>=1&&house<=12){const c=profectionCategory(house);out[c]=Math.min(99,out[c]+5)}return out}
+export function scores(items:Signal[],house:number){const out=Object.fromEntries(categories.map(c=>[c,50])) as Record<Category,number>;for(const s of items)out[s.category]=s.score;if(Number.isInteger(house)&&house>=1&&house<=12){const c=profectionCategory(house);if(items.some(s=>s.category===c))out[c]=Math.min(99,out[c]+5)}return out}
 export function houseNumber(lon:number,cusps:number[]){if(cusps.length!==12)return 0;for(let i=0;i<12;i++){const start=normalize(cusps[i]);const arc=normalize(cusps[(i+1)%12]-start);if(normalize(lon-start)<arc)return i+1}return 0}
 export type SynastryEvidence={first:Point;second:Point;angle:number;orb:number;influence:number};
 export function synastry(a:Point[],b:Point[]):SynastryEvidence[]{const out:SynastryEvidence[]=[];for(const first of a)for(const second of b){
