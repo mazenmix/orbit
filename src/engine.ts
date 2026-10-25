@@ -82,7 +82,15 @@ export function report(p:Profile,at:Date){
   auxiliaryNatal,auxiliaryCurrent:currentNodes.points,auxiliaryEvidence,
   auxiliaryMissing:{natal:[...natalNodes.missing,...angles.missing],transit:currentNodes.missing},
   signals:items,scores:scores(items,house),house,
-  complete:current.missing.length===0&&natalAll.missing.length===0};
+  // Keep the legacy completeness flag scoped to the 16 built-in ephemeris
+  // positions; derived points and independent SE1 asteroid files are separate.
+  complete:current.missing.length===0&&natalAll.missing.length===0,
+  extendedCoverage:{
+   builtIn:current.missing.length===0&&natalAll.missing.length===0,
+   auxiliary:auxiliaryNatal.length>0&&natalNodes.missing.length===0&&currentNodes.missing.length===0&&angles.missing.length===0,
+   namedAsteroids:'optional-separately-loaded' as const,
+   missing:[...natalAll.missing,...current.missing,...natalNodes.missing,...currentNodes.missing,...angles.missing]
+  }};
 }
 export type Report=ReturnType<typeof report>;
 export function compatibility(a:Profile,b:Profile){
