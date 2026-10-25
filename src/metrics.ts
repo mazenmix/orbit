@@ -56,6 +56,22 @@ export function metricCoverage(metric:Pick<MetricSpec,'source'>,signals:readonly
  const present=sources.filter(x=>supported.has(x)).length;
  return present===0?'none':present===sources.length?'complete':'partial';
 }
+/** Show only category scores which have an actual calculated close transit.
+ * No 50-point neutral placeholder may be counted as personal evidence.
+ * A partial value is explicitly labelled with its source coverage in the UI. */
+export function observedMetric(metric:Pick<MetricSpec,'source'|'inverted'>,scores:Inputs,signals:readonly {category:Category}[]){
+ const sources=[...new Set(metric.source)];
+ const measured=new Set(signals.map(s=>s.category));
+ const observed=sources.filter(category=>measured.has(category));
+ const values=observed.map(category=>scores[category]);
+ if(values.some(v=>!Number.isFinite(v)||v<1||v>99))throw Error('Invalid observed category score');
+ const raw=values.length?Math.round(values.reduce((a,b)=>a+b,0)/values.length):null;
+ return {
+  value:raw===null?null:(metric.inverted?100-raw:raw),
+  coverage:observed.length===0?'none':observed.length===sources.length?'complete':'partial' as MetricCoverage,
+  present:observed.length,total:sources.length,missing:sources.filter(c=>!measured.has(c))
+ };
+}
 export type GoDomain='work'|'social'|'relationships'|'travel';
 export type GoDecision={domain:GoDomain;value:number;state:'go'|'check'|'hold';drivers:MetricName[]};
 export type GoReview={state:GoDecision['state'];sourceCategories:Category[];complete:boolean;mixed:boolean;sensitive:boolean;strongest:DecisionDetail['strongest'];supportFactor:DecisionDetail['supportFactor'];challengeFactor:DecisionDetail['challengeFactor']};
