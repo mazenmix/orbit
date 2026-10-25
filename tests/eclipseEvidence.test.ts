@@ -29,3 +29,15 @@ test('selected-time AI and local eclipse queries do not read the live-now widget
  assert.doesNotMatch(packet,/getRealEclipses\(\)/);
  assert.match(source,/const events=confirmedEclipses\(selected,1,\{lat:active\.lat,lon:active\.lon\},true\)/);
 });
+
+test('eclipse page follows pinned Time Machine interval without running live timers',()=>{
+ const ui=readFileSync('src/main.ts','utf8');
+ const cache=ui.slice(ui.indexOf('function getRealEclipses(){'),ui.indexOf('function getLunations(){'));
+ assert.match(cache,/reference=\+selected/);
+ assert.match(cache,/context=Math\.floor\(reference\/300000\)/);
+ assert.match(cache,/confirmedEclipses\(new Date\(reference-2\*86400000\),2\)/);
+ const page=ui.slice(ui.indexOf('function eclipsesPage(){'),ui.indexOf('function lunarPhaseScreen(){'));
+ assert.match(page,/eclipseCountdownParts\(liveTimePinned\?\+selected:Date\.now\(\),\+e\.maximum\)/);
+ const tick=ui.slice(ui.indexOf('function tickEclipseCountdowns('),ui.indexOf('function tickLiveClocks('));
+ assert.match(tick,/if\(screen!=='eclipses'\|\|liveTimePinned\)return/);
+});
