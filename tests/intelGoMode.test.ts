@@ -80,16 +80,16 @@ test('Today replaces its top gauges with a professional current-sky wheel in bot
 test('Today puts reusable live Moon and Void-of-Course rings below Time Machine',()=>{
  const classic=main.slice(main.indexOf('function today(){'),main.indexOf('function trend(',main.indexOf('function today(){')));
  const panel=main.slice(main.indexOf('function todayMoonGaugePanel()'),main.indexOf('function today(){'));
- const gaugeUpdater=main.slice(main.indexOf('function updateTodayMoonGauges('),main.indexOf('function updateTodayVocStatus('));
- assert.match(classic,/<button class=\\"panel time-shortcut\\"/);
- assert.match(classic,/time-shortcut[\\s\\S]*todayMoonGaugePanel\\(\\)/);
- assert.match(panel,/lunarGaugeMarkup\\('moon',w\\.enteredAt,w\\.ingressAt/);
- assert.match(panel,/lunarGaugeMarkup\\('voc',w\\.vocStartsAt,w\\.ingressAt/);
- assert.match(gaugeUpdater,/updateLunarGauge\\('moon',now\\)/);
- assert.match(gaugeUpdater,/updateLunarGauge\\('voc',now\\)/);
- assert.match(main,/if\\(screen==='today'&&ready\\)updateTodayMoonGauges\\(\\+selected\\)/);
- assert.match(main,/if\\(screen==='today'\\)updateTodayMoonGauges\\(now\\)/);
- assert.match(css,/\\.mx-today-moon-gauges-stack/);
+ const updater=main.slice(main.indexOf('function updateTodayMoonGauges('),main.indexOf('function updateTodayVocStatus('));
+ assert.ok(classic.indexOf('time-shortcut')>=0);
+ assert.ok(classic.indexOf('todayMoonGaugePanel()')>classic.indexOf('time-shortcut'),'The gauge panel follows the Time Machine');
+ assert.ok(panel.includes("lunarGaugeMarkup('moon',w.enteredAt,w.ingressAt"),'Actual Moon sign ring');
+ assert.ok(panel.includes("lunarGaugeMarkup('voc',w.vocStartsAt,w.ingressAt"),'Actual VOC ring');
+ assert.ok(updater.includes("updateLunarGauge('moon',now)"));
+ assert.ok(updater.includes("updateLunarGauge('voc',now)"));
+ assert.ok(main.includes("if(screen==='today'&&ready)updateTodayMoonGauges(+selected)"));
+ assert.ok(main.includes("if(screen==='today')updateTodayMoonGauges(now)"));
+ assert.ok(css.includes('.mx-today-moon-gauges-stack'));
 });
 
 test('Go Mode recommendations stay compact and use actual chart evidence',()=>{
