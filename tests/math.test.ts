@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {normalize,distance,aspects,signals,scores,synastry,compatibilityScore,houseNumber,type Point} from '../src/math.ts';
+import {normalize,distance,aspects,signals,scores,synastry,compatibilityScore,compatibilityHasEvidence,houseNumber,type Point} from '../src/math.ts';
 import {birthInstant,zonedInstant,defaultProfile,julianDay,annualHouse} from '../src/engine.ts';
 const point=(id:string,longitude:number,speed=1):Point=>({id,symbol:id,longitude,speed});
 test('Swift normalization vectors and zodiac wraparound',()=>{assert.equal(normalize(-10),350);assert.equal(normalize(370),10);assert.equal(normalize(-720),0);assert.equal(distance(359,1),2);assert.equal(distance(0,180),180)});
@@ -20,4 +20,13 @@ test('annual profection cannot create an unsupported category bonus',()=>{
  assert.ok(onlyLove.some(s=>s.category==='love'));
  assert.equal(scores(onlyLove,10).career,50,'Career stays at baseline even while another category has evidence');
  assert.equal(scores(onlyLove,7).love,Math.min(99,onlyLove.find(s=>s.category==='love')!.score+5));
+});
+
+test('relationship dimensions without a relevant close aspect have no claimed evidence',()=>{
+ const contacts=synastry([point('Venus',0)],[point('Mars',120)]);
+ assert.equal(compatibilityHasEvidence('attraction',contacts),true);
+ assert.equal(compatibilityHasEvidence('sexual',contacts),true);
+ assert.equal(compatibilityHasEvidence('communication',contacts),false);
+ assert.equal(compatibilityHasEvidence('emotional',contacts),false);
+ assert.equal(compatibilityHasEvidence('attraction',[]),false);
 });
