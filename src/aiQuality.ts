@@ -28,7 +28,9 @@ export function unsupportedOutcomeClaims(text:string):string[]{
  // authorize a second, positive certainty claim in the same sentence.
  const assertions=message.replace(/\b(?:not guaranteed|no guarantees?|cannot guarantee)\b|(?:مو|غير|ليس|ليست)\s+مضمون(?:ة|ا)?/gu,' ');
  if(/(?:\bguarantee(?:d|s)?\b|\bcertainly\s+will\b|\bwill\s+(?:definitely|certainly)\b|اكيد\s+(?:راح|حت|يرجع)|مضمون(?:ة)?(?:\s|$))/iu.test(assertions))problems.push('unsupported-certainty');
- if(/\b(?:will|going to)\s+(?:definitely\s+)?(?:marry|win|contact you|return to you)|(?:راح|سوف)\s+(?:تتزوج|تربح|ترجعلك|يرجعلك|يتصل بيك|تتصل بيك)/u.test(message))problems.push('unsupported-future-outcome');
+ // Reject other specific real-world outcomes as certainties. Symbolic contact
+ // data cannot establish a promotion, reunion, job offer or future partner.
+ if(/\b(?:will|going to)\s+(?:definitely\s+)?(?:marry|win|contact you|return to you|meet your soulmate|find true love|get promoted|land (?:a|the) job|receive a job offer)|\b(?:your ex|your partner)\s+will\s+(?:return|come back|call you)|(?:راح|سوف)\s+(?:تتزوج|تربح|ترجعلك|يرجعلك|يتصل بيك|تتصل بيك|تترقى|تحصل على وظيفة|تلتقي بحب حياتك|تتعرف على شريك حياتك|يرجع|ترجع)/u.test(message))problems.push('unsupported-future-outcome');
  if(/(?:\bshe secretly wants\b|\bhe secretly desires\b|\bknow her private thoughts\b|نعرف\s+افكارها\s+السرية|نقدر\s+نقرا\s+رغباتها|\bshe (?:loves you|wants you sexually)\b|\bhe is sexually attracted to you\b|هي تحبك بالسر|هو يرغب بيك جنسيا)/iu.test(message))problems.push('private-intent-claim');
  if(/\byou (?:have|suffer from) (?:depression|bipolar disorder|cancer|adhd|ptsd)\b|عندك (?:اكتئاب|سرطان|اضطراب ثنايي|اضطراب ثنائي)|مصاب ب(?:الاكتئاب|السرطان)/u.test(message))problems.push('unsupported-diagnosis');
  return [...new Set(problems)];
