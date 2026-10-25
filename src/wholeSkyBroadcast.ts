@@ -198,7 +198,7 @@ export function wholeSkyBroadcast(points:readonly Point[],events:readonly WholeS
  const veryNext=next&&+next.at-now<=6*3600000?next:null;
  if(veryRecent&&( !veryNext||now-(+veryRecent.at)<+veryNext.at-now)){
   const item=occurrenceLanguage(veryRecent,lang);
-  title=lang==='ar'?'صار هسه: '+item.title:'Just occurred: '+item.title;
+  title=lang==='ar'?'صار خلال الساعات الأخيرة: '+item.title:'Exact within the last six hours: '+item.title;
   meaning=item.description;action=item.action;
   movement=lang==='ar'?'هذا الموضوع صار الأبرز خلال الساعات الأخيرة.':'This theme was prominent in the past few hours.';
  }else if(veryNext){
