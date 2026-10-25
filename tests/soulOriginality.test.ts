@@ -16,7 +16,10 @@ test('200 readings have original deep content, summaries and actions, not reword
  assert.ok(list.every((x,i)=>x.summary.ar.startsWith(soulThemes[i].focusAr)));
  assert.ok(list.every((x,i)=>x.example.ar.startsWith(soulDeep[i].ar)));
  assert.ok(list.every((x,i)=>!x.deep.ar.includes(soulDeep[i].ar)),'the illustrative example must not be copied into deep analysis');
- assert.ok(list.every((x,i)=>x.advice.ar===soulThemes[i].actionAr));
+ assert.ok(list.every((x,i)=>x.advice.ar.startsWith(soulThemes[i].actionAr.replace(/[.؟!\s]+$/u,''))));
+ assert.ok(list.every((x,i)=>x.advice.ar.length>soulThemes[i].actionAr.length+70),'topic actions must include a substantive chart-specific execution plan');
+ const different=soulTopics.map(t=>soulReading({...chart,points:chart.points.map(p=>({...p,longitude:(p.longitude+137)%360}))} as any,t));
+ assert.ok(list.every((x,i)=>x.advice.ar!==different[i].advice.ar),'actions must respond to the relevant placements instead of remaining fixed topic constants');
  assert.ok(list.every((x,i)=>!x.deep.ar.includes('المفتاح العملي هو')));
 });
 test('source astrological symbolism changes with natal positions, not topic title alone',()=>{

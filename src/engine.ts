@@ -4,7 +4,7 @@ import type {AsteroidSwiss} from './asteroidRuntime.ts';
 import {bodies,normalize,aspects,signals,scores,houseNumber,synastry,compatibilityScore,compatibilityHasEvidence,type Point,type Dimension} from './math.ts';
 export type Profile={id:string;name:string;date:string;time:string;zone:string;lat:number;lon:number;city:string;known:boolean;kind:'self'|'dating'|'work'|'friend'|'family';sex?:'male'|'female'};
 export const defaultProfile:Profile={id:'demo',name:'Demo',date:'2000-01-01',time:'12:00',zone:'Etc/UTC',lat:51.4779,lon:0,city:'Greenwich',known:true,kind:'self'};
-export const CALCULATION_VERSION='2026-10-19.2';
+export const CALCULATION_VERSION='2026-10-25.1';
 export function birthInstant(p:Profile){return new Date(Temporal.PlainDateTime.from(`${p.date}T${p.known?p.time:'12:00'}`).toZonedDateTime(p.zone,{disambiguation:'reject'}).epochMilliseconds)}
 export function zonedInstant(value:string,zone:string){return new Date(Temporal.PlainDateTime.from(value).toZonedDateTime(zone,{disambiguation:'reject'}).epochMilliseconds)}
 export function localValue(date:Date,zone:string){return Temporal.Instant.fromEpochMilliseconds(+date).toZonedDateTimeISO(zone).toPlainDateTime().toString().slice(0,16)}

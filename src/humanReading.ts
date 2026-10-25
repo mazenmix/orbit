@@ -1,6 +1,5 @@
 import type {SoulReading} from './soulEngine.ts';
-import {soulAspectPairs} from './soulEngine.ts';
-import {getSoulTheme} from './soulThemes.ts';
+import {soulPlainReading} from './soulEngine.ts';
 import type {PrecisionInsight} from './chartPrecisionNarrative.ts';
 import type {SynastryEvidence} from './math.ts';
 type Both={ar:string;en:string};
@@ -46,42 +45,11 @@ export function humanSoul(reading:SoulReading):{summary:Both;deep:Both}{
    }
   };
  }
- const [a,b]=reading.basis,aspect=soulAspectPairs(reading.basis)[0],topic=getSoulTheme(reading.topic.id);
- const tension=aspect&&(aspect.type===90||aspect.type===180);
- const convergence=aspect&&aspect.type===0;
- const mixed=reading.contradictory;
- const third=reading.basis[2];
- const arDifference=a.sign===b.sign?
-  'واضح من المزج الرمزي ميل إلى '+style(a.sign,'ar')+' بأكثر من موقف، بس تطبيقه يختلف حسب الظروف.':
-  'عدك ميلين مختلفين: '+style(a.sign,'ar')+' من جهة، و'+style(b.sign,'ar')+' من جهة ثانية. يمكن واحد ينفعك بالعلاقات والثاني بالشغل؛ السياق يحدد.';
- const enDifference=a.sign===b.sign?
-  'The symbolism emphasizes '+style(a.sign,'en')+' across different situations, though context changes how it works.':
-  'Depending on the situation, you may shift between '+style(a.sign,'en')+' on one side and '+style(b.sign,'en')+' on the other. Neither style defines your personality on its own.';
- const arPattern=tension?'إذا استعجلت الحسم، هالاحتياجين ممكن يتزاحمن؛ اختبر وين تحتاج توازن بدل ما تضغط على نفسك.':
-  convergence?'الموضوعين قريبين من بعض بقراءتك؛ فرّق بين رغبتك الحقيقية وبين الحاجة لإثبات موقفك.':
-  aspect?'من الممكن تنسيق هالأسلوبين بسهولة نسبية، بس هذا يحتاج موقف فعلي حتى تختبره.':
-  'ما عندنا عامل إضافي قوي يرجّح أسلوب على الثاني، فخلي التجربة الواقعية هي اللي تحسم.';
- const enPattern=tension?'These priorities may pull against each other under pressure. Look for a practical balance rather than making a snap decision.':
-  convergence?'Both needs are closely connected; separate what you genuinely want from pressure to prove a point.':
-  aspect?'These approaches may complement each other, but real behavior is what can confirm whether they help.':
-  'There is no stronger supporting pattern here, so test both approaches against actual experiences.';
- const arHouse=house(a.house,'ar')?'ركز خصوصاً على '+house(a.house,'ar')+'. ':'';
- const enHouse=house(a.house,'en')?'This may be worth exploring especially around '+house(a.house,'en')+'. ':'';
- const thirdAr=third?'وقد يضيف احتياج '+(planetAreas[third.planet]?.ar??'آخر')+' أسلوب '+style(third.sign,'ar')+(house(third.house,'ar')?' بموضوع '+house(third.house,'ar'):'')+'. ':'';
- const thirdEn=third?'The need around '+(planetAreas[third.planet]?.en??'another personal theme')+' may also bring '+style(third.sign,'en')+(house(third.house,'en')?' into '+house(third.house,'en'):'')+'. ':'';
- return {
- summary:{
-  ar:topic.focusAr.replace(/[.؟!\s]+$/u,'')+'. '+arDifference,
-  en:topic.focusEn.replace(/[.!?\s]+$/u,'')+'. '+enDifference
- },
- deep:{
-  ar:'بخصوص '+reading.topic.ar+'، '+arPattern+' '+arHouse+thirdAr+(mixed?'المؤشرات مو كلها بنفس الاتجاه؛ شوف شنو ينطبق على مواقفك فعلياً قبل ما تعتبره صفة ثابتة.':'قارن هالتفسير بمواقفك المتكررة، مو بحادثة وحدها.'),
-  en:'For '+reading.topic.en+', '+enPattern+' '+enHouse+thirdEn+(mixed?'The indicators do not all point the same way, so avoid a fixed personality label.':'Compare this theme with recurring experiences rather than one event.')
- }
- };
+ return soulPlainReading(reading);
 }
 const planetAreas:Record<string,Both>={
  Sun:{ar:'ثقتك بنفسك والقرار',en:'identity and decisions'},Moon:{ar:'حاجتك للراحة والاطمئنان',en:'comfort and reassurance'},
+ Ascendant:{ar:'أسلوب حضورك والانطباع الأول',en:'presentation and first impressions'},MC:{ar:'اتجاهك المهني وحضورك العام',en:'career direction and public presence'},
  Mercury:{ar:'تفكيرك وطريقة الكلام',en:'thinking and communication'},Venus:{ar:'طريقة الاهتمام والحب',en:'affection and values'},
  Mars:{ar:'المبادرة وردّة الفعل',en:'initiative and reactions'},Jupiter:{ar:'التوسع والتجارب',en:'growth and exploration'},
  Saturn:{ar:'الالتزام والحدود',en:'responsibilities and limits'},Uranus:{ar:'الاستقلال والتغيير',en:'independence and change'},

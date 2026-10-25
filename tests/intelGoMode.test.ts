@@ -43,6 +43,7 @@ test('Go Mode contains all 29 metrics, all four daily gauges and all four decisi
  assert.match(view,/todayQuickGauges\(r,true\)/);
  assert.match(view,/derivedMetrics\(sky\.scores\)/);
  assert.match(view,/goModes\(indicators\)/);
+ assert.match(view,/reviewContextGoMode\(d,indicators,sky\)/,'Review the same contextual sources which produce the displayed score');
  assert.match(view,/mx-go-mode-decisions/);
  assert.match(view,/mx-go-mode-indicators/);
  assert.match(view,/go-grid/);
@@ -107,7 +108,7 @@ test('Go Mode recommendations stay compact and use actual chart evidence',()=>{
  assert.ok(start>=0&&end>start);
  assert.doesNotMatch(narrative,/signalStory\(/,'Do not duplicate the long transit story inside every Go card');
  assert.doesNotMatch(narrative,/story\.good|story\.action/,'Never concatenate verbose story paragraphs');
- assert.match(narrative,/memo\.strongest\.transit\.id/,'Cue must come from strongest computed transit');
+ assert.match(narrative,/cues\[domain\]\[memo\.strongest\.transit\]/,'Cue must come from the strongest contributing contextual transit');
  assert.match(narrative,/memo\.complete/,'Missing evidence must be disclosed');
  assert.match(narrative,/memo\.sensitive/,'Sensitive scores must be qualified');
  assert.match(narrative,/memo\.mixed/,'Conflicting evidence must be qualified');

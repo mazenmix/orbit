@@ -1,5 +1,6 @@
 import type {Category} from './math.ts';
 import type {DecisionDetail} from './decisionUltra.ts';
+import {contextScore,type SkyContext,type SkyContact} from './skyContext.ts';
 /** Transparent derived SYMBOLIC indicators. Not 23 independently measured outcomes. */
 type Inputs=Record<Category,number>;
 export type MetricName='overview'|'career'|'focus'|'productivity'|'money'|'communication'|'social'|'reputation'|'love'|'romance'|'attraction'|'chemistry'|'emotional'|'calm'|'energy'|'motivation'|'recovery'|'sleep'|'timing'|'travel'|'adventure'|'caution'|'luck'|'sexuality'|'desire'|'nightlife'|'dating'|'newpeople'|'risk';
@@ -90,6 +91,48 @@ export function reviewGoMode(mode:GoDecision,metrics:readonly MetricResult[],dec
  const supportFactor=strongest('supportFactor'),challengeFactor=strongest('challengeFactor'),mixed=!!supportFactor&&!!challengeFactor;
  const state=!active.length?'check':mode.state==='go'&&(!complete||mixed||sensitive||active.some(d=>d.resolution==='caution'))?'check':mode.state;
  return {state,sourceCategories,complete,mixed,sensitive,strongest:strongest('strongest'),supportFactor,challengeFactor};
+}
+export type ContextGoReview={state:GoDecision['state'];sourceCategories:Category[];complete:boolean;mixed:boolean;sensitive:boolean;
+ coverage:{present:number;total:number;missing:Category[]};strongest:SkyContact|null;supportFactor:SkyContact|null;challengeFactor:SkyContact|null};
+/** Contextual GO values must be reviewed against the very same contributors.
+ * Tight transit alerts are a different model and cannot supply their coverage.
+ * A remote neutral baseline is not an observed source for a GO verdict. */
+export function reviewContextGoMode(mode:GoDecision,metrics:readonly MetricResult[],context:SkyContext):ContextGoReview{
+ const sourceCategories=[...new Set(mode.drivers.flatMap(id=>{
+  const metric=metrics.find(m=>m.id===id);
+  if(!metric)throw Error('Missing contextual Go Mode driver');
+  return metric.source;
+ }))];
+ if(!sourceCategories.length)throw Error('Missing contextual Go Mode categories');
+ const sourceScores=sourceCategories.map(category=>context.scores[category]);
+ if(sourceScores.some(value=>!Number.isFinite(value)||value<1||value>99))throw Error('Invalid contextual Go Mode score');
+ const expected=Math.round(sourceScores.reduce((sum,value)=>sum+value,0)/sourceScores.length);
+ if(mode.value!==expected)throw Error('Go Mode value does not match its contextual sources');
+ const missing:Category[]=[],contacts:SkyContact[]=[];
+ let sensitive=false;
+ const direction=(value:number)=>Math.abs(value)<1e-10?0:Math.sign(value);
+ for(const category of sourceCategories){
+  const domain=context.domains[category];
+  if(!domain){missing.push(category);continue;}
+  const contributors=domain.contributors;
+  if(!Array.isArray(contributors)||contributors.length>2||domain.contacts!==contributors.length||
+   new Set(contributors.map(c=>c.transit)).size!==contributors.length)throw Error('Invalid contextual Go Mode contributors');
+  if(domain.score!==context.scores[category]||domain.score!==contextScore(contributors))throw Error('Contextual score and contributors disagree');
+  const active=contributors.filter(c=>c.strength>0&&c.tone!==0);
+  if(!active.length){missing.push(category);continue;}
+  contacts.push(...active);
+  const net=active.reduce((sum,c)=>sum+c.tone*c.strength,0);
+  // Same source-removal test used for close-contact decisions, performed on
+  // contextual contributions instead of unrelated close-contact factors.
+  if(direction(net)!==0&&active.some(c=>direction(net-c.tone*c.strength)!==direction(net)))sensitive=true;
+ }
+ const unique=[...new Map(contacts.map(c=>[c.transit+':'+c.natal+':'+c.angle,c])).values()];
+ const ranked=[...unique].sort((a,b)=>Math.abs(b.tone*b.strength)-Math.abs(a.tone*a.strength)||a.orb-b.orb||a.transit.localeCompare(b.transit));
+ const supportFactor=ranked.find(c=>c.tone>0)??null,challengeFactor=ranked.find(c=>c.tone<0)??null;
+ const mixed=!!supportFactor&&!!challengeFactor,complete=missing.length===0;
+ const state=!complete?'check':mode.state==='go'&&(mixed||sensitive)?'check':mode.state;
+ return {state,sourceCategories,complete,mixed,sensitive,coverage:{present:sourceCategories.length-missing.length,total:sourceCategories.length,missing},
+  strongest:ranked[0]??null,supportFactor,challengeFactor};
 }
 /** Each source category contributes once, even when several Go Mode drivers
  * are derived from it. Previous nested means silently counted shared inputs

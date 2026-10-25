@@ -11,7 +11,7 @@ import type {Chart} from './engine.ts';
  */
 export type SkyScope='tight'|'wide'|'background';
 export type SkyContact={transit:string;natal:string;angle:number;orb:number;strength:number;tone:number};
-export type SkyDomain={category:Category;score:number;scope:SkyScope;primary:SkyContact;contacts:number};
+export type SkyDomain={category:Category;score:number;scope:SkyScope;primary:SkyContact;contacts:number;contributors:readonly SkyContact[]};
 export type SkyContext={scores:Record<Category,number>;domains:Record<Category,SkyDomain>};
 const anchors:Record<Category,readonly string[]>={
  overview:['Sun','Ascendant'],
@@ -31,6 +31,11 @@ function tonalValue(planet:string,angle:number){
  if(angle===60||angle===120)return 1;
  if(angle===90||angle===180)return -1;
  return positive.has(planet)?0.9:difficult.has(planet)?-0.8:0.25;
+}
+/** Shared calculation for a contextual value and its decision review. */
+export function contextScore(contacts:readonly SkyContact[]):number{
+ if(contacts.some(c=>!Number.isFinite(c.strength)||c.strength<0||c.strength>1||!Number.isFinite(c.tone)||c.tone< -1||c.tone>1))throw Error('Invalid contextual contribution');
+ return Math.round(clamp(50+contacts.reduce((value,c)=>value+c.tone*c.strength*20,0)));
 }
 function targetPoints(natal:Chart,known:boolean):Point[]{
  const list=natal.points.filter(p=>known||p.id!=='Moon').slice();
@@ -64,14 +69,13 @@ export function skyContext(natal:Chart,current:Chart,known:boolean):SkyContext{
   // the declared 8-degree contextual limit. The exact-contact model is untouched.
   const contributors:SkyContact[]=[],seen=new Set<string>();
   for(const candidate of candidates){
-   if(candidate.orb>8||seen.has(candidate.transit))continue;
+   if(candidate.orb>8||candidate.strength<=0||seen.has(candidate.transit))continue;
    contributors.push(candidate);seen.add(candidate.transit);
    if(contributors.length===2)break;
   }
-  const delta=contributors.reduce((v,c)=>v+c.tone*c.strength*20,0);
-  const score=Math.round(clamp(50+delta));
+  const score=contextScore(contributors);
   const scope:SkyScope=primary.orb<=2.2?'tight':primary.orb<=8?'wide':'background';
-  domains[category]={category,score,scope,primary,contacts:contributors.length};
+  domains[category]={category,score,scope,primary,contacts:contributors.length,contributors};
   scores[category]=score;
  }
  return {scores,domains};

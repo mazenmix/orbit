@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {skyContext,contextGaugeBasis} from '../src/skyContext.ts';
+import {skyContext,contextGaugeBasis,contextScore} from '../src/skyContext.ts';
 import {derivedMetrics,goModes} from '../src/metrics.ts';
 import type {Chart} from '../src/engine.ts';
 const base=(degrees:Record<string,number>,at='2026-11-01T11:32:00Z'):Chart=>({
@@ -15,6 +15,8 @@ test('all eight domains including recovery receive real ephemeris-based context'
  assert.ok(Object.values(sky.domains).every(x=>x.primary&&Number.isFinite(x.primary.orb)));
  assert.equal(sky.domains.recovery.primary.orb,0);
  assert.equal(sky.domains.recovery.scope,'tight');
+ assert.ok(Object.values(sky.domains).every(domain=>domain.contacts===domain.contributors.length&&domain.contributors.length<=2));
+ assert.ok(Object.values(sky.domains).every(domain=>contextScore(domain.contributors)===domain.score));
  const metrics=derivedMetrics(sky.scores);
  assert.equal(metrics.length,29);
  assert.ok(metrics.every(x=>x.value>=1&&x.value<=99));
@@ -26,6 +28,7 @@ test('distant geometry is neutral context, not invented exact strength',()=>{
  const sky=base({Sun:25,Moon:25,Mercury:25,Venus:25,Mars:25,Jupiter:25,Saturn:25,Uranus:25,Neptune:25,Pluto:25});
  const result=skyContext(nadir,sky,false);
  assert.ok(Object.values(result.domains).every(x=>x.scope==='background'&&x.score===50&&x.contacts===0));
+ assert.ok(Object.values(result.domains).every(x=>x.contributors.length===0));
  assert.match(contextGaugeBasis(result,['career']),/محايد/);
 });
 test('time-varying transits change contextual values, while a fixed instant is deterministic',()=>{
@@ -47,4 +50,8 @@ test('unknown birth time excludes estimated natal Moon and angles',()=>{
 });
 test('fails explicitly on missing required planetary ephemerides',()=>{
  assert.throws(()=>skyContext(natal,base({Sun:1,Moon:2}),true),/Insufficient principal/);
+});
+
+test('contextual contribution scoring rejects invalid strengths instead of making a verdict',()=>{
+ assert.throws(()=>contextScore([{transit:'Venus',natal:'Moon',angle:120,orb:0,strength:NaN,tone:1}]),/Invalid contextual contribution/);
 });

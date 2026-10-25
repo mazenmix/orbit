@@ -1,5 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {onRequestPost} from '../functions/api/soul.ts';
+import {detectInventedNatalText} from '../src/soulGrounding.ts';
 const site='https://mxastro.pages.dev';
 const v={topicId:1,language:'ar',evidence:[{planet:'Sun',longitude:10,sign:0,house:1,retrograde:false,angle:null},{planet:'Moon',longitude:100,sign:3,house:4,retrograde:false,angle:null}]};
 const req=(body:unknown,origin=site)=>new Request(site+'/api/soul',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify(body)});
@@ -104,4 +105,35 @@ test('natal responses disclose their symbolic origin and bounded checks; missing
  const noFrame={...symbolicAnswer,summary:'هذه صفات ثابتة حسب مواضع الشمس والقمر.'};
  const rejected=await onRequestPost({request:req(v),env:{AI:{run:async()=>({response:JSON.stringify(noFrame)})}}});
  assert.equal((await rejected.json()).fallbackReason,'unsupported-claim');
+});
+
+test('ordinary Arabic and English placement paraphrases cannot swap two authorized signs',async()=>{
+ for(const claim of [
+  'الشمس موجودة في السرطان','برج الشمس هو السرطان','القمر يقع في الحمل',
+  'الشمس تقع ببرج السرطان','السرطان هو برج الشمس','Sun is in Cancer','Moon is positioned in Aries',
+  'قمرك بالعقرب','شمسك بالسرطان','وقمرچ بالحمل','شمسج بالسرطان',
+ ]){
+  const errors=detectInventedNatalText([claim],v.evidence);
+  assert.ok(errors.some(code=>code.startsWith('wrong-planet-sign:')),claim);
+  const env={AI:{run:async()=>({response:{...symbolicAnswer,detailedAnalysis:'هذه قراءة رمزية للمراجعة، '+claim+'، ثم قارن المعنى بمواقفك من دون اعتباره صفة ثابتة.'}})}};
+  const response=await onRequestPost({request:req(v),env});const body=await response.json();
+  assert.equal(response.status,200);assert.equal(body.quality,'verified-editorial-fallback',claim);
+  assert.equal(body.fallbackReason,'natal-evidence',claim);
+ }
+});
+test('correct placement paraphrases remain valid and do not cross a clause to the next planet',()=>{
+ for(const claim of [
+  'الشمس موجودة في الحمل، والقمر يقع في السرطان',
+  'برج الشمس هو الحمل. القمر موجود في السرطان.',
+  'الشمس تعبر عن المبادرة، والقمر في السرطان.',
+  'Sun is located in Aries; Moon is in Cancer.',
+  "Sun's sign is Aries, and Moon is positioned in Cancer.",
+  'الشمس موجودة في البيت الأول، والقمر يقع في البيت الرابع',
+  'قمرك بالسرطان، وشمسك بالحمل','قمرچ بالسرطان وشمسج بالحمل',
+ ])assert.deepEqual(detectInventedNatalText([claim],v.evidence),[],claim);
+});
+test('a planet cannot borrow another supplied house through ordinary location prose',()=>{
+ for(const claim of ['الشمس موجودة في البيت الرابع','القمر يقع في البيت الأول','Sun is positioned in house 4'])
+  assert.ok(detectInventedNatalText([claim],v.evidence).some(code=>code.startsWith('wrong-planet-house:')),claim);
+ assert.ok(detectInventedNatalText(['ونبتون يضيف موضوعاً جديداً'],v.evidence).includes('invented-planet:Neptune'));
 });

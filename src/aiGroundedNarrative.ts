@@ -49,15 +49,13 @@ const pick=(pair:Pair,ar:boolean)=>pair[ar?0:1];
 function describe(e:AIContact,kind:'support'|'challenge',ar:boolean):string{
  const target=targets[e.natal]??targets.Sun,driver=moving[e.transit]??moving.Sun;
  const area=pick(target.subject,ar),lens=pick(driver,ar),scene=pick(target.example,ar),action=pick(target.check,ar);
- const closer=e.orb<=.5,hard=kind==='challenge';
+ const hard=kind==='challenge';
  if(ar){
-  return (hard?'الجانب اللي يحتاج انتباه':'أبرز مجال تگدر تشتغل عليه')+' هو '+area+'؛ الحساب يجمعه ويه '+lens+'. '+
-   'إذا عندك '+scene+'، '+(hard?'لا تعتمد على أول انطباع ولا تستعجل بالحسم':'استثمر الوضوح الموجود من دون ما تفترض أن النتيجة مضمونة')+'. '+
-   (closer?'هذا الاتصال قريب جداً من دقته الحسابية؛ ':'')+action+'.';
+  return 'إذا عندك '+scene+'، انتبه إلى '+area+' ويه '+lens+'. '+
+   (hard?'هنا يحتاج القرار مساحة للمراجعة، حتى ما يغطي الضغط على التفاصيل. ':'تگدر تستفيد من وضوح هالجانب بخطوة محددة، من دون افتراض نتيجة جاهزة. ')+action+'.';
  }
- return (hard?'The counterweight to review':'The clearest area to work on')+' is '+area+', alongside '+lens+'. '+
-  'If you face '+scene+', '+(hard?'avoid treating the first impression as proof or rushing a choice':'use the opening without assuming any outcome')+'. '+
-  (closer?'This is a particularly close calculated contact. ':'')+action+'.';
+ return 'If you face '+scene+', consider '+area+' alongside '+lens+'. '+
+  (hard?'Leave room to review the details before pressure drives the choice. ':'Use this theme for one concrete step without assuming an outcome. ')+action+'.';
 }
 export function evidenceGroundedPlainAnalysis(ctx:AIAdviceContext):string{
  const ar=ctx.language==='ar';
@@ -66,8 +64,8 @@ export function evidenceGroundedPlainAnalysis(ctx:AIAdviceContext):string{
   'ما وصلتني اتصالات ولادية محسوبة تكفي لقراءة شخصية بهالوقت. ما راح أعطيك كلام عام وأنسبه لخريطتك.':
   'No verified natal contacts were supplied for this moment. A personal reading cannot be justified from empty evidence.';
  const primary=supports??challenges!;
- const first=describe(primary,supports?'support':'challenge',ar);
- const other=supports&&challenges?describe(challenges,'challenge',ar):'';
+ const first=(ar?'بهالقراءة الرمزية، ':'In this symbolic reading, ')+describe(primary,supports?'support':'challenge',ar).replace(/^If /,'if ');
+ const other=supports&&challenges?(ar?'بالمقابل، ':'The counterweight is this: ')+describe(challenges,'challenge',ar):'';
  if(other)return first+'\n\n'+other;
- return first+'\n\n'+(ar?'هاي نقطة واحدة مدعومة بالاتصال المحسوب بهالوقت؛ ماكو عامل ثانٍ كافي حتى أنسبلك موضوع إضافي.':'Only one calculated contact supports this focus; no second personal theme is justified.');
+ return first+'\n\n'+(ar?'خلّ تركيزك على هالموقف إذا كان ينطبق عليك؛ الدليل المتاح ما يكفي حتى نضيف موضوع شخصي ثاني.':'Keep the focus on this situation if it applies to you; the available evidence does not justify adding a second personal theme.');
 }

@@ -4,11 +4,78 @@
 import {bodies} from './math.ts';
 import {evidenceGroundedPlainAnalysis} from './aiGroundedNarrative.ts';
 export type AIContact={transit:string;natal:string;angle:number;orb:number;applying:boolean};
-export type AIAdviceContext={language:'ar'|'en';support:AIContact|null;challenge:AIContact|null;events:readonly {kind:string;type:string;maximum:string}[];evidence?:readonly AIContact[];supplemental?:readonly AIContact[];strict?:boolean;plainLanguage?:boolean;comparisonAvailable?:boolean};
+export type AIExplanationLink={contact:string;excerpt:string};
+export type AIAdviceContext={language:'ar'|'en';support:AIContact|null;challenge:AIContact|null;events:readonly {kind:string;type:string;maximum:string}[];evidence?:readonly AIContact[];supplemental?:readonly AIContact[];strict?:boolean;plainLanguage?:boolean;comparisonAvailable?:boolean;semanticLinks?:readonly AIExplanationLink[]};
 const normalized=(s:string)=>s.normalize('NFKC').toLocaleLowerCase().replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/[٠-٩]/g,v=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(v))).replace(/[۰-۹]/g,v=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(v)));
 const aliases:Record<string,string[]>={...Object.fromEntries(bodies.map(b=>[b[1],[b[1],b[2]]])),Ascendant:['Ascendant','الطالع'],MC:['MC','Midheaven','وسط السماء']};
 const escaped=(s:string)=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const mentions=(text:string,id:string)=>[...(aliases[id]??[id])].some(alias=>new RegExp('(?:^|[^\\p{L}])(?:و)?'+escaped(normalized(alias))+'(?:$|[^\\p{L}])','u').test(text));
+type Meaning={ar:string;en:string;terms:RegExp};
+// These are declared symbolic editorial meanings, not validated psychological
+// facts. Keep the target and the moving factor separate so naming an unrelated
+// life area cannot pass merely because a reply contains "symbolic" and "but".
+const targetMeanings:Record<string,Meaning>={
+ Sun:{ar:'الاتجاه الشخصي والهوية والثقة بالقرار',en:'personal direction, identity and self-confidence',terms:/اتجاهك|هويتك|ثقتك|قرار.*شخص|هدفك|قناع[ةت]|\b(?:identity|personal direction|self.confidence|your own choice|personal goal)\b/u},
+ Moon:{ar:'الراحة العاطفية ورد الفعل عند الضغط',en:'emotional comfort and reactions under stress',terms:/راح[ةت]|راحتك|ضغط|منزعج|مزاج|عاطف|شعور|مشاعر|تهدئ|استفز|\b(?:emotional|comfort|upset|stress|feelings|rest|reassurance)\b/u},
+ Mercury:{ar:'المراسلات والمعلومات ووضوح الاتفاق',en:'messages, information and clear agreements',terms:/رسال[ةت]|مراسل|معلوم|تواصل|جواب|اجاب|سؤال|تفاصيل.*اتفاق|\b(?:messag|information|communicat|reply|clarif|question|agreement)/u},
+ Venus:{ar:'التقارب والتقدير والتبادل في العلاقة',en:'affection, appreciation and reciprocity in relationships',terms:/تقارب|علاق|تقدير|اهتمام|انجذاب|دعوة|محب[ةت]|متبادل|\b(?:affection|appreciat|reciproc|relationship|invitation|intimacy|connection)/u},
+ Mars:{ar:'المبادرة والاستعجال ورد الفعل',en:'initiative, urgency and impulsive reactions',terms:/مبادر|استعج|تستعجل|اندفاع|رد.?الفعل|نقاش.*يحتد|\b(?:initiative|urgency|impuls|rush|act quickly|react)/u},
+ Jupiter:{ar:'الفرص والتوسع مقابل الوقت والكلفة',en:'opportunities and expansion versus cost and capacity',terms:/فرص|توسع|مشروع|سفر|كلف[ةت]|مكسب|\b(?:opportunit|expand|expansion|trip|project|cost|benefit)/u},
+ Saturn:{ar:'المسؤوليات والالتزامات والموارد',en:'responsibilities, obligations and resources',terms:/مسؤول|التزام|ملتزم|واجب|موعد|وعد|موارد|\b(?:responsibil|obligation|commitment|deadline|promise|resource)/u},
+ Uranus:{ar:'تغيير الخطة والاستقلال وكسر الروتين',en:'change of plan, independence and disruption of routine',terms:/تغيير|تغير|استقلال|روتين|خطة|\b(?:change|independ|routine|disrupt|plan)/u},
+ Neptune:{ar:'التوقعات والانطباعات مقابل الوقائع',en:'expectations and impressions versus evidence',terms:/توقع|انطباع|حقيق|وقائع|تخمين|غامض|غموض|\b(?:expectation|impression|evidence|guess|ambig|hope)/u},
+ Pluto:{ar:'السيطرة والحدود والتغيير العميق',en:'control, boundaries and deep change',terms:/سيطر|تحكم|حدود|تغيير.*عميق|\b(?:control|boundar|deep change|power)/u},
+ Chiron:{ar:'النقد والنقاط الحساسة وتجربة قديمة',en:'criticism, sensitive topics and past experience',terms:/نقد|حساس|قديم|ذكرى|\b(?:critic|sensitiv|past experience|old experience)/u},
+ Ceres:{ar:'المساعدة والرعاية وتوازن العطاء',en:'care, help and reciprocal support',terms:/مساعد|رعاي|اهتمام|عطاء|\b(?:care|help|support|nurtur)/u},
+ Pallas:{ar:'حل المشكلة والبحث عن سببها',en:'problem-solving and identifying causes',terms:/مشكلة|مشكل[ةت]|سبب|اسباب|حلول|حل |فرضيات|\b(?:problem|solution|cause|hypothes)/u},
+ Juno:{ar:'الاتفاق والالتزام والمسؤولية المشتركة',en:'commitment, shared expectations and agreements',terms:/اتفاق|التزام|توقع|مشترك|\b(?:agreement|commitment|expectation|shared responsibil)/u},
+ Vesta:{ar:'التركيز والاستمرار في مهمة',en:'focus and sustained effort on a task',terms:/تركيز|مهم[ةت]|استمرار|تفرغ|تشتت|\b(?:focus|task|sustain|devot|distraction)/u},
+ Pholus:{ar:'التفاصيل الصغيرة وتبعات القرار',en:'small details and wider consequences',terms:/تفصيل|تفاصيل|صغير|تبعات|منسي|شرط|\b(?:detail|small|consequence|overlook|condition)/u},
+ Ascendant:{ar:'الانطباع الاول وطريقة تقديم نفسك',en:'first impressions and presenting yourself',terms:/انطباع.*اول|تقديم.*نفس|تقدم.*نفس|لقاء.*جديد|اول.*رسال|\b(?:first impression|presenting yourself|introduc|first meeting)/u},
+ MC:{ar:'المسار المهني والعمل والصورة العامة',en:'career direction, work and professional standing',terms:/مهني|شغل|عمل|وظيف|مدير|سمع[ةت]|\b(?:career|work|professional|job|reputation|deliverable)/u},
+};
+const driverMeanings:Record<string,Meaning>={
+ Sun:{ar:'اتخاذ موقف واضح',en:'taking a clear position',terms:/موقف|وضوح|واضح|حسم|قناع[ةت]|\b(?:position|clear|decid|conviction)/u},
+ Moon:{ar:'التفاعل مع الشعور الحالي',en:'reacting to current feelings',terms:/شعور|مشاعر|مزاج|رد.?فعل|انفعال|\b(?:feeling|mood|react|emotion)/u},
+ Mercury:{ar:'المعلومة وطريقة توصيلها',en:'information and communication',terms:/معلوم|تواصل|رسال|مراسل|وضح|وضوح|سؤال|اجاب|\b(?:information|communicat|messag|clarif|question|reply)/u},
+ Venus:{ar:'التقدير وقيمة العلاقة او الاختيار',en:'appreciation and the value of a connection or choice',terms:/تقدير|علاق|قيمة|اهتمام|متبادل|\b(?:appreciat|value|connection|affection|reciproc)/u},
+ Mars:{ar:'الاستعجال والمبادرة',en:'urgency and taking initiative',terms:/استعج|تستعجل|مبادر|اندفاع|سرع|\b(?:urgency|rush|initiative|impuls|quick)/u},
+ Jupiter:{ar:'توسيع الخيارات والفرص',en:'expanding options and opportunities',terms:/توسع|توسيع|فرص|خيارات|\b(?:expand|opportunit|options|growth)/u},
+ Saturn:{ar:'المسؤولية وحدود القدرة',en:'responsibility and limits of capacity',terms:/مسؤول|التزام|قدرت|قدرة|حدود|طاقت|عبء|واجب|\b(?:responsibil|commitment|limit|capacity|obligation|burden)/u},
+ Uranus:{ar:'كسر الروتين والتغيير',en:'disrupting routine and making changes',terms:/روتين|تغيير|تغير|استقلال|\b(?:routine|change|independ|disrupt)/u},
+ Neptune:{ar:'الانطباع والحقيقة',en:'impressions versus reality',terms:/انطباع|حقيق|وقائع|تخمين|غامض|غموض|\b(?:impression|reality|fact|guess|ambig|evidence)/u},
+ Pluto:{ar:'التحكم والحدود',en:'control and boundaries',terms:/تحكم|سيطر|حدود|\b(?:control|boundar|power)/u},
+ Chiron:{ar:'الحساسية للنقد والذكريات',en:'sensitivity to criticism and memories',terms:/حساس|نقد|ذكرى|ذكريات|قديم|\b(?:sensitiv|critic|memor|past experience)/u},
+ Ceres:{ar:'المساعدة والاهتمام العملي',en:'practical care and help',terms:/مساعد|رعاي|اهتمام|عطاء|\b(?:care|help|support|nurtur)/u},
+ Pallas:{ar:'البحث عن حل وسبب المشكلة',en:'finding solutions and causes',terms:/حل |حلول|مشكلة|اسباب|سبب|فرضيات|\b(?:solution|problem|cause|hypothes)/u},
+ Juno:{ar:'توقع الالتزام والوضوح',en:'expectations of commitment and clarity',terms:/التزام|توقع|اتفاق|مشترك|\b(?:commitment|expectation|agreement|shared)/u},
+ Vesta:{ar:'التفرغ والتركيز في مهمة',en:'devotion and focus on a task',terms:/تفرغ|تركيز|مهمة|مهم[ةت]|تشتت|\b(?:devot|focus|task|distraction)/u},
+ Pholus:{ar:'اثر التفاصيل والقرارات الصغيرة',en:'the effect of small details and choices',terms:/تفصيل|تفاصيل|صغير|تبعات|شرط|\b(?:detail|small|consequence|condition)/u},
+};
+const contactKey=(e:AIContact)=>e.transit+':'+e.natal+':'+e.angle;
+export function calculatedNarrativeFactors(ctx:AIAdviceContext){
+ return ([['support',ctx.support],['challenge',ctx.challenge]] as const).flatMap(([role,e])=>{
+  if(!e)return [];
+  const target=targetMeanings[e.natal],driver=driverMeanings[e.transit];
+  if(!target||!driver)return [];
+  return [{contact:contactKey(e),role,target:e.natal,driver:e.transit,
+   targetMeaning:target[ctx.language],driverMeaning:driver[ctx.language]}];
+ });
+}
+function semanticLinkProblems(message:string,ctx:AIAdviceContext):string[]{
+ const factors=calculatedNarrativeFactors(ctx),problems:string[]=[];
+ if(!factors.length)return ['no-interpretable-factor'];
+ const paragraphs=message.split(/\n\s*\n/u);
+ if(ctx.semanticLinks!==undefined){
+  if(ctx.semanticLinks.length!==factors.length||new Set(ctx.semanticLinks.map(x=>x.contact)).size!==factors.length)return ['invalid-semantic-links'];
+  if(ctx.semanticLinks.some(link=>!factors.some(f=>f.contact===link.contact)||!link.excerpt.trim()||!message.includes(normalized(link.excerpt))))return ['invalid-semantic-links'];
+ }
+ for(const factor of factors){
+  const candidates=ctx.semanticLinks===undefined?paragraphs:ctx.semanticLinks.filter(link=>link.contact===factor.contact).map(link=>normalized(link.excerpt));
+  if(!candidates.some(text=>targetMeanings[factor.target].terms.test(text)&&driverMeanings[factor.driver].terms.test(text)))problems.push('missing-factor-meaning:'+factor.contact);
+ }
+ return problems;
+}
 export function conciseAI(text:string):string{
  const stripped=text.replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*$/gi,'').replace(/<\/?think>/gi,'').trim().slice(0,12000);
  const seen=new Set<string>(),out:string[]=[];
@@ -40,6 +107,7 @@ export function hasSymbolicFraming(text:string):boolean{return /symbolic|symboli
 export function unsafeAIGuesses(message:string,ctx:AIAdviceContext):string[]{
  message=normalized(message).replace(/\*\*/g,'');
  const problems=unsupportedOutcomeClaims(message);
+ if(ctx.strict&&!ctx.evidence?.length)problems.push('no-calculated-basis');
  if(!ctx.events.length&&/(?:eclipse|كسوف|خسوف)/iu.test(message))problems.push('unverified-eclipse');
  const dates=[...message.matchAll(/\b(?:18|19|20|21|22|23)\d\d-\d\d-\d\d\b/g)].map(x=>x[0]);
  const known=new Set(ctx.events.map(e=>e.maximum.slice(0,10)));
@@ -96,6 +164,7 @@ export function unsafeAIGuesses(message:string,ctx:AIAdviceContext):string[]{
    const technical=/(?:اقتران|تربيع|تثليث|تسديس|مقابلة|اورب|أورب|فارق زاوي|\borb\b|\btrine\b|\bsquare\b|\bsextile\b|\bconjunction\b|\bopposition\b|\bapplying\b|\bseparating\b|\d+(?:[.,]\d+)?\s*°)/iu;
    if(technical.test(message)||Object.keys(aliases).some(id=>mentions(message,id)))problems.push('reader-facing-technical-jargon');
    if(ctx.strict&&contacts.length&&message.length<80)problems.push('too-vague-for-personal-reading');
+   if(ctx.strict&&contacts.length)problems.push(...semanticLinkProblems(message,ctx));
   }
   if(ctx.challenge&&/\b(?:no|without any)\s+(?:challenging (?:contacts|factors|aspects)|counter-evidence|tension)\b|(?:ماكو|لا توجد|بدون)\s+(?:عوامل|اتصالات|زوايا)\s+(?:متحدية|معاكسة)|\b(?:entirely|purely|fully)\s+(?:favorable|favourable|supportive|positive)\b|(?:كلها|جميع الاتصالات)\s+داعمة/u.test(message))problems.push('denied-counter-evidence');
  }

@@ -69,17 +69,6 @@ export function soulBasis(chart:Chart,topic:SoulTopic,{knownTime=true}:SoulOptio
 function placementText(b:NatalBasis,ar:boolean){
  return name(b.planet,ar)+(ar?' في ':' in ')+(ar?arSigns:enSigns)[b.sign];
 }
-function pairInterpretation(basis:NatalBasis[],ar:boolean){
- const [a,b]=basis;
- if(!a)return ar?'المواضع اللازمة لهذا الموضوع غير متاحة؛ لا نضيف صفات شخصية لتعويض نقص البيانات.':'The required indicators are unavailable; missing data do not justify invented traits.';
- if(!b)return ar?'نقرأ '+placementText(a,true)+' رمزياً من زاوية '+role(a.planet,true)+' و'+styleAr[a.sign]+'. لا تتوفر إشارة ثانية للمقارنة.':placementText(a,false)+' is read symbolically through '+role(a.planet,false)+' and '+styleEn[a.sign]+'. A second indicator is unavailable.';
- if(a.sign===b.sign)return ar?
-  'يشترك '+name(a.planet,true)+' و'+name(b.planet,true)+' في برج '+arSigns[a.sign]+'، المرتبط رمزياً بـ'+styleAr[a.sign]+'. لكن الأول يتعلق بـ'+role(a.planet,true)+'، والثاني بـ'+role(b.planet,true)+'؛ لذلك نقرأ الأسلوب المشترك في وظيفتين مختلفتين.':
-  name(a.planet,false)+' and '+name(b.planet,false)+' share '+enSigns[a.sign]+', symbolically associated with '+styleEn[a.sign]+'. The first concerns '+role(a.planet,false)+' and the second '+role(b.planet,false)+', giving the shared style two different roles.';
- return ar?
-  'نقرأ موضع '+placementText(a,true)+' بوصفه رمزاً لموضوع '+role(a.planet,true)+' بأسلوب '+styleAr[a.sign]+'، بينما يرتبط موضع '+placementText(b,true)+' بموضوع '+role(b.planet,true)+' عبر '+styleAr[b.sign]+'. محور القراءة هو كيفية إعطاء كل دور مساحة تناسب الموقف.':
-  placementText(a,false)+' symbolizes '+role(a.planet,false)+' through '+styleEn[a.sign]+', while '+placementText(b,false)+' connects '+role(b.planet,false)+' with '+styleEn[b.sign]+'. The focus is on giving each role room appropriate to the situation.';
-}
 function aspectInterpretation(basis:NatalBasis[],ar:boolean){
  const pairs=soulAspectPairs(basis);
  if(!pairs.length)return ar?'لا يوجد اتصال رئيسي ضمن أورب 3° بين المؤشرات المختارة؛ هذا لا يعني خلو الخارطة كلها من الاتصالات.':'No major aspect falls within 3° among the selected indicators; this does not mean the entire chart lacks aspects.';
@@ -93,43 +82,104 @@ function aspectInterpretation(basis:NatalBasis[],ar:boolean){
  return lead+(contrasting?(ar?' ويوجد أيضاً '+describe(contrasting)+'؛ لذلك تضم القراءة جانباً داعماً وآخر يحتاج موازنة.':' There is also '+describe(contrasting)+', so the reading includes both ease and a need for adjustment.'):'');
 }
 
-/** Interpret the actual combination of two natal indicators in each of the
- * 200 individually authored topics. No claim about private desires or observed behaviour. */
-function livedNatalTheme(topic:SoulTopic,basis:NatalBasis[],specific:{ar:string;en:string},rule:{resource:{ar:string;en:string};risk:{ar:string;en:string}}){
- const [a,b]=basis;
- const relations=soulAspectPairs(basis);
- const lead=relations[0];
- const firstAr=placementText(a,true),secondAr=placementText(b,true);
- const firstEn=placementText(a,false),secondEn=placementText(b,false);
- const different=a.sign!==b.sign;
- const bridgeAr=different?
-  'الأول يميل رمزياً لأسلوب '+styleAr[a.sign]+'، والثاني يضيف '+styleAr[b.sign]+'. مو لازم تختار واحد دائماً؛ السؤال شوقت تستخدم كل أسلوب.':
-  'الاثنين يشتركون بأسلوب '+styleAr[a.sign]+'، لكن كل واحد يخص احتياج مختلف: '+role(a.planet,true)+' مقابل '+role(b.planet,true)+'.';
- const bridgeEn=different?
-  'The first symbolizes '+styleEn[a.sign]+'; the second adds '+styleEn[b.sign]+'. These are different lenses, not a fixed personality verdict.':
-  'Both share the style of '+styleEn[a.sign]+', but serve distinct needs: '+role(a.planet,false)+' and '+role(b.planet,false)+'.';
- const meetingAr=lead?(lead.type===90||lead.type===180?
-  'وأكو '+aspectNamesAr[lead.type]+' بين '+name(lead.first,true)+' و'+name(lead.second,true)+'؛ بالتفسير يشير لشدّ بين رغبتين. حاول تلاحظ متى يتحول الاختلاف لحيرة أو عناد.':
-  lead.type===0?'وأكو اقتران يحط هالموضوعين بمساحة واحدة؛ جرب تميّز بين احتياجاتهما قبل قرار مهم.':
-  'وأكو '+aspectNamesAr[lead.type]+' بين '+name(lead.first,true)+' و'+name(lead.second,true)+'؛ هذا يرمز لقابلية تنسيق، لكنه ما يثبت أن المهارة موجودة فعلاً.') :
-  'ماكو اتصال رئيسي قريب بين المؤشرين ضمن الأورب المعتمد؛ لذلك ما ننسب إلهم شدّ أو انسجام غير محسوب.';
- const meetingEn=lead?(lead.type===90||lead.type===180?
-  'A calculated '+aspectNamesEn[lead.type]+' between '+lead.first+' and '+lead.second+' suggests competing needs; notice where they might clash in decisions.':
-  lead.type===0?'A conjunction unites the themes; check whether you are treating two different needs as one.':
-  'A calculated '+aspectNamesEn[lead.type]+' between '+lead.first+' and '+lead.second+' suggests room for coordination, not evidence of acquired ability.'):
-  'No close major aspect connects these selected indicators, so no fabricated harmony or tension is assigned.';
- const settingAr=a.house?'وبحسب البيت '+a.house+'، ممكن تختبر هالسؤال بموضوع '+houseFocusAr[a.house]+'.':'';
- const settingEn=a.house?'House '+a.house+' places the reflection around '+houseFocusEn[a.house]+'.':'';
- return {
-  summaryAr:'بموضوع «'+topic.ar+'»، '+firstAr+' يسلّط الضوء على '+role(a.planet,true)+'، بينما '+secondAr+' يضيف '+role(b.planet,true)+'. '+bridgeAr,
-  summaryEn:'For “'+topic.en+'”, '+firstEn+' symbolizes '+role(a.planet,false)+', while '+secondEn+' adds '+role(b.planet,false)+'. '+bridgeEn,
-  deepAr:meetingAr+' '+settingAr+' وإذا شفت هالنمط بحياتك فعلاً، قوّي جانب '+rule.resource.ar+'، وانتبه من '+rule.risk.ar+'.',
-  deepEn:meetingEn+' '+settingEn+' If this pattern matches real situations in your life, develop '+rule.resource.en+' while watching for '+rule.risk.en+'.'
+type Both={ar:string;en:string};
+type SignMethod={step:Both;check:Both;watch:Both};
+/** Practical lenses for an actual placement. These are reflection exercises,
+ * not assertions that the owner has an observed trait or a future outcome. */
+const methods:readonly SignMethod[]=[
+ {step:{ar:'ابدأ بمحاولة قصيرة وحدد شنو تريد منها قبل الفعل',en:'Try one small action and name its purpose before acting'},check:{ar:'هل المبادرة وضّحت المطلوب لو بس سرّعت القرار؟',en:'Did taking initiative clarify the need, or only speed up the decision?'},watch:{ar:'لا تخلي سرعة البداية تختصر الاستماع أو التفاصيل',en:'Do not let a quick start replace listening or checking details'}},
+ {step:{ar:'اختار خطوة ثابتة تگدر تكررها وحدد الكلفة اللي تناسبك',en:'Choose a repeatable step and a cost you can sustain'},check:{ar:'هل الثبات خدمك لو صرت متمسك بطريقة ما عادت نافعة؟',en:'Did consistency help, or did you keep a method that no longer works?'},watch:{ar:'فرّق بين الاستقرار المفيد وبين تأجيل التغيير الضروري',en:'Distinguish useful stability from postponing a necessary change'}},
+ {step:{ar:'قارن تفسيرين للموقف واسأل عن المعلومة اللي تفرّق بينهن',en:'Compare two explanations and ask for the fact that distinguishes them'},check:{ar:'هل السؤال قرّبك للفهم لو فتح احتمالات بدون نهاية؟',en:'Did the question improve understanding, or only multiply possibilities?'},watch:{ar:'لا تحوّل جمع الآراء إلى بديل عن اختيار واضح',en:'Do not let collecting opinions replace making a clear choice'}},
+ {step:{ar:'سمّ الحاجة اللي تريد تحميها ووضحها بطلب بسيط',en:'Name the need you want to protect and state it as a simple request'},check:{ar:'هل شرحت احتياجك لو انتظرت غيرك يفهمه وحده؟',en:'Did you explain your need, or expect someone else to infer it?'},watch:{ar:'افصل الشعور بعدم الراحة عن الدليل على نية غيرك',en:'Separate discomfort from evidence about another person’s intent'}},
+ {step:{ar:'عبّر عن رغبتك بوضوح واترك مساحة لجواب يختلف عنها',en:'Express what you want clearly and allow a different response'},check:{ar:'هل التعبير مثّلك فعلاً لو صار هدفه الحصول على مديح؟',en:'Did your expression reflect what matters to you, or seek approval?'},watch:{ar:'لا تربط قيمة خطوتك بحجم الانتباه اللي تحصل عليه',en:'Do not measure the value of a step by the attention it receives'}},
+ {step:{ar:'حدد تفصيل واحد يغيّر النتيجة وحسّنه قبل زيادة الشروط',en:'Improve one detail that changes the result before adding more conditions'},check:{ar:'هل التدقيق حسّن النتيجة لو منعك تبدأ؟',en:'Did attention to detail improve the result, or prevent a start?'},watch:{ar:'حط حد للمراجعة حتى ما يصير الكمال شرط لكل خطوة',en:'Set a limit on revision so perfection is not required before every step'}},
+ {step:{ar:'وضح شنو تحتاج إنت واسأل عن حاجة الطرف المعني قبل الاتفاق',en:'State your need and ask what the other person needs before agreeing'},check:{ar:'هل الاتفاق بيه مكان لرأيك لو وافقت بس حتى يهدأ الجو؟',en:'Did the agreement include your view, or only keep the peace?'},watch:{ar:'لا تخلي المحافظة على الهدوء تمسح اعتراضاً مهماً',en:'Do not preserve harmony by hiding an important objection'}},
+ {step:{ar:'اختار معلومة حساسة واحدة تحتاج وضوح وحدد حدود مشاركتها',en:'Choose one sensitive uncertainty to clarify and define its privacy boundary'},check:{ar:'هل التحقق أعطاك معلومة جديدة لو صار اختبار متكرر للثقة؟',en:'Did checking produce new information, or become a repeated test of trust?'},watch:{ar:'فرّق بين حماية الخصوصية ومحاولة ضمان كل رد فعل',en:'Distinguish protecting privacy from trying to control every response'}},
+ {step:{ar:'جرّب خياراً يوسّع تجربتك ضمن وقت وكلفة معلومين',en:'Try an option that broadens experience within a known time and cost'},check:{ar:'هل التجربة خدمت غرضك لو كان الجديد وحده سبب الحماس؟',en:'Did the experiment serve your purpose, or was novelty the only appeal?'},watch:{ar:'راجع حدود الإمكانات قبل ما توسّع الوعد أو الخطة',en:'Check actual capacity before expanding a promise or plan'}},
+ {step:{ar:'حوّل المطلوب إلى التزام واحد بموعد وحدود مسؤولية واضحة',en:'Turn the need into one commitment with a deadline and clear responsibility'},check:{ar:'هل الخطة قابلة للتنفيذ لو حمّلت نفسك واجباً مو كله عليك؟',en:'Is the plan workable, or did you take responsibility that is not all yours?'},watch:{ar:'خلّ مجال لتعديل الخطة بدل اعتبار كل تأخير تقصيراً',en:'Allow the plan to change instead of treating every delay as failure'}},
+ {step:{ar:'جرّب بديلاً صغيراً واشرح شنو يضيفه قبل ترك الطريقة السابقة',en:'Test a small alternative and explain its benefit before replacing the old method'},check:{ar:'هل التغيير حل مشكلة محددة لو صار إثباتاً للاستقلال؟',en:'Did the change solve a specific problem, or mainly assert independence?'},watch:{ar:'اربط الاختلاف بفائدة فعلية حتى ما يصير التغيير غاية وحده',en:'Connect a different approach to a practical benefit rather than change alone'}},
+ {step:{ar:'اكتب انطباعك أولاً، وبعدها افصله عن المعلومة المؤكدة',en:'Write the initial impression, then separate it from confirmed information'},check:{ar:'أي جزء من الانطباع تأكد بالفعل وأي جزء بعده احتمال؟',en:'Which part of the impression was confirmed, and which remains possible?'},watch:{ar:'لا تعوّض نقص المعلومة بقصة مريحة أو مخيفة',en:'Do not fill an information gap with a comforting or frightening story'}}
+];
+const method=(p:NatalBasis)=>methods[p.sign];
+// Sensory preferences cannot be read from a relationship or career template.
+// Here the symbolic lens changes how to compare real samples, never which
+// perfume, color, food or design someone supposedly must enjoy.
+const sensoryMethods:readonly SignMethod[]=[
+ {step:{ar:'جرّب خيار واحد بكمية أو مساحة صغيرة قبل الشراء أو التغيير',en:'Try one option in a small amount or area before buying or changing it'},check:{ar:'بعد ما يهدأ حماس البداية، يبقى الخيار مريح إلك؟',en:'After the initial excitement fades, does the option still suit you?'},watch:{ar:'اترك وقت بين الانطباع الأول والاختيار النهائي',en:'Allow time between the first impression and the final choice'}},
+ {step:{ar:'اختبر الراحة والخامة أو الرائحة أكثر من مرة بظروف استعمالك',en:'Test comfort, material or scent more than once in your usual setting'},check:{ar:'هل تفضله بعد الاستعمال لو بس لأنه مألوف؟',en:'Do you prefer it after use, or mainly because it is familiar?'},watch:{ar:'خلّ الإحساس الفعلي يراجع حكمك، حتى على الخيار المعتاد',en:'Let actual use challenge your view, even of a familiar option'}},
+ {step:{ar:'قارن خيارين وحدد فرق واحد واضح بينهن بدل تبديل خيارات كثيرة',en:'Compare two options and identify one clear difference instead of cycling through many'},check:{ar:'تگدر تسمي الفرق اللي خلاك تفضّل واحد منهن؟',en:'Can you name the difference that made one option preferable?'},watch:{ar:'حدد عدد المقارنات حتى ما تضيع الفروق بكثرة الخيارات',en:'Limit comparisons so the differences do not disappear among too many options'}},
+ {step:{ar:'لاحظ شلون يتغير إحساسك بالخيار حسب المكان والوقت والذكريات',en:'Notice how the setting, time and memories change your response to an option'},check:{ar:'تحب الخيار نفسه لو الجو والذكرى المرتبطة بيه؟',en:'Do you like the option itself, or the mood and memory associated with it?'},watch:{ar:'ميز الراحة الحسية الحالية عن تعلقك بصورة أو ذكرى',en:'Separate current sensory comfort from attachment to an image or memory'}},
+ {step:{ar:'اختار تفصيل يعبر عن ذوقك وشوفه بعيداً عن إعلان أو رأي معجب',en:'Choose a detail that expresses your taste and assess it apart from advertising or praise'},check:{ar:'إذا ما شافه أو مدحه أحد، بعدك تختاره؟',en:'Would you still choose it if no one noticed or praised it?'},watch:{ar:'خلّ التفضيل الشخصي واضح قبل ما تدخل آراء الناس',en:'Clarify your preference before bringing in other people’s opinions'}},
+ {step:{ar:'ركز على تفصيل مؤثر مثل الملمس أو الثبات أو تناسق اللون',en:'Focus on one useful detail such as texture, lasting quality or color balance'},check:{ar:'التفصيل فعلاً غيّر راحتك لو صار تدقيق بلا فائدة؟',en:'Did that detail change your comfort, or become checking without a benefit?'},watch:{ar:'حدد مستوى يكفيك من الجودة بدل البحث عن خيار كامل',en:'Define sufficient quality rather than searching for a perfect option'}},
+ {step:{ar:'قارن الخيار مع بقية الأشياء اللي تستعملها وشوف الانسجام الفعلي',en:'Compare the option with what you already use and assess how they work together'},check:{ar:'الانسجام يريحك لو تختاره فقط حتى يناسب رأي غيرك؟',en:'Does that balance suit you, or mainly accommodate someone else’s opinion?'},watch:{ar:'احتفظ بتفضيلك حتى وأنت تقارن التنسيق العام',en:'Keep your own preference in view while considering the overall combination'}},
+ {step:{ar:'اختبر تفصيل واحد بعمق وعلى مهل، ودوّن شنو تغير بانطباعك',en:'Examine one detail closely over time and note what changed in your impression'},check:{ar:'تفضيلك نابع من التجربة لو من قصة تسويقية حول الخيار؟',en:'Does your preference come from trying it, or from a story used to sell it?'},watch:{ar:'لا تحوّل الرائحة أو اللون إلى حكم على شخصيتك أو شخصية غيرك',en:'Do not turn a scent or color into a verdict about anyone’s personality'}},
+ {step:{ar:'جرّب اختلاف بسيط عن المعتاد ضمن كلفة وحدود مريحة',en:'Try a small departure from your usual taste within a comfortable cost and scope'},check:{ar:'الخيار الجديد مناسب بعد التجربة لو الحماس كان لأنه مختلف؟',en:'Does the new option suit you after trying it, or mainly appeal through novelty?'},watch:{ar:'وازن الفضول مع تجربة فعلية قبل الالتزام بخيار كبير',en:'Balance curiosity with actual sampling before a larger commitment'}},
+ {step:{ar:'حدد الاستعمال والميزانية وشوف إذا الخيار يخدمهن بمرور الوقت',en:'Define the use and budget, then see whether the option serves both over time'},check:{ar:'هل القيمة تجي من الاستعمال لو من السعر والاسم وحدهن؟',en:'Does the value come from use, or only from the price and label?'},watch:{ar:'افصل الجودة اللي تلاحظها عن السمعة والسعر',en:'Separate quality you can observe from reputation and price'}},
+ {step:{ar:'جرّب تفصيل غير مألوف وقارنه بوظيفة أو راحة تهمك',en:'Try an unusual detail and compare it with a function or comfort you value'},check:{ar:'الاختلاف أضاف شي يعجبك لو كان الغرض بس أنه نادر؟',en:'Did the difference add something you like, or mainly make the option unusual?'},watch:{ar:'خلّ الاختلاف يخدم ذوقك بدل ما يصير شرطاً وحده',en:'Let being different serve your taste rather than become the only requirement'}},
+ {step:{ar:'دوّن إحساسك الأول وبعدين أعد التجربة حتى تفرّق الجو عن الخاصية',en:'Record the first impression, then repeat the test to separate mood from the property itself'},check:{ar:'يبقى الإحساس نفسه إذا اختلف الضوء أو المكان أو الوقت؟',en:'Does the impression hold when the light, setting or time changes?'},watch:{ar:'لا تعتبر الصورة الجميلة بديل عن اختبار ما تستعمله فعلاً',en:'Do not let an appealing image replace testing what you will actually use'}}
+];
+const topicMethod=(topic:SoulTopic,p:NatalBasis)=>topic.categoryId===21?sensoryMethods[p.sign]:method(p);
+const sensoryStylesAr=['التجربة السريعة والمحاولة الصغيرة','الراحة والثبات والملمس','المقارنة والتنوع','الألفة والذاكرة والجو','التعبير والحضور','التفاصيل والدقة','التنسيق والتوازن','العمق والتركيز على التفاصيل','الاستكشاف والتجديد','المنفعة والجودة','الاختلاف والابتكار','الانطباع والخيال'];
+const sensoryStylesEn=['small, direct experiments','comfort, consistency and texture','comparison and variety','familiarity, memory and atmosphere','expression and presence','detail and precision','coordination and balance','depth and attention to detail','exploration and novelty','usefulness and quality','difference and innovation','impression and imagination'];
+const topicStyle=(topic:SoulTopic,p:NatalBasis,ar:boolean)=>(topic.categoryId===21?(ar?sensoryStylesAr:sensoryStylesEn):(ar?styleAr:styleEn))[p.sign];
+const sentence=(text:string)=>text.replace(/[.؟!\s]+$/u,'');
+const inline=(text:string)=>text.charAt(0).toLowerCase()+text.slice(1);
+function pairMeaning(pair:NatalAspect|undefined,ar:boolean):string{
+ if(!pair)return ar?'ماكو رابط قريب بين المؤشرات المختارة يبرر افتراض انسجام أو صراع بينها؛ نراجع كل حاجة على حدة.':'No close link among the selected indicators supports assuming harmony or conflict; consider each need separately.';
+ const needs=role(pair.first,ar)+(ar?' و':' and ')+role(pair.second,ar);
+ if(ar){
+  const meaning=pair.type===90?'نقرأه كشدّ محتمل بين حاجتين؛ حدد شنو يحتاجه كل جانب قبل الحسم':pair.type===180?'نقرأه كحاجة للتفاوض وتبادل المساحة بين الجانبين':pair.type===0?'يجمع هالحاجتين بموضوع واحد؛ ميّز الغرض اللي يخص كل جانب':pair.type===60?'يشير لتعاون ممكن يحتاج خطوة واعية تجمع الجانبين':'يشير لتنسيق أسهل نسبياً؛ تگدر تختبره بتصرف عملي';
+  return 'الرابط المحسوب يخص '+needs+' تحديداً. بالتفسير الرمزي، '+meaning+'.';
+ }
+ const meaning=pair.type===90?'may compete over how to act; separate what each needs before deciding':pair.type===180?'may require negotiation rather than choosing one and suppressing the other':pair.type===0?'are closely joined; distinguish their purposes rather than treating them as one need':pair.type===60?'may cooperate through a deliberate step; the opening still requires effort':'may work together with relative ease; test that coordination rather than assuming an established skill';
+ return 'The calculated link specifically concerns '+needs+'. Symbolically, these needs '+meaning+'.';
+}
+function composeSoul(topic:SoulTopic,basis:NatalBasis[]){
+ const theme=getSoulTheme(topic.id),rule=soulRule(topic.id),specific=soulDeepFor(topic.id);
+ const [a,b,c]=basis,first=topicMethod(topic,a),second=topicMethod(topic,b),pairs=soulAspectPairs(basis),lead=pairs[0];
+ const aAr=topicStyle(topic,a,true),bAr=topicStyle(topic,b,true),aEn=topicStyle(topic,a,false),bEn=topicStyle(topic,b,false);
+ const hard=(p:NatalAspect)=>p.type===90||p.type===180;
+ const counter=lead?pairs.find(p=>hard(lead)?[60,120].includes(p.type):[60,120].includes(lead.type)&&hard(p)):undefined;
+ const relationAr=pairMeaning(lead,true),relationEn=pairMeaning(lead,false);
+ const strategyAr=lead?(hard(lead)?'وازن بين الاحتياجات قبل الحسم':lead.type===0?'ميّز غرض كل حاجة قبل جمعهن بخطوة وحدة':'حوّل التنسيق الممكن إلى تجربة صغيرة'):'تعامل مع كل حاجة بشكل منفصل قبل ربطهن بنتيجة واحدة';
+ const strategyEn=lead?(hard(lead)?'Balance the needs before deciding':lead.type===0?'Separate each need’s purpose before combining them':'Turn possible coordination into a small experiment'):'Consider each need separately before linking them to one outcome';
+ const resourceEn=inline(rule.resource.en),riskEn=inline(rule.risk.en.replace(/\bundefined\b/giu,'unclear'));
+ const bridgeAr=a.sign===b.sign?
+  'بالقراءة الرمزية، '+role(a.planet,true)+' و'+role(b.planet,true)+' يشتركون بأسلوب '+aAr+'؛ المهم تميّز الغرض اللي يخدمه كل جانب.':
+  'بالقراءة الرمزية، جانب '+role(a.planet,true)+' نراجعه من زاوية '+aAr+'، وجانب '+role(b.planet,true)+' من زاوية '+bAr+'.';
+ const bridgeEn=a.sign===b.sign?
+  'Symbolically, '+role(a.planet,false)+' and '+role(b.planet,false)+' share '+aEn+', while serving different purposes.':
+  'The symbolic lens pairs '+role(a.planet,false)+' with '+aEn+', and '+role(b.planet,false)+' with '+bEn+'.';
+ const summary={
+  ar:sentence(theme.focusAr)+'. خلّ الفكرة قابلة للتجربة: جرّب '+rule.resource.ar+'. '+bridgeAr+' '+strategyAr+'.',
+  en:sentence(theme.focusEn)+'. Make this concrete by practicing '+resourceEn+'. '+bridgeEn+' '+strategyEn+'.'
  };
+ const thirdAr=c&&(!lead||![lead.first,lead.second].includes(c.planet))?' ومن زاوية '+role(c.planet,true)+'، تظهر عدسة '+topicStyle(topic,c,true)+'؛ '+sentence(topicMethod(topic,c).watch.ar)+'.':'';
+ const thirdEn=c&&(!lead||![lead.first,lead.second].includes(c.planet))?' The additional theme of '+role(c.planet,false)+' brings '+topicStyle(topic,c,false)+'. '+topicMethod(topic,c).watch.en+'.':'';
+ const useHouse=a.house&&![21,23].includes(topic.categoryId);
+ const settingAr=useHouse?' جرّب تلاحظ هالنمط ضمن '+houseFocusAr[a.house!]+'، خصوصاً إذا هذا هو سياق سؤالك.':'';
+ const settingEn=useHouse?' Look for this pattern around '+houseFocusEn[a.house!]+', where that area is relevant to your question.':'';
+ const deep={
+  ar:'بخصوص '+topic.ar+'، انتبه أثناء التجربة إلى '+rule.risk.ar+'. '+relationAr+' '+sentence(first.watch.ar)+'، واسأل نفسك: '+second.check.ar+thirdAr+settingAr+(counter?' وبنفس الوقت، '+pairMeaning(counter,true)+' لذلك لازم تراعي الجانبين قبل الاستنتاج.':''),
+  en:'For '+topic.en+', watch for '+riskEn+' when trying this. '+relationEn+' '+sentence(first.watch.en)+'. Ask yourself: '+second.check.en+thirdEn+settingEn+(counter?' At the same time, '+pairMeaning(counter,false)+' Consider both patterns before drawing a conclusion.':'')
+ };
+ return {summary,deep,
+  strengths:{ar:[rule.resource.ar+'؛ '+(a.sign===b.sign?'استثمر '+aAr+' لخدمة '+role(a.planet,true)+' و'+role(b.planet,true)+'، وحدد شنو يحتاجه كل جانب.':'طوّرها عبر '+aAr+' بموضوع '+role(a.planet,true)+'، مع إعطاء '+role(b.planet,true)+' مساحة لأسلوب '+bAr+'.')],en:[rule.resource.en+'; '+(a.sign===b.sign?'use '+aEn+' for both '+role(a.planet,false)+' and '+role(b.planet,false)+', distinguishing what each needs.':'develop it through '+aEn+' in '+role(a.planet,false)+', while allowing '+bEn+' in '+role(b.planet,false)+'.')]},
+  weaknesses:{ar:[rule.risk.ar+'؛ '+(a.sign===b.sign?'إذا استخدمت '+aAr+' بكل المواقف، راقب متى تحتاج تغيّر الطريقة حسب الغرض. ':'إذا أخذ أسلوب '+aAr+' كل المساحة على حساب '+bAr+'، ')+sentence(first.watch.ar)+'.'],en:[riskEn+'; '+(a.sign===b.sign?'if you use '+aEn+' in every situation, check when the purpose calls for a different approach. ':'if an approach based on '+aEn+' overrides the need for '+bEn+', ')+inline(sentence(first.watch.en))+'.']},
+  example:{ar:sentence(specific.ar)+'. لتختبر المثال بهالأسلوب: '+sentence(first.step.ar)+'؛ بعدها اسأل نفسك: '+second.check.ar,en:sentence(specific.en)+'. To test that example: '+inline(sentence(first.step.en))+'; then ask: '+second.check.en},
+  advice:{ar:sentence(theme.actionAr)+'. بالتطبيق: '+sentence(first.step.ar)+(a.sign===b.sign?'، وراقب إذا تگدر تستخدم نفس الأسلوب بدون ما تهمل اختلاف الحاجة الثانية':'، وبالخطوة الثانية '+sentence(second.step.ar))+'. '+strategyAr+'، وراجع النتيجة الفعلية قبل التعميم.',en:sentence(theme.actionEn)+'. In practice: '+inline(sentence(first.step.en))+(a.sign===b.sign?', checking that the shared approach still serves both distinct needs':', then '+inline(sentence(second.step.en)))+'. '+strategyEn+' and review the actual result before generalizing.'}
+ };
+}
+/** Reader-facing prose and technical evidence share one interpretation. A
+ * relation is always named by its actual pair, never by array positions. */
+export function soulPlainReading(reading:SoulReading):{summary:Both;deep:Both}{
+ if(reading.basisStatus!=='available'||reading.basis.length<2)return {summary:reading.summary,deep:reading.deep};
+ const content=composeSoul(canonicalTopic(reading.topic),reading.basis);
+ return {summary:content.summary,deep:content.deep};
 }
 export function soulReading(chart:Chart,topic:SoulTopic,options:SoulOptions={}):SoulReading{
  topic=canonicalTopic(topic);
- const theme=getSoulTheme(topic.id),specific=soulDeepFor(topic.id),rule=soulRule(topic.id),basis=soulBasis(chart,topic,options),a=basis[0];
+ const basis=soulBasis(chart,topic,options);
  if(basis.length<2){
   const available=basis.length?{ar:'المتاح فقط: '+placementText(basis[0],true)+'.',en:'Only '+placementText(basis[0],false)+' is available.'}:{ar:'لا تتوفر مواضع صالحة من المؤشرات المطلوبة لهذا الموضوع.',en:'No valid placement among this topic’s required indicators is available.'};
   return {topic,basis,basisStatus:basis.length?'limited':'unavailable',
@@ -139,23 +189,13 @@ export function soulReading(chart:Chart,topic:SoulTopic,options:SoulOptions={}):
    limitations:{ar:'هذا الموضوع يحتاج مؤشرين ولاديين صالحين على الأقل قبل تقديم قراءة رمزية. وقت الولادة المجهول يستبعد القمر والطالع ووسط السماء والبيوت.',en:'This topic requires at least two valid natal indicators for a symbolic reading. Unknown birth time excludes Moon, angles and houses.'},contradictory:false};
  }
  const pairs=soulAspectPairs(basis),mixed=pairs.some(p=>[90,180].includes(p.type))&&pairs.some(p=>[60,120].includes(p.type));
- const introAr=a?' في القراءة الرمزية لـ«'+topic.ar+'»، يضيف موضع '+placementText(a,true)+' منظور '+role(a.planet,true)+' عبر '+styleAr[a.sign]+'.':' لا تتوفر بيانات كافية لربط هذا الموضوع بخارطتك.';
- const introEn=a?' For “'+topic.en+'”, '+placementText(a,false)+' adds the symbolic perspective of '+role(a.planet,false)+' through '+styleEn[a.sign]+'.':' The available data are insufficient to connect this topic to your chart.';
- const c=basis[2];
- const thirdAr=c?' ويضيف '+placementText(c,true)+' منظور '+role(c.planet,true)+(basis.slice(0,2).some(b=>b.sign===c.sign)?'':' عبر '+styleAr[c.sign])+'.':'';
- const thirdEn=c?' '+placementText(c,false)+' adds '+role(c.planet,false)+(basis.slice(0,2).some(b=>b.sign===c.sign)?'':' through '+styleEn[c.sign])+'.':'';
- const housesAr=a?.house?' موضع '+name(a.planet,true)+' في البيت '+a.house+' يضيف سياق '+houseFocusAr[a.house]+' إلى هذا الموضوع.':'';
- const housesEn=a?.house?' '+name(a.planet,false)+' in house '+a.house+' adds the context of '+houseFocusEn[a.house]+' to this theme.':'';
- const retro=basis.filter(b=>b.retrograde).map(b=>name(b.planet,true)).join(' و'),retroEn=basis.filter(b=>b.retrograde).map(b=>name(b.planet,false)).join(' and ');
- const retroAr=retro?' يظهر '+retro+' بحركة تراجعية ظاهرية؛ يمكن قراءتها رمزياً كمراجعة لطريقة التعبير، ولا تدل وحدها على ضعف أو فشل.':'';
- const retroTextEn=retroEn?' '+retroEn+' shows apparent retrograde motion, which may be used as a reflection on expression; it does not establish weakness or failure.':'';
  const knownTime=options.knownTime!==false;
- const lived=livedNatalTheme(topic,basis,specific,rule);
+ const content=composeSoul(topic,basis);
  return {topic,basis,basisStatus:'available',
-  summary:{ar:theme.focusAr+'. '+lived.summaryAr,en:theme.focusEn+'. '+lived.summaryEn},
-  deep:{ar:lived.deepAr+(mixed?' أكو جوانب داعمة وجوانب متعارضة؛ لا تستخلص صفة ثابتة من جانب واحد.':'')+(retroAr?' '+retroAr:''),en:lived.deepEn+(mixed?' Both harmonious and challenging aspects exist, so avoid a one-sided conclusion.':'')+(retroTextEn?' '+retroTextEn:'')},
-  strengths:{ar:[rule.resource.ar],en:[rule.resource.en]},weaknesses:{ar:[rule.risk.ar],en:[rule.risk.en]},
-  example:{ar:specific.ar+'.',en:specific.en+'.'},advice:{ar:theme.actionAr,en:theme.actionEn},
+  summary:{ar:content.summary.ar+' بموضوع «'+topic.ar+'»: '+basis.map(p=>placementText(p,true)).join('، ')+'.',en:content.summary.en+' For “'+topic.en+'”: '+basis.map(p=>placementText(p,false)).join(', ')+'.'},
+  deep:{ar:content.deep.ar+' '+aspectInterpretation(basis,true),en:content.deep.en+' '+aspectInterpretation(basis,false)},
+  strengths:content.strengths,weaknesses:content.weaknesses,
+  example:content.example,advice:content.advice,
   question:{ar:'بموضوع «'+topic.ar+'»، تذكّر موقف حقيقي من آخر فترة: شنو تصرفك بالضبط؟ وأي جزء من التفسير يشبهك، وأي جزء ما ينطبق عليك؟',en:'For “'+topic.en+'”, recall one recent real situation: what did you actually do? Which part of this reading fits, and which does not?'},
   limitations:{ar:'مواقع الأجرام بيانات حسابية؛ معاني الشخصية تأويلات تنجيمية غير مثبتة علمياً، وليست اختباراً نفسياً أو كشفاً لرغبات الآخرين. نقاط القوة والتحديات محاور للمراجعة، وليست صفات مؤكدة. '+(!knownTime?'وقت الولادة غير معروف: بقية المواضع تقريبية عند الظهر المحلي؛ استُبعد القمر والطالع ووسط السماء والبيوت واتصالاتها من هذه القراءة.':chart.cusps.length===12?'البيوت محسوبة بنظام Placidus من وقت ومكان الولادة.':'البيوت غير متاحة لهذا الحساب؛ لم نفترض طالعاً أو أرقام بيوت.'),en:'Celestial positions are calculated data; personality meanings are astrological interpretations without scientific validation, not psychological tests or access to private wishes. Strengths and challenges are reflection themes, not established traits. '+(!knownTime?'Birth time is unknown: remaining positions use approximate local noon; Moon, angles, houses and their aspects are excluded from this reading.':chart.cusps.length===12?'Placidus houses use birth time and location.':'Houses are unavailable for this calculation; no angles or houses are assumed.')},contradictory:mixed};
 }

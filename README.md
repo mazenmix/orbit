@@ -118,3 +118,11 @@ Shipped: bounded exact natal-transit root refinement, 30-day selectable time hea
 ## 2026-10-19 — reliability revision
 
 Calculation method `2026-10-19.1` unifies applying/separating direction across sections, removes linear exact-time guesses and global aspect truncation, preserves counter-evidence in domain and AI summaries, fails closed on missing core data, and omits ungrounded annual-house bonuses. Calendar failure states and leap-day boundaries are corrected. AI explanations receive stricter evidence checks and show their calculation instant. See the dated section of `VERIFICATION.md` for checks and remaining limits.
+
+## 2026-10-25 — personalized readings and evidence coverage
+
+Method `2026-10-25.1` connects each natal topic to its selected chart factors, identifies the actual pair behind a relationship between indicators, and adapts strengths, challenges, examples and practical steps to those factors. Sensory topics use comparisons of real preferences rather than relationship or career advice. Missing birth evidence still produces an unavailable reading.
+
+Time Machine heatmaps and trends exclude unavailable domains from averages; missing cells show a dash and partial heatmap averages show coverage. Go Mode reviews the same contextual contributors used for its displayed score. AI explanations now check their selected target and moving-factor meanings, reject additional Arabic placement paraphrases, and identify when the displayed reading was composed directly from calculated evidence after a model draft failed review.
+
+These changes improve traceability and editorial relevance. Symbolic interpretations remain unvalidated as personality measurements or event predictions.
