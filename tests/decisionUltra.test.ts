@@ -3,7 +3,7 @@ import {resolveDecisions,decisionExplanation,trustworthyPeak} from '../src/decis
 import type {Evidence,Signal} from '../src/math.ts';
 const factor=(planet:string,target:string,angle:number,weight:number,exact:string|null=null):Evidence=>({id:planet+'-'+angle+'-'+target,transit:{id:planet,symbol:'?',longitude:100,speed:1},natal:{id:target,symbol:'?',longitude:90,speed:0},angle,orb:.3,maximumOrb:2,applying:true,weight,exact});
 test('opposing career contacts are classified as mixed with the actual supportive/challenging sources',()=>{
- const sources=[factor('Venus','Sun',120,.85),factor('Saturn','Sun',90,.8)];
+ const sources=[factor('Venus','MC',120,.85),factor('Saturn','MC',90,.8)];
  const signal:Signal={category:'career',score:65,factors:sources,tier:'A',tone:'supportive'};
  const memo=resolveDecisions(sources,[signal]).find(d=>d.category==='career')!;
  assert.equal(memo.resolution,'balanced');assert.equal(memo.mixed,true);
