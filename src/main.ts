@@ -68,7 +68,7 @@ import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
 import {derivedMetrics,goModes,reviewContextGoMode,type GoDomain,type ContextGoReview,type MetricResult} from './metrics.ts';
 import {skyContext,contextGaugeBasis,contextGaugeNarrative,type SkyContext} from './skyContext.ts';
-import {travelMetricsByGroup} from './travelMode.ts';
+import {travelMetricsByGroup,travelMetricReading} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
 import {supportive,difficult} from './math.ts';
 import {initEngine,report,defaultProfile,compatibility,chart,sunMoonState,confirmedEclipses,asteroidSwissRuntime,birthInstant,targets,localValue,zonedInstant,validateProfile,type Profile,type Report,type Chart} from './engine.ts';
@@ -256,14 +256,17 @@ function liveGaugeSky():SkyContext{
 }
 function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,string],travelId?:string){
  const label=override?t(override[0],override[1]):t(m.ar,m.en),amount=m.value;
- const basis=contextGaugeBasis(liveGaugeSky(),m.source,lang==='en');
+ const travel=travelId?travelMetricReading(m,liveGaugeSky(),lang==='en'):null;
+ const basis=travel?.basis??contextGaugeBasis(liveGaugeSky(),m.source,lang==='en');
  return '<article class="mx-focus-metric '+gaugeLevel(amount)+'"'+
   (travelId?' data-travel-metric="'+travelId+'"':' data-today-gauge="'+m.id+'"')+
   ' data-indicator-id="'+m.id+'">'+
   '<span class="mx-today-gauge-icon" aria-hidden="true">'+symbol+'</span><b>'+label+'</b>'+
   '<strong>'+amount+'<small>/100</small></strong>'+
-  '<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
+  '<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
   '<small class="mx-metric-coverage" title="'+esc(basis)+'">'+esc(basis)+'</small>'+
+  (travel?'<p class="mx-travel-gauge-summary">'+esc(travel.summary)+'</p>'+
+   '<details class="mx-travel-gauge-detail"><summary>'+t('سبب الدرجة','Why this score')+'</summary><p>'+esc(travel.detail)+'</p></details>':'')+
   '</article>';
 }
 function todayQuickGauges(r:Report,insideGo=false){
@@ -887,6 +890,7 @@ function travelModePage(){
  const sections=groups.map(group=>
   '<section class="panel mx-travel-group" data-travel-group="'+group.id+'">'+
   (group.id==='social'?'':'<div class="section-title"><h2>'+t(group.titleAr,group.titleEn)+'</h2>'+tag(group.rows.length+' '+t('مؤشرات','indicators'))+'</div>')+
+  (group.id==='movement'?'<p class="mx-travel-score-direction">'+t('جميع الدرجات: الأعلى أنسب، والأقل سلبي أكثر؛ الأحمر مو توقع خطر فعلي.','Every score: higher is more favorable, lower is less favorable; red does not predict actual danger.')+'</p>':'')+
   '<div class="mx-focus-metrics mx-travel-grid">'+group.rows.map(({id,metric})=>quickGaugeCard(metric,travelSymbol(id),undefined,id)).join('')+'</div></section>'
  ).join('');
  return '<div class="mx-travel-mode-page mx-quick-gauges" data-section="travelmode">'+
