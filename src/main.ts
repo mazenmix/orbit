@@ -69,7 +69,7 @@ import {travelMetricsByGroup} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
 import {supportive,difficult} from './math.ts';
 import {initEngine,report,defaultProfile,compatibility,chart,sunMoonState,confirmedEclipses,asteroidSwissRuntime,birthInstant,targets,localValue,zonedInstant,validateProfile,type Profile,type Report,type Chart} from './engine.ts';
-import {categories,category as evidenceCategory,aspects,angles,aspectNames,type Category,type Signal,type Evidence} from './math.ts';
+import {categories,category as evidenceCategory,aspects,angles,aspectNames,type Category,type Signal,type Evidence,type Dimension} from './math.ts';
 import {lang,setLang,t,cat,categoryLabels,planet,signSymbols,signsAr,signsEn,signName,copy as sourceCopy,tone,notice,technical,aspect} from './i18n.ts';
 import {loadProfiles,saveProfiles,download,parseBackup} from './storage.ts';
 import {wheel} from './chart.ts';
@@ -1024,7 +1024,9 @@ function profileForm(p:Profile,isNew=false){
 }
 function relationshipWindowUI(person:Profile){
  try{
-  const match=compatibility(active,person),period=relationshipWindows(selected,match.dimensions,at=>getReport(at).scores,21,active.zone);
+  const match=compatibility(active,person);
+   if(!match.overallCovered)return '<section class="panel relationship-calendar mx-people-section"><p>'+t('ماكو اتصالات شخصية كافية حتى نرتّب الأيام حسب التوافق.','Not enough calculated personal contacts to rank relationship dates.')+'</p></section>';
+   const period=relationshipWindows(selected,match.dimensions,at=>getReport(at).scores,21,active.zone);
   const cards=(kind:'message'|'date')=>{
    const used=new Set<string>();
    return bestWindows(period,kind,3).map(day=>{
@@ -1062,11 +1064,14 @@ function peoplePage(){
   focusSummary=uiMode==='simple'?relationshipFocus(partner,c):'';
   const title=(k:string)=>t(({attraction:'الجاذبية',sexual:'الكيمياء الحميمية',emotional:'القرب العاطفي',communication:'التفاهم بالكلام',stability:'الاستمرارية',conflict:'هدوء الخلافات'} as Record<string,string>)[k],({attraction:'Attraction',sexual:'Intimate chemistry',emotional:'Emotional closeness',communication:'Communication',stability:'Steadiness',conflict:'Conflict resilience'} as Record<string,string>)[k]);
   const gauge=(value:number)=>'<div class="mx-people-gauge '+gaugeLevel(value)+'" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+value+'"><div class="mx-people-gauge-number"><b>'+value+'</b><small>/100</small></div><div class="mx-people-gauge-track"><i style="width:'+value+'%"></i></div></div>';
-  const classic=Object.entries(c.dimensions).filter(([k])=>c.romantic||!['attraction','sexual'].includes(k)).map(([k,v])=>{const n=k==='conflict'?100-v:v;return '<div class="partner-score metric-card '+gaugeLevel(n)+'"><span>'+title(k)+'</span>'+gauge(n)+'</div>'}).join('');
+  const classic=Object.entries(c.dimensions).filter(([k])=>c.romantic||!['attraction','sexual'].includes(k)).map(([k,v])=>{
+    const n=k==='conflict'?100-v:v,supported=c.coverage[k as Dimension];
+    return '<div class="partner-score metric-card '+(supported?gaugeLevel(n):'mx-unavailable')+'"><span>'+title(k)+'</span>'+(supported?gauge(n):'<strong>—</strong>')+'</div>';
+   }).join('');
   const usedEvidence=new Set<string>();
   const extended=insights.map(x=>{const story=partnerCardStory(x,c.dimensions,{love:indices.love,communication:indices.communication,energy:indices.energy},c.evidence,usedEvidence);return '<article class="partner-insight metric-card '+gaugeLevel(x.score)+'"><h3>'+t(x.arTitle,x.enTitle)+'</h3>'+gauge(x.score)+'<p class="mx-partner-reading">'+esc(t(story.ar,story.en))+'</p>'+(story.factorAr?'<small class="mx-partner-basis">'+esc(t(story.factorAr,story.factorEn))+'</small>':'')+'</article>';}).join('');
-  analysis='<section class="panel partner-overview mx-people-section"><div class="section-title"><div><h2>'+esc(active.name)+' × '+esc(partner.name)+'</h2></div><div class="big-score '+gaugeLevel(c.overall)+'">'+c.overall+'<small>/100</small></div></div><h3>'+t('خلاصة العلاقة اليوم','Today’s relationship snapshot')+'</h3>'+(partner.known?'':'<p class="alert">'+t('وقت ميلاد هذا الشخص مو معروف؛ بعض الاتصالات مستبعدة من الحساب.','Birth time is unknown; some lunar and angle contacts are excluded.')+'</p>')+'<div class="dimension-grid clear-gauges">'+classic+'</div></section>'+
- (c.romantic?'<section class="panel intimacy-section mx-people-section"><div class="partner-insights-grid">'+extended+'</div></section>':'')+
+  analysis='<section class="panel partner-overview mx-people-section"><div class="section-title"><div><h2>'+esc(active.name)+' × '+esc(partner.name)+'</h2></div><div class="big-score '+(c.overallCovered?gaugeLevel(c.overall):'mx-unavailable')+'">'+(c.overallCovered?c.overall+'<small>/100</small>':'—')+'</div></div><h3>'+t('خلاصة العلاقة اليوم','Today’s relationship snapshot')+'</h3>'+(partner.known?'':'<p class="alert">'+t('وقت ميلاد هذا الشخص مو معروف؛ بعض الاتصالات مستبعدة من الحساب.','Birth time is unknown; some lunar and angle contacts are excluded.')+'</p>')+'<div class="dimension-grid clear-gauges">'+classic+'</div></section>'+
+ (c.romantic&&c.overallCovered?'<section class="panel intimacy-section mx-people-section"><div class="partner-insights-grid">'+extended+'</div></section>':'')+
   '';
   technical='<details class="panel synastry-technical"><summary>'+t('التفاصيل الحسابية الفلكية للمتخصصين','Advanced mathematical aspect details')+' · '+c.evidence.length+'</summary>'+c.evidence.map(e=>'<p class="technical">'+planet(e.first.id)+' · '+aspect(e.angle)+' · '+planet(e.second.id)+' — '+e.orb.toFixed(3)+'°</p>').join('')+'</details>';
  }
