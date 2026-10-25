@@ -38,7 +38,7 @@ test('When a true station does not exist in the search window, no false percenta
  assert.equal(phases[0].startedAt,null);
  assert.equal(phases[0].endsAt,null);
 });
-test('Compact countdown units fit into narrow planet cards and preserve live timing',()=>{
+test('Legacy interval formatter stays correct; planet cards show exact station timestamp',()=>{
  const start=Date.parse('2026-01-01T00:00:00Z');
  const fortyFive=Date.parse('2026-02-15T02:20:00Z');
  assert.equal(motionTimeRemaining(start,fortyFive,'ar',true),'1ش · 14ي · 2س');
@@ -46,8 +46,9 @@ test('Compact countdown units fit into narrow planet cards and preserve live tim
  assert.equal(motionTimeRemaining(start,start+2*3600000+25*60000,'en',true),'2h · 25m');
  assert.equal(motionTimeRemaining(start+3600000,start,'ar',true),'انتهى');
  const main=readFileSync('src/main.ts','utf8');
- assert.match(main,/motionTimeRemaining\(at,\+period\.endsAt,lang,true\)/);
- assert.match(main,/motionTimeRemaining\(now,end,lang,true\)/);
+ assert.match(main,/planetMotionStationText\(period\.endsAt\)/);
+ assert.match(main,/data-motion-station/);
+ assert.doesNotMatch(main,/data-motion-countdown/);
 });
 test('Countdown uses calendar months rather than 30-day approximations',()=>{
  assert.match(motionTimeRemaining(START,START+2*3600000+25*60000,'ar'),/2 ساعة/);
