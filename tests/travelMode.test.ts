@@ -2,7 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {derivedMetrics} from '../src/metrics.ts';
-import {travelMetricGroups,travelMetricsByGroup} from '../src/travelMode.ts';
+import {travelMetricGroups,travelMetricsByGroup,travelMetricReading} from '../src/travelMode.ts';
+import {skyContext} from '../src/skyContext.ts';
+import type {Chart} from '../src/engine.ts';
+import {gaugeLevel} from '../src/peopleInsights.ts';
 import type {Category} from '../src/math.ts';
 const src=readFileSync('src/main.ts','utf8');
 const nums:Record<Category,number>={overview:56,career:78,love:81,communication:63,energy:52,emotions:61,recovery:45,timing:72};
@@ -79,4 +82,66 @@ test('Travel cards reuse the exact Sex/Love/Emotions/Work quick gauge component,
  assert.match(css,/\.mx-travel-group\{padding:15px 18px!important/);
  assert.match(css,/\.mx-travel-group\{padding:12px!important/);
  assert.ok(!css.includes('Travel Mode uniform turquoise'),'Superseded color-only patch should be removed');
+});
+
+
+test('all twelve Travel Mode indicators explain their own activity and show their actual scoring inputs',()=>{
+ const chart=(points:Record<string,number>):Chart=>({
+  date:new Date('2026-10-25T18:00:00Z'),
+  points:Object.entries(points).map(([id,longitude])=>({id,symbol:'*',longitude,speed:1})),
+  cusps:[],asc:null,mc:null,missing:[]
+ });
+ const base=chart({Sun:8,Moon:20,Mercury:45,Venus:72,Mars:130,Jupiter:152,Saturn:204,Uranus:260,Neptune:298,Pluto:335});
+ const current=chart({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334});
+ const context=skyContext(base,current,true);
+ const groups=travelMetricsByGroup(derivedMetrics(context.scores));
+ const readings=groups.flatMap(g=>g.rows.map(({metric})=>{
+  const ar=travelMetricReading(metric,context);
+  const en=travelMetricReading(metric,context,true);
+  assert.ok(ar.summary.length>30,metric.id+' needs an activity-specific Arabic explanation');
+  assert.ok(en.summary.length>30,metric.id+' needs an English explanation');
+  assert.equal(ar.basis.split(' · ').length,metric.source.length,'Must disclose all contributing category scores');
+  assert.ok(ar.detail.includes(ar.basis));
+  assert.match(ar.detail,/اتصال محسوب|ماكو اتصال/);
+  assert.ok(!/تربيع.*تربيع/.test(ar.basis),'Card basis is category scores, not the same repeated aspect');
+  return ar.summary;
+ }));
+ assert.equal(new Set(readings).size,12,'All twelve cards must use distinct readings');
+ assert.match(src,/travelMetricReading\(m,liveGaugeSky\(\),lang==='en'\)/);
+ assert.match(src,/mx-travel-gauge-summary/);
+ assert.match(src,/mx-travel-gauge-detail/);
+ assert.match(src,/mx-travel-score-direction/);
+ const css=readFileSync('src/focus.css','utf8');
+ assert.match(css,/\.mx-travel-mode-page \.mx-travel-gauge-summary/);
+ assert.match(css,/\.mx-travel-mode-page \.mx-travel-gauge-detail/);
+});
+
+test('risk and rest do not reverse the meaning of red, yellow and green',()=>{
+ const chart=(points:Record<string,number>):Chart=>({
+  date:new Date('2026-10-25T18:00:00Z'),
+  points:Object.entries(points).map(([id,longitude])=>({id,symbol:'*',longitude,speed:1})),
+  cusps:[],asc:null,mc:null,missing:[]
+ });
+ const base=chart({Sun:8,Moon:20,Mercury:45,Venus:72,Mars:130,Jupiter:152,Saturn:204,Uranus:260,Neptune:298,Pluto:335});
+ const current=chart({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334});
+ const sky=skyContext(base,current,true);
+ const makeContext=(value:number)=>{
+  const scores={...sky.scores,timing:value,emotions:value,recovery:value};
+  const domains={...sky.domains,timing:{...sky.domains.timing,score:value},
+   emotions:{...sky.domains.emotions,score:value},recovery:{...sky.domains.recovery,score:value}};
+  return {...sky,scores,domains};
+ };
+ const low=makeContext(10),high=makeContext(90);
+ for(const id of ['risk','sleep'] as const){
+  const l=derivedMetrics(low.scores).find(x=>x.id===id)!;
+  const h=derivedMetrics(high.scores).find(x=>x.id===id)!;
+  assert.ok(l.value<h.value);
+  assert.equal(gaugeLevel(l.value),'low');
+  assert.equal(gaugeLevel(h.value),'strong');
+  assert.notEqual(travelMetricReading(l,low).summary,travelMetricReading(h,high).summary);
+ }
+ assert.match(travelMetricReading(derivedMetrics(low.scores).find(x=>x.id==='sleep')!,low).summary,/إذا تعبان ارتاح/);
+ assert.match(travelMetricReading(derivedMetrics(low.scores).find(x=>x.id==='risk')!,low).detail,/مو قياس لخطر فعلي/);
+ const risk=derivedMetrics(high.scores).find(x=>x.id==='risk')!;
+ assert.equal(risk.value,90,'A high readiness score must never be painted red');
 });
