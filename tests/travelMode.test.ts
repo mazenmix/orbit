@@ -43,7 +43,7 @@ test('Travel Mode is a main navigation option immediately below Go Mode, not a s
  assert.match(src,/function travelModePage\(\)/);
  assert.match(src,/data-section="travelmode"/);
  assert.ok(!src.includes("card('travelmode'"));
- assert.ok(src.includes('const calculated=derivedMetrics(data!.scores),groups=travelMetricsByGroup(calculated)'));
+ assert.ok(src.includes('const calculated=derivedMetrics(liveGaugeSky().scores),groups=travelMetricsByGroup(calculated)'));
 });
 test('Travel Mode does not replace all-29 Go Mode',()=>{
  const travel=src.slice(src.indexOf('function travelModePage(){'),src.indexOf('function asteroidsPage(){'));
