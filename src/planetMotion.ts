@@ -24,9 +24,9 @@ function addMonthsUTC(date:Date,months:number):Date{
  first.setUTCDate(Math.min(day,end));
  return first;
 }
-export function motionTimeRemaining(now:number,end:number,language:'ar'|'en'):string{
+export function motionTimeRemaining(now:number,end:number,language:'ar'|'en',compact=false):string{
  if(!Number.isFinite(now)||!Number.isFinite(end))return language==='ar'?'الوقت غير متاح':'Time unavailable';
- if(now>=end)return language==='ar'?'انتهت الفترة':'Period ended';
+ if(now>=end)return compact?(language==='ar'?'انتهى':'Ended'):(language==='ar'?'انتهت الفترة':'Period ended');
  const base=new Date(now);
  let months=0;
  while(months<120&&+addMonthsUTC(base,months+1)<=end)months++;
@@ -37,6 +37,11 @@ export function motionTimeRemaining(now:number,end:number,language:'ar'|'en'):st
   ?[[years,'سنة'],[calendarMonths,'شهر'],[days,'يوم'],[hours,'ساعة'],[minutes,'دقيقة']] as const
   :[[years,'y'],[calendarMonths,'mo'],[days,'d'],[hours,'h'],[minutes,'min']] as const;
  const significant=words.filter(([n])=>n>0);
+ if(compact){
+  const abbreviations=language==='ar'?['سنة','ش','ي','س','د']:['y','mo','d','h','m'];
+  const compactUnits=words.map(([n],i)=>[n,abbreviations[i]] as const).filter(([n])=>n>0);
+  return (compactUnits.length?compactUnits.slice(0,3):[[1,language==='ar'?'د':'m']]).map(([n,unit])=>n+unit).join(' · ');
+ }
  return (significant.length?significant.slice(0,3):[[1,language==='ar'?'دقيقة':'min']]).map(([n,unit])=>n+' '+unit).join(' · ');
 }
 /** Search in both directions in five-day steps and refine the two *actual*
