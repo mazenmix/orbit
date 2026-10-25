@@ -6,6 +6,14 @@ export type NamedContact=Evidence;
  * do not fabricate angles or merge into the original scoring algorithm.
  */
 export function namedAsteroidContacts(transits:readonly Point[],natal:readonly Point[],at:Date):NamedContact[]{
+ if(!Number.isFinite(+at)||[...transits,...natal].some(p=>!p||!Number.isFinite(p.longitude)||!Number.isFinite(p.speed))){
+  throw Error('Invalid named asteroid position, speed or instant');
+ }
+ // A duplicate body at different coordinates is not an additional contact.
+ for(const group of [transits,natal]){
+  const ids=group.map(p=>p.id);
+  if(new Set(ids).size!==ids.length)throw Error('Duplicate ephemeris body in named asteroid contact calculation');
+ }
  const out:NamedContact[]=[];
  for(const t of transits){
   const asteroid=namedAsteroids.find(a=>a.name===t.id);if(!asteroid)continue;
@@ -16,7 +24,9 @@ export function namedAsteroidContacts(transits:readonly Point[],natal:readonly P
    out.push({id:'named-'+asteroid.number+'-'+angle+'-'+n.id,transit:t,natal:n,angle,orb,maximumOrb:limit,applying,weight:Math.min(1,(1-orb/limit)*.62+asteroid.baseWeight*.20+importance(n.id)*.18),exact:null});
   }
  }
- return out.sort((a,b)=>b.weight-a.weight||a.orb-b.orb).slice(0,100);
+ // Return the entire eligible contact set; callers may shorten presentation,
+ // never silently discard the rest before per-body interpretation or audit.
+ return out.sort((a,b)=>b.weight-a.weight||a.orb-b.orb||a.id.localeCompare(b.id));
 }
 export type AsteroidMeaning={arTheme:string;arAction:string;enTheme:string;enAction:string};
 export const meanings:Readonly<Record<string,AsteroidMeaning>>={
@@ -87,7 +97,13 @@ export function asteroidReading(item:NamedAsteroid,contact:NamedContact|undefine
   Venus:['التقارب والتقدير','affection and values'],Mars:['المبادرة وحدود الاندفاع','initiative and boundaries'],Jupiter:['التوسع واختيار الفرص','growth and opportunity'],
   Saturn:['الالتزام والمسؤولية','commitment and responsibility'],Uranus:['الاستقلال والتغيير','autonomy and change'],
   Neptune:['التوقعات والخيال','expectations and imagination'],Pluto:['العمق والسيطرة','intensity and control'],
-  Ascendant:['حضورك والانطباع الأول','presence and first impressions'],MC:['العمل ودورك العام','career and public role']
+  Ascendant:['حضورك والانطباع الأول','presence and first impressions'],MC:['العمل ودورك العام','career and public role'],
+  Chiron:['التعامل مع التجارب الحساسة والتعلّم منها','reflection on sensitive experiences and learning'],
+  Ceres:['العناية المتبادلة وحدود المسؤولية','practical care and reciprocal responsibility'],
+  Pallas:['حلّ المشكلات والتخطيط','problem solving and planning'],
+  Juno:['توقعات الالتزام والإنصاف','commitment expectations and fairness'],
+  Vesta:['التركيز والاهتمام بالأولويات','focus and sustained priorities'],
+  Pholus:['مراجعة أثر التفاصيل الصغيرة بالقرارات','checking the impact of small decisions']
  };
  const aspectAr:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
  const aspectEn:Record<number,string>={0:'conjunction',60:'sextile',90:'square',120:'trine',180:'opposition'};
