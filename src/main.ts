@@ -1606,7 +1606,11 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installProm
 render();
 initEngine().then(v=>{engineVersion=v;ready=true;recalculate();render();void refreshAIConnection();if('serviceWorker' in navigator&&import.meta.env.PROD){
  let refreshingNewVersion=false;
+ // A first-time install may claim this page without changing its build.
+ // Do not reload during initial onboarding; reload only on a real subsequent update.
+ let alreadyControlled=Boolean(navigator.serviceWorker.controller);
  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+  if(!alreadyControlled){alreadyControlled=true;return;}
   if(refreshingNewVersion)return;
   refreshingNewVersion=true;
   // Preserve user input if a new release activates while a field is being edited.

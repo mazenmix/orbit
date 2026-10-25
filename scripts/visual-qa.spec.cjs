@@ -169,12 +169,12 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await page.goto('/#today',{waitUntil:'domcontentloaded'});
   await page.evaluate(()=>localStorage.setItem('mx.active','qa-self'));
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.locator('.mx-moon-personal-summary').first().waitFor({state:'visible',timeout:75000});
-  const ownMoon=await page.locator('.mx-moon-personal-summary').first().textContent();
+  await page.locator('.mx-sky-meaning').first().waitFor({state:'visible',timeout:75000});
+  const ownMoon=await page.locator('.mx-sky-meaning').first().textContent();
   await page.evaluate(()=>localStorage.setItem('mx.active','qa-person'));
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.locator('.mx-moon-personal-summary').first().waitFor({state:'visible',timeout:75000});
-  const partnerMoon=await page.locator('.mx-moon-personal-summary').first().textContent();
+  await page.locator('.mx-sky-meaning').first().waitFor({state:'visible',timeout:75000});
+  const partnerMoon=await page.locator('.mx-sky-meaning').first().textContent();
   expect(partnerMoon,'Moon and your chart must use the newly selected birth profile').not.toEqual(ownMoon);
   expect(errors).toEqual([]);
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
@@ -418,7 +418,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
    localStorage.setItem('mx.uiMode','pro');
   });
   await page.reload({waitUntil:'domcontentloaded'});
-  const card=page.locator('.lunar-card p');
+  const card=page.locator('.mx-focus-hero .mx-sky-meaning');
   await card.waitFor({state:'visible',timeout:75000});
   await expect(page.locator('#active-profile option')).toHaveCount(2);
   const first=(await card.innerText()).trim();
