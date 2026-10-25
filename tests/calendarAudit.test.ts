@@ -91,9 +91,23 @@ test('DST transition dates retain genuine local sampling on both sides of leap s
 test('no partial multi-sample days or fabricated outcome when any sample is missing',()=>{
  const sample=[{hour:4 as const,evidence:[]},{hour:12 as const,evidence:[]},{hour:20 as const,evidence:[]}];
  const r=calendarDaySynthesis(sample);
- assert.deepEqual(r.sampleScores,[50,50,50]);assert.equal(r.value,50);
- assert.equal(r.minimum,50);assert.equal(r.maximum,50);
+ assert.deepEqual(r.sampleScores,[0,0,0]);assert.equal(r.value,0);
+ assert.equal(r.minimum,0);assert.equal(r.maximum,0);assert.equal(r.considered,0);
  assert.equal(r.strongestSupport,null);assert.equal(r.strongestChallenge,null);
  assert.throws(()=>calendarDaySynthesis(sample.slice(1)),/Incomplete/);
  assert.throws(()=>calendarDaySynthesis([{hour:12,evidence:[]},sample[0],sample[2]]),/Incomplete/);
+});
+
+test('unsupported individual checkpoints never contribute artificial neutral 50s to a supported day',()=>{
+ const valid=calendarMomentEvidence(
+  chart(new Date('2027-03-14T09:00:00Z'),known,false,false),
+  chart(zonedInstant(known.date+'T'+known.time,known.zone),known),
+  new Date('2027-03-14T09:00:00Z'),true);
+ const complete=calendarDaySynthesis(CALENDAR_SAMPLE_HOURS.map(hour=>({hour,evidence:valid})));
+ const partial=calendarDaySynthesis([{hour:4 as const,evidence:[]},{hour:12 as const,evidence:valid},{hour:20 as const,evidence:[]}]);
+ assert.ok(complete.considered>0);
+ assert.equal(partial.value,complete.value);
+ assert.deepEqual(partial.sampleScores,[0,complete.value,0]);
+ assert.equal(partial.minimum,complete.value);
+ assert.equal(partial.maximum,complete.value);
 });
