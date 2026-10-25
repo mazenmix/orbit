@@ -124,15 +124,16 @@ let asteroidCategory:Category|'all'='all';
 let asteroidLoading=false,asteroidProgress='',asteroidFailures:{name:string;reason:string}[]=[];
 let heatmapCache:{key:string;cells:HeatCell[]}|null=null;
 let lunationCache:{key:string;items:Lunation[]}|null=null;
-let realEclipseCache:{checked:number;items:ConfirmedEclipse[]}|null=null;
+let realEclipseCache:{checked:number;context:number;items:ConfirmedEclipse[]}|null=null;
 function getRealEclipses(){
- const now=Date.now();
- // Search from two days ago so an eclipse remains visible *after maximum* until last contact.
- if(!realEclipseCache||now-realEclipseCache.checked>300000||realEclipseCache.items.some(e=>eclipseEventBounds(e).end<=now)){
-  const possible=confirmedEclipses(new Date(now-2*86400000),2).filter(e=>eclipseEventBounds(e).end>now);
+ const now=Date.now(),reference=+selected,context=Math.floor(reference/300000);
+ // Live and Time Machine eclipse lists must use their own explicit moment.
+ // Include an eclipse whose maximum passed but whose last contact is ongoing.
+ if(!realEclipseCache||realEclipseCache.context!==context||now-realEclipseCache.checked>300000||realEclipseCache.items.some(e=>eclipseEventBounds(e).end<=reference)){
+  const possible=confirmedEclipses(new Date(reference-2*86400000),2).filter(e=>eclipseEventBounds(e).end>reference);
   const next=['solar','lunar'].map(kind=>possible.find(e=>e.kind===kind)).filter((e):e is ConfirmedEclipse=>!!e);
   if(next.length!==2)throw Error('Upcoming solar or lunar eclipse is unavailable');
-  realEclipseCache={checked:now,items:next.sort((a,b)=>+a.maximum-+b.maximum)};
+  realEclipseCache={checked:now,context,items:next.sort((a,b)=>+a.maximum-+b.maximum)};
  }
  return realEclipseCache.items;
 }
@@ -788,13 +789,13 @@ function eclipsesPage(){
   const time=(at:Date)=>dateText(at,{weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
   const stage=(label:string,at:Date|null)=>'<div class="eclipse-stage '+(at?'':'not-available')+'"><small>'+label+'</small>'+(at?'<time datetime="'+at.toISOString()+'">'+time(at)+'</time>':'<span>—</span>')+'</div>';
   const countdown=(e:ConfirmedEclipse)=>{
-   const parts=eclipseCountdownParts(Date.now(),+e.maximum);
+   const parts=eclipseCountdownParts(liveTimePinned?+selected:Date.now(),+e.maximum);
    const fields=([['months',t('شهر','MONTHS')],['days',t('يوم','DAYS')],['hours',t('ساعة','HOURS')],['minutes',t('دقيقة','MINUTES')],['seconds',t('ثانية','SECONDS')]] as const);
    return '<div class="eclipse-countdown" data-eclipse-to="'+(+e.maximum)+'" role="timer" aria-label="'+t('المتبقي حتى ذروة الكسوف أو الخسوف','Time until eclipse maximum')+'"><div class="eclipse-countdown-heading"><span class="eclipse-countdown-dot" aria-hidden="true"></span>'+t('المتبقي حتى الذروة','COUNTDOWN TO MAXIMUM')+'</div><div class="eclipse-countdown-grid">'+fields.map(([unit,label])=>'<div class="eclipse-countdown-unit"><span class="eclipse-countdown-number" data-eclipse-unit="'+unit+'">'+String(parts[unit]).padStart(2,'0')+'</span><small>'+label+'</small></div>').join('')+'</div></div>';
   };
   return '<div class="confirmed-eclipses eclipse-premium-grid">'+eclipses.map((e,i)=>{
     const solar=e.kind==='solar';
-    const status=eclipseEventPhase(e,Date.now()),bounds=eclipseEventBounds(e);
+    const status=eclipseEventPhase(e,liveTimePinned?+selected:Date.now()),bounds=eclipseEventBounds(e);
     const place=solar
      ?e.globalCoordinates
       ?'<div class="eclipse-geography"><span>'+t('موقع أعظم الكسوف عالمياً','Greatest global solar eclipse point')+'</span><strong data-eclipse-geo="'+e.globalCoordinates.lat.toFixed(4)+','+e.globalCoordinates.lon.toFixed(4)+'">'+e.globalCoordinates.lat.toFixed(2)+'°, '+e.globalCoordinates.lon.toFixed(2)+'°</strong><small>'+t('الدولة إذا كانت نقطة الذروة على اليابسة؛ وقد تكون فوق البحر','Country if the maximum falls on land; it may be over the ocean')+'</small></div>'
@@ -1505,7 +1506,7 @@ function updateLiveSkyWheel(now:number){
 /** A seconds clock independent of the Swiss Ephemeris and narrative DOM update.
  * Continue while the sky is enlarged on any visible tab; no fake ephemeris. */
 function tickEclipseCountdowns(now:number){
- if(screen!=='eclipses')return;
+ if(screen!=='eclipses'||liveTimePinned)return;
  root.querySelectorAll<HTMLElement>('.eclipse-premium[data-eclipse-start][data-eclipse-end]').forEach(card=>{
   const start=Number(card.dataset.eclipseStart),end=Number(card.dataset.eclipseEnd);
   if(!Number.isFinite(start)||!Number.isFinite(end))return;
