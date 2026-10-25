@@ -114,8 +114,8 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
  const planetTopic=planetScenes[event.first];
  const soon=+event.at>+at;
  const phaseNow=lang==='ar'?
-  (soon?'قبل هالحدث، إذا عندك موضوع مفتوح فالأفضل ترتب خطواتك.':'من هسه، إذا عندك موضوع مفتوح بهالمجال فالأفضل تراقب شنو يتغيّر فعلاً.'):
-  (soon?'Before this event, you can prepare a practical next step.':'From now, watch for real changes rather than assumptions.');
+  (soon?'قبل هالحدث:':''):
+  (soon?'Before this event:':'');
  let now=houseTopic?txt(houseTopic.now,lang):txt(planetTopic.now,lang);
  let later=houseTopic?txt(houseTopic.later,lang):txt(planetTopic.later,lang);
  let action=houseTopic?txt(houseTopic.step,lang):txt(planetTopic.step,lang);
@@ -145,8 +145,15 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
     'إذا صار اختلاف أو تأخير، لا تفسّره فوراً كرفض أو فشل.'):
     (balanced?'If things feel easier, follow through rather than merely hoping.':
      'If things slow down, do not assume rejection or failure.');
-   now=txt(planetTopic.now,lang)+' '+(houseTopic?txt(houseTopic.now,lang):txt(second.now,lang));
-   later=txt(second.later,lang)+' '+caution;
+   // A fast Moon aspect must never inherit Jupiter/Saturn's weeks-long
+   // planetary template. Duration cannot be inferred from a paired name.
+   const lunar=event.first==='Moon'||event.second==='Moon';
+   now=(houseTopic?txt(houseTopic.now,lang):txt(planetTopic.now,lang))+' '+
+    (lang==='ar'?(balanced?'زاوية داعمة رمزياً، مو ضمان لنتيجة.':'زاوية تحتاج موازنة رمزياً، مو توقع حدوث مشكلة.'):
+     (balanced?'This is a symbolically supportive aspect, not a promised outcome.':'This is a symbolically challenging aspect, not a prediction of trouble.'));
+   later=lunar?(lang==='ar'?'التأويل يخص الفترة القريبة من وقت الاتصال القمري فقط؛ لا يمتد لأسابيع من دون عامل فلكي منفصل.':
+    'The interpretation concerns the short Moon-aspect window, not weeks ahead without separate calculated evidence.'):
+    (houseTopic?txt(houseTopic.later,lang):txt(second.later,lang))+' '+caution;
   }
  }
  // Only a verified close transit to a natal planet can add a second personal
