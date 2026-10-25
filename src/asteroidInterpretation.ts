@@ -6,6 +6,14 @@ export type NamedContact=Evidence;
  * do not fabricate angles or merge into the original scoring algorithm.
  */
 export function namedAsteroidContacts(transits:readonly Point[],natal:readonly Point[],at:Date):NamedContact[]{
+ if(!Number.isFinite(+at)||[...transits,...natal].some(p=>!p||!Number.isFinite(p.longitude)||!Number.isFinite(p.speed))){
+  throw Error('Invalid named asteroid position, speed or instant');
+ }
+ // A duplicate body at different coordinates is not an additional contact.
+ for(const group of [transits,natal]){
+  const ids=group.map(p=>p.id);
+  if(new Set(ids).size!==ids.length)throw Error('Duplicate ephemeris body in named asteroid contact calculation');
+ }
  const out:NamedContact[]=[];
  for(const t of transits){
   const asteroid=namedAsteroids.find(a=>a.name===t.id);if(!asteroid)continue;
