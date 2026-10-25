@@ -107,8 +107,20 @@ const txt=(b:Bi,lang:SkyLanguage)=>lang==='ar'?b.ar:b.en;
 export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}:PersonalSkyContext):PersonalSkyStory{
  if(!Number.isFinite(+at)||!Number.isFinite(+event.at))throw Error('Invalid story time');
  const human=occurrenceLanguage(event,lang);
- const focusPlanet=skyAtEvent.find(p=>p.id===event.first);
- if(!focusPlanet||!Number.isFinite(focusPlanet.longitude))throw Error('Event body not verified');
+ const focusBodies=skyAtEvent.filter(p=>p.id===event.first);
+ if(focusBodies.length!==1||!Number.isFinite(focusBodies[0].longitude))throw Error('Event body not verified');
+ const focusPlanet=focusBodies[0];
+ // An aspect title is only an interpretation of a verified *pair*. A valid
+ // first planet alone cannot authorize a claim about a different second one.
+ // Live contacts are allowed a wider 1.2° orb; refined events are more exact.
+ if(event.kind==='aspect'){
+  const partner=event.second?skyAtEvent.filter(p=>p.id===event.second):[];
+  if(partner.length!==1||!Number.isFinite(partner[0].longitude)||
+     ![0,60,90,120,180].includes(event.angle??NaN)||
+     Math.abs(distance(focusPlanet.longitude,partner[0].longitude)-event.angle!)>1.200001){
+   throw Error('Unverified sky aspect: both actual bodies and aspect angle are required');
+  }
+ }
  const house=knownBirthTime&&natal.cusps.length===12?houseNumber(focusPlanet.longitude,natal.cusps):0;
  const houseTopic=house>=1&&house<=12?houses[house-1]:null;
  const planetTopic=planetScenes[event.first];

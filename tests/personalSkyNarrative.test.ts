@@ -22,7 +22,8 @@ const sky:Point[]=[
  {id:'Moon',symbol:'☾',longitude:55,speed:13},
  {id:'Mercury',symbol:'☿',longitude:210,speed:2},
  {id:'Venus',symbol:'♀',longitude:180.3,speed:1},
- {id:'Mars',symbol:'♂',longitude:290,speed:.8}
+ {id:'Mars',symbol:'♂',longitude:290,speed:.8},
+ {id:'Jupiter',symbol:'♃',longitude:175,speed:.08}
 ];
 const ingress:WholeSkyOccurrence={kind:'ingress',at:new Date(+NOW-2*3600000),first:'Venus',sign:6};
 const make=(event:WholeSkyOccurrence,n:Chart=natal(),knownBirthTime=true,at=NOW)=>
@@ -67,7 +68,8 @@ test('Unknown birth time does not invent Placidus houses',()=>{
 test('Actual natal contact may add a verified second topic, not imaginary orb math',()=>{
  const event:WholeSkyOccurrence={kind:'aspect',first:'Venus',second:'Mercury',angle:120,at:NOW};
  const withContact:Chart={...natal(0),points:[{id:'Sun',symbol:'☉',longitude:180.2,speed:0}]};
- const reading=make(event,withContact);
+ const accurateSky=sky.map(p=>p.id==='Mercury'?{...p,longitude:300.3}:p);
+ const reading=personalSkyStory({event,at:NOW,natal:withContact,skyAtEvent:accurateSky,knownBirthTime:true,lang:'ar'});
  assert.match(reading.next,/بخريطتك هذا يلامس موضوع/);
  assert.doesNotMatch(reading.now+reading.next,/[°]|تربيع|تثليث|تسديس|أورب|درجة/);
 });
@@ -106,7 +108,8 @@ test('retrograde ingress describes revisiting a sign without promising a reunion
 
 test('a conjunction is not automatically classified as a challenging square or opposition',()=>{
  const event:WholeSkyOccurrence={kind:'aspect',first:'Moon',second:'Venus',angle:0,at:NOW};
- const story=make(event);
+ const alignedSky=sky.map(p=>p.id==='Moon'?{...p,longitude:180.3}:p);
+ const story=personalSkyStory({event,at:NOW,natal:natal(),skyAtEvent:alignedSky,knownBirthTime:true,lang:'ar'});
  assert.match(story.now,/اقتران يجمع الموضوعين/);
  assert.doesNotMatch(story.now,/زاوية متوترة|زاوية تحتاج موازنة/);
 });
@@ -135,4 +138,10 @@ test('a personal full Moon reads the verified Sun–Moon axis rather than one na
  assert.match(knownReading.next,/المال المشترك|المصاريف/);
  const unknownReading=personalSkyStory({event,at:NOW,natal:natal(0,false),skyAtEvent:exactlyOpposite,knownBirthTime:false,lang:'ar'});
  assert.doesNotMatch(unknownReading.next,/البدر يربط رمزياً بين/);
+});
+
+test('personal aspect refuses a missing partner or a false angle despite real first body',()=>{
+ const event:WholeSkyOccurrence={kind:'aspect',first:'Venus',second:'Mercury',angle:120,at:NOW};
+ assert.throws(()=>make(event),/Unverified sky aspect/);
+ assert.throws(()=>personalSkyStory({event,at:NOW,natal:natal(),skyAtEvent:sky.filter(p=>p.id!=='Mercury'),knownBirthTime:true,lang:'ar'}),/Unverified sky aspect/);
 });
