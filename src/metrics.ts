@@ -63,8 +63,20 @@ export function reviewGoMode(mode:GoDecision,metrics:readonly MetricResult[],dec
  const state=!active.length?'check':mode.state==='go'&&(!complete||mixed||sensitive||active.some(d=>d.resolution==='caution'))?'check':mode.state;
  return {state,sourceCategories,complete,mixed,sensitive,strongest:strongest('strongest'),supportFactor,challengeFactor};
 }
+/** Each source category contributes once, even when several Go Mode drivers
+ * are derived from it. Previous nested means silently counted shared inputs
+ * multiple times (for example, career in both Career and Focus). */
 export function goModes(metrics:readonly MetricResult[]):GoDecision[]{
- const values=new Map(metrics.map(v=>[v.id,v.value]));
+ const byId=new Map(metrics.map(m=>[m.id,m]));
+ if(byId.size!==metrics.length)throw Error('Repeated Go Mode indicator');
+ const direct=new Map<Category,number>();
+ for(const metric of metrics){
+  if(metric.source.length!==1||metric.inverted)continue;
+  const category=metric.source[0],previous=direct.get(category);
+  if(!Number.isFinite(metric.value)||metric.value<1||metric.value>99)throw Error('Invalid direct category index');
+  if(previous!==undefined&&previous!==metric.value)throw Error('Conflicting direct category indices');
+  direct.set(category,metric.value);
+ }
  const configurations:[GoDomain,MetricName[]][]=[
   ['work',['career','focus','timing']],
   ['social',['social','communication','energy']],
@@ -72,8 +84,13 @@ export function goModes(metrics:readonly MetricResult[]):GoDecision[]{
   ['travel',['travel','timing','focus']]
  ];
  return configurations.map(([domain,drivers])=>{
-  const list=drivers.map(k=>values.get(k));
-  if(list.some(v=>v===undefined||!Number.isFinite(v)||v<1||v>99))throw Error('Incomplete or invalid indicator set');
+  const sources=[...new Set(drivers.flatMap(id=>{
+   const metric=byId.get(id);
+   if(!metric||!Number.isFinite(metric.value)||metric.value<1||metric.value>99)throw Error('Incomplete or invalid indicator set');
+   return metric.source;
+  }))];
+  const list=sources.map(c=>direct.get(c));
+  if(list.some(v=>v===undefined||!Number.isFinite(v)||v<1||v>99))throw Error('Incomplete or invalid source category indices');
   const value=Math.round(list.reduce<number>((a,b)=>a+(b??0),0)/list.length);
   return {domain,value,state:value>=68?'go':value>=45?'check':'hold',drivers};
  });
