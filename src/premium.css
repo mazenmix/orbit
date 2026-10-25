@@ -181,3 +181,70 @@ dialog#detail:has(.mx-expanded-sky) #dialog-content{width:100%}
 .lunar-premium-grid .mx-lunar-gauge.is-voc .mx-lunar-gauge-ring strong{color:#ffafc1}
 .lunar-premium-grid .mx-lunar-gauge.is-voc .mx-lunar-gauge-copy span{color:#ffcad7}
 .lunar-premium-grid .mx-lunar-gauge.is-voc .mx-lunar-gauge-copy strong{color:#ffe6ee}
+
+
+/* MX lunar countdown visibility refresh — make the ticking time the focal point.
+   Shared by Current Moon Sign and Void of Course; live clock logic is unchanged. */
+.lunar-premium-grid .mx-lunar-gauge{
+  min-height:103px;
+  padding:12px 14px;
+  gap:14px;
+}
+.lunar-premium-grid .mx-lunar-gauge-copy{
+  justify-content:center;
+  gap:9px;
+}
+.lunar-premium-grid .mx-lunar-gauge-copy [data-gauge-label]{
+  font-size:13px;
+  font-weight:750;
+  line-height:1.4;
+}
+.lunar-premium-grid .mx-lunar-gauge-copy strong[data-gauge-time]{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  align-self:flex-start;
+  min-width:8ch;
+  max-width:100%;
+  box-sizing:border-box;
+  padding:7px 12px 9px;
+  border-radius:11px;
+  border:1px solid #4fc9aa68;
+  background:linear-gradient(135deg,#0c302bba,#0b252a70);
+  box-shadow:inset 0 1px 0 #b8ffed15,0 3px 13px #020b1430;
+  color:#f1fff9;
+  font-family:Manrope,'Noto Sans Arabic',sans-serif;
+  font-size:clamp(25px,2.5vw,31px);
+  font-weight:850;
+  line-height:1.15;
+  letter-spacing:.7px;
+  font-variant-numeric:tabular-nums lining-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;
+  text-shadow:0 0 16px #51e9b745;
+  white-space:nowrap;
+  direction:ltr;
+  unicode-bidi:isolate;
+}
+.lunar-premium-grid .mx-lunar-gauge.is-voc .mx-lunar-gauge-copy strong[data-gauge-time]{
+  border-color:#ec78946b;
+  background:linear-gradient(135deg,#4c2339bf,#321d31a3);
+  color:#fff1f6;
+  text-shadow:0 0 16px #ff86a05e;
+}
+@media(max-width:550px){
+  .lunar-premium-grid .mx-lunar-gauge{min-height:94px;padding:10px;gap:10px}
+  .lunar-premium-grid .mx-lunar-gauge-copy{gap:7px}
+  .lunar-premium-grid .mx-lunar-gauge-copy [data-gauge-label]{font-size:12px}
+  .lunar-premium-grid .mx-lunar-gauge-copy strong[data-gauge-time]{
+    font-size:clamp(21px,5.8vw,28px);
+    padding:7px 9px;
+    letter-spacing:.35px;
+  }
+}
+@media(max-width:360px){
+  .lunar-premium-grid .mx-lunar-gauge-copy strong[data-gauge-time]{
+    font-size:20px;
+    padding:7px 8px;
+    letter-spacing:0;
+  }
+}
