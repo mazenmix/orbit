@@ -1606,7 +1606,10 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installProm
 render();
 initEngine().then(v=>{engineVersion=v;ready=true;recalculate();render();void refreshAIConnection();if('serviceWorker' in navigator&&import.meta.env.PROD){
  let refreshingNewVersion=false;
+ // First install merely claims this page, not a newer app version.
+ let alreadyControlled=Boolean(navigator.serviceWorker.controller);
  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+  if(!alreadyControlled){alreadyControlled=true;return;}
   if(refreshingNewVersion)return;
   refreshingNewVersion=true;
   // Preserve user input if a new release activates while a field is being edited.
