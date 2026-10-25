@@ -110,6 +110,15 @@ const relevance:Record<Dimension,Record<string,number>>={
  stability:{'Saturn|Sun':1.30,'Moon|Saturn':1.35,'Saturn|Venus':1.42,'Mars|Saturn':.92,'Sun|Sun':.92,'Moon|Moon':1.05,'Jupiter|Saturn':.84},
  conflict:{'Mars|Mars':1.38,'Mars|Mercury':1.25,'Mars|Moon':1.36,'Mars|Saturn':1.35,'Mars|Uranus':1.22,'Mars|Pluto':1.28,'Mercury|Uranus':.96,'Moon|Pluto':1.08,'Saturn|Sun':.86}
 };
+/** Report whether a compatibility dimension has an actually calculated close
+ * aspect that contributes to its rubric. The neutral 50 score alone is not
+ * evidence of attraction, intimacy, communication or mutual intent. */
+export function compatibilityHasEvidence(dim:Dimension,evidence:readonly SynastryEvidence[]):boolean{
+ return evidence.some(e=>{
+  const pair=[e.first.id,e.second.id].sort().join('|');
+  return (relevance[dim][pair]??0)>0;
+ });
+}
 export function compatibilityScore(dim:Dimension,evidence:SynastryEvidence[],factor=1,bonus=0){let delta=bonus;for(const e of evidence){const pair=[e.first.id,e.second.id].sort().join('|'),r=relevance[dim][pair]??0;let g:number;
  if(dim==='conflict')g=challenging(e)?1:harmonious(e)?-.42:/Mars|Pluto|Uranus/.test(pair)?.68:.18;
  else if(harmonious(e))g=1;else if(challenging(e))g=(dim==='attraction'||dim==='sexual')?(pair==='Mars|Venus'||pair.includes('Pluto')?.35:-.48):-.78;
