@@ -33,6 +33,28 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await ctx.close();
  });
 }
+
+test('Today sky wheel sits at the left of the live reading without an empty top row',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/#today',{waitUntil:'domcontentloaded'});
+ const today=page.locator('.mx-today-compact');
+ await today.waitFor({state:'visible',timeout:75000});
+ const sky=today.locator('.mx-today-sky'),hero=today.locator('.main-column .hero');
+ await expect(sky).toBeVisible();
+ await expect(hero).toBeVisible();
+ const boxes=await Promise.all([sky.boundingBox(),hero.boundingBox(),today.locator('.scores-grid').boundingBox()]);
+ const [wheel,reading,scores]=boxes;
+ expect(wheel&&reading&&scores).toBeTruthy();
+ expect(wheel.x+wheel.width,'Sky wheel belongs in the left rail').toBeLessThan(reading.x+12);
+ expect(Math.abs(wheel.y-reading.y),'Wheel and reading begin on the same row').toBeLessThan(20);
+ expect(scores.y-reading.y-reading.height,'Score cards move up directly below live reading').toBeLessThan(45);
+ await page.setViewportSize({width:390,height:844});
+ await expect(sky).toBeVisible();
+ const [mobileWheel,mobileHero]=await Promise.all([sky.boundingBox(),hero.boundingBox()]);
+ expect(mobileWheel.y).toBeLessThan(mobileHero.y);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThan(9);
+});
+
 test('Moon, eclipse and MX Intelligence premium cards',async({page},testInfo)=>{
  await page.goto('/#lunar',{waitUntil:'domcontentloaded'});
  await page.locator('.premium-time-tile').first().waitFor({timeout:75000});
