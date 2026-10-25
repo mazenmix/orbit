@@ -333,17 +333,18 @@ function mainPersonalEvent(brief:WholeSkyBroadcast):PersonalSkyStory|null{
  try{return personalEventStory(event,event.at.valueOf()===selected.valueOf()?data!.current.points:undefined)}
  catch(err){console.warn('Personal sky context unavailable',err);return null}
 }
-function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string){
+function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,compact=false){
  if(!events.length)return '<p class="mx-focus-note">'+empty+'</p>';
  return events.map(e=>{
   const story=personalEventStory(e);
   const time=dateText(e.at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-  return '<article class="mx-sky-feed-item" data-sky-event="'+esc(e.kind+':'+e.first+':'+(e.second??''))+'">'+
+  const more='<p class="mx-sky-feed-now"><b>'+t('هسه:','Now:')+'</b> '+esc(story.now)+'</p>'+
+   '<p class="mx-sky-feed-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(story.next)+'</p>'+
+   '<p class="mx-sky-feed-action"><strong>'+t('شنو تسوي؟','What to do:')+'</strong> '+esc(story.action)+'</p>';
+  return '<article class="mx-sky-feed-item'+(compact?' mx-sky-feed-compact':'')+'" data-sky-event="'+esc(e.kind+':'+e.first+':'+(e.second??''))+'">'+
    '<div><strong>'+esc(story.title)+'</strong><time datetime="'+e.at.toISOString()+'">'+esc(time)+'</time></div>'+
    '<p class="mx-sky-feed-context">'+esc(story.focus)+'</p>'+
-   '<p class="mx-sky-feed-now"><b>'+t('هسه:','Now:')+'</b> '+esc(story.now)+'</p>'+
-   '<p class="mx-sky-feed-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(story.next)+'</p>'+
-   '<p class="mx-sky-feed-action"><strong>'+t('شنو تسوي؟','What to do:')+'</strong> '+esc(story.action)+'</p></article>';
+   (compact?'<details class="mx-sky-event-details"><summary>'+t('اقرأ التفاصيل','Read details')+'</summary>'+more+'</details>':more)+'</article>';
  }).join('');
 }
 function planetLiveStatus(brief:WholeSkyBroadcast){
@@ -392,7 +393,7 @@ function focusedToday(){
  '<section class="panel mx-focus-panel mx-focus-lunar-status '+(moonIsVoid?'is-voc':'is-clear')+'" data-voc-start="'+moonVocStart+'" data-voc-end="'+moonVocEnd+'"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+
  '<button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('الأحداث الفلكية القادمة · كل الكواكب','Upcoming events · all planets')+'</h2>'+
- '<div class="mx-sky-feed">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.')):'')+'</div></section>'+
+ '<div class="mx-sky-feed mx-sky-feed-upcoming" role="list">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.'),true):'')+'</div></section>'+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('آخر ما تغير بالسماء','Recent sky changes')+'</h2>'+
  '<div class="mx-sky-feed">'+(brief?wholeSkyEventItems(brief.latest,t('ماكو حدث دقيق مسجل بالفترة الحالية.','No recent exact event.')):'')+'</div></section>'+
  '</aside></div>';
