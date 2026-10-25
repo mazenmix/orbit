@@ -64,7 +64,9 @@ export function scanWholeSky(at:Date,read:WholeSkyReader,hoursBack=18,hoursAhead
     const root=bisectAngle(func,a,b,.1);
     if(root&&Math.abs(func(+root))<.03){const after=point(Math.min(end,+root+60000),id);emit({kind:'ingress',at:root,first:id,sign:signAt(after),retrograde:after.speed<0});}
    }
-   if(first.speed*last.speed<0){
+   // Include exact zero-velocity samples: a station can lie exactly on a survey boundary.
+   // Adjacent intervals may see the same root; emit() deduplicates it by time.
+   if(first.speed*last.speed<=0&&first.speed!==last.speed){
     const func=(t:number)=>point(t,id).speed;
     const root=bisectAngle(func,a,b,.1);
     if(root&&Math.abs(func(+root))<.02){
