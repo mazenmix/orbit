@@ -183,7 +183,7 @@ test('Tahoma style covers all application surfaces after prior feature styles',(
 
 test('calendar keeps three numeric color bands but removes the legend and explanatory subtitle',()=>{
  const calendar=readFileSync('src/astroCalendar.ts','utf8');
- assert.ok(calendar.includes("value<=30?'red':value<=70?'yellow':'green'"));
+ assert.ok(calendar.includes("value<30?'red':value<=70?'yellow':'green'"));
  assert.ok(!main.includes('astro-legend-item'));
  assert.ok(!main.includes('astro-cal-toolbar'));
  assert.ok(!main.includes('كل الأشهر الاثني عشر ظاهرة'));
