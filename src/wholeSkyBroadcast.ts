@@ -4,7 +4,7 @@ import {currentSkyContacts,type SkyAspect,type SkyLanguage} from './todaySkyBrie
 
 /** Whole-sky event engine. Every event time is refined against the actual
  * ephemeris reader; velocity-only projections must never be presented as exact.
- * Uses a bounded 1-hour survey, then sub-minute numerical root verification.
+ * Uses a bounded 30-minute survey, then sub-minute numerical root verification.
  */
 export const FULL_SKY_BODIES=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'] as const;
 export type SkyBodyId=typeof FULL_SKY_BODIES[number];
@@ -47,7 +47,7 @@ const planet=(id:SkyBodyId,lang:SkyLanguage)=>dictionary[id][lang];
 const pair=(a:SkyBodyId,b:SkyBodyId,lang:SkyLanguage)=>planet(a,lang)+(lang==='ar'?' ويّه ':' with ')+planet(b,lang);
 export function scanWholeSky(at:Date,read:WholeSkyReader,hoursBack=18,hoursAhead=48):WholeSkyOccurrence[]{
  if(!Number.isFinite(+at)||hoursBack<0||hoursAhead<=0||hoursBack>168||hoursAhead>168)throw Error('Invalid whole-sky scan window');
- const HOUR=3600000,start=+at-hoursBack*HOUR,end=+at+hoursAhead*HOUR,step=HOUR;
+ const HOUR=3600000,start=+at-hoursBack*HOUR,end=+at+hoursAhead*HOUR,step=HOUR/2;
  const cache=new Map<number,Map<SkyBodyId,Point>>();
  const snapshot=(t:number)=>{let p=cache.get(t);if(!p){p=valid(read(new Date(t)));cache.set(t,p)}return p};
  const point=(t:number,id:SkyBodyId)=>snapshot(t).get(id)!;
