@@ -376,7 +376,7 @@ function focusedToday(){
  const clock=t('الحساب الفلكي: ','Sky calculated: ')+dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
  const personalized=brief?mainPersonalEvent(brief):null;
  const message=personalized?.now??brief?.meaning??t('تعذّر التحقق من موقع واحد أو أكثر من الكواكب؛ ما راح نعرض حدث غير محسوب.','One or more sky positions could not be verified. Unverified events are not shown.');
- return todaySkyWheel(r)+'<div class="mx-focused-dashboard mx-full-sky-today"><div class="mx-focus-main">'+
+ return '<div class="mx-focused-dashboard mx-full-sky-today"><div class="mx-focus-main">'+
  '<section class="panel mx-focus-hero" data-sky-reading-id="'+esc(brief?.identity??'unavailable')+'">'+
  '<div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('بث حركة السماء هسه','WHOLE-SKY LIVE')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'):'LIVE')+'</span></div>'+
  '<h2>'+esc(brief?.title??t('رصد السماء غير متاح','Sky report unavailable'))+'</h2>'+
@@ -387,13 +387,14 @@ function focusedToday(){
  activity+'<small class="mx-sky-live-checked" aria-label="'+t('وقت آخر حساب','Last calculation')+'">'+esc(clock)+'</small>'+
  '</section>'+
  (brief?planetLiveStatus(brief):'<p role="status">'+esc(skyFailure)+'</p>')+
- '</div><aside class="mx-focus-aside">'+
+ '</div><aside class="mx-focus-aside">'+todaySkyWheel(r)+
+ '<button type="button" class="panel time-shortcut mx-today-time-shortcut" data-go="time"><span>◷</span><div><b>'+t('آلة الزمن','Time Machine')+'</b><p>'+t('أي تاريخ. منظور جديد.','Another date. A new perspective.')+'</p></div><b>↗</b></button>'+
+ '<section class="panel mx-focus-panel mx-focus-lunar-status '+(moonIsVoid?'is-voc':'is-clear')+'" data-voc-start="'+moonVocStart+'" data-voc-end="'+moonVocEnd+'"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+
+ '<button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('الأحداث الفلكية القادمة · كل الكواكب','Upcoming events · all planets')+'</h2>'+
  '<div class="mx-sky-feed">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.')):'')+'</div></section>'+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('آخر ما تغير بالسماء','Recent sky changes')+'</h2>'+
  '<div class="mx-sky-feed">'+(brief?wholeSkyEventItems(brief.latest,t('ماكو حدث دقيق مسجل بالفترة الحالية.','No recent exact event.')):'')+'</div></section>'+
- '<section class="panel mx-focus-panel mx-focus-lunar-status '+(moonIsVoid?'is-voc':'is-clear')+'" data-voc-start="'+moonVocStart+'" data-voc-end="'+moonVocEnd+'"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+
- '<button class="secondary mx-focus-subaction" data-go="lunar">'+t('تفاصيل القمر','Moon details')+' ↗</button></section>'+
  '</aside></div>';
 }
 
