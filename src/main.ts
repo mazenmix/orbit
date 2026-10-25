@@ -32,7 +32,7 @@ import {shiftGoTime,type GoTimeStep} from './goTimeNavigation.ts';
 
 import {todaySkyBrief,todayEventPlain,type TodaySkyBrief} from './todaySkyBrief.ts';
 import {scanWholeSky,wholeSkyBroadcast,occurrenceLanguage,type WholeSkyOccurrence,type WholeSkyBroadcast} from './wholeSkyBroadcast.ts';
-import {scanMotionCycles,remainingMotionPercent,motionTimeRemaining,type MotionCycle} from './planetMotion.ts';
+import {scanMotionCycles,remainingMotionPercent,type MotionCycle} from './planetMotion.ts';
 import {personalSkyStory,type PersonalSkyStory} from './personalSkyNarrative.ts';
 import type {FocusReadingInput} from './focusEventReading.ts';
 import {refineNatalTransit} from './precision.ts';
@@ -381,6 +381,15 @@ function currentPlanetMotionCycles():MotionCycle[]|null{
  }
  return null;
 }
+/** Format the *computed station instant* in the active profile's zone, not a countdown. */
+function planetMotionStationText(at:Date):string{
+ const parts=new Intl.DateTimeFormat('en-GB',{
+  timeZone:active.zone,numberingSystem:'latn',year:'2-digit',month:'2-digit',
+  day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'
+ }).formatToParts(at);
+ const get=(name:string)=>parts.find(part=>part.type===name)?.value??'';
+ return get('day')+'/'+get('month')+'/'+get('year')+' · '+get('hour')+':'+get('minute');
+}
 function planetLiveStatus(brief:WholeSkyBroadcast){
  const current=currentPlanetMotionCycles(),at=+selected;
  return '<section class="panel mx-sky-planets"><h2>'+t('حركة كل الكواكب هسه','Every planet right now')+'</h2>'+
@@ -397,8 +406,8 @@ function planetLiveStatus(brief:WholeSkyBroadcast){
     gauge='<div class="mx-motion-meter" data-motion-start="'+(+period.startedAt)+'" data-motion-end="'+(+period.endsAt)+'" data-motion-mode="'+(isRetro?'retro':'direct')+'">'+
      '<div class="mx-motion-meter-head"><b data-motion-percent>'+pct+'%</b></div>'+
      '<progress max="100" value="'+pct+'" aria-label="'+t('النسبة المتبقية من الحركة الحالية','Current motion period remaining')+'"></progress>'+
-     '<div class="mx-motion-countdown">'+
-     '<time data-motion-countdown datetime="'+period.endsAt.toISOString()+'">'+esc(motionTimeRemaining(at,+period.endsAt,lang,true))+'</time></div></div>';
+     '<div class="mx-motion-end"><small>'+t(isRetro?'نهاية التراجع':'نهاية المباشر',isRetro?'Retrograde ends':'Direct phase ends')+'</small>'+
+     '<time data-motion-station datetime="'+period.endsAt.toISOString()+'" title="'+esc(timezoneCityLabel(active.zone))+'">'+esc(planetMotionStationText(period.endsAt))+'</time></div></div>';
    }else if(!isPermanent){
     gauge='<div class="mx-motion-meter mx-motion-loading" role="status">'+
       ((planetMotionError&&planetMotionError.key===active.id+':'+Math.floor(at/86400000))||(planetMotionCache?.key===active.id+':'+Math.floor(at/86400000) && !!current)
@@ -409,7 +418,7 @@ function planetLiveStatus(brief:WholeSkyBroadcast){
     (isPermanent?'':'<small class="'+motionColor+'">'+motionText+'</small>')+gauge+'</article>';
   }).join('')+'</div></section>';
 }
-/** Update the numerical display every second without recalculating ephemeris. */
+/** Update motion percentages each second; the station date stays fixed until the next computed phase. */
 function tickPlanetMotionGauges(now:number){
  if(screen!=='today')return;
  root.querySelectorAll<HTMLElement>('.mx-sky-planet [data-motion-start][data-motion-end]').forEach(meter=>{
@@ -420,11 +429,6 @@ function tickPlanetMotionGauges(now:number){
   if(value&&value.textContent!==pct+'%')value.textContent=pct+'%';
   const progress=meter.querySelector<HTMLProgressElement>('progress');
   if(progress&&progress.value!==pct)progress.value=pct;
-  const clock=meter.querySelector<HTMLElement>('[data-motion-countdown]');
-  if(clock){
-   const label=motionTimeRemaining(now,end,lang,true);
-   if(clock.textContent!==label)clock.textContent=label;
-  }
  });
 }
 function focusedToday(){
