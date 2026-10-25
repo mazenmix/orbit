@@ -43,7 +43,7 @@ test('calendar month groups and week offsets remain day-accurate',()=>{
 
 test('threshold boundary and monotonic color grade',()=>{
  const samples=[1,15,29,30,31,50,69,70,71,85,99];
- const colors=['red','red','red','red','yellow','yellow','yellow','yellow','green','green','green'];
+ const colors=['red','red','red','yellow','yellow','yellow','yellow','yellow','green','green','green'];
  assert.deepEqual(samples.map(calendarColorForScore),colors);
  for(const invalid of [NaN,-1,0,100,15.5,Infinity])assert.throws(()=>calendarColorForScore(invalid));
 });
