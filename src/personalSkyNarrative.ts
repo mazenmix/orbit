@@ -179,7 +179,7 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
   now:prefix+(soon?phaseNow+' ':'')+now,
   next:later,
   action,
-  focus:houseTopic?txt(houseTopic.area,lang):natalContactTopic??(lang==='ar'?'حدث عام: لا توجد بيوت ولادية مؤكدة أو اتصالات شخصية قريبة':'General event: no verified natal houses or close personal contacts'),
+  focus:houseTopic?txt(houseTopic.area,lang):natalContactTopic??(!knownBirthTime?(lang==='ar'?'قراءة عامة لأن وقت الميلاد مو مؤكد وماكو اتصال شخصي قريب':'General reading: birth time unconfirmed and no close natal contact'):(lang==='ar'?'قراءة عامة: ماكو بيت ولادي قابل للحساب أو اتصال شخصي قريب':'General event: no available natal house or close personal contact')),
   personal:Boolean(houseTopic||natalContactTopic)
  };
 }
