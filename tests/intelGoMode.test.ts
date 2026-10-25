@@ -63,6 +63,8 @@ test('Today replaces its top gauges with a professional current-sky wheel in bot
  const live=main.slice(main.indexOf('function updateLiveSkyWheel('),main.indexOf('function refreshLiveBody('));
  assert.match(focused,/todaySkyWheel\(r\)/);
  assert.match(classic,/todaySkyWheel\(r\)/);
+ assert.ok(classic.indexOf('right-column') < classic.indexOf('todaySkyWheel(r)'), 'Today wheel is placed inside the left-side rail, not in a separate top row');
+ assert.match(css,/#live-view-body \.mx-today-compact\{/);
  assert.doesNotMatch(focused,/todayQuickGauges\(r\)/);
  assert.doesNotMatch(classic,/todayQuickGauges\(r\)/);
  assert.match(sky,/chart-layout chart-expanded mx-today-sky-layout/);
