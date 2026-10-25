@@ -130,7 +130,9 @@ test('Today planet cards have station-based progress and independent live countd
  const clocks=main.slice(main.indexOf('function tickPlanetMotionGauges('),main.indexOf('function focusedToday()'));
  const css=readFileSync('src/focus.css','utf8');
  assert.match(ui,/remainingMotionPercent/);
- assert.match(ui,/motionTimeRemaining/);
+ assert.match(ui,/planetMotionStationText/);
+ assert.match(ui,/data-motion-station/);
+ assert.doesNotMatch(ui,/motionTimeRemaining|data-motion-countdown/);
  assert.match(ui,/data-motion-start/);
  assert.match(ui,/data-motion-end/);
  assert.match(ui,/if\(!isPermanent&&period/);
@@ -203,17 +205,21 @@ test('Moon-Sun conjunction is a New Moon while opposition is a Full Moon',()=>{
  assert.match(difficult.title,/تربيع/);
 });
 
-test('Compact planetary gauges omit redundant copy and keep percentages and countdowns on one row',()=>{
+test('Compact planetary gauges show exact localized station date and minute without overflow',()=>{
  const main=readFileSync('src/main.ts','utf8');
  const ui=main.slice(main.indexOf('function planetLiveStatus('),main.indexOf('/** Update the numerical display every second'));
  const css=readFileSync('src/focus.css','utf8');
  assert.doesNotMatch(ui,/مباشر دائماً|Always direct|المتبقي من الفترة|Phase remaining|يرجع مباشر خلال|Turns direct in|يبدأ التراجع خلال|Turns retrograde in/);
  assert.match(ui,/isPermanent\?'':'<small/);
  assert.match(ui,/mx-motion-meter-head"><b data-motion-percent/);
- assert.match(ui,/mx-motion-countdown/);
- assert.match(ui,/<time data-motion-countdown/);
+ assert.match(ui,/mx-motion-end/);
+ assert.match(ui,/<time data-motion-station/);
+ assert.match(ui,/timeZone:active.zone/);
+ assert.match(ui,/hourCycle:'h23'/);
+ assert.match(ui,/نهاية التراجع/);
+ assert.match(ui,/نهاية المباشر/);
  assert.match(css,/\.mx-motion-meter-head\{[\s\S]*?justify-content:center/);
- assert.match(css,/\.mx-motion-countdown time\{[\s\S]*?white-space:nowrap/);
+ assert.match(css,/\.mx-motion-end time\{[\s\S]*?white-space:nowrap/);
  assert.match(main,/tickPlanetMotionGauges/);
 });
 
