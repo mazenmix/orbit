@@ -62,7 +62,7 @@ export function scanWholeSky(at:Date,read:WholeSkyReader,hoursBack=18,hoursAhead
     const boundary=(last.speed>=0?signAt(last):signAt(first))*30;
     const func=(t:number)=>signed(point(t,id).longitude-boundary);
     const root=bisectAngle(func,a,b,.1);
-    if(root&&Math.abs(func(+root))<.03)emit({kind:'ingress',at:root,first:id,sign:signAt(point(Math.min(end,+root+60000),id))});
+    if(root&&Math.abs(func(+root))<.03){const after=point(Math.min(end,+root+60000),id);emit({kind:'ingress',at:root,first:id,sign:signAt(after),retrograde:after.speed<0});}
    }
    if(first.speed*last.speed<0){
     const func=(t:number)=>point(t,id).speed;
@@ -144,9 +144,9 @@ export function occurrenceLanguage(e:WholeSkyOccurrence,lang:SkyLanguage):{title
  const base=dictionary[e.first],human=guides[e.first],arabic=lang==='ar';
  if(e.kind==='ingress'){
   if(e.sign===undefined||e.sign<0||e.sign>11)throw Error('Invalid verified zodiac sign');
-  return {title:arabic?base.ar+' دخل '+signText(e.sign,lang):base.en+' entered '+signText(e.sign,lang),
-   description:arabic?'هالفترة خَلّ تركيزك على '+signsAdvice[e.sign]+'. '+human.ar:
-    'This period, focus on '+signText(e.sign,lang)+' themes. '+human.en,
+  return {title:arabic?base.ar+(e.retrograde?' رجع متراجعاً إلى ':' دخل ')+signText(e.sign,lang):base.en+(e.retrograde?' returned retrograde to ':' entered ')+signText(e.sign,lang),
+   description:arabic?(e.retrograde?'العودة التراجعية رمزياً تفتح مجال مراجعة '+signsAdvice[e.sign]+'. ':'الدخول يبرز رمزياً موضوع '+signsAdvice[e.sign]+'. ')+human.ar:
+    (e.retrograde?'A retrograde return symbolically revisits ':'The ingress symbolically highlights ')+signText(e.sign,lang)+' themes. '+human.en,
    action:arabic?human.doAr:human.doEn};
  }
  if(e.kind==='station')return {
@@ -163,7 +163,13 @@ export function occurrenceLanguage(e:WholeSkyOccurrence,lang:SkyLanguage):{title
  const context=detail?(arabic?detail.ar:detail.en):
   arabic?'إذا عندك موضوع يجمع '+base.theme+' و'+dictionary[another].theme+'، خلّ اهتمامك بالخطوة اللي تگدر تسويها فعلاً.':
    'For matters involving '+base.englishTheme+' and '+dictionary[another].englishTheme+', focus on a step you can actually take.';
- return {title:pair(e.first,another,lang),
+ const isSolarLunar=(e.first==='Sun'&&another==='Moon')||(e.first==='Moon'&&another==='Sun');
+ const lunation= isSolarLunar&&e.angle===180?(arabic?'اكتمال القمر — مقابلة الشمس والقمر':'Full Moon — Sun–Moon opposition'):
+  isSolarLunar&&e.angle===0?(arabic?'محاق القمر — اقتران الشمس والقمر':'New Moon — Sun–Moon conjunction'):null;
+ const aspectLabels:Record<number,[string,string]>={0:['اقتران','conjunction'],60:['تسديس','sextile'],90:['تربيع','square'],120:['تثليث','trine'],180:['مقابلة','opposition']};
+ const aspectName=aspectLabels[e.angle]??null;
+ if(!aspectName)throw Error('Unsupported aspect angle');
+ return {title:lunation??pair(e.first,another,lang)+' · '+(arabic?aspectName[0]:aspectName[1]),
   description:context+(tense?(arabic?' لا تستعجل بالحسم.':' Avoid a rushed decision.'):(arabic?' جرّب خطوة صغيرة وواضحة.':' Take one small, clear step.')),
   action:detail?(arabic?detail.doAr:detail.doEn):(arabic?second.doAr:second.doEn)};
 }
