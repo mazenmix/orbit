@@ -41,3 +41,21 @@ test('non-dating pairs never inherit romantic dimensions from a reorder',()=>{
   assert.equal(result.coverage.sexual,false);
  }
 });
+
+test('a dating label is not transferable to an unrelated saved-person pair',()=>{
+ const partner=person('date','dating','2000-02-01');
+ const unrelated=person('friend','friend','2000-03-01');
+ const secondPartner=person('date2','dating','2000-04-01');
+ for(const [a,b] of [[partner,unrelated],[unrelated,partner],[partner,secondPartner],[secondPartner,partner]] as const){
+  const result=compatibility(a,b);
+  assert.equal(result.romantic,false);
+  assert.equal(result.coverage.attraction,false);
+  assert.equal(result.coverage.sexual,false);
+  assert.equal(result.dimensions.attraction,0);
+ }
+});
+test('comparisons fail closed for malformed profile definitions',()=>{
+ const self=person('self','self','2000-01-01');
+ assert.throws(()=>compatibility({...self,zone:'Invalid/Tz'},person('date','dating','2000-02-01')));
+ assert.throws(()=>compatibility(self,{...person('date','dating','2000-02-01'),time:'25:90'}));
+});
