@@ -91,7 +91,7 @@ test('Go-mode uses unique domain-specific recommendations rather than repetitive
  assert.ok(main.includes('function mxGoNarrative('));
  assert.ok(!main.includes("t('اسأل عن التفاصيل قبل القرار'"));
  assert.ok(!main.includes('تظهر زاوية رمزية داعمة؛ استثمرها بخطوة محدودة'));
- assert.ok(main.includes('mxGoNarrative(d.domain,state,memo)'));
+ assert.ok(main.includes('contextGaugeNarrative(sky,memo.sourceCategories'), 'Go Mode text derives from each domain\'s current chart categories');
 });
 
 test('Moon sign has live five-line calculation tied to owner natal data',()=>{
