@@ -124,6 +124,22 @@ test('Planet sign entries and every sky event carry a distinct practical persona
  assert.notEqual(readings[2].description,readings[3].description);
 });
 
+test('Today planet cards have station-based progress and independent live countdowns',()=>{
+ const main=readFileSync('src/main.ts','utf8');
+ const ui=main.slice(main.indexOf('function planetLiveStatus('),main.indexOf('function focusedToday()'));
+ const clocks=main.slice(main.indexOf('function tickPlanetMotionGauges('),main.indexOf('function focusedToday()'));
+ const css=readFileSync('src/focus.css','utf8');
+ assert.match(ui,/remainingMotionPercent/);
+ assert.match(ui,/motionTimeRemaining/);
+ assert.match(ui,/data-motion-start/);
+ assert.match(ui,/data-motion-end/);
+ assert.match(ui,/mx-motion-permanent/);
+ assert.match(ui,/progress max="100"/);
+ assert.match(ui,/is-retrograde/);
+ assert.match(clocks,/data-motion-percent/);
+ assert.match(main,/tickPlanetMotionGauges\(liveTimePinned\?\+selected:now\)/);
+ assert.match(css,/\.mx-sky-planet\.is-retrograde .mx-motion-meter progress/);
+});
 test('Live event cards show What to do in readable user-directed Arabic',()=>{
  const main=readFileSync('src/main.ts','utf8');
  const section=main.slice(main.indexOf('function wholeSkyEventItems('),main.indexOf('function planetLiveStatus('));

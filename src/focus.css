@@ -798,6 +798,63 @@
  color:#8fe0c5;
 }
 
+/* Verified planetary-motion gauges: green direct, orange retrograde. */
+#live-view-body .mx-full-sky-today .mx-sky-planet{
+ gap:6px;min-height:176px;
+}
+#live-view-body .mx-full-sky-today .mx-sky-planet.is-direct{
+ border-color:rgba(101,211,164,.26);
+}
+#live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde{
+ border-color:rgba(255,157,65,.34);
+ background:linear-gradient(155deg,rgba(129,79,35,.18),rgba(38,35,57,.28));
+}
+#live-view-body .mx-full-sky-today .mx-motion-meter{margin-top:auto;display:flex;flex-direction:column;gap:6px;min-width:0}
+#live-view-body .mx-full-sky-today .mx-motion-meter-head{
+ display:flex;align-items:center;justify-content:space-between;gap:4px;
+ font-size:.66rem;color:#a3cdb9;line-height:1.3;
+}
+#live-view-body .mx-full-sky-today .mx-motion-meter-head b{
+ font-size:.85rem;line-height:1.2;font-variant-numeric:tabular-nums;color:#70e5ad;
+}
+#live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde .mx-motion-meter-head{color:#f2bd89}
+#live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde .mx-motion-meter-head b{color:#ffaa55}
+#live-view-body .mx-full-sky-today .mx-motion-meter progress{
+ display:block;width:100%;height:9px;max-width:100%;border:none;border-radius:20px;
+ appearance:none;-webkit-appearance:none;background:rgba(59,78,77,.48);overflow:hidden;
+ accent-color:#42d79b;
+}
+#live-view-body .mx-full-sky-today .mx-motion-meter progress::-webkit-progress-bar{background:rgba(59,78,77,.48);border-radius:20px}
+#live-view-body .mx-full-sky-today .mx-motion-meter progress::-webkit-progress-value{
+ background:linear-gradient(90deg,#19966e,#5ce3a4);border-radius:20px;
+}
+#live-view-body .mx-full-sky-today .mx-motion-meter progress::-moz-progress-bar{
+ background:linear-gradient(90deg,#19966e,#5ce3a4);border-radius:20px;
+}
+#live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde .mx-motion-meter progress{accent-color:#ff972e}
+#live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde .mx-motion-meter progress::-webkit-progress-value{
+ background:linear-gradient(90deg,#dc681a,#ffb35b);
+}
+#live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde .mx-motion-meter progress::-moz-progress-bar{
+ background:linear-gradient(90deg,#dc681a,#ffb35b);
+}
+#live-view-body .mx-full-sky-today .mx-motion-countdown{
+ display:flex;flex-direction:column;gap:3px;min-width:0;
+ border-top:1px solid rgba(164,172,193,.13);padding-top:7px;
+}
+#live-view-body .mx-full-sky-today .mx-motion-countdown small{color:#c4cfe1;font-size:.65rem;line-height:1.4}
+#live-view-body .mx-full-sky-today .mx-motion-countdown time{
+ display:block;font-size:.77rem;color:#e8fdf2;font-variant-numeric:tabular-nums;
+ font-weight:800;line-height:1.5;overflow-wrap:anywhere;
+}
+#live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde .mx-motion-countdown time{color:#ffd4a0}
+#live-view-body .mx-full-sky-today .mx-motion-permanent .mx-motion-countdown{
+ color:#9db6b3;font-size:.7rem;line-height:1.5;
+}
+#live-view-body .mx-full-sky-today .mx-motion-loading{
+ font-size:.7rem;line-height:1.6;color:#bac8d6;min-height:50px;justify-content:flex-end;
+}
+
 @media(max-width:810px){#live-view-body .mx-full-sky-today .mx-sky-planet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:410px){#live-view-body .mx-full-sky-today .mx-sky-planet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
