@@ -2,6 +2,7 @@
  * probabilities, exact future dates, or private-person claims as calculations.
  */
 import {bodies} from './math.ts';
+import {evidenceGroundedPlainAnalysis} from './aiGroundedNarrative.ts';
 export type AIContact={transit:string;natal:string;angle:number;orb:number;applying:boolean};
 export type AIAdviceContext={language:'ar'|'en';support:AIContact|null;challenge:AIContact|null;events:readonly {kind:string;type:string;maximum:string}[];evidence?:readonly AIContact[];supplemental?:readonly AIContact[];strict?:boolean;plainLanguage?:boolean;comparisonAvailable?:boolean};
 const normalized=(s:string)=>s.normalize('NFKC').toLocaleLowerCase().replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/[٠-٩]/g,v=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(v))).replace(/[۰-۹]/g,v=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(v)));
@@ -130,28 +131,7 @@ export function groundedFallback(ctx:AIAdviceContext){
 }
 /** Safe fallback in client language, grounded in target domains but without astronomical labels. */
 export function groundedPlainFallback(ctx:AIAdviceContext):string{
- const ar=ctx.language==='ar',lead=ctx.challenge??ctx.support;
- if(!lead)return ar?'المعلومات الحالية ما تكفي حتى أحدد موضوعاً شخصياً بعينه. اختار موضوعاً واحداً تريد تحسمه اليوم، وجمّع حقائقه قبل القرار.':'There is insufficient evidence for a specific personal reading. Choose one question and gather the facts first.';
- const domain:Record<string,[string,string,string,string]>={
-  Sun:['قرار يخص أولوياتك الشخصية','a decision about priorities','وضح هدفك قبل ما تحاول ترضي الجميع.','Clarify your goal before trying to satisfy everyone.'],
-  Moon:['راحتك وردّة فعلك','comfort and emotional reactions','حدد شنو تحتاج حتى تهدأ قبل الرد.','Name what you need before responding.'],
-  Mercury:['حوار أو رسالة تنتظر توضيح','a conversation or message needing clarity','اسأل عن الشي الغامض بدل ما تفسره من نفسك.','Ask about uncertainty rather than inferring intentions.'],
-  Venus:['التقارب والاهتمام','connection and affection','عبّر بوضوح وخلي جواب الطرف الثاني يحدد خطوتك.','Express interest clearly and let the response guide you.'],
-  Mars:['المبادرة وحدود الاندفاع','initiative and impulse','ابدأ بخطوة صغيرة بدل قرار يصعب الرجوع عنه.','Take a small reversible step.'],
-  Jupiter:['فكرة توسع أو فرصة','an opportunity for growth','احسب الكلفة والوقت قبل الالتزام.','Review cost and timing before committing.'],
-  Saturn:['الالتزام والمسؤولية','responsibilities and boundaries','وضح المطلوب والموعد قبل الموافقة.','Clarify scope and deadline before agreeing.'],
-  Uranus:['تغيير بالروتين أو الخطة','a change in routine or plan','جرّب تعديل قابل للتراجع أولاً.','Try a reversible change first.'],
-  Neptune:['التوقعات مقابل الوقائع','expectations versus facts','ميز بين اللي تعرفه وبين اللي تتمناه.','Separate evidence from hopes.'],
-  Pluto:['حدود السيطرة والتغيير','boundaries and change','ركز على تصرفك واترك استجابة غيرك له.','Focus on your own choices, not another person’s reaction.'],
-  MC:['المسار المهني','career direction','حدد نتيجة واضحة تقدر تقيسها.','Define one measurable result.'],
-  Ascendant:['الانطباع الأول والتعارف','first impressions','خلي الكلام طبيعي وواضح.','Keep communication natural and clear.']
- };
- const d=domain[lead.natal]??['ترتيب الأولويات','prioritizing your choices','اختار خطوة واحدة قابلة للقياس.','Choose one measurable step.'];
- const contrast=ctx.support&&ctx.challenge?
- (ar?'أكو جانب يشجعك تتحرك، وبالمقابل جانب يحتاج تروّي؛ لا تخلي الحماس يلغي التدقيق.':'There is both an opening and a reason for caution; avoid letting enthusiasm replace checking.'):
- (ar?'هذا محور للمراجعة، مو دليل أن حدثاً محدداً راح يصير.':'This is a theme for reflection, not a forecast of an event.');
- return ar?'هسه يمكن يفيدك تراجع '+d[0]+'. '+contrast+' إذا عندك موقف مشابه فعلاً، قارن الفكرة بالوقائع قبل تحسم.\n\n'+d[2]+' جرّب هالخطوة وراقب النتيجة الحقيقية بدل الحكم من الشعور وحده.':
-  'Your practical focus is '+d[1]+'. '+contrast+' Check whether this theme actually fits your situation.\n\n'+d[3]+' Evaluate what happens instead of assuming a result.';
+ return evidenceGroundedPlainAnalysis(ctx);
 }
 export function reviewGeneratedAdvice(raw:string,ctx:AIAdviceContext){
  const clean=conciseAI(raw),problems=unsafeAIGuesses(clean,ctx);
