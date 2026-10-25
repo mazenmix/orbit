@@ -123,6 +123,12 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
   if(event.sign===undefined||event.sign<0||event.sign>11)throw Error('Invalid sign event');
   const emphasis=txt(ingressStyles[event.sign],lang);
   later+=' '+emphasis;
+  if(event.retrograde){
+   now+=(lang==='ar'?' هاي عودة أثناء التراجع الظاهري، ومعناها التقليدي مراجعة موضوع سابق، مو وعد برجوع شخص أو حدث.':
+    ' This apparent retrograde return traditionally emphasizes review, not a promise that anyone or anything will return.');
+   later=lang==='ar'?'راجع التوقعات الحالية عند إعادة المرور بالبرج؛ القرار يعتمد على الواقع.':
+    'Reassess expectations as the sign is revisited; real circumstances decide outcomes.';
+  }
   // A Venus ingress in Libra with 7th house, for example, concerns an actual
   // natal life sector AND Libra's give-and-take rather than all users' romance.
   if(event.first==='Venus'&&houseTopic){
