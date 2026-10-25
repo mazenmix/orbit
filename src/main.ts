@@ -19,6 +19,7 @@ import './focus.css';
 import './peopleCards.css';
 import './lifeGauges.css';
 import './moonMansions.css';
+import './navAlignment.css';
 import {lunarMansionWindow,type LunarMansionWindow} from './moonMansions.ts';
 import {astroCalendarDays,firstTwelveCalendarMonths,astroCalendarGridPosition,calendarDaySynthesis,calendarMomentEvidence,CALENDAR_SAMPLE_HOURS,type AstroCalendarDay,type AstroCalendarRating,type CalendarDayRating} from './astroCalendar.ts';
 import {optionalComparison,distinctParagraphs} from './reading.ts';
@@ -166,7 +167,7 @@ function currentMansionWindow():LunarMansionWindow {
 }
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const personHue=(id:string)=>{const ids=profiles.map(p=>p.id).sort();return Math.round((Math.max(0,ids.indexOf(id))*137.508+28)%360)};
-const icon=(name:string)=>({today:'✦',signals:'⌁',people:'♧',chart:'◎',settings:'⚙',time:'◷',lunar:'☾',eclipses:'◑',asteroids:'✧',advanced:'◈',intel:'✦',go:'➤',travelmode:'✈',calendar:'▦',more:'☷',ai:'✧',evidence:'⎔'}[name]??'·');
+const icon=(name:string)=>({today:'✦',signals:'⌁',people:'♧',chart:'◎',settings:'⚙',time:'◷',lunar:'☾',eclipses:'◑',asteroids:'✧',advanced:'◈',intel:'✦',go:'➤',travelmode:'<svg class="mx-plane-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5L21 16Z"/></svg>',calendar:'▦',more:'☷',ai:'✧',evidence:'⎔'}[name]??'·');
 const labels:Record<string,()=>string>={today:()=>t('اليوم','Today'),signals:()=>t('الإشارات','Signals'),people:()=>t('الناس','People'),chart:()=>t('خارطتي','My chart'),settings:()=>t('الإعدادات','Settings'),time:()=>t('آلة الزمن','Time Machine'),lunar:()=>t('القمر','Moon'),eclipses:()=>t('الكسوف والخسوف','Eclipses'),asteroids:()=>t('الكويكبات','Named asteroids'),advanced:()=>t('التوقيت المتقدم','Advanced timing'),calendar:()=>t('التقويم','Calendar'),more:()=>t('المزيد','More'),go:()=>t('Go Mode','Go Mode'),travelmode:()=>t('Travel Mode','Travel Mode'),intel:()=>t('Go Mode','Go Mode'),ai:()=>t('شرح Ai','Ai explanations'),evidence:()=>t('الدليل الفلكي','Astrological evidence')};
 let clockFormat: '24'|'12'=localStorage.getItem('mx.clockFormat')==='12'?'12':'24';
 let liveTimePinned=false,liveLastRender=0,liveMinute=-1,moonNarrativeLastMinute=-1,liveSkyLastTick=0;
