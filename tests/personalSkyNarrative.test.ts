@@ -102,3 +102,26 @@ test('retrograde ingress describes revisiting a sign without promising a reunion
  assert.match(story.now,/عودة أثناء التراجع/);
  assert.doesNotMatch(story.now+story.next,/أكيد يرجع|حتتصل|شخص راح يرجع/);
 });
+
+
+test('a conjunction is not automatically classified as a challenging square or opposition',()=>{
+ const event:WholeSkyOccurrence={kind:'aspect',first:'Moon',second:'Venus',angle:0,at:NOW};
+ const story=make(event);
+ assert.match(story.now,/اقتران يجمع الموضوعين/);
+ assert.doesNotMatch(story.now,/زاوية متوترة|زاوية تحتاج موازنة/);
+});
+test('unknown birth hour can still support a precisely calculated non-lunar natal contact',()=>{
+ const timedOut=natal(0,false);
+ const chartWithSun={...timedOut,points:[{id:'Sun',symbol:'☉',longitude:180.2,speed:0}]};
+ const story=make(ingress,chartWithSun,false);
+ assert.equal(story.personal,true);
+ assert.match(story.focus,/قرارك الشخصي|ثقتك/);
+ assert.doesNotMatch(story.now,/بخريطتك هذا يرتبط/);
+ assert.match(story.next,/بخريطتك هذا يلامس/);
+});
+test('future retrograde ingress uses upcoming language rather than asserting a completed return',()=>{
+ const event:WholeSkyOccurrence={...ingress,retrograde:true,at:new Date(+NOW+3600000)};
+ const story=make(event);
+ assert.match(story.now,/الحدث القادم يمثل عودة أثناء التراجع/);
+ assert.doesNotMatch(story.now,/هاي عودة أثناء/);
+});
