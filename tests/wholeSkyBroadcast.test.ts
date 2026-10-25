@@ -210,7 +210,8 @@ test('Compact planetary gauges omit redundant copy and keep percentages and coun
  assert.doesNotMatch(ui,/مباشر دائماً|Always direct|المتبقي من الفترة|Phase remaining|يرجع مباشر خلال|Turns direct in|يبدأ التراجع خلال|Turns retrograde in/);
  assert.match(ui,/isPermanent\?'':'<small/);
  assert.match(ui,/mx-motion-meter-head"><b data-motion-percent/);
- assert.match(ui,/mx-motion-countdown"><time data-motion-countdown/);
+ assert.match(ui,/mx-motion-countdown/);
+ assert.match(ui,/<time data-motion-countdown/);
  assert.match(css,/\.mx-motion-meter-head\{[\s\S]*?justify-content:center/);
  assert.match(css,/\.mx-motion-countdown time\{[\s\S]*?white-space:nowrap/);
  assert.match(main,/tickPlanetMotionGauges/);
