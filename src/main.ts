@@ -398,7 +398,7 @@ function planetLiveStatus(brief:WholeSkyBroadcast){
      '<div class="mx-motion-meter-head"><b data-motion-percent>'+pct+'%</b></div>'+
      '<progress max="100" value="'+pct+'" aria-label="'+t('النسبة المتبقية من الحركة الحالية','Current motion period remaining')+'"></progress>'+
      '<div class="mx-motion-countdown">'+
-     '<time data-motion-countdown datetime="'+period.endsAt.toISOString()+'">'+esc(motionTimeRemaining(at,+period.endsAt,lang))+'</time></div></div>';
+     '<time data-motion-countdown datetime="'+period.endsAt.toISOString()+'">'+esc(motionTimeRemaining(at,+period.endsAt,lang,true))+'</time></div></div>';
    }else if(!isPermanent){
     gauge='<div class="mx-motion-meter mx-motion-loading" role="status">'+
       ((planetMotionError&&planetMotionError.key===active.id+':'+Math.floor(at/86400000))||(planetMotionCache?.key===active.id+':'+Math.floor(at/86400000) && !!current)
@@ -422,7 +422,7 @@ function tickPlanetMotionGauges(now:number){
   if(progress&&progress.value!==pct)progress.value=pct;
   const clock=meter.querySelector<HTMLElement>('[data-motion-countdown]');
   if(clock){
-   const label=motionTimeRemaining(now,end,lang);
+   const label=motionTimeRemaining(now,end,lang,true);
    if(clock.textContent!==label)clock.textContent=label;
   }
  });
