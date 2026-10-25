@@ -133,7 +133,9 @@ test('Today planet cards have station-based progress and independent live countd
  assert.match(ui,/motionTimeRemaining/);
  assert.match(ui,/data-motion-start/);
  assert.match(ui,/data-motion-end/);
- assert.match(ui,/mx-motion-permanent/);
+ assert.match(ui,/if\(!isPermanent&&period/);
+ assert.match(ui,/else if\(!isPermanent\)/);
+ assert.doesNotMatch(ui,/mx-motion-permanent/);
  assert.match(ui,/progress max="100"/);
  assert.match(ui,/is-retrograde/);
  assert.match(clocks,/data-motion-percent/);

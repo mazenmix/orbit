@@ -712,11 +712,14 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
    await expect(details).toHaveAttribute('open','');
    await expect(details.locator('.mx-sky-feed-now')).toBeVisible();
   }
-  // Motion bar audit: ten bodies, permanent direct motion for Sun/Moon,
-  // and real finite phase endpoints for every resolved countdown.
+  // Sun and Moon show motion status only: no gauges, percent or countdown.
+  // The other eight planet cards retain finite station phase metrics.
   const planets=page.locator('.mx-full-sky-today .mx-sky-planet');
   await expect(planets).toHaveCount(10);
-  await expect(planets.locator('.mx-motion-permanent')).toHaveCount(2);
+  await expect(page.locator('.mx-full-sky-today .mx-sky-planet.is-permanent')).toHaveCount(2);
+  await expect(page.locator('.mx-full-sky-today .mx-sky-planet.is-permanent .mx-motion-meter')).toHaveCount(0);
+  await expect(page.locator('.mx-full-sky-today .mx-sky-planet.is-permanent progress')).toHaveCount(0);
+  await expect(page.locator('.mx-full-sky-today .mx-sky-planet.is-permanent [data-motion-countdown]')).toHaveCount(0);
   const motionMeters=page.locator('.mx-full-sky-today .mx-sky-planet .mx-motion-meter[data-motion-start]');
   const sampleMeter=motionMeters.first();
   if(await motionMeters.count()){

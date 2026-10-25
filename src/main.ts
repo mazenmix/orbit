@@ -392,24 +392,20 @@ function planetLiveStatus(brief:WholeSkyBroadcast){
    const motionColor=isRetro?'is-retrograde':'is-direct';
    const motionText=isPermanent?t('مباشر دائماً','Always direct'):isRetro?t('متراجع','Retrograde'):t('مباشر','Direct');
    let gauge='';
-   if(isPermanent){
-    gauge='<div class="mx-motion-meter mx-motion-permanent"><div class="mx-motion-meter-head"><span>'+t('حركة دائمة','Permanent motion')+'</span><b>100%</b></div>'+
-     '<progress max="100" value="100" aria-label="'+t('دائماً مباشر','Always direct')+'"></progress>'+
-     '<div class="mx-motion-countdown">'+t('ماكو تراجع أو موعد انقلاب','No retrograde station applies')+'</div></div>';
-   }else if(period?.startedAt&&period?.endsAt&&+period.startedAt<=at&&at<+period.endsAt){
+   if(!isPermanent&&period?.startedAt&&period?.endsAt&&+period.startedAt<=at&&at<+period.endsAt){
     const pct=remainingMotionPercent(+period.startedAt,+period.endsAt,at)!;
     gauge='<div class="mx-motion-meter" data-motion-start="'+(+period.startedAt)+'" data-motion-end="'+(+period.endsAt)+'" data-motion-mode="'+(isRetro?'retro':'direct')+'">'+
      '<div class="mx-motion-meter-head"><span>'+t('المتبقي من الفترة','Phase remaining')+'</span><b data-motion-percent>'+pct+'%</b></div>'+
      '<progress max="100" value="'+pct+'" aria-label="'+t('النسبة المتبقية من الحركة الحالية','Current motion period remaining')+'"></progress>'+
      '<div class="mx-motion-countdown"><small>'+(isRetro?t('يرجع مباشر خلال','Turns direct in'):t('يبدأ التراجع خلال','Turns retrograde in'))+'</small>'+
      '<time data-motion-countdown datetime="'+period.endsAt.toISOString()+'">'+esc(motionTimeRemaining(at,+period.endsAt,lang))+'</time></div></div>';
-   }else{
+   }else if(!isPermanent){
     gauge='<div class="mx-motion-meter mx-motion-loading" role="status">'+
       ((planetMotionError&&planetMotionError.key===active.id+':'+Math.floor(at/86400000))||(planetMotionCache?.key===active.id+':'+Math.floor(at/86400000) && !!current)
        ?t('موعد تغيّر الاتجاه غير متاح حالياً','Station timing unavailable')
        :t('دا أحسب موعد تغيّر الاتجاه…','Calculating verified station…'))+'</div>';
    }
-   return '<article class="mx-sky-planet '+motionColor+'"><strong>'+esc(item.label)+'</strong><span>'+esc(item.sign)+'</span>'+
+   return '<article class="mx-sky-planet '+motionColor+(isPermanent?' is-permanent':'')+'"><strong>'+esc(item.label)+'</strong><span>'+esc(item.sign)+'</span>'+
     '<small class="'+motionColor+'">'+motionText+'</small>'+gauge+'</article>';
   }).join('')+'</div></section>';
 }
