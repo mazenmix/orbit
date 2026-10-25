@@ -12,3 +12,13 @@ test('actual extra named asteroid contacts are calculated rather than skipped by
  assert.ok(asteroidReading(namedAsteroids[0],a[0]).emphasis.includes('زهرتك'));
  assert.equal(namedAsteroidContacts([{id:'Eros',symbol:'✧',longitude:300,speed:0}],[{id:'Venus',symbol:'♀',longitude:10,speed:0}],d).length,0);
 });
+
+test('catalogue themes do not issue individualized advice without an exact computed contact',()=>{
+ const entry=namedAsteroids.find(x=>x.name==='Eros')!;
+ const generic=asteroidReading(entry,undefined);
+ assert.equal(generic.action,'');
+ assert.match(generic.emphasis,/ماكو اتصال ولادي قريب/);
+ const contact=namedAsteroidContacts([{id:'Eros',symbol:'✧',longitude:121,speed:.12}],[{id:'Venus',symbol:'♀',longitude:120,speed:0}],new Date('2026-10-18T12:00:00Z'))[0];
+ assert.ok(contact);
+ assert.ok(asteroidReading(entry,contact).action.length>15);
+});
