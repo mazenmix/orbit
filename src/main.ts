@@ -715,7 +715,7 @@ function goModePage(){
  const gauges=todayQuickGauges(r,true);
  const timeNav=sharedModeTimeNavigation();
  const goCards='<section class="panel mx-go-mode-decisions">'+
-  '<div class="go-grid">'+go.map(d=>{const memo=reviewGoMode(d,indicators,decisions),state=memo.state;return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+(memo.complete?d.value:'—')+(memo.complete?'<em>/100</em>':'')+'</strong><p class="go-decision">'+mxGoNarrative(d.domain,state,memo)+'</p></div>'}).join('')+'</div>'+
+  '<div class="go-grid">'+go.map(d=>{const memo=reviewGoMode(d,indicators,decisions),state=memo.state;return '<div class="go-card '+state+' '+(memo.complete?gaugeLevel(d.value):'mx-unavailable')+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+(memo.complete?d.value:'—')+(memo.complete?'<em>/100</em>':'')+'</strong><p class="go-decision">'+mxGoNarrative(d.domain,state,memo)+'</p></div>'}).join('')+'</div>'+
   '</section>';
  const allIndicators='<section class="panel mx-go-mode-indicators"><div class="metrics-grid">'+
   indicators.map(m=>indicatorGaugeCard(m)).join('')+
