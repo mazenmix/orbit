@@ -35,11 +35,11 @@ export function fortuneContactWeight(e:Evidence):number{
  return e.weight*(.45+.55*proximity)*(e.applying?1.08:1)*relevance;
 }
 /** Consistent, monotonic user-selected thresholds. Values are integers:
- * 1–30 red; 31–70 yellow; 71–99 green. 30 and 70 are inclusive below.
+ * 1–29 red; 30–70 yellow; 71–99 green. Both 30 and 70 are yellow.
  */
 export function calendarColorForScore(value:number):CalendarColor{
  if(!Number.isInteger(value)||value<1||value>99)throw Error('Invalid astrological index');
- return value<=30?'red':value<=70?'yellow':'green';
+ return value<30?'red':value<=70?'yellow':'green';
 }
 export function colorizeAstroDay(evidence:readonly Evidence[]):AstroCalendarRating{
  let favorableWeight=0,challengingWeight=0,strongestSupport:Evidence|null=null,strongestChallenge:Evidence|null=null;
