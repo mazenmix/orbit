@@ -34,6 +34,21 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
  });
 }
 
+test('Today lunar rings appear beneath Time Machine',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/#today',{waitUntil:'domcontentloaded'});
+ const panel=page.locator('.mx-today-compact .mx-today-moon-gauges');
+ await panel.waitFor({state:'visible',timeout:75000});
+ await expect(panel.locator('.mx-lunar-gauge')).toHaveCount(2);
+ const clock=panel.locator('[data-lunar-gauge="moon"] [data-gauge-time]');
+ await expect.poll(()=>clock.textContent(),{timeout:6000}).not.toBe('—');
+ const initial=await clock.textContent();
+ await expect.poll(()=>clock.textContent(),{timeout:5000}).not.toBe(initial);
+ const times=await Promise.all([page.locator('.mx-today-compact .time-shortcut').boundingBox(),panel.boundingBox()]);
+ expect(times[1].y).toBeGreaterThanOrEqual(times[0].y+times[0].height-3);
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThan(9);
+});
 test('Today sky wheel sits at the left of the live reading without an empty top row',async({page})=>{
  await page.setViewportSize({width:1440,height:900});
  await page.goto('/#today',{waitUntil:'domcontentloaded'});
