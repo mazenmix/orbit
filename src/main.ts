@@ -37,6 +37,7 @@ import {refineNatalTransit} from './precision.ts';
 import {scanLunations,type Lunation} from './eclipse.ts';
 import type {ConfirmedEclipse} from './realEclipses.ts';
 import {eclipseEvidenceAt} from './eclipseEvidence.ts';
+import {auxiliaryName} from './auxiliaryPoints.ts';
 import {namedAsteroids,asteroidSourcePath} from './asteroids.ts';
 import {loadNamedAsteroids,mountedAsteroidCount,namedAsteroidPositions} from './asteroidRuntime.ts';
 import {asteroidReading,namedAsteroidContacts} from './asteroidInterpretation.ts';
@@ -1011,6 +1012,11 @@ function evidencePage(){
  '<p class="subtle">'+t('الأجرام الثانوية الولادية المحسوبة (مستقلة عن درجات المؤشرات):','Calculated minor natal bodies (separate from indicator scores):')+'</p>'+
  '<div class="eclipse-contacts">'+r.supplementalNatal.map(p=>'<span><b>'+esc(planet(p.id))+'</b> · '+esc(signName(p.longitude))+' · '+p.longitude.toFixed(4)+'°</span>').join('')+'</div>'+
  '<div class="eclipse-contacts">'+r.supplementalEvidence.map(e=>'<span><b>'+esc(technical(e))+'</b></span>').join('')+'</div>'+
+ '<p class="subtle">'+t('العقد القمرية والنقاط المشتقة وزوايا الخريطة (مستقلة عن الدرجات):','Lunar nodes and derived chart points (not used in scores):')+'</p>'+
+ '<div class="eclipse-contacts">'+r.auxiliaryNatal.map(p=>'<span><b>'+esc(auxiliaryName(p.id,lang==='ar'))+'</b> · '+esc(signName(p.longitude))+' · '+p.longitude.toFixed(4)+'°</span>').join('')+'</div>'+
+ '<div class="eclipse-contacts">'+r.auxiliaryCurrent.map(p=>'<span><b>'+esc(auxiliaryName(p.id,lang==='ar'))+' '+t('الآن','current')+'</b> · '+p.longitude.toFixed(4)+'°</span>').join('')+'</div>'+
+ '<div class="eclipse-contacts">'+r.auxiliaryEvidence.map(e=>'<span><b>'+esc(auxiliaryName(e.natal.id,lang==='ar'))+' · '+esc(technical(e))+'</b></span>').join('')+'</div>'+
+ (r.auxiliaryMissing.natal.length||r.auxiliaryMissing.transit.length?'<p class="subtle">'+t('نقاط فلكية غير قابلة للحساب لهذي البيانات: ','Unavailable additional chart points: ')+esc([...new Set([...r.auxiliaryMissing.natal,...r.auxiliaryMissing.transit])].map(id=>auxiliaryName(id,lang==='ar')).join('، '))+'</p>':'')+
  (r.supplementalMissing.natal.length||r.supplementalMissing.transit.length?'<p class="subtle">'+t('عناصر ثانوية غير متاحة حسابياً: ','Unavailable minor ephemerides: ')+esc([...new Set([...r.supplementalMissing.natal,...r.supplementalMissing.transit])].join('، '))+'</p>':'')+
  '</details>';
 }
