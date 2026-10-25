@@ -838,21 +838,21 @@
 #live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde .mx-motion-meter progress::-moz-progress-bar{
  background:linear-gradient(90deg,#dc681a,#ffb35b);
 }
-#live-view-body .mx-full-sky-today .mx-motion-countdown{
- display:flex;flex-direction:column;gap:3px;min-width:0;
- border-top:1px solid rgba(164,172,193,.13);padding-top:7px;
+#live-view-body .mx-full-sky-today .mx-motion-end{
+ display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;
+ border-top:1px solid rgba(164,172,193,.13);padding-top:6px;
 }
-#live-view-body .mx-full-sky-today .mx-motion-countdown small{color:#c4cfe1;font-size:.65rem;line-height:1.4}
-#live-view-body .mx-full-sky-today .mx-motion-countdown time{
- display:block;width:100%;font-size:clamp(8px,.7vw,10px);color:#e8fdf2;
- font-variant-numeric:tabular-nums;font-weight:800;line-height:1.4;
- white-space:nowrap;overflow-wrap:normal;letter-spacing:-.02em;
- text-align:center;direction:rtl;
+#live-view-body .mx-full-sky-today .mx-motion-end small{
+ display:block;width:100%;text-align:center;color:#c4cfe1;font-size:clamp(9px,.75vw,10px);
+ line-height:1.25;white-space:nowrap;
 }
-#live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde .mx-motion-countdown time{color:#ffd4a0}
-#live-view-body .mx-full-sky-today .mx-motion-permanent .mx-motion-countdown{
- color:#9db6b3;font-size:.7rem;line-height:1.5;
+#live-view-body .mx-full-sky-today .mx-motion-end time{
+ display:block;width:100%;max-width:100%;box-sizing:border-box;
+ font-size:clamp(9px,.75vw,11px);color:#e8fdf2;font-variant-numeric:tabular-nums;
+ font-weight:800;line-height:1.25;white-space:nowrap;overflow-wrap:normal;
+ letter-spacing:-.015em;text-align:center;direction:ltr;unicode-bidi:isolate;
 }
+#live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde .mx-motion-end time{color:#ffd4a0}
 #live-view-body .mx-full-sky-today .mx-motion-loading{
  font-size:.7rem;line-height:1.6;color:#bac8d6;min-height:50px;justify-content:flex-end;
 }
