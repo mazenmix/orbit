@@ -125,3 +125,14 @@ test('future retrograde ingress uses upcoming language rather than asserting a c
  assert.match(story.now,/الحدث القادم يمثل عودة أثناء التراجع/);
  assert.doesNotMatch(story.now,/هاي عودة أثناء/);
 });
+
+test('a personal full Moon reads the verified Sun–Moon axis rather than one natal house',()=>{
+ const event:WholeSkyOccurrence={kind:'aspect',first:'Sun',second:'Moon',angle:180,at:NOW};
+ const exactlyOpposite=sky.map(p=>p.id==='Moon'?{...p,longitude:40}:p);
+ const knownReading=personalSkyStory({event,at:NOW,natal:natal(),skyAtEvent:exactlyOpposite,knownBirthTime:true,lang:'ar'});
+ assert.match(knownReading.title,/اكتمال القمر|مقابلة الشمس والقمر/);
+ assert.match(knownReading.next,/البدر يربط رمزياً بين/);
+ assert.match(knownReading.next,/المال المشترك|المصاريف/);
+ const unknownReading=personalSkyStory({event,at:NOW,natal:natal(0,false),skyAtEvent:exactlyOpposite,knownBirthTime:false,lang:'ar'});
+ assert.doesNotMatch(unknownReading.next,/البدر يربط رمزياً بين/);
+});
