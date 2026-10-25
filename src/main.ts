@@ -510,11 +510,11 @@ function todayMoonGaugePanel(){
  try{
   const w=moonWindow(),isVoid=w.isVoid;
   return '<section class="panel mx-today-moon-gauges '+(isVoid?'is-voc':'is-clear')+'" data-voc-start="'+(+w.vocStartsAt)+'" data-voc-end="'+(+w.ingressAt)+'" data-sign-end="'+(+w.ingressAt)+'" aria-label="'+t('عدادات القمر وخلو المسار','Moon and void-of-course gauges')+'">'+
-   '<header class="mx-today-moon-gauges-head"><h2>☾ '+t('القمر الآن وخلو المسار','Current Moon & Void of Course')+'</h2><span class="mx-today-gauges-live"><i class="status-dot"></i>LIVE</span></header>'+
-   '<div class="lunar-premium-grid mx-today-moon-gauges-stack">'+
+   '<header class="mx-today-moon-gauges-head"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2><span class="mx-today-gauges-live"><i class="status-dot"></i>LIVE</span></header>'+
+   '<div class="mx-today-moon-gauges-stack">'+
     '<div class="mx-today-moon-gauge-unit"><div class="mx-today-moon-gauge-title"><span>'+t('القمر الآن','Current Moon')+'</span><strong>'+signName(w.sign*30)+'</strong></div>'+
      lunarGaugeMarkup('moon',w.enteredAt,w.ingressAt,w.enteredAt,w.vocStartsAt)+'</div>'+
-    '<div class="mx-today-moon-gauge-unit"><div class="mx-today-moon-gauge-title"><span>VOID OF COURSE</span><strong>'+(isVoid?t('خالي المسار','Active'):t('ماشي عدل','On course'))+'</strong></div>'+
+    '<div class="mx-today-moon-gauge-unit"><div class="mx-today-moon-gauge-title"><span>'+t('خلو المسار','Void of Course')+'</span><strong>'+(isVoid?t('خالي المسار','Active'):t('ماشي عدل','On course'))+'</strong></div>'+
      lunarGaugeMarkup('voc',w.vocStartsAt,w.ingressAt,w.enteredAt,w.vocStartsAt)+'</div>'+
    '</div></section>';
  }catch(e){
