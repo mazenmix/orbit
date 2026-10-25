@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {normalize,distance,aspects,signals,scores,synastry,compatibilityScore,compatibilityHasEvidence,houseNumber,type Point} from '../src/math.ts';
+import {normalize,distance,aspects,signals,scores,synastry,compatibilityScore,compatibilityHasEvidence,houseNumber,bodies,angles,type Point} from '../src/math.ts';
 import {birthInstant,zonedInstant,defaultProfile,julianDay,annualHouse} from '../src/engine.ts';
 const point=(id:string,longitude:number,speed=1):Point=>({id,symbol:id,longitude,speed});
 test('Swift normalization vectors and zodiac wraparound',()=>{assert.equal(normalize(-10),350);assert.equal(normalize(370),10);assert.equal(normalize(-720),0);assert.equal(distance(359,1),2);assert.equal(distance(0,180),180)});
@@ -39,4 +39,30 @@ test('relationship dimensions without a relevant close aspect have no claimed ev
  assert.equal(compatibilityHasEvidence('communication',contacts),false);
  assert.equal(compatibilityHasEvidence('emotional',contacts),false);
  assert.equal(compatibilityHasEvidence('attraction',[]),false);
+});
+
+test('every configured wheel ephemeris body participates in five major transit aspects',()=>{
+ const at=new Date('2026-10-25T09:00:00Z');
+ assert.equal(bodies.length,16);
+ assert.deepEqual([...angles],[0,60,90,120,180]);
+ for(const [,id] of bodies)for(const angle of angles){
+  const contacts=aspects([point(id,angle,.25)],[point('Sun',0,0)],at);
+  assert.equal(contacts.length,1,id+' at '+angle+' degrees');
+  assert.equal(contacts[0].angle,angle);
+  assert.equal(contacts[0].orb,0);
+  assert.equal(contacts[0].exact,null);
+ }
+});
+test('all configured transiting bodies use measured orbs and direct versus retrograde approach',()=>{
+ const at=new Date('2026-10-25T09:00:00Z');
+ for(const [,id] of bodies){
+  const direct=aspects([point(id,119.75,1)],[point('Venus',0,0)],at);
+  const retro=aspects([point(id,119.75,-1)],[point('Venus',0,0)],at);
+  assert.equal(direct.length,1,id+' direct');
+  assert.equal(retro.length,1,id+' retrograde');
+  assert.equal(direct[0].applying,true,id+' direct');
+  assert.equal(retro[0].applying,false,id+' retrograde');
+  assert.equal(direct[0].orb,.25);
+  assert.equal(retro[0].orb,.25);
+ }
 });
