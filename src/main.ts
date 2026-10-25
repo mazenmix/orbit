@@ -39,7 +39,7 @@ import type {ConfirmedEclipse} from './realEclipses.ts';
 import {eclipseEvidenceAt} from './eclipseEvidence.ts';
 import {auxiliaryName} from './auxiliaryPoints.ts';
 import {namedAsteroids,asteroidSourcePath} from './asteroids.ts';
-import {loadNamedAsteroids,mountedAsteroidCount,namedAsteroidPositions} from './asteroidRuntime.ts';
+import {loadNamedAsteroids,mountedAsteroidCount,isAsteroidMounted,namedAsteroidPositions} from './asteroidRuntime.ts';
 import {asteroidReading,namedAsteroidContacts} from './asteroidInterpretation.ts';
 import {partnerInsights,gaugeLevel} from './peopleInsights.ts';
 import {partnerCardStory} from './partnerCardStory.ts';
@@ -747,13 +747,25 @@ function travelModePage(){
   sharedModeTimeNavigation()+sections+
   '</div>';
 }
+// Cache a validated birth placement once per active profile and mounted
+// ephemeris set. Live sky refreshes never recompute 56 natal bodies needlessly.
+let natalAsteroidCache:{key:string;positions:Map<string,Chart['points'][number]>}|null=null;
+function natalAsteroidsForActive(){
+ const available=namedAsteroids.filter(a=>isAsteroidMounted(a.number)).map(a=>a.number);
+ if(!active.known||!available.length)return new Map<string,Chart['points'][number]>();
+ const key=JSON.stringify(active)+':'+available.join(',');
+ if(natalAsteroidCache?.key===key)return natalAsteroidCache.positions;
+ const positions=new Map(namedAsteroidPositions(asteroidSwissRuntime(),birthInstant(active)).map(p=>[p.id,p]));
+ natalAsteroidCache={key,positions};
+ return positions;
+}
 function asteroidsPage(){
  const count=mountedAsteroidCount(),positions=count?namedAsteroidPositions(asteroidSwissRuntime(),selected):[];
  const map=new Map(positions.map(p=>[p.id,p]));
  // These are fixed natal asteroid placements, distinct from the currently
  // transiting positions above. Do not invent an exact natal longitude when
  // the recorded birth hour is unknown.
- const natalAsteroidMap=active.known&&count?new Map(namedAsteroidPositions(asteroidSwissRuntime(),birthInstant(active)).map(p=>[p.id,p])):new Map<string,typeof positions[number]>();
+ const natalAsteroidMap=natalAsteroidsForActive();
  const filtered=asteroidCategory==='all'?namedAsteroids:namedAsteroids.filter(a=>a.areas.includes(asteroidCategory as Category));
  // All eligible calculated natal bodies and derived points are checked.
  // Only targets with an authored symbolic topic can shape the short prose.
