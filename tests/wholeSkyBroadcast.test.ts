@@ -22,6 +22,19 @@ test('two distinct Mercury–Venus exact passes inside two hours are not merged 
  assert.ok(Math.abs(+events[0].at-(BASE+.5*HOUR))<60000);
  assert.ok(Math.abs(+events[1].at-(BASE+1.5*HOUR))<60000);
 });
+test('two exact Mercury–Venus contacts inside a single hour are separately detected',()=>{
+ const read=(at:Date):Point[]=>{
+  const h=(+at-BASE)/HOUR;
+  return sample(at).map(p=>p.id==='Mercury'
+   ?{...p,longitude:30+.1*(h-.25)*(h-.75),speed:.1*(2*h-1)*24}
+   :p);
+ };
+ const events=scanWholeSky(new Date(BASE+.5*HOUR),read,.5,.5)
+  .filter(e=>e.kind==='aspect'&&e.first==='Mercury'&&e.second==='Venus'&&e.angle===60);
+ assert.equal(events.length,2);
+ assert.ok(Math.abs(+events[0].at-(BASE+.25*HOUR))<60000);
+ assert.ok(Math.abs(+events[1].at-(BASE+.75*HOUR))<60000);
+});
 test('All ten major bodies must come from actual valid ephemeris points',()=>{
  const points=sample(new Date(BASE));
  const out=wholeSkyBroadcast(points,[],new Date(BASE),'ar');
