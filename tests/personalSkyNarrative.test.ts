@@ -98,7 +98,7 @@ test('Moon-Jupiter event never inherits weeks-long Jupiter narrative',()=>{
 test('retrograde ingress describes revisiting a sign without promising a reunion',()=>{
  const event:WholeSkyOccurrence={...ingress,retrograde:true};
  const story=make(event);
- assert.match(story.title,/رجع متراجعاً/);
+ assert.match(story.title,/عادت متراجعة/);
  assert.match(story.now,/عودة أثناء التراجع/);
  assert.doesNotMatch(story.now+story.next,/أكيد يرجع|حتتصل|شخص راح يرجع/);
 });
