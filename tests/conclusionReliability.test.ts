@@ -136,7 +136,7 @@ test('Go Mode refuses a high but source-sensitive reading and malformed metric v
  const evidence=['Sun','Mercury','Moon','Uranus'].map(id=>factor('Venus',id,120));
  const review=reviewGoMode(mode,metrics,resolveDecisions(evidence,signals(evidence)));
  assert.equal(review.sensitive,true);assert.equal(review.state,'check');
- assert.throws(()=>goModes(metrics.map(m=>m.id==='career'?{...m,value:NaN}:m)),/invalid/);
+ assert.throws(()=>goModes(metrics.map(m=>m.id==='career'?{...m,value:NaN}:m)),/[Ii]nvalid/);
 });
 
 const contacts:Contact[]=Array.from({length:30},(_,i)=>({transit:['Sun','Moon','Venus','Jupiter','Saturn','Uranus'][Math.floor(i/5)],natal:['Sun','Moon','Mercury','Venus','Mars'][i%5],angle:120,orb:.2,applying:true}));
