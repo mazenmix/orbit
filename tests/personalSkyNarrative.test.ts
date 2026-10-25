@@ -87,3 +87,18 @@ test('Today cards and main hero use personal context rather than general copy',(
  assert.match(pro,/mainPersonalEvent\(sky\)/);
  assert.match(pro,/personal\.next/);
 });
+
+test('Moon-Jupiter event never inherits weeks-long Jupiter narrative',()=>{
+ const event:WholeSkyOccurrence={kind:'aspect',first:'Moon',second:'Jupiter',angle:120,at:NOW};
+ const story=make(event);
+ assert.doesNotMatch(story.next,/بالأسابيع الجاية|in the coming weeks/i);
+ assert.match(story.next,/الاتصال القمري/);
+ assert.match(story.now,/زاوية داعمة رمزياً/);
+});
+test('retrograde ingress describes revisiting a sign without promising a reunion',()=>{
+ const event:WholeSkyOccurrence={...ingress,retrograde:true};
+ const story=make(event);
+ assert.match(story.title,/رجع متراجعاً/);
+ assert.match(story.now,/عودة أثناء التراجع/);
+ assert.doesNotMatch(story.now+story.next,/أكيد يرجع|حتتصل|شخص راح يرجع/);
+});
