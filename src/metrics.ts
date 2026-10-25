@@ -44,6 +44,18 @@ export function derivedMetrics(input:Inputs):MetricResult[]{
   return {...spec,value:spec.inverted?100-average:average,formula:(spec.inverted?'100 − ':'')+'avg('+spec.source.join(', ')+')'};
  });
 }
+/** Disclosure of evidence coverage: values blended with a default 50 are not
+ * supportable personalized indicator scores. A domain must have a calculated
+ * source signal for EACH of the metric's underlying categories. This does
+ * not assess empirical predictive validity of astrology. */
+export type MetricCoverage='complete'|'partial'|'none';
+export function metricCoverage(metric:Pick<MetricSpec,'source'>,signals:readonly {category:Category}[]):MetricCoverage{
+ const sources=[...new Set(metric.source)];
+ if(!sources.length)return 'none';
+ const supported=new Set(signals.map(x=>x.category));
+ const present=sources.filter(x=>supported.has(x)).length;
+ return present===0?'none':present===sources.length?'complete':'partial';
+}
 export type GoDomain='work'|'social'|'relationships'|'travel';
 export type GoDecision={domain:GoDomain;value:number;state:'go'|'check'|'hold';drivers:MetricName[]};
 export type GoReview={state:GoDecision['state'];sourceCategories:Category[];complete:boolean;mixed:boolean;sensitive:boolean;strongest:DecisionDetail['strongest'];supportFactor:DecisionDetail['supportFactor'];challengeFactor:DecisionDetail['challengeFactor']};
