@@ -90,19 +90,44 @@ Address the profile using ${grammaticalGender==='female'?'female Iraqi Arabic gr
  const symbolicIndices=Object.fromEntries(Object.entries(indices).map(([k,v])=>[k,String(v)+'/100 (symbolic index, not a probability)']));
  const messages:Message[]=[{role:'system',content:system},{role:'user',content:JSON.stringify({calculatedAt,comparison,indices:symbolicIndices,strongestSupporting:describe(strongestSupporting),strongestChallenging:describe(strongestChallenging),evidence:evidence.map(describe),supplementalNamedAsteroids:extendedEvidence,verifiedUpcomingEclipses:eclipseEvents})+'\n/no_think'}];
  try{
-  let result:any;
-  if(status.provider==='gateway'){
-   const upstream=new URL(env.QWEN_GATEWAY_URL!);if(upstream.protocol!=='https:')return json({error:'Gateway must use HTTPS.'},503);
-   const response=await fetch(upstream,{method:'POST',headers:{'Content-Type':'application/json',...(env.QWEN_GATEWAY_TOKEN?{Authorization:`Bearer ${env.QWEN_GATEWAY_TOKEN}`}:{})},body:JSON.stringify({model:status.model,messages,temperature:.3,max_tokens:1200,stream:false}),signal:AbortSignal.timeout(50000)});
-   if(!response.ok)return json({error:'Ai gateway did not complete the request.',code:'AI_UPSTREAM_ERROR'},502);
-   result=await response.json();
-  }else{
-   result=await env.AI!.run(CF_MODEL,{messages,temperature:.3,max_tokens:1200,stream:false});
+  const runModel=async(send:Message[])=>{
+   let response:any;
+   if(status.provider==='gateway'){
+    const upstream=new URL(env.QWEN_GATEWAY_URL!);
+    if(upstream.protocol!=='https:')throw Error('Gateway must use HTTPS');
+    const result=await fetch(upstream,{method:'POST',headers:{'Content-Type':'application/json',...(env.QWEN_GATEWAY_TOKEN?{Authorization:'Bearer '+env.QWEN_GATEWAY_TOKEN}:{})},body:JSON.stringify({model:status.model,messages:send,temperature:.2,max_tokens:1200,stream:false}),signal:AbortSignal.timeout(50000)});
+    if(!result.ok)throw Error('Ai gateway could not complete request');
+    response=await result.json();
+   }else{
+    response=await env.AI!.run(CF_MODEL,{messages:send,temperature:.2,max_tokens:1200,stream:false});
+   }
+   return response?.choices?.[0]?.message?.content??response?.response;
+  };
+  const context={language:input.language as 'ar'|'en',support:describe(strongestSupporting),challenge:describe(strongestChallenging),events:eclipseEvents,evidence,supplemental:extendedEvidence,strict:true,plainLanguage:true,comparisonAvailable:Object.values(comparison).some(v=>v!==null)};
+  const first=await runModel(messages);
+  if(typeof first!=='string'||!first.trim())return json({error:'Ai returned no explanation. Please retry.',code:'AI_EMPTY_RESPONSE'},502);
+  let checked=reviewGeneratedAdvice(first,context),retried=false;
+  if(checked.fallback){
+   // Do not silently show a canned paragraph just because the model omitted
+   // evidence or added a fabricated certainty. Give the model one targeted
+   // chance to correct itself, then use a deterministic evidence-bound reading.
+   retried=true;
+   const correction:Message={role:'user',content:
+    'Your previous draft failed factual/style validation ('+checked.problems.join(', ')+'). '+
+    'Rewrite from the provided calculated factors ONLY: make the actual natal target and transit theme determine a recognizable daily-life scene, include the distinct strongest challenge if present, and end with a concrete checkable action. '+
+    'Do not invent an event, private feelings or precise dates. Write natural Iraqi Arabic when language=ar; no body names, math or angle jargon. Include one subtle symbolic qualifier. Output only two compact paragraphs. /no_think'};
+   try{
+    const second=await runModel([...messages,correction]);
+    if(typeof second==='string'&&second.trim()){
+     const reviewed=reviewGeneratedAdvice(second,context);
+     if(!reviewed.fallback)checked=reviewed;
+    }
+   }catch{ /* The verified calculation-grounded fallback remains available. */ }
   }
-  const raw=result?.choices?.[0]?.message?.content??result?.response;
-  if(typeof raw!=='string')return json({error:'Ai returned no explanation. Please retry.',code:'AI_EMPTY_RESPONSE'},502);
-  const checked=reviewGeneratedAdvice(raw,{language:input.language,support:describe(strongestSupporting),challenge:describe(strongestChallenging),events:eclipseEvents,evidence,supplemental:extendedEvidence,strict:true,plainLanguage:true,comparisonAvailable:Object.values(comparison).some(v=>v!==null)});
-  if(!checked.text)return json({error:'Ai returned no explanation. Please retry.',code:'AI_EMPTY_RESPONSE'},502);
-  return json({explanation:checked.text,model:status.model,provider:status.provider,quality:checked.fallback?'grounded-fallback':'reviewed-model',calculatedAt});
+  if(!checked.text)return json({error:'No grounded explanation available.',code:'AI_EMPTY_RESPONSE'},502);
+  return json({explanation:checked.text,model:status.model,provider:status.provider,
+   quality:checked.fallback?'grounded-fallback':'reviewed-model',calculatedAt,
+   review:{corrected:retried,grounded:!checked.fallback,reasonCodes:checked.fallback?checked.problems:[]}});
+
  }catch{return json({error:input.language==='ar'?'خدمة Ai على السيرفر غير متاحة حالياً. تحقق من تفعيل Workers AI وحصته بحساب Cloudflare، وجرّب مرة ثانية.':'Ai is unavailable. Check Workers AI activation and quota in Cloudflare, then retry.',code:'AI_UNAVAILABLE'},503)}
 }
