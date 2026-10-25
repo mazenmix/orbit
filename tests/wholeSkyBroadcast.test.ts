@@ -202,3 +202,17 @@ test('Moon-Sun conjunction is a New Moon while opposition is a Full Moon',()=>{
  const difficult=occurrenceLanguage({kind:'aspect',at,first:'Moon',second:'Mars',angle:90},'ar');
  assert.match(difficult.title,/تربيع/);
 });
+
+test('Compact planetary gauges omit redundant copy and keep percentages and countdowns on one row',()=>{
+ const main=readFileSync('src/main.ts','utf8');
+ const ui=main.slice(main.indexOf('function planetLiveStatus('),main.indexOf('/** Update the numerical display every second'));
+ const css=readFileSync('src/focus.css','utf8');
+ assert.doesNotMatch(ui,/مباشر دائماً|Always direct|المتبقي من الفترة|Phase remaining|يرجع مباشر خلال|Turns direct in|يبدأ التراجع خلال|Turns retrograde in/);
+ assert.match(ui,/isPermanent\?'':'<small/);
+ assert.match(ui,/mx-motion-meter-head"><b data-motion-percent/);
+ assert.match(ui,/mx-motion-countdown"><time data-motion-countdown/);
+ assert.match(css,/\.mx-motion-meter-head\{[\s\S]*?justify-content:center/);
+ assert.match(css,/\.mx-motion-countdown time\{[\s\S]*?white-space:nowrap/);
+ assert.match(main,/tickPlanetMotionGauges/);
+});
+
