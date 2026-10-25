@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {metricSpecs,derivedMetrics,goModes,metricCoverage} from '../src/metrics.ts';
+import {metricSpecs,derivedMetrics,goModes,metricCoverage,observedMetric} from '../src/metrics.ts';
 const categories={overview:50,career:70,love:80,communication:60,energy:75,emotions:40,recovery:55,timing:65};
 test('29 named symbolic indicators use eight source indices without invented probabilities',()=>{
  const result=derivedMetrics(categories);
@@ -53,4 +53,20 @@ test('unsupported baseline scores are not described as fully evidenced',()=>{
  assert.equal(metricCoverage(find('focus'),[{category:'career'}]),'partial');
  assert.equal(metricCoverage(find('focus'),[{category:'career'},{category:'communication'},{category:'recovery'}]),'complete');
  assert.equal(metricCoverage(find('focus'),[{category:'career'},{category:'career'}]),'partial');
+});
+
+test('observed-only metric does not blend in an unsupported neutral baseline',()=>{
+ const specs=metricSpecs,find=(id:string)=>specs.find(x=>x.id===id)!;
+ assert.deepEqual(observedMetric(find('dating'),categories,[]).value,null);
+ const partial=observedMetric(find('dating'),categories,[{category:'love'}]);
+ assert.equal(partial.coverage,'partial');
+ assert.equal(partial.value,80);
+ assert.equal(partial.present,1);
+ assert.equal(partial.total,3);
+ const complete=observedMetric(find('dating'),categories,[{category:'love'},{category:'communication'},{category:'timing'}]);
+ assert.equal(complete.coverage,'complete');
+ assert.equal(complete.value,Math.round((80+60+65)/3));
+ const caution=observedMetric(find('risk'),categories,[{category:'emotions'},{category:'recovery'}]);
+ assert.equal(caution.value,100-Math.round((40+55)/2));
+ assert.equal(caution.coverage,'partial');
 });
