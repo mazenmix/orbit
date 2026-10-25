@@ -34,6 +34,8 @@ test('derived angles only exist with reliable time, cusps and Swiss Vertex',()=>
  assert.deepEqual(derived.points.map(p=>p.id),['Descendant','IC','Vertex']);
  assert.deepEqual(derived.points.map(p=>p.longitude),[170,85,67]);
  assert.equal(natalDerivedAngles(base,false).points.length,0);
+ assert.equal(natalDerivedAngles({...base,cusps:[]},true).points.length,0);
+ assert.equal(natalDerivedAngles({...base,cusps:[NaN,...base.cusps.slice(1)]},true).points.length,0);
  const polar=natalDerivedAngles({...base,asc:null,mc:null,vertex:null},true);
  assert.equal(polar.points.length,0);
  assert.deepEqual(polar.missing,['Descendant','IC','Vertex']);
