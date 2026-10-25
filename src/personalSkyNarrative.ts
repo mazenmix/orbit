@@ -124,8 +124,8 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
   const emphasis=txt(ingressStyles[event.sign],lang);
   later+=' '+emphasis;
   if(event.retrograde){
-   now+=(lang==='ar'?' هاي عودة أثناء التراجع الظاهري، ومعناها التقليدي مراجعة موضوع سابق، مو وعد برجوع شخص أو حدث.':
-    ' This apparent retrograde return traditionally emphasizes review, not a promise that anyone or anything will return.');
+   now+=(lang==='ar'?(soon?' الحدث القادم يمثل عودة أثناء التراجع الظاهري، مو دليلاً على رجوع شخص أو نتيجة.':' هاي عودة أثناء التراجع الظاهري، مو دليلاً على رجوع شخص أو نتيجة.'):
+    (soon?' The upcoming apparent retrograde return is not evidence of a reunion or outcome.':' This apparent retrograde return is not evidence of a reunion or outcome.'));
    later=lang==='ar'?'راجع التوقعات الحالية عند إعادة المرور بالبرج؛ القرار يعتمد على الواقع.':
     'Reassess expectations as the sign is revisited; real circumstances decide outcomes.';
   }
@@ -146,17 +146,15 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
   const second=event.second?planetScenes[event.second]:null;
   if(second){
    const balanced=event.angle===60||event.angle===120;
-   const caution=lang==='ar'?(balanced?
-    'إذا الأمور تمشي بسهولة، استغلها بخطوة حقيقية بدل الاكتفاء بالحماس.':
-    'إذا صار اختلاف أو تأخير، لا تفسّره فوراً كرفض أو فشل.'):
-    (balanced?'If things feel easier, follow through rather than merely hoping.':
-     'If things slow down, do not assume rejection or failure.');
+   const challenging=event.angle===90||event.angle===180;
+   const caution=lang==='ar'?(balanced?'الانسجام الرمزي لا يضمن نتيجة.':challenging?'التوتر الرمزي لا يثبت وقوع مشكلة.':'الاقتران يجمع عاملين، لكنه لا يحدد النتيجة.'):
+    (balanced?'Symbolic harmony does not guarantee any outcome.':challenging?'Symbolic tension does not establish a real dispute.':'Conjunction combines two factors without determining an outcome.');
    // A fast Moon aspect must never inherit Jupiter/Saturn's weeks-long
    // planetary template. Duration cannot be inferred from a paired name.
    const lunar=event.first==='Moon'||event.second==='Moon';
    now=(houseTopic?txt(houseTopic.now,lang):txt(planetTopic.now,lang))+' '+
-    (lang==='ar'?(balanced?'زاوية داعمة رمزياً، مو ضمان لنتيجة.':'زاوية تحتاج موازنة رمزياً، مو توقع حدوث مشكلة.'):
-     (balanced?'This is a symbolically supportive aspect, not a promised outcome.':'This is a symbolically challenging aspect, not a prediction of trouble.'));
+    (lang==='ar'?(balanced?'زاوية داعمة رمزياً، مو ضمان لنتيجة.':challenging?'زاوية متوترة رمزياً، مو توقع حدوث مشكلة.':'اقتران يجمع الموضوعين رمزياً، بدون حكم مسبق على النتيجة.'):
+     (balanced?'This is a symbolically supportive aspect, not a promised outcome.':challenging?'This is a symbolically challenging aspect, not a prediction of trouble.':'This conjunction combines the themes symbolically without a predetermined outcome.'));
    later=lunar?(lang==='ar'?'التأويل يخص الفترة القريبة من وقت الاتصال القمري فقط؛ لا يمتد لأسابيع من دون عامل فلكي منفصل.':
     'The interpretation concerns the short Moon-aspect window, not weeks ahead without separate calculated evidence.'):
     (houseTopic?txt(houseTopic.later,lang):txt(second.later,lang))+' '+caution;
@@ -172,13 +170,16 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
   later+=lang==='ar'?' وبخريطتك هذا يلامس موضوع '+topic+'؛ انتبه إذا هو فعلاً حاضر بحياتك.':
    ' In your natal chart it also relates to '+topic+'; check whether that matters in your circumstances.';
  }
+ // A close calculated transit-to-natal contact remains personal without a
+ // known birth time; natal-Moon or house claims still require it.
+ const natalContactTopic=link&&natalFocus[link.natal.id]?txt(natalFocus[link.natal.id],lang):null;
  const prefix=houseTopic?(lang==='ar'?'بخريطتك هذا يرتبط بـ'+houseTopic.area.ar+'. ':'In your chart this concerns '+houseTopic.area.en+'. '):'';
  return {
   title:human.title,
   now:prefix+(soon?phaseNow+' ':'')+now,
   next:later,
   action,
-  focus:houseTopic?txt(houseTopic.area,lang):(lang==='ar'?'قراءة عامة لأن وقت الميلاد مو مؤكد':'General reading: birth time unconfirmed'),
-  personal:Boolean(houseTopic)
+  focus:houseTopic?txt(houseTopic.area,lang):natalContactTopic??(lang==='ar'?'حدث عام: لا توجد بيوت ولادية مؤكدة أو اتصالات شخصية قريبة':'General event: no verified natal houses or close personal contacts'),
+  personal:Boolean(houseTopic||natalContactTopic)
  };
 }
