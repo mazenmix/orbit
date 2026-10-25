@@ -70,8 +70,12 @@ export function scanWholeSky(at:Date,read:WholeSkyReader,hoursBack=18,hoursAhead
     const func=(t:number)=>point(t,id).speed;
     const root=bisectAngle(func,a,b,.1);
     if(root&&Math.abs(func(+root))<.02){
-     const after=point(Math.min(end,+root+600000),id);
-     emit({kind:'station',at:root,first:id,retrograde:after.speed<0});
+     // Zero velocity alone is not a change of direction: verify both sides
+     // independently to reject tangencies and sampled zero-speed plateaus.
+     const before=point(Math.max(start,+root-60000),id);
+     const after=point(Math.min(end,+root+60000),id);
+     if(before.speed*after.speed<0)
+      emit({kind:'station',at:root,first:id,retrograde:after.speed<0});
     }
    }
   }

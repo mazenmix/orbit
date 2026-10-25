@@ -61,6 +61,17 @@ test('Station direction is refined from signed real ephemeris velocity',()=>{
  assert.equal(changed!.retrograde,false);
  assert.ok(Math.abs(+changed!.at-station)<60000);
 });
+test('zero-speed tangency without direction reversal does not invent a station',()=>{
+ const origin=BASE+2*HOUR;
+ const read=(date:Date):Point[]=>sample(date).map(p=>{
+  if(p.id!=='Mars')return p;
+  const h=(+date-origin)/HOUR;
+  return {...p,longitude:160+.0001*h*h*h,speed:.0072*h*h};
+ });
+ const stations=scanWholeSky(new Date(origin),read,3,3)
+   .filter(e=>e.kind==='station'&&e.first==='Mars');
+ assert.equal(stations.length,0);
+});
 test('An actual nonlunar event can drive the headline while all planets remain visible',()=>{
  const at=new Date(BASE+3*HOUR);
  const events:WholeSkyOccurrence[]=[{kind:'aspect',at:new Date(+at+HOUR),first:'Mercury',second:'Venus',angle:60}];

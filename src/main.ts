@@ -37,8 +37,9 @@ import {refineNatalTransit} from './precision.ts';
 import {scanLunations,type Lunation} from './eclipse.ts';
 import type {ConfirmedEclipse} from './realEclipses.ts';
 import {eclipseEvidenceAt} from './eclipseEvidence.ts';
+import {auxiliaryName} from './auxiliaryPoints.ts';
 import {namedAsteroids,asteroidSourcePath} from './asteroids.ts';
-import {loadNamedAsteroids,mountedAsteroidCount,namedAsteroidPositions} from './asteroidRuntime.ts';
+import {loadNamedAsteroids,mountedAsteroidCount,isAsteroidMounted,namedAsteroidPositions} from './asteroidRuntime.ts';
 import {asteroidReading,namedAsteroidContacts} from './asteroidInterpretation.ts';
 import {partnerInsights,gaugeLevel} from './peopleInsights.ts';
 import {partnerCardStory} from './partnerCardStory.ts';
@@ -746,17 +747,39 @@ function travelModePage(){
   sharedModeTimeNavigation()+sections+
   '</div>';
 }
+// Cache a validated birth placement once per active profile and mounted
+// ephemeris set. Live sky refreshes never recompute 56 natal bodies needlessly.
+let natalAsteroidCache:{key:string;positions:Map<string,Chart['points'][number]>}|null=null;
+function natalAsteroidsForActive(){
+ const available=namedAsteroids.filter(a=>isAsteroidMounted(a.number)).map(a=>a.number);
+ if(!active.known||!available.length)return new Map<string,Chart['points'][number]>();
+ const key=JSON.stringify(active)+':'+available.join(',');
+ if(natalAsteroidCache?.key===key)return natalAsteroidCache.positions;
+ const positions=new Map(namedAsteroidPositions(asteroidSwissRuntime(),birthInstant(active)).map(p=>[p.id,p]));
+ natalAsteroidCache={key,positions};
+ return positions;
+}
 function asteroidsPage(){
  const count=mountedAsteroidCount(),positions=count?namedAsteroidPositions(asteroidSwissRuntime(),selected):[];
  const map=new Map(positions.map(p=>[p.id,p]));
+ // These are fixed natal asteroid placements, distinct from the currently
+ // transiting positions above. Do not invent an exact natal longitude when
+ // the recorded birth hour is unknown.
+ const natalAsteroidMap=natalAsteroidsForActive();
  const filtered=asteroidCategory==='all'?namedAsteroids:namedAsteroids.filter(a=>a.areas.includes(asteroidCategory as Category));
- const contacts=positions.length?namedAsteroidContacts(positions,targets(data!.natal).filter(p=>active.known||!['Moon','Ascendant','MC'].includes(p.id)),selected):[];
+ // All eligible calculated natal bodies and derived points are checked.
+ // Only targets with an authored symbolic topic can shape the short prose.
+ const natalTargets=[...targets(data!.natal),...data!.supplementalNatal];
+ const allTargets=[...natalTargets,...data!.auxiliaryNatal];
+ const contacts=positions.length?namedAsteroidContacts(positions,allTargets.filter(p=>active.known||!['Moon','Ascendant','MC','Descendant','IC','Vertex'].includes(p.id)),selected):[];
+ const proseTargets=new Set(natalTargets.map(p=>p.id));
  const activated=new Map<string,typeof contacts[number]>();
- for(const contact of contacts)if(!activated.has(contact.transit.id))activated.set(contact.transit.id,contact);
+ for(const contact of contacts)if(proseTargets.has(contact.natal.id)&&!activated.has(contact.transit.id))activated.set(contact.transit.id,contact);
  return '<div class="section-title"><div><span class="eyebrow">MX ASTRO · ASTEROID STORIES</span><h2>'+t('الكويكبات: شنو تعني إلك؟','Asteroids: what do these themes mean?')+'</h2></div></div>'+
  '<section class="panel asteroid-intro"><h2>'+t('تفسير مختلف لكل كويكب','A unique reading for every asteroid')+'</h2><p>'+t('كل كويكب إله معنى مختلف ونصيحة واقعية بسطرين. التفسير يعتمد على دلالته التقليدية، وإذا انحسب اتصال قريب من خارطتك نذكره بصورة مبسطة. مو قراءة لأفكار الغير، وماكو رقم يضمن وقوع حدث.','Each asteroid has its own short symbolic theme and useful action. If a close birth-chart contact is actually calculated, it is explained in plain language. These are not private thoughts or event predictions.')+'</p><div class="button-row"><button class="primary" id="load-named-asteroids" '+(asteroidLoading?'disabled':'')+'>'+(asteroidLoading?t('جار تحميل الحسابات…','Loading calculations…'):count===56?t('حدّث حسابات الكويكبات','Refresh asteroid calculations'):t('فعّل حساباتي للكويكبات الـ56','Calculate my 56 asteroid positions'))+'</button><button class="secondary" data-go="time">'+t('غيّر وقت القراءة','Change reading time')+'</button></div><small id="asteroid-progress" role="status">'+(asteroidProgress?esc(asteroidProgress):count+' / 56 '+t('مواقع فلكية متاحة للحساب','ephemerides currently loaded'))+'</small>'+(asteroidFailures.length?'<details><summary>'+t('بعض البيانات غير متاحة؛ شوف التفاصيل','Some data is unavailable; see details')+'</summary>'+asteroidFailures.map(x=>'<p>'+esc(x.name)+': '+esc(x.reason)+'</p>').join('')+'</details>':'')+'</section>'+
- '<section class="panel"><div class="section-title"><h2>'+t('المعاني والتأثيرات الرمزية','Symbolic meanings and practical takeaways')+'</h2><label class="heat-label">'+t('اختار المجال','Filter by theme')+' <select id="asteroid-category"><option value="all">'+t('الكل','All')+'</option>'+categories.map(c=>'<option value="'+c+'" '+(asteroidCategory===c?'selected':'')+'>'+cat(c)+'</option>').join('')+'</select></label></div><div class="asteroids-grid reading-asteroids">'+filtered.map(a=>{const point=map.get(a.name),near=activated.get(a.name),r=asteroidReading(a,near,lang==='en');return '<article class="asteroid-item meaning-card"><div class="meaning-head"><h3>'+esc(a.name)+'</h3><span class="'+(near?'reading-active':'reading-neutral')+'">'+(near?t('نشط رمزياً بخارطتك','Close natal contact'):t('معنى رمزي','Symbolic theme'))+'</span></div><p>'+esc(r.theme)+'</p>'+(r.action?'<p class="advice-action">'+esc(r.action)+'</p>':'')+''+(near?'<details><summary>'+t('أساس القراءة','Reading basis')+'</summary><small>'+esc(r.emphasis)+'</small></details>':'')+(point?'<details><summary>'+t('الموضع المحسوب','Actual ephemeris position')+'</summary><small>MPC '+a.number+' · '+signName(point.longitude)+' · '+(point.longitude%30).toFixed(3)+'°</small></details>':'')+'</article>'}).join('')+'</div></section>'+
- (contacts.length?'<details class="panel asteroid-technical"><summary>'+t('الاتصالات المحسوبة مع خارطة الميلاد (للتدقيق فقط)','Calculated natal aspects (advanced details)')+' · '+contacts.length+'</summary><div class="eclipse-contacts">'+contacts.slice(0,60).map(e=>'<span><b>'+esc(e.transit.id)+' → '+esc(planet(e.natal.id))+'</b> '+aspect(e.angle)+' · '+e.orb.toFixed(2)+'°</span>').join('')+'</div></details>':'');
+ '<section class="panel"><div class="section-title"><h2>'+t('المعاني والتأثيرات الرمزية','Symbolic meanings and practical takeaways')+'</h2><label class="heat-label">'+t('اختار المجال','Filter by theme')+' <select id="asteroid-category"><option value="all">'+t('الكل','All')+'</option>'+categories.map(c=>'<option value="'+c+'" '+(asteroidCategory===c?'selected':'')+'>'+cat(c)+'</option>').join('')+'</select></label></div><div class="asteroids-grid reading-asteroids">'+filtered.map(a=>{const point=map.get(a.name),natalPoint=natalAsteroidMap.get(a.name),near=activated.get(a.name),r=asteroidReading(a,near,lang==='en');return '<article class="asteroid-item meaning-card"><div class="meaning-head"><h3>'+esc(a.name)+'</h3><span class="'+(near?'reading-active':'reading-neutral')+'">'+(near?t('نشط رمزياً بخارطتك','Close natal contact'):t('معنى رمزي','Symbolic theme'))+'</span></div><p>'+esc(r.theme)+'</p>'+(r.action?'<p class="advice-action">'+esc(r.action)+'</p>':'')+''+(near?'<details><summary>'+t('أساس القراءة','Reading basis')+'</summary><small>'+esc(r.emphasis)+'</small></details>':'')+(point?'<details><summary>'+t('الموضع المحسوب','Actual ephemeris position')+'</summary><small>MPC '+a.number+' · '+t('الوقت المختار: ','Selected moment: ')+signName(point.longitude)+' · '+(point.longitude%30).toFixed(3)+'°</small>'+
+ (natalPoint?'<p><small>'+t('وقت الميلاد: ','At birth: ')+signName(natalPoint.longitude)+' · '+(natalPoint.longitude%30).toFixed(3)+'°</small></p>':'')+'</details>':'')+'</article>'}).join('')+'</div></section>'+
+ (contacts.length?'<details class="panel asteroid-technical"><summary>'+t('الاتصالات المحسوبة مع خارطة الميلاد (للتدقيق فقط)','Calculated natal aspects (advanced details)')+' · '+contacts.length+'</summary><div class="eclipse-contacts">'+contacts.map(e=>'<span><b>'+esc(e.transit.id)+' → '+esc(auxiliaryName(e.natal.id,lang==='ar')===e.natal.id?planet(e.natal.id):auxiliaryName(e.natal.id,lang==='ar'))+'</b> '+aspect(e.angle)+' · '+e.orb.toFixed(2)+'°</span>').join('')+'</div></details>':'');
 }
 const eclipseCountryNames=new Map<string,string>();
 const eclipseCountryPending=new Set<string>();
@@ -1007,7 +1030,17 @@ function evidencePage(){
  return '<article class="narrative-evidence"><div class="narrative-heading"><span>'+categoryLabels[s.category][2]+'</span><h3>'+cat(s.category)+'</h3><b class="reading-level '+gaugeLevel(s.score)+'">'+s.score+'</b></div><h3>'+esc(c.title)+'</h3><p>'+esc(c.good)+'</p><p class="advice-action"><strong>'+t('شنو تسوي: ','What to do: ')+'</strong>'+esc(c.action)+'</p><p class="advice-caution">'+esc(c.careful)+'</p><small>'+esc(why)+'</small>'+'<p class="decision-line '+(digest.mixed?'decision-mixed':'')+'">'+decisionExplanation(digest,lang==='ar')+'</p></article>'}).join('');
  return '<section class="panel insight-lead"><h2>'+mood+'</h2><p>'+t('هاي قراءة رمزية تربط كل فكرة باتصال محسوب، وبعدها تنطيك نصيحة عملية. لا تعتبر الدرجة وعد بحدث أو معرفة لنوايا شخص آخر.','These symbolic readings tie each theme to a calculated contact and a practical action, not an event guarantee or access to another person’s mind.')+'</p><button class="secondary" id="export-report">'+t('نزّل تفاصيل الحساب إذا تحتاجها','Export technical calculation details')+'</button></section>'+
  '<div class="narrative-grid">'+(narrative||'<section class="panel">'+t('الاتصالات الحالية قليلة؛ اختار لحظة ثانية من آلة الزمن لقراءة مختلفة.','Few current contacts; select another moment in Time Machine.')+'</section>')+'</div>'+
- '<details class="panel evidence-technical"><summary>'+t('للمهتمين: الأرقام والزوايا الفلكية التفصيلية','For advanced users: detailed positions and aspect geometry')+'</summary><div class="eclipse-contacts">'+r.evidence.map(e=>'<span><b>'+esc(technical(e))+'</b></span>').join('')+'</div></details>';
+ '<details class="panel evidence-technical"><summary>'+t('للمهتمين: الأرقام والزوايا الفلكية التفصيلية','For advanced users: detailed positions and aspect geometry')+'</summary><div class="eclipse-contacts">'+r.evidence.map(e=>'<span><b>'+esc(technical(e))+'</b></span>').join('')+'</div>'+
+ '<p class="subtle">'+t('الأجرام الثانوية الولادية المحسوبة (مستقلة عن درجات المؤشرات):','Calculated minor natal bodies (separate from indicator scores):')+'</p>'+
+ '<div class="eclipse-contacts">'+r.supplementalNatal.map(p=>'<span><b>'+esc(planet(p.id))+'</b> · '+esc(signName(p.longitude))+' · '+p.longitude.toFixed(4)+'°</span>').join('')+'</div>'+
+ '<div class="eclipse-contacts">'+r.supplementalEvidence.map(e=>'<span><b>'+esc(technical(e))+'</b></span>').join('')+'</div>'+
+ '<p class="subtle">'+t('العقد القمرية والنقاط المشتقة وزوايا الخريطة (مستقلة عن الدرجات):','Lunar nodes and derived chart points (not used in scores):')+'</p>'+
+ '<div class="eclipse-contacts">'+r.auxiliaryNatal.map(p=>'<span><b>'+esc(auxiliaryName(p.id,lang==='ar'))+'</b> · '+esc(signName(p.longitude))+' · '+p.longitude.toFixed(4)+'°</span>').join('')+'</div>'+
+ '<div class="eclipse-contacts">'+r.auxiliaryCurrent.map(p=>'<span><b>'+esc(auxiliaryName(p.id,lang==='ar'))+' '+t('الآن','current')+'</b> · '+p.longitude.toFixed(4)+'°</span>').join('')+'</div>'+
+ '<div class="eclipse-contacts">'+r.auxiliaryEvidence.map(e=>'<span><b>'+esc(auxiliaryName(e.natal.id,lang==='ar'))+' · '+esc(technical(e))+'</b></span>').join('')+'</div>'+
+ (r.auxiliaryMissing.natal.length||r.auxiliaryMissing.transit.length?'<p class="subtle">'+t('نقاط فلكية غير قابلة للحساب لهذي البيانات: ','Unavailable additional chart points: ')+esc([...new Set([...r.auxiliaryMissing.natal,...r.auxiliaryMissing.transit])].map(id=>auxiliaryName(id,lang==='ar')).join('، '))+'</p>':'')+
+ (r.supplementalMissing.natal.length||r.supplementalMissing.transit.length?'<p class="subtle">'+t('عناصر ثانوية غير متاحة حسابياً: ','Unavailable minor ephemerides: ')+esc([...new Set([...r.supplementalMissing.natal,...r.supplementalMissing.transit])].join('، '))+'</p>':'')+
+ '</details>';
 }
 function zoneChoices(current:string){
  const world=typeof Intl.supportedValuesOf==='function'?Intl.supportedValuesOf('timeZone'):[];
@@ -1075,7 +1108,12 @@ function peoplePage(){
   analysis='<section class="panel partner-overview mx-people-section"><div class="section-title"><div><h2>'+esc(active.name)+' × '+esc(partner.name)+'</h2></div><div class="big-score '+(c.overallCovered?gaugeLevel(c.overall):'mx-unavailable')+'">'+(c.overallCovered?c.overall+'<small>/100</small>':'—')+'</div></div><h3>'+t('خلاصة العلاقة اليوم','Today’s relationship snapshot')+'</h3>'+(partner.known?'':'<p class="alert">'+t('وقت ميلاد هذا الشخص مو معروف؛ بعض الاتصالات مستبعدة من الحساب.','Birth time is unknown; some lunar and angle contacts are excluded.')+'</p>')+'<div class="dimension-grid clear-gauges">'+classic+'</div></section>'+
  (c.romantic&&c.overallCovered?'<section class="panel intimacy-section mx-people-section"><div class="partner-insights-grid">'+extended+'</div></section>':'')+
   '';
-  technical='<details class="panel synastry-technical"><summary>'+t('التفاصيل الحسابية الفلكية للمتخصصين','Advanced mathematical aspect details')+' · '+c.evidence.length+'</summary>'+c.evidence.map(e=>'<p class="technical">'+planet(e.first.id)+' · '+aspect(e.angle)+' · '+planet(e.second.id)+' — '+e.orb.toFixed(3)+'°</p>').join('')+'</details>';
+  technical='<details class="panel synastry-technical"><summary>'+t('التفاصيل الحسابية الفلكية للمتخصصين','Advanced mathematical aspect details')+' · '+(c.evidence.length+c.supplementalEvidence.length)+'</summary>'+
+   c.evidence.map(e=>'<p class="technical">'+esc(planet(e.first.id))+' · '+aspect(e.angle)+' · '+esc(planet(e.second.id))+' — '+e.orb.toFixed(3)+'°</p>').join('')+
+   (c.supplementalEvidence.length?'<p class="subtle">'+t('اتصالات الأجرام الثانوية والنقاط المحسوبة، مو داخلة بدرجات التوافق:','Supplementary body/point contacts, excluded from compatibility scores:')+'</p>':'')+
+   c.supplementalEvidence.map(e=>'<p class="technical">'+esc(auxiliaryName(e.first.id,lang==='ar')===e.first.id?planet(e.first.id):auxiliaryName(e.first.id,lang==='ar'))+' · '+aspect(e.angle)+' · '+esc(auxiliaryName(e.second.id,lang==='ar')===e.second.id?planet(e.second.id):auxiliaryName(e.second.id,lang==='ar'))+' — '+e.orb.toFixed(3)+'°</p>').join('')+
+   (c.additionalMissing.first.length||c.additionalMissing.second.length?'<p class="subtle">'+t('بيانات ثانوية غير متاحة لواحدة من الخارطتين: ','Missing supplementary ephemerides for one or both charts: ')+esc([...new Set([...c.additionalMissing.first,...c.additionalMissing.second])].join('، '))+'</p>':'')+
+   '</details>';
  }
  if(partner&&uiMode==='simple'){
   analysis=focusSummary+

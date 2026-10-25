@@ -97,7 +97,13 @@ export function asteroidReading(item:NamedAsteroid,contact:NamedContact|undefine
   Venus:['التقارب والتقدير','affection and values'],Mars:['المبادرة وحدود الاندفاع','initiative and boundaries'],Jupiter:['التوسع واختيار الفرص','growth and opportunity'],
   Saturn:['الالتزام والمسؤولية','commitment and responsibility'],Uranus:['الاستقلال والتغيير','autonomy and change'],
   Neptune:['التوقعات والخيال','expectations and imagination'],Pluto:['العمق والسيطرة','intensity and control'],
-  Ascendant:['حضورك والانطباع الأول','presence and first impressions'],MC:['العمل ودورك العام','career and public role']
+  Ascendant:['حضورك والانطباع الأول','presence and first impressions'],MC:['العمل ودورك العام','career and public role'],
+  Chiron:['التعامل مع التجارب الحساسة والتعلّم منها','reflection on sensitive experiences and learning'],
+  Ceres:['العناية المتبادلة وحدود المسؤولية','practical care and reciprocal responsibility'],
+  Pallas:['حلّ المشكلات والتخطيط','problem solving and planning'],
+  Juno:['توقعات الالتزام والإنصاف','commitment expectations and fairness'],
+  Vesta:['التركيز والاهتمام بالأولويات','focus and sustained priorities'],
+  Pholus:['مراجعة أثر التفاصيل الصغيرة بالقرارات','checking the impact of small decisions']
  };
  const aspectAr:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
  const aspectEn:Record<number,string>={0:'conjunction',60:'sextile',90:'square',120:'trine',180:'opposition'};
