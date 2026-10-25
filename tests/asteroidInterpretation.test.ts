@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {namedAsteroids} from '../src/asteroids.ts';import {meanings,asteroidReading,namedAsteroidContacts} from '../src/asteroidInterpretation.ts';
+import test from 'node:test';import assert from 'node:assert/strict';import {namedAsteroids} from '../src/asteroids.ts';import {meanings,asteroidReading,currentAsteroidReading,namedAsteroidContacts} from '../src/asteroidInterpretation.ts';
 test('all 56 native named asteroids have distinct two-line interpretations and useful actions',()=>{
  assert.equal(namedAsteroids.length,56);
  for(const a of namedAsteroids){const c=meanings[a.name];assert.ok(c,'missing '+a.name);assert.ok(c.arTheme.length>16&&c.arAction.length>25);assert.ok(c.enTheme.length>10&&c.enAction.length>30);}
@@ -21,4 +21,21 @@ test('catalogue themes do not issue individualized advice without an exact compu
  const contact=namedAsteroidContacts([{id:'Eros',symbol:'✧',longitude:121,speed:.12}],[{id:'Venus',symbol:'♀',longitude:120,speed:0}],new Date('2026-10-18T12:00:00Z'))[0];
  assert.ok(contact);
  assert.ok(asteroidReading(entry,contact).action.length>15);
+});
+
+test('current asteroid cards distinguish verified positions, natal aspects and missing files',()=>{
+ const item=namedAsteroids.find(x=>x.name==='Eros')!;
+ const position={id:'Eros',symbol:'✧',longitude:121,speed:.12};
+ const at=new Date('2026-10-25T11:00:00Z');
+ const noContact=currentAsteroidReading(item,position,undefined);
+ assert.match(noContact.theme,/الأسد|°/);
+ assert.match(noContact.action,/ماكو اتصال قريب/);
+ const closest=namedAsteroidContacts([position],[{id:'Venus',symbol:'♀',longitude:120,speed:0}],at)[0];
+ const personalized=currentAsteroidReading(item,position,closest);
+ assert.match(personalized.emphasis,/زهرتك/);
+ assert.ok(personalized.action.length>15);
+ const noFile=currentAsteroidReading(item,undefined,undefined);
+ assert.match(noFile.theme,/غير محسوب/);
+ assert.equal(noFile.action,'');
+ assert.match(currentAsteroidReading(item,position,closest,true).theme,/Leo/);
 });
