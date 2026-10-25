@@ -7,7 +7,7 @@ test('29 named symbolic indicators use eight source indices without invented pro
  assert.equal(new Set(result.map(x=>x.id)).size,29);
  assert.ok(result.every(x=>x.value>=1&&x.value<=99));
  assert.equal(result.find(x=>x.id==='career')?.value,70);
- assert.equal(result.find(x=>x.id==='caution')?.value,40);
+ assert.equal(result.find(x=>x.id==='caution')?.value,60);
  assert.match(result.find(x=>x.id==='luck')?.formula??'',/overview, timing, love/);
 });
 test('go mode is a deterministic reversible-activity indicator, not a probability',()=>{
@@ -26,7 +26,7 @@ test('fixed indices produce stable derived rankings',()=>{
 
 test('new six social, intimacy and risk indices remain symbolic derivations only',()=>{
  const result=derivedMetrics(categories);for(const id of ["sexuality","desire","nightlife","dating","newpeople","risk"])assert.ok(result.some(m=>m.id===id));
- assert.equal(result.find(m=>m.id==='risk')?.value,100-Math.round((65+40+55)/3));
+ assert.equal(result.find(m=>m.id==='risk')?.value,Math.round((65+40+55)/3));
  assert.ok(result.every(m=>m.formula.includes('avg(')));
 });
 
@@ -67,6 +67,21 @@ test('observed-only metric does not blend in an unsupported neutral baseline',()
  assert.equal(complete.coverage,'complete');
  assert.equal(complete.value,Math.round((80+60+65)/3));
  const caution=observedMetric(find('risk'),categories,[{category:'emotions'},{category:'recovery'}]);
- assert.equal(caution.value,100-Math.round((40+55)/2));
+ assert.equal(caution.value,Math.round((40+55)/2));
  assert.equal(caution.coverage,'partial');
+});
+
+
+test('every caution and Travel Mode gauge is higher-is-better without hidden reverse coding',()=>{
+ const strong={...categories,timing:90,emotions:90,energy:90,recovery:90};
+ const weak={...categories,timing:10,emotions:10,energy:10,recovery:10};
+ const high=derivedMetrics(strong),low=derivedMetrics(weak);
+ for(const id of ['risk','caution','nightlife','sleep','travel'] as const){
+  const h=high.find(m=>m.id===id)!,l=low.find(m=>m.id===id)!;
+  assert.ok(h.value>l.value,id+' must increase when readiness improves');
+  assert.equal(h.inverted,undefined,id+' must not be reverse coded');
+  assert.doesNotMatch(h.formula,/100 −/);
+ }
+ assert.equal(high.find(m=>m.id==='risk')?.value,90);
+ assert.equal(low.find(m=>m.id==='risk')?.value,10);
 });
