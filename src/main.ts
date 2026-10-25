@@ -90,8 +90,8 @@ try{
  }
 }catch(e){console.warn('Invalid private setup link; no profiles were replaced',e)}
 
-// Correct the old sample UTC zone on previously saved Baghdad profiles, without altering birth data.
-if(profiles.some(p=>['baghdad','بغداد'].includes(p.city.toLowerCase().trim())&&p.zone==='Etc/UTC')){profiles=profiles.map(p=>['baghdad','بغداد'].includes(p.city.toLowerCase().trim())&&p.zone==='Etc/UTC'?{...p,zone:'Asia/Baghdad'}:p);saveProfiles(profiles)}
+// A saved IANA timezone is part of the birth instant. Never rewrite it from
+// a city label: this would silently change the natal chart and its history.
 let active=profiles.find(p=>p.id===localStorage.getItem('mx.active'))??profiles[0];
 let screen=location.hash.slice(1)||'today',selected=new Date(),data:Report|undefined,ready=false,engineVersion='',error='',toastTimer:ReturnType<typeof setTimeout>,installPrompt:any;
 let aiConnection={checked:false,configured:false,provider:'none',model:'Qwen3'};
