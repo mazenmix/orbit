@@ -357,9 +357,13 @@ let planetMotionPending='';
 let planetMotionError:{key:string;time:number}|null=null;
 function currentPlanetMotionCycles():MotionCycle[]|null{
  const now=+selected,key=active.id+':'+Math.floor(now/86400000);
- if(planetMotionCache?.key===key&&planetMotionCache.cycles.every(c=>
-  c.startedAt&&c.endsAt&&+c.startedAt<=now&&now<+c.endsAt
- ))return planetMotionCache.cycles;
+ if(planetMotionCache?.key===key){
+  // An unresolved station is a real missing result, not an excuse to repeat
+  // an expensive multi-year search every ten seconds.
+  const crossed=planetMotionCache.cycles.some(c=>
+   c.startedAt&&c.endsAt&&!(+c.startedAt<=now&&now<+c.endsAt));
+  if(!crossed)return planetMotionCache.cycles;
+ }
  if(planetMotionPending!==key&&(!planetMotionError||planetMotionError.key!==key||Date.now()-planetMotionError.time>300000)){
   planetMotionPending=key;
   void scanMotionCycles(selected,at=>chart(at,active,false,false).points,
@@ -401,7 +405,7 @@ function planetLiveStatus(brief:WholeSkyBroadcast){
      '<time data-motion-countdown datetime="'+period.endsAt.toISOString()+'">'+esc(motionTimeRemaining(at,+period.endsAt,lang))+'</time></div></div>';
    }else{
     gauge='<div class="mx-motion-meter mx-motion-loading" role="status">'+
-      (planetMotionError&&planetMotionError.key===active.id+':'+Math.floor(at/86400000)
+      ((planetMotionError&&planetMotionError.key===active.id+':'+Math.floor(at/86400000))||(planetMotionCache?.key===active.id+':'+Math.floor(at/86400000) && !!current)
        ?t('موعد تغيّر الاتجاه غير متاح حالياً','Station timing unavailable')
        :t('دا أحسب موعد تغيّر الاتجاه…','Calculating verified station…'))+'</div>';
    }

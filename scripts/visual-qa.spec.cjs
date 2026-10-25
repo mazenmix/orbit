@@ -712,6 +712,27 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
    await expect(details).toHaveAttribute('open','');
    await expect(details.locator('.mx-sky-feed-now')).toBeVisible();
   }
+  // Motion bar audit: ten bodies, permanent direct motion for Sun/Moon,
+  // and real finite phase endpoints for every resolved countdown.
+  const planets=page.locator('.mx-full-sky-today .mx-sky-planet');
+  await expect(planets).toHaveCount(10);
+  await expect(planets.locator('.mx-motion-permanent')).toHaveCount(2);
+  const motionMeters=page.locator('.mx-full-sky-today .mx-sky-planet .mx-motion-meter[data-motion-start]');
+  const sampleMeter=motionMeters.first();
+  if(await motionMeters.count()){
+   const fields=await sampleMeter.evaluate(el=>({
+    start:Number(el.getAttribute('data-motion-start')),
+    end:Number(el.getAttribute('data-motion-end')),
+    percent:Number(el.querySelector('[data-motion-percent]')?.textContent?.replace('%','')),
+    value:Number(el.querySelector('progress')?.value),
+    timer:el.querySelector('[data-motion-countdown]')?.textContent?.trim()??''
+   }));
+   expect(fields.start).toBeLessThan(fields.end);
+   expect(fields.percent).toBeGreaterThanOrEqual(0);
+   expect(fields.percent).toBeLessThanOrEqual(100);
+   expect(fields.value).toBe(fields.percent);
+   expect(fields.timer.length).toBeGreaterThan(0);
+  }
   const leftRail=page.locator('.mx-full-sky-today .mx-focus-aside');
   await expect(leftRail.locator('.mx-today-sky-layout')).toHaveCount(1);
   await expect(leftRail.locator('.mx-today-time-shortcut')).toBeVisible();
