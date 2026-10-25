@@ -233,6 +233,7 @@ function render(){
  if(screen==='eclipses')tickEclipseCountdowns(Date.now());
  // Today uses the cached whole-sky event scan; no natal-only background scan.
  if(screen==='lunar'&&ready)updateLiveVocClock(+selected);
+ if(screen==='today'&&ready)updateTodayMoonGauges(+selected);
  if(screen==='ai'&&ready)void refreshLiveQwen(false);
  if(screen==='calendar'&&ready)startCalendarWork();
  if(['asteroids','go','travelmode'].includes(screen)&&ready&&!asteroidAutoAttempted&&mountedAsteroidCount()<namedAsteroids.length&&location.hostname.endsWith('.pages.dev')){asteroidAutoAttempted=true;void refreshAsteroidEphemerides();}
@@ -504,7 +505,24 @@ function scoresHTML(r:Report){
  }).join('')+'</div>';
 }
 function signalCard(s:Signal,index:number){const text=copy(s);return `<button class="signal-card ${s.tone}" data-signal="${index}"><span class="signal-icon">${categoryLabels[s.category][2]}</span><div><div class="signal-meta">${cat(s.category)} <span>·</span> ${tone(s)}</div><h3>${text.title}</h3><div class="direct-advice"><p class="good"><b>${t("الزين","Good")}</b>${text.good}</p><p class="careful"><b>${t("انتبه","Watch out")}</b>${text.careful}</p><p class="do"><b>${t("سوي هالشي","Do this")}</b>${text.action}</p></div><small>${t('اعرض الدليل','See evidence')} <span class="arrow">↗</span></small></div></button>`}
-function today(){const r=data!,primary=r.signals[0],text=primary?copy(primary):null;let sky:WholeSkyBroadcast|null=null;try{sky=currentWholeSky()}catch(e){console.warn('Pro Today whole-sky brief unavailable',e)}const personal=sky?mainPersonalEvent(sky):null;return `<div class="dashboard-grid mx-today-compact"><div class="main-column"><section class="hero panel"><div class="hero-top"><span class="live-label"><i class="status-dot"></i>${t('بث السماء كلها · الآن','WHOLE-SKY LIVE')}</span><span class="subtle">${dateText(selected,{hour:'2-digit',minute:'2-digit'})}</span></div><div class="hero-copy">${tag(t('مرحباً','Welcome')+' '+esc(active.name),'violet')}<h2>${esc(sky?.title??t('القراءة الفلكية غير متاحة هسه','Sky brief unavailable'))}</h2><p><b>${t('هسه:','Now:')}</b> ${esc(personal?.now??sky?.meaning??t('رصد السماء ما اكتمل؛ ما نعرض قراءة قديمة على أنها مباشرة.','Sky verification is unavailable; no old reading is presented as live.'))}</p>${personal?'<p class="mx-sky-reading-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(personal.next)+'</p>':''}<p class="mx-focus-story-action"><b>${t('شنو تسوي؟','What to do:')}</b> ${esc(personal?.action??sky?.action??t('ارجع بعد تحديث الحسابات.','Retry once calculations are available.'))}</p><small class="mx-sky-live-checked">${t('آخر حساب للسماء:','Sky calculated:')} ${dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</small><div class="hero-bottom"><button class="primary" data-go="evidence">${t('ليش هاي القراءة؟','Why this reading?')} <span>↗</span></button><button class="secondary mx-ai-context" data-go="ai">✧ ${t('شرح Ai','Explain with Ai')}</button></div></div><div class="hero-orbit" aria-hidden="true"><i></i><i></i><i></i><span>✦</span><b>☾</b><em>·</em></div></section>${scoresHTML(r)}<div class="section-title"><h2>${t('إشارات تستحق انتباهك','Signals worth your attention')}</h2><button class="text-button" data-go="signals">${t('كل الإشارات','All signals')} ↗</button></div><div class="signal-list">${distinctHighlights(r.signals,copy,3,1).map(({item,index})=>signalCard(item,index)).join('')||`<p class="empty panel">${t('ماكو إشارات إضافية مختلفة عن القراءة الرئيسية ضمن الأورب المحدد.','No additional distinct signals beyond the headline reading within the configured orbs.')}</p>`}</div></div><aside class="right-column">${todaySkyWheel(r)}<section class="panel lunar-card"><span class="moon-glyph">☾</span><span class="eyebrow">${t('القمر وخارطتك','THE MOON & YOUR CHART')}</span><h3>${signName(r.current.points.find(p=>p.id==='Moon')!.longitude)}</h3><p>${esc(moonPersonalSummary(r,active.known,lang))}</p><button class="text-button" data-go="evidence">${t('شوف التفاصيل','View details')} ↗</button></section><button class="panel time-shortcut" data-go="time"><span>◷</span><div><b>${t('آلة الزمن','Time Machine')}</b><p>${t('أي تاريخ. منظور جديد.','Another date. A new perspective.')}</p></div><b>↗</b></button></aside></div>`}
+/** Reuse the Moon page's exact ephemeris rings in Today's narrow left rail. */
+function todayMoonGaugePanel(){
+ try{
+  const w=moonWindow(),isVoid=w.isVoid;
+  return '<section class="panel mx-today-moon-gauges '+(isVoid?'is-voc':'is-clear')+'" data-voc-start="'+(+w.vocStartsAt)+'" data-voc-end="'+(+w.ingressAt)+'" data-sign-end="'+(+w.ingressAt)+'" aria-label="'+t('عدادات القمر وخلو المسار','Moon and void-of-course gauges')+'">'+
+   '<header class="mx-today-moon-gauges-head"><h2>☾ '+t('القمر الآن وخلو المسار','Current Moon & Void of Course')+'</h2><span class="mx-today-gauges-live"><i class="status-dot"></i>LIVE</span></header>'+
+   '<div class="lunar-premium-grid mx-today-moon-gauges-stack">'+
+    '<div class="mx-today-moon-gauge-unit"><div class="mx-today-moon-gauge-title"><span>'+t('القمر الآن','Current Moon')+'</span><strong>'+signName(w.sign*30)+'</strong></div>'+
+     lunarGaugeMarkup('moon',w.enteredAt,w.ingressAt,w.enteredAt,w.vocStartsAt)+'</div>'+
+    '<div class="mx-today-moon-gauge-unit"><div class="mx-today-moon-gauge-title"><span>VOID OF COURSE</span><strong>'+(isVoid?t('خالي المسار','Active'):t('ماشي عدل','On course'))+'</strong></div>'+
+     lunarGaugeMarkup('voc',w.vocStartsAt,w.ingressAt,w.enteredAt,w.vocStartsAt)+'</div>'+
+   '</div></section>';
+ }catch(e){
+  console.warn('Today Moon gauges unavailable',e);
+  return '<section class="panel mx-today-moon-gauges"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2><p>'+t('حساب توقيت القمر غير متاح حالياً.','Moon timing is currently unavailable.')+'</p></section>';
+ }
+}
+function today(){const r=data!,primary=r.signals[0],text=primary?copy(primary):null;let sky:WholeSkyBroadcast|null=null;try{sky=currentWholeSky()}catch(e){console.warn('Pro Today whole-sky brief unavailable',e)}const personal=sky?mainPersonalEvent(sky):null;return `<div class="dashboard-grid mx-today-compact"><div class="main-column"><section class="hero panel"><div class="hero-top"><span class="live-label"><i class="status-dot"></i>${t('بث السماء كلها · الآن','WHOLE-SKY LIVE')}</span><span class="subtle">${dateText(selected,{hour:'2-digit',minute:'2-digit'})}</span></div><div class="hero-copy">${tag(t('مرحباً','Welcome')+' '+esc(active.name),'violet')}<h2>${esc(sky?.title??t('القراءة الفلكية غير متاحة هسه','Sky brief unavailable'))}</h2><p><b>${t('هسه:','Now:')}</b> ${esc(personal?.now??sky?.meaning??t('رصد السماء ما اكتمل؛ ما نعرض قراءة قديمة على أنها مباشرة.','Sky verification is unavailable; no old reading is presented as live.'))}</p>${personal?'<p class="mx-sky-reading-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(personal.next)+'</p>':''}<p class="mx-focus-story-action"><b>${t('شنو تسوي؟','What to do:')}</b> ${esc(personal?.action??sky?.action??t('ارجع بعد تحديث الحسابات.','Retry once calculations are available.'))}</p><small class="mx-sky-live-checked">${t('آخر حساب للسماء:','Sky calculated:')} ${dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</small><div class="hero-bottom"><button class="primary" data-go="evidence">${t('ليش هاي القراءة؟','Why this reading?')} <span>↗</span></button><button class="secondary mx-ai-context" data-go="ai">✧ ${t('شرح Ai','Explain with Ai')}</button></div></div><div class="hero-orbit" aria-hidden="true"><i></i><i></i><i></i><span>✦</span><b>☾</b><em>·</em></div></section>${scoresHTML(r)}<div class="section-title"><h2>${t('إشارات تستحق انتباهك','Signals worth your attention')}</h2><button class="text-button" data-go="signals">${t('كل الإشارات','All signals')} ↗</button></div><div class="signal-list">${distinctHighlights(r.signals,copy,3,1).map(({item,index})=>signalCard(item,index)).join('')||`<p class="empty panel">${t('ماكو إشارات إضافية مختلفة عن القراءة الرئيسية ضمن الأورب المحدد.','No additional distinct signals beyond the headline reading within the configured orbs.')}</p>`}</div></div><aside class="right-column">${todaySkyWheel(r)}<section class="panel lunar-card"><span class="moon-glyph">☾</span><span class="eyebrow">${t('القمر وخارطتك','THE MOON & YOUR CHART')}</span><h3>${signName(r.current.points.find(p=>p.id==='Moon')!.longitude)}</h3><p>${esc(moonPersonalSummary(r,active.known,lang))}</p><button class="text-button" data-go="evidence">${t('شوف التفاصيل','View details')} ↗</button></section><button class="panel time-shortcut" data-go="time"><span>◷</span><div><b>${t('آلة الزمن','Time Machine')}</b><p>${t('أي تاريخ. منظور جديد.','Another date. A new perspective.')}</p></div><b>↗</b></button>${todayMoonGaugePanel()}</aside></div>`}
 function trend(hours:number){const rows=Array.from({length:9},(_,i)=>{const at=new Date(Math.min(Date.UTC(2399,11,31,23,59),+selected+i*hours/8*3600000));return {at,value:average(getReport(at))}});const pts=rows.map((r,i)=>`${i*75},${130-r.value}`).join(' ');return `<div class="trend"><svg viewBox="0 0 600 150" role="img" aria-label="${t('مؤشر رمزي محسوب عبر الوقت','Calculated symbolic index over time')}"><defs><linearGradient id="area" x2="0" y2="1"><stop stop-color="#8272df" stop-opacity=".25"/><stop offset="1" stop-color="#8272df" stop-opacity="0"/></linearGradient></defs>${[25,50,75,100].map(v=>`<line x1="0" x2="600" y1="${130-v}" y2="${130-v}" stroke="#292d43" stroke-dasharray="3 5"/><text x="3" y="${126-v}" fill="#727993" font-size="8">${v}</text>`).join('')}<polygon points="0,140 ${pts} 600,140" fill="url(#area)"/><polyline points="${pts}" stroke="#a79aef" stroke-width="2" fill="none"/>${rows.map((r,i)=>`<circle cx="${i*75}" cy="${130-r.value}" r="3" fill="#c6bbff"><title>${dateText(r.at,{hour:'2-digit',minute:'2-digit'})}: ${r.value}/100</title></circle>`).join('')}</svg><div class="trend-labels" dir="ltr">${rows.filter((_,i)=>i%2===0).map(r=>`<span>${dateText(r.at,{hour:'2-digit',minute:'2-digit'})}</span>`).join('')}</div></div>`}
 function signalsPage(){const r=data!;return `<div class="filter-row">${(['all',...categories] as const).map(c=>`<button data-filter="${c}" class="chip ${filter===c?'selected':''}">${c==='all'?t('الكل','All'):cat(c)}</button>`).join('')}</div><div class="signal-list wide">${r.signals.map((s,i)=>filter==='all'||filter===s.category?signalCard(s,i):'').join('')||`<div class="empty panel">${t('ماكو إشارة لهالمجال ضمن الأورب المحدد.','No signal in this category within the configured orbs.')}</div>`}</div>`}
 const soulCharts=new Map<string,Chart>();
@@ -1441,6 +1459,21 @@ function updateLunarGauge(kind:'moon'|'voc',now:number){
  if(ring)ring.style.strokeDashoffset=String(60*Math.PI*(1-percentage/100));
  if(bar){bar.setAttribute('aria-label',label);bar.setAttribute('aria-valuenow',String(rounded))}
 }
+/** Tick the Today Moon/VOC rings every second and force a new ephemeris
+ * window on ingress or when VOC changes state. Keeps lunar-page rings shared. */
+function updateTodayMoonGauges(now:number):boolean{
+ const card=root.querySelector<HTMLElement>('.mx-today-moon-gauges[data-sign-end]');
+ if(!card)return false;
+ const signEnd=Number(card.dataset.signEnd),vocStart=Number(card.dataset.vocStart),vocEnd=Number(card.dataset.vocEnd);
+ if(!Number.isFinite(signEnd)||!Number.isFinite(vocStart)||!Number.isFinite(vocEnd))return false;
+ const isVoid=vocColorState(vocStart,vocEnd,now)==='is-voc';
+ const changed=card.classList.contains('is-voc')!==isVoid;
+ card.classList.toggle('is-voc',isVoid);
+ card.classList.toggle('is-clear',!isVoid);
+ updateLunarGauge('moon',now);
+ updateLunarGauge('voc',now);
+ return changed||now>=signEnd;
+}
 /** Flip the Today lunar panel immediately on ephemeris VOC boundaries. */
 function updateTodayVocStatus(now:number):boolean{
  const card=root.querySelector<HTMLElement>('.mx-focus-lunar-status');
@@ -1615,6 +1648,7 @@ function refreshLiveBody(now:number){
  bind();
  liveLastRender=now;
  if(screen==='lunar')updateLiveVocClock(now);
+ if(screen==='today')updateTodayMoonGauges(now);
  if(Math.abs(scrollY-window.scrollY)>4)window.scrollTo({left:scrollX,top:scrollY,behavior:'instant'});
  return true;
 }
@@ -1635,7 +1669,9 @@ function refreshLiveView(force=false){
   liveSkyLastTick=now;updateLiveSkyWheel(now);
  }
  if(liveTimePinned)return; // Explicit Time Machine instants stay fixed.
- const boundary=screen==='lunar'?updateLiveVocClock(now):screen==='today'?updateTodayVocStatus(now):false;
+ const todayBoundary=screen==='today'?updateTodayVocStatus(now):false;
+ const todayGaugeBoundary=screen==='today'?updateTodayMoonGauges(now):false;
+ const boundary=screen==='lunar'?updateLiveVocClock(now):(todayBoundary||todayGaugeBoundary);
  if(screen==='lunar'&&!boundary)updateLiveMoonSign(now);
  const cadence=LIVE_CONTENT_INTERVAL_MS[screen]??30000;
  // Settings fields are user-owned state, not an ephemeral sky calculation.
