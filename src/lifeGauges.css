@@ -31,3 +31,11 @@
 }
 @media(max-width:355px){#live-view-body .mx-go-life-grid{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){#live-view-body .mx-travel-practical .meter i{transition:none!important}}
+
+/* Explicit evidence states must stay legible in compact desktop/mobile gauges. */
+#live-view-body .mx-metric-coverage{display:block;font-size:10px!important;line-height:1.45!important;color:#c4b7e5!important;letter-spacing:0;overflow-wrap:anywhere;font-weight:600}
+#live-view-body .mx-quick-gauges .mx-focus-metric>.mx-metric-coverage{grid-column:1/-1;grid-row:auto;text-align:center;margin-top:1px}
+#live-view-body .metric-card>.mx-metric-coverage{margin-top:6px}
+#live-view-body .go-card>.mx-metric-coverage{margin:5px 0 6px}
+#live-view-body .mx-asteroid-evidence{margin:8px 0 0;font-size:12px;line-height:1.7;color:#c9b9e9;overflow-wrap:anywhere}
+#live-view-body .mx-unavailable>b,#live-view-body .mx-unavailable>strong{font-size:clamp(13px,1.5vw,17px);line-height:1.35;overflow-wrap:anywhere}
