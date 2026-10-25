@@ -29,7 +29,9 @@ export function auxiliaryNodes(read:(id:number)=>ArrayLike<number>|null):Auxilia
  return {points,missing};
 }
 export function natalDerivedAngles(chart:Chart,knownBirthTime:boolean):AuxiliaryResult{
- if(!knownBirthTime)return {points:[],missing:['Descendant','IC','Vertex']};
+ if(!knownBirthTime||chart.cusps.length!==12||
+    chart.cusps.some(x=>!Number.isFinite(x)))
+  return {points:[],missing:['Descendant','IC','Vertex']};
  const points:AuxiliaryPoint[]=[],missing:string[]=[];
  if(chart.asc===null||!Number.isFinite(chart.asc))missing.push('Descendant');
  else points.push(make('Descendant',chart.asc+180,0,'DSC','placidus-derived'));
