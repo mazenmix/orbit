@@ -41,6 +41,7 @@ test('Go Mode gives each underlying category one vote instead of double-counting
  // Distinct social sources: love (80), communication (20), energy (20).
  assert.equal(social.value,40);
  assert.equal(social.state,'hold');
- assert.throws(()=>goModes(metrics.filter(row=>row.id!=='career')),/Incomplete or invalid source category indices/);
+ assert.throws(()=>goModes(metrics.filter(row=>row.id!=='career')),/Incomplete or invalid indicator set/);
+ assert.throws(()=>goModes(metrics.filter(row=>row.id!=='recovery')),/Incomplete or invalid source category indices/);
  assert.throws(()=>goModes([...metrics,metrics[0]]),/Repeated Go Mode indicator/);
 });
