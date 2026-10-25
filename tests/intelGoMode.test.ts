@@ -49,7 +49,7 @@ test('Go Mode contains all 29 metrics, all four daily gauges and all four decisi
  assert.match(view,/metrics-grid/);
  assert.match(view,/indicators\.map\(m=>/);
  assert.match(view,/go\.map\(d=>/);
- assert.match(view,/mxGoNarrative/);
+ assert.match(view,/contextGaugeNarrative\(sky,memo\.sourceCategories/);
  assert.match(view,/goCards\+renderGoLifeGauges\(sky\.scores,categories\)\+allIndicators/);
  for(const id of indicatorIds)assert.ok(main.includes("id:'"+id+"'"),id);
  const metrics=derivedMetrics(inputs);
