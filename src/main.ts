@@ -720,7 +720,7 @@ function goModePage(){
  const allIndicators='<section class="panel mx-go-mode-indicators"><div class="metrics-grid">'+
   indicators.map(m=>indicatorGaugeCard(m)).join('')+
   '</div></section>';
- return '<div class="mx-go-mode-page" data-section="go">'+timeNav+gauges+goCards+renderGoLifeGauges(r.scores)+allIndicators+'</div>';
+ return '<div class="mx-go-mode-page" data-section="go">'+timeNav+gauges+goCards+renderGoLifeGauges(r.scores,r.signals.map(s=>s.category))+allIndicators+'</div>';
 }
 /** Simple glyphs that correspond to the exact travel domains and keep the
  * same single-icon layout as the four quick Go Mode gauges. */
