@@ -40,6 +40,28 @@ test('Today lunar rings appear beneath Time Machine',async({page})=>{
  const panel=page.locator('.mx-today-compact .mx-today-moon-gauges');
  await panel.waitFor({state:'visible',timeout:75000});
  await expect(panel.locator('.mx-lunar-gauge')).toHaveCount(2);
+ const layout=async()=>{
+  return panel.evaluate(el=>{
+   const box=el.getBoundingClientRect();
+   const rows=Array.from(el.querySelectorAll('.mx-today-moon-gauge-unit'));
+   const info=rows.map(row=>{
+    const rect=row.getBoundingClientRect();
+    const ring=row.querySelector('.mx-lunar-gauge-ring')?.getBoundingClientRect();
+    const timer=row.querySelector('[data-gauge-time]')?.getBoundingClientRect();
+    return {top:rect.top,bottom:rect.bottom,left:rect.left,right:rect.right,
+      ringLeft:ring?.left,ringRight:ring?.right,timerLeft:timer?.left,timerRight:timer?.right};
+   });
+   return {width:box.width,overflow:el.scrollWidth-el.clientWidth,rows:info};
+  });
+ };
+ const desktop=await layout();
+ expect(desktop.rows).toHaveLength(2);
+ expect(desktop.rows[1].top).toBeGreaterThanOrEqual(desktop.rows[0].bottom-1);
+ expect(desktop.overflow,'Today lunar gauge content must remain inside left panel').toBeLessThan(3);
+ for(const row of desktop.rows){
+  expect(row.ringLeft).toBeGreaterThanOrEqual(row.left-1);
+  expect(row.timerRight).toBeLessThanOrEqual(row.right+1);
+ }
  const clock=panel.locator('[data-lunar-gauge="moon"] [data-gauge-time]');
  await expect.poll(()=>clock.textContent(),{timeout:6000}).not.toBe('—');
  const initial=await clock.textContent();
@@ -47,6 +69,9 @@ test('Today lunar rings appear beneath Time Machine',async({page})=>{
  const times=await Promise.all([page.locator('.mx-today-compact .time-shortcut').boundingBox(),panel.boundingBox()]);
  expect(times[1].y).toBeGreaterThanOrEqual(times[0].y+times[0].height-3);
  await page.setViewportSize({width:390,height:844});
+ const mobile=await layout();
+ expect(mobile.rows[1].top).toBeGreaterThanOrEqual(mobile.rows[0].bottom-1);
+ expect(mobile.overflow).toBeLessThan(3);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThan(9);
 });
 test('Today sky wheel sits at the left of the live reading without an empty top row',async({page})=>{
