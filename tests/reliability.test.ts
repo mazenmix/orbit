@@ -33,7 +33,7 @@ test('actual ephemeris applying direction agrees between calendar and report at 
   }
  }
 });
-test('real 2027 demo snapshots use the full domain balance, including the observed January career reversal',()=>{
+test('real 2027 demo snapshots use the full domain balance and preserve original Sun evidence as overview',()=>{
  for(let month=0;month<12;month++){
   const r=report(defaultProfile,new Date(Date.UTC(2027,month,15,12)));
   for(const s of r.signals){
@@ -44,7 +44,7 @@ test('real 2027 demo snapshots use the full domain balance, including the observ
    if(net<-.18)assert.ok(['watch','caution'].includes(s.tone));
    if(net<0)assert.ok(s.score<=50);
   }
-  if(month===0){const work=r.signals.find(s=>s.category==='career')!;assert.equal(work.allFactors?.length,10);assert.ok(work.score<50);assert.notEqual(work.tone,'exceptional');}
+  if(month===0){const overview=r.signals.find(s=>s.category==='overview')!;const solar=r.evidence.filter(e=>e.natal.id==='Sun');assert.ok(solar.length>0);assert.ok(overview.allFactors?.every(e=>category(e)==='overview'));assert.ok(solar.every(e=>overview.allFactors?.some(x=>x.id===e.id)));}
  }
 });
 test('all eligible contacts survive beyond the former global top-48 cutoff',()=>{
@@ -64,7 +64,7 @@ test('narrative and domain signals preserve the strongest counter-evidence below
  const all=[...support,challenge];
  const packet=narrativeEvidence(all);assert.equal(packet.length,12);
  assert.ok(packet.some(e=>e.id==='counter'));
- const signal=signals(all).find(s=>s.category==='career')!;
+ const signal=signals(all).find(s=>s.category==='overview')!;
  assert.equal(signal.factors.length,4);assert.ok(signal.factors.some(e=>e.id==='counter'));
  assert.deepEqual(narrativeEvidence([...all].reverse()),packet);
  assert.equal(new Set(packet.map(e=>e.id)).size,packet.length);
