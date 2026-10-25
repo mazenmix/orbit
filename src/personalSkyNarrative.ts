@@ -40,7 +40,7 @@ const houses:readonly HouseTopic[]=[
  later:{ar:'راقب إذا الخطة اليومية واقعية؛ إذا اختلفت الظروف عدّل المهام بدل إضافة ضغط جديد.',en:'Check whether your daily plan is realistic, and adjust it rather than adding pressure.'},
  step:{ar:'حدد شغلتين مهمات ورتّب وقتهن بدون تشتت.',en:'Prioritize two concrete tasks and schedule them.'}},
  {area:{ar:'الشراكات والعلاقات والاتفاقات',en:'partnerships, relationships and agreements'},
- now:{ar:'إذا عندك علاقة أو اتفاق مو محسوم، هسه المهم تعرف الطرفين شنو يريدون فعلاً.',en:'If a relationship or agreement is unresolved, clarify what each side actually wants.'},
+ now:{ar:'إذا عندك علاقة أو اتفاق مو محسوم، الأهم تتأكد شنو يريد كل طرف فعلاً.',en:'If a relationship or agreement is unresolved, clarify what each side actually wants.'},
  later:{ar:'بالأيام الجاية ممكن يظهر احتياج لتعديل توقعات أو حدود؛ لا تعتبر الكلام الحلو وحده التزام.',en:'You may need to revisit expectations or boundaries; words alone are not a commitment.'},
  step:{ar:'اسأل سؤال واحد مباشر عن النية أو موعد الالتزام.',en:'Ask one direct question about intentions or timing.'}},
  {area:{ar:'المال المشترك والالتزامات والثقة',en:'shared finances, commitments and trust'},
@@ -137,8 +137,8 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
   }
  }else if(event.kind==='station'){
   now=(lang==='ar'?(event.retrograde?
-    'هسه راجع شي قديم يخص '+(houseTopic?houseTopic.area.ar:namesAr[event.first])+'. ':
-    'هسه تگدر ترتب خطوة مؤجلة بموضوع '+(houseTopic?houseTopic.area.ar:namesAr[event.first])+'. '):
+    'إذا عندك موضوع قديم يخص '+(houseTopic?houseTopic.area.ar:namesAr[event.first])+'، تگدر تراجعه. ':
+    'إذا عندك خطوة مؤجلة بموضوع '+(houseTopic?houseTopic.area.ar:namesAr[event.first])+'، تگدر ترتبها. '):
     (event.retrograde?'Revisit an older issue around ':'You can organize a pending step around ')+
     (houseTopic?houseTopic.area.en:event.first)+'. ')+txt(planetTopic.now,lang);
   later=txt(planetTopic.later,lang)+' '+(houseTopic?txt(houseTopic.later,lang):'');
