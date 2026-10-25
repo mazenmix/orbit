@@ -406,7 +406,7 @@ function planetLiveStatus(brief:WholeSkyBroadcast){
     gauge='<div class="mx-motion-meter" data-motion-start="'+(+period.startedAt)+'" data-motion-end="'+(+period.endsAt)+'" data-motion-mode="'+(isRetro?'retro':'direct')+'">'+
      '<div class="mx-motion-meter-head"><b data-motion-percent>'+pct+'%</b></div>'+
      '<progress max="100" value="'+pct+'" aria-label="'+t('النسبة المتبقية من الحركة الحالية','Current motion period remaining')+'"></progress>'+
-     '<div class="mx-motion-end"><small>'+t(isRetro?'نهاية التراجع':'نهاية المباشر',isRetro?'Retrograde ends':'Direct phase ends')+'</small>'+
+     '<div class="mx-motion-end">'+
      '<time data-motion-station datetime="'+period.endsAt.toISOString()+'" title="'+esc(timezoneCityLabel(active.zone))+'">'+esc(planetMotionStationText(period.endsAt))+'</time></div></div>';
    }else if(!isPermanent){
     gauge='<div class="mx-motion-meter mx-motion-loading" role="status">'+
