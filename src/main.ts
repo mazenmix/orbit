@@ -64,7 +64,7 @@ import {createSyncCode,parseSyncCode,uploadEncrypted,downloadEncrypted,syncStatu
 import {subscribeBackgroundPush,unsubscribeBackgroundPush,sendBackgroundPushTest,getPushStatus,pushAvailableOnThisDevice,backgroundPushOptedIn,refreshBackgroundPushIfNeeded,type MoonPushEvent} from './pushClient.ts';
 import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './progressions.ts';
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
-import {derivedMetrics,goModes,reviewGoMode,type GoDomain,type GoReview,type MetricResult} from './metrics.ts';
+import {derivedMetrics,goModes,reviewGoMode,metricCoverage,type GoDomain,type GoReview,type MetricResult} from './metrics.ts';
 import {travelMetricsByGroup} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
 import {supportive,difficult} from './math.ts';
@@ -243,12 +243,14 @@ function tag(text:string,cls=''){return `<span class="tag ${cls}">${text}</span>
  * meters and all twelve Travel Mode cards. */
 function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,string],travelId?:string){
  const label=override?t(override[0],override[1]):t(m.ar,m.en),amount=m.value;
- return '<article class="mx-focus-metric '+gaugeLevel(amount)+'"'+
+ const supported=metricCoverage(m,data?.signals??[])==='complete';
+ return '<article class="mx-focus-metric '+(supported?gaugeLevel(amount):'mx-unavailable')+'"'+
   (travelId?' data-travel-metric="'+travelId+'"':' data-today-gauge="'+m.id+'"')+
   ' data-indicator-id="'+m.id+'">'+
   '<span class="mx-today-gauge-icon" aria-hidden="true">'+symbol+'</span><b>'+label+'</b>'+
-  '<strong>'+amount+'<small>/100</small></strong>'+
-  '<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
+  '<strong>'+(supported?amount:'—')+(supported?'<small>/100</small>':'')+'</strong>'+
+  (supported?'<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>':
+    '<div class="mx-today-gauge-track" aria-label="'+t('لا توجد أدلة محسوبة كافية','Insufficient calculated evidence')+'"><i style="width:0%"></i></div>')+
   '</article>';
 }
 function todayQuickGauges(r:Report,insideGo=false){
@@ -683,13 +685,14 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:GoReview){
 }
 /** Compact Go Mode indicator gauge: label, score and progress bar only. */
 function indicatorGaugeCard(m:MetricResult,travelId?:string){
- const label=t(m.ar,m.en);
- return '<div class="metric-card '+(travelId?'mx-travel-metric ':'')+gaugeLevel(m.value)+'" data-indicator-id="'+m.id+'"'+
-  (travelId?' data-travel-metric="'+travelId+'"':'')+'>'+
-  '<small>'+label+'</small>'+
-  '<b>'+m.value+'<em>/100</em></b>'+
-  '<div class="meter" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+m.value+'"><i style="width:'+m.value+'%"></i></div>'+
-  '</div>';
+ const label=t(m.ar,m.en),supported=metricCoverage(m,data?.signals??[])==='complete';
+ return '<div class="metric-card '+(travelId?'mx-travel-metric ':'')+(supported?gaugeLevel(m.value):'mx-unavailable')+'" data-indicator-id="'+m.id+'"'+
+   (travelId?' data-travel-metric="'+travelId+'"':'')+'>'+
+   '<small>'+label+'</small>'+
+   '<b>'+(supported?m.value:'—')+(supported?'<em>/100</em>':'')+'</b>'+
+   (supported?'<div class="meter" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+m.value+'"><i style="width:'+m.value+'%"></i></div>':
+    '<div class="meter" aria-label="'+t('بيانات شخصية غير كافية','Insufficient personal evidence')+'"><i style="width:0%"></i></div>')+
+   '</div>';
 }
 /** Both Go Mode and Travel Mode share one date/time selector, the same calculation engine, and the same actions. */
 function sharedModeTimeNavigation(){
@@ -715,7 +718,7 @@ function goModePage(){
  const gauges=todayQuickGauges(r,true);
  const timeNav=sharedModeTimeNavigation();
  const goCards='<section class="panel mx-go-mode-decisions">'+
-  '<div class="go-grid">'+go.map(d=>{const memo=reviewGoMode(d,indicators,decisions),state=memo.state;return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><p class="go-decision">'+mxGoNarrative(d.domain,state,memo)+'</p></div>'}).join('')+'</div>'+
+  '<div class="go-grid">'+go.map(d=>{const memo=reviewGoMode(d,indicators,decisions),state=memo.state;return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+(memo.complete?d.value:'—')+(memo.complete?'<em>/100</em>':'')+'</strong><p class="go-decision">'+mxGoNarrative(d.domain,state,memo)+'</p></div>'}).join('')+'</div>'+
   '</section>';
  const allIndicators='<section class="panel mx-go-mode-indicators"><div class="metrics-grid">'+
   indicators.map(m=>indicatorGaugeCard(m)).join('')+
