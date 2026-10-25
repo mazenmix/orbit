@@ -649,18 +649,34 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   await expect(page.locator('#live-view-body .mx-today-gauges')).toHaveCount(0);
   const panel=await page.locator('.mx-today-sky').boundingBox();
   expect(panel.width,'Today sky should be a compact panel').toBeLessThanOrEqual(500);
-  // Regression: upcoming event cards are SIDE BY SIDE, never a vertical stack.
-  const upcoming=page.locator('.mx-full-sky-today .mx-sky-feed-upcoming');
-  await expect(upcoming).toBeVisible();
+  // Regression: upcoming items follow the planet movement card, 3/2/1 across viewports.
+  const planetPanel=page.locator('.mx-full-sky-today .mx-focus-main > .mx-sky-planets');
+  const upcomingPanel=page.locator('.mx-full-sky-today .mx-focus-main > .mx-sky-events-panel');
+  const upcoming=upcomingPanel.locator('.mx-sky-feed-upcoming');
+  await expect(planetPanel).toBeVisible();
+  await expect(upcomingPanel).toBeVisible();
+  const planetBounds=await planetPanel.boundingBox(),upcomingBounds=await upcomingPanel.boundingBox();
+  expect(upcomingBounds.y,'Upcoming block starts below planet movement').toBeGreaterThanOrEqual(planetBounds.y+planetBounds.height-2);
+  await expect(page.locator('.mx-full-sky-today .mx-focus-aside .mx-sky-feed-upcoming')).toHaveCount(0);
   const eventCards=upcoming.locator('.mx-sky-feed-compact');
   const count=await eventCards.count();
-  const flow=await upcoming.evaluate(el=>getComputedStyle(el).gridAutoFlow);
-  expect(flow,'Upcoming stream uses horizontal grid flow').toContain('column');
+  const layout=await upcoming.evaluate(el=>({flow:getComputedStyle(el).gridAutoFlow,columns:getComputedStyle(el).gridTemplateColumns.split(/\s+/).filter(Boolean).length,overflow:getComputedStyle(el).overflowX,excess:el.scrollWidth-el.clientWidth}));
+  const expectedColumns=device==='desktop'?3:device==='tablet'?2:1;
+  expect(layout.flow,'Upcoming events fill grid by rows').toContain('row');
+  expect(layout.columns,'Upcoming events responsive grid columns').toBe(expectedColumns);
+  expect(layout.excess,'No horizontal scroll inside upcoming events').toBeLessThanOrEqual(2);
   if(count>=2){
-   const first=await eventCards.nth(0).boundingBox();
-   const second=await eventCards.nth(1).boundingBox();
-   expect(Math.abs(first.y-second.y),'Upcoming cards stay in the same visual row').toBeLessThan(4);
-   expect(second.x,'RTL places the following event to the left').toBeLessThan(first.x);
+   const first=await eventCards.nth(0).boundingBox(),second=await eventCards.nth(1).boundingBox();
+   if(expectedColumns>1){
+    expect(Math.abs(first.y-second.y),'First events share the same row').toBeLessThan(4);
+    expect(second.x,'RTL places the next event to the left').toBeLessThan(first.x);
+   }else{
+    expect(second.y,'On phone event two starts on the next row').toBeGreaterThan(first.y);
+   }
+   if(count>=4&&expectedColumns===3){
+    const fourth=await eventCards.nth(3).boundingBox();
+    expect(fourth.y,'Fourth event starts the second row').toBeGreaterThan(first.y);
+   }
    const details=eventCards.first().locator('details.mx-sky-event-details');
    await details.locator('summary').click();
    await expect(details).toHaveAttribute('open','');
