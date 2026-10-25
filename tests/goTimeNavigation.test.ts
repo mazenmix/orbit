@@ -34,7 +34,7 @@ test('Go Mode renders timestamp picker and all quick jumps before its gauges',()
  assert.match(nav,/data-go-time-shift="\+hour"/);
  assert.match(nav,/data-now/);
  assert.match(go,/const timeNav=sharedModeTimeNavigation\(\)/);
- assert.match(go,/timeNav\+gauges\+goCards\+renderGoLifeGauges\(r\.scores\)\+allIndicators/);
+ assert.match(go,/timeNav\+gauges\+goCards\+renderGoLifeGauges\(r\.scores,r\.signals\.map\(s=>s\.category\)\)\+allIndicators/);
 });
 
 test('Go Mode time picker recalculates every indicator using selected timezone and pinned moment',()=>{
