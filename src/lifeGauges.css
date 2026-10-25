@@ -39,3 +39,13 @@
 #live-view-body .go-card>.mx-metric-coverage{margin:5px 0 6px}
 #live-view-body .mx-asteroid-evidence{margin:8px 0 0;font-size:12px;line-height:1.7;color:#c9b9e9;overflow-wrap:anywhere}
 #live-view-body .mx-unavailable>b,#live-view-body .mx-unavailable>strong{font-size:clamp(13px,1.5vw,17px);line-height:1.35;overflow-wrap:anywhere}
+
+/* Optional, source-backed named asteroid close contacts for GO / Travel. */
+#live-view-body .mx-live-asteroid-hits{margin-top:12px!important}
+#live-view-body .mx-live-asteroid-hits h2{font-size:16px;margin:0 0 12px}
+#live-view-body .mx-live-asteroid-hits>p{font-size:12px;color:#b6bfd8}
+#live-view-body .mx-live-asteroid-hit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:9px}
+#live-view-body .mx-live-asteroid-hit-grid article{padding:12px 13px;border:1px solid #8f7cb945;border-radius:13px;background:linear-gradient(120deg,#7f6ac210,#141827);min-width:0}
+#live-view-body .mx-live-asteroid-hit-grid strong{font-size:14px;color:#e5d4ff}
+#live-view-body .mx-live-asteroid-hit-grid small{display:block;font-size:11px;margin-top:5px;color:#b6c8ea}
+#live-view-body .mx-live-asteroid-hit-grid p{font-size:12px;line-height:1.65;margin:8px 0 0;color:#dfdbe8}
