@@ -811,7 +811,7 @@
 }
 #live-view-body .mx-full-sky-today .mx-motion-meter{margin-top:auto;display:flex;flex-direction:column;gap:6px;min-width:0}
 #live-view-body .mx-full-sky-today .mx-motion-meter-head{
- display:flex;align-items:center;justify-content:space-between;gap:4px;
+ display:flex;align-items:center;justify-content:center;gap:4px;text-align:center;
  font-size:.66rem;color:#a3cdb9;line-height:1.3;
 }
 #live-view-body .mx-full-sky-today .mx-motion-meter-head b{
@@ -844,8 +844,10 @@
 }
 #live-view-body .mx-full-sky-today .mx-motion-countdown small{color:#c4cfe1;font-size:.65rem;line-height:1.4}
 #live-view-body .mx-full-sky-today .mx-motion-countdown time{
- display:block;font-size:.77rem;color:#e8fdf2;font-variant-numeric:tabular-nums;
- font-weight:800;line-height:1.5;overflow-wrap:anywhere;
+ display:block;width:100%;font-size:clamp(8px,.7vw,10px);color:#e8fdf2;
+ font-variant-numeric:tabular-nums;font-weight:800;line-height:1.4;
+ white-space:nowrap;overflow-wrap:normal;letter-spacing:-.02em;
+ text-align:center;direction:rtl;
 }
 #live-view-body .mx-full-sky-today .mx-sky-planet.is-retrograde .mx-motion-countdown time{color:#ffd4a0}
 #live-view-body .mx-full-sky-today .mx-motion-permanent .mx-motion-countdown{
