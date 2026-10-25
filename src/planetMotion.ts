@@ -40,7 +40,7 @@ export function motionTimeRemaining(now:number,end:number,language:'ar'|'en',com
  if(compact){
   const abbreviations=language==='ar'?['سنة','ش','ي','س','د']:['y','mo','d','h','m'];
   const compactUnits=words.map(([n],i)=>[n,abbreviations[i]] as const).filter(([n])=>n>0);
-  return (compactUnits.length?compactUnits.slice(0,3):[[1,language==='ar'?'د':'m']]).map(([n,unit])=>n+unit).join(' · ');
+  return (compactUnits.length?compactUnits.slice(0,3):[[1,language==='ar'?'د':'m']]).map(([n,unit])=>String(n)+unit).join(' · ');
  }
  return (significant.length?significant.slice(0,3):[[1,language==='ar'?'دقيقة':'min']]).map(([n,unit])=>n+' '+unit).join(' · ');
 }
