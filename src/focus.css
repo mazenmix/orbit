@@ -826,108 +826,91 @@
 }
 
 
-/* Today: authentic Moon/VOC circular gauges directly beneath Time Machine.
-   Identical timing attributes and rings to the dedicated Moon page. */
+
+/* Today-only compact Moon/VOC display.  The Lunar page keeps its large gauges. */
 #live-view-body .mx-today-compact .mx-today-moon-gauges{
- padding:13px 14px!important;
- margin:0!important;
- min-width:0;
- border-radius:15px;
+  width:100%;max-width:100%;min-width:0;overflow:hidden;
+  padding:13px!important;margin:0!important;border-radius:15px;
 }
 #live-view-body .mx-today-moon-gauges-head{
- display:flex;
- justify-content:space-between;
- align-items:center;
- gap:7px;
- margin:0 0 11px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin:0 0 11px;
 }
 #live-view-body .mx-today-moon-gauges-head h2{
- font-size:13px;
- line-height:1.5;
- font-weight:800;
+  margin:0;min-width:0;font-size:13px;line-height:1.4;color:#eee8fb;font-weight:800;
 }
 #live-view-body .mx-today-gauges-live{
- display:inline-flex;
- align-items:center;
- color:#86d8b8;
- font:800 9px/1.3 Manrope,'Noto Sans Arabic',sans-serif;
- letter-spacing:.5px;
- direction:ltr;
+  display:flex;align-items:center;gap:3px;flex:0 0 auto;
+  direction:ltr;font:700 9px/1.1 Manrope,sans-serif;color:#8fe1c3;
 }
 #live-view-body .mx-today-moon-gauges-stack{
- display:grid!important;
- grid-template-columns:minmax(0,1fr)!important;
- gap:11px!important;
+  display:flex!important;flex-direction:column!important;
+  width:100%;min-width:0;gap:9px!important;
 }
 #live-view-body .mx-today-moon-gauge-unit{
- min-width:0;
+  display:block;width:100%;max-width:100%;min-width:0;
+  padding:10px;border:1px solid #3c4c55;border-radius:13px;
+  background:linear-gradient(140deg,#1b2730,#15202b);
 }
 #live-view-body .mx-today-moon-gauge-title{
- display:flex;
- align-items:center;
- justify-content:space-between;
- gap:7px;
- color:#c7cadb;
- font-size:11px;
- font-weight:750;
- margin-bottom:5px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;min-width:0;margin:0 0 8px;
+  font-size:11px;line-height:1.4;color:#c2d9d7;font-weight:700;
 }
-#live-view-body .mx-today-moon-gauge-title span{min-width:0}
 #live-view-body .mx-today-moon-gauge-title strong{
- font-size:12px;
- color:#e1d2ff;
- text-align:end;
+  min-width:0;font-size:12px;font-weight:800;
+  line-height:1.4;color:#e8dafa;text-align:end;
 }
-#live-view-body .mx-today-compact .mx-today-moon-gauges-stack .mx-lunar-gauge{
- display:flex;
- align-items:center;
- gap:10px;
- min-height:79px;
- padding:9px 10px;
- margin:0!important;
- border-radius:12px;
+#live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge{
+  display:grid!important;grid-template-columns:52px minmax(0,1fr)!important;
+  align-items:center;gap:10px!important;direction:ltr;
+  width:100%;max-width:100%;min-width:0;min-height:62px;
+  padding:0!important;margin:0!important;border:0!important;
+  background:transparent!important;box-shadow:none!important;
 }
 #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-ring{
- width:60px;
- height:60px;
- flex:0 0 60px;
+  width:52px!important;height:52px!important;flex:0 0 52px!important;min-width:0;
 }
-#live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-ring strong{font-size:14px}
+#live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-ring svg{
+  width:100%!important;height:100%!important;
+}
+#live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-ring strong{font-size:12px!important}
 #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-copy{
- display:flex;
- flex-direction:column;
- justify-content:center;
- gap:5px;
- min-width:0;
- flex:1 1 0;
+  display:flex!important;flex-direction:column;justify-content:center;
+  align-items:flex-start;gap:5px!important;
+  min-width:0;width:100%;direction:rtl;text-align:right;
 }
 #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-copy [data-gauge-label]{
- font-size:10px;
- line-height:1.45;
- font-weight:700;
+  display:block;min-width:0;width:100%;font-size:10px!important;
+  line-height:1.4!important;white-space:normal;overflow-wrap:anywhere;
+  color:#bde5d7;
 }
 #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-copy strong[data-gauge-time]{
- display:inline-flex;
- justify-content:center;
- align-items:center;
- align-self:flex-start;
- direction:ltr;
- min-width:0;
- max-width:100%;
- padding:5px 7px;
- font:900 clamp(16px,1.5vw,19px)/1.2 Manrope,'Noto Sans Arabic',sans-serif;
- white-space:nowrap;
- font-variant-numeric:tabular-nums;
- border-radius:8px;
- border:1px solid #4fc9aa58;
- background:#0e302b8a;
- color:#f2fff9;
+  display:inline-block!important;align-self:flex-start;
+  max-width:100%;min-width:0;box-sizing:border-box;
+  margin:0;padding:5px 7px;border:1px solid #3887768c;border-radius:8px;
+  background:#0b302bb3;box-shadow:none;
+  color:#f0fff8;font:850 16px/1.15 Manrope,monospace!important;
+  letter-spacing:0;white-space:nowrap;direction:ltr;unicode-bidi:isolate;
+  font-variant-numeric:tabular-nums;
 }
+#live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge.is-voc .mx-lunar-gauge-track{stroke:#bd769354}
+#live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge.is-voc .mx-lunar-gauge-progress{stroke:#ff7798;filter:drop-shadow(0 0 4px #ff668a6a)}
+#live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge.is-voc .mx-lunar-gauge-ring strong{color:#ffafc1}
+#live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge.is-voc .mx-lunar-gauge-copy [data-gauge-label]{color:#ffd0dc}
 #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge.is-voc .mx-lunar-gauge-copy strong[data-gauge-time]{
- border-color:#ec78946b;
- background:#4c2339a8;
- color:#fff1f6;
+  color:#fff1f6;background:#432334c9;border-color:#e770956f;
 }
-@media(max-width:390px){
- #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-copy strong[data-gauge-time]{font-size:16px}
+#live-view-body .mx-today-moon-gauges-stack .mx-today-moon-gauge-unit:has(.mx-lunar-gauge.is-voc){
+  background:linear-gradient(140deg,#30202e,#211b2c);border-color:#a254705e;
+}
+@media(max-width:1120px){
+  #live-view-body .mx-today-compact .mx-today-moon-gauges{
+    width:min(100%,440px);margin-inline:auto!important;
+  }
+}
+@media(max-width:375px){
+  #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge{grid-template-columns:46px minmax(0,1fr)!important;gap:8px!important}
+  #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-ring{width:46px!important;height:46px!important;flex-basis:46px!important}
+  #live-view-body .mx-today-moon-gauges-stack .mx-lunar-gauge-copy strong[data-gauge-time]{font-size:14px!important}
 }
