@@ -14,3 +14,14 @@ test('complete 56-body calculated set is not silently truncated at 100 factors',
  assert.ok(all.some(e=>e.transit.id===namedAsteroids.at(-1)!.name));
  assert.ok(all.every(e=>e.angle===0&&e.orb===0));
 });
+
+test('corrupt, duplicate or stale asteroid evidence cannot produce a narrative',()=>{
+ const Eros=body('Eros');
+ const Sun=body('Sun');
+ const at=new Date('2026-10-25T00:00:00Z');
+ assert.throws(()=>namedAsteroidContacts([{...Eros,longitude:NaN}],[Sun],at),/Invalid named asteroid/);
+ assert.throws(()=>namedAsteroidContacts([Eros],[{...Sun,speed:Infinity}],at),/Invalid named asteroid/);
+ assert.throws(()=>namedAsteroidContacts([Eros,Eros],[Sun],at),/Duplicate ephemeris/);
+ assert.throws(()=>namedAsteroidContacts([Eros],[Sun,Sun],at),/Duplicate ephemeris/);
+ assert.throws(()=>namedAsteroidContacts([Eros],[Sun],new Date(NaN)),/Invalid named asteroid/);
+});
