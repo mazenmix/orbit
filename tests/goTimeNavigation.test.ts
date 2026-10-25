@@ -34,7 +34,7 @@ test('Go Mode renders timestamp picker and all quick jumps before its gauges',()
  assert.match(nav,/data-go-time-shift="\+hour"/);
  assert.match(nav,/data-now/);
  assert.match(go,/const timeNav=sharedModeTimeNavigation\(\)/);
- assert.match(go,/timeNav\+gauges\+goCards\+renderGoLifeGauges\(r\.scores,r\.signals\.map\(s=>s\.category\)\)\+allIndicators/);
+ assert.match(go,/timeNav\+gauges\+goCards\+renderGoLifeGauges\(sky\.scores,categories\)\+allIndicators/);
 });
 
 test('Go Mode time picker recalculates every indicator using selected timezone and pinned moment',()=>{
@@ -44,7 +44,7 @@ test('Go Mode time picker recalculates every indicator using selected timezone a
  assert.match(binding,/go-time-form/);
  assert.match(binding,/zonedInstant\(String\(new FormData\(goTimeForm\)\.get\('moment'\)\),active\.zone\)/);
  assert.match(binding,/updateTime\(.*true\)/);
- assert.match(source,/const indicators=derivedMetrics\(data!\.scores\)/);
+ assert.match(source,/indicators=derivedMetrics\(sky\.scores\)/);
  assert.match(source,/function updateTime\(at:Date,pin=true\)/);
  assert.match(source,/if\(liveTimePinned\)return;/);
 });
@@ -66,7 +66,7 @@ test('Travel Mode has identical time selector above its 12 recalculated gauges',
  assert.match(nav,/data-go-time-shift="-hour"/);
  assert.match(nav,/data-go-time-shift="\+hour"/);
  assert.match(nav,/data-go-time-shift="\+day"/);
- assert.match(travel,/derivedMetrics\(data!\.scores\)/);
+ assert.match(travel,/derivedMetrics\(liveGaugeSky\(\)\.scores\)/);
  assert.match(travel,/quickGaugeCard\(metric,travelSymbol\(id\),undefined,id\)/);
  const src=readFileSync('src/focus.css','utf8');
  assert.match(src,/#live-view-body \.mx-go-time-nav\{/);
