@@ -145,7 +145,7 @@ test('retrograde sign crossings retain direction instead of generic direct ingre
  const ingress=events.find(e=>e.kind==='ingress'&&e.first==='Venus'&&e.sign===6);
  assert.ok(ingress,'Retrograde return from Scorpio into Libra must be recognized');
  assert.equal(ingress!.retrograde,true);
- assert.match(occurrenceLanguage(ingress!,'ar').title,/رجع متراجعاً إلى الميزان/);
+ assert.match(occurrenceLanguage(ingress!,'ar').title,/عادت متراجعة إلى الميزان/);
  assert.match(occurrenceLanguage(ingress!,'en').title,/returned retrograde to Libra/);
 });
 test('Moon-Sun conjunction is a New Moon while opposition is a Full Moon',()=>{
