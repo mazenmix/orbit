@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {metricSpecs,derivedMetrics,goModes} from '../src/metrics.ts';
+import {metricSpecs,derivedMetrics,goModes,metricCoverage} from '../src/metrics.ts';
 const categories={overview:50,career:70,love:80,communication:60,energy:75,emotions:40,recovery:55,timing:65};
 test('29 named symbolic indicators use eight source indices without invented probabilities',()=>{
  const result=derivedMetrics(categories);
@@ -44,4 +44,13 @@ test('Go Mode gives each underlying category one vote instead of double-counting
  assert.throws(()=>goModes(metrics.filter(row=>row.id!=='career')),/Incomplete or invalid indicator set/);
  assert.throws(()=>goModes(metrics.filter(row=>row.id!=='recovery')),/Incomplete or invalid source category indices/);
  assert.throws(()=>goModes([...metrics,metrics[0]]),/Repeated Go Mode indicator/);
+});
+
+test('unsupported baseline scores are not described as fully evidenced',()=>{
+ const rows=derivedMetrics(categories),find=(id:string)=>rows.find(m=>m.id===id)!;
+ assert.equal(metricCoverage(find('career'),[]),'none');
+ assert.equal(metricCoverage(find('career'),[{category:'career'}]),'complete');
+ assert.equal(metricCoverage(find('focus'),[{category:'career'}]),'partial');
+ assert.equal(metricCoverage(find('focus'),[{category:'career'},{category:'communication'},{category:'recovery'}]),'complete');
+ assert.equal(metricCoverage(find('focus'),[{category:'career'},{category:'career'}]),'partial');
 });
