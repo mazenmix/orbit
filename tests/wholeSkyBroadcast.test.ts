@@ -9,6 +9,32 @@ const sample=(t:Date):Point[]=>{
  const lon:Record<string,number>={Sun:210+h*.04,Moon:5+h*.55,Mercury:29.5+h*.1,Venus:90,Mars:160,Jupiter:248,Saturn:307,Uranus:340,Neptune:277,Pluto:190};
  return FULL_SKY_BODIES.map(id=>({id,symbol:'•',longitude:lon[id],speed:id==='Moon'?13.2:id==='Mercury'?2.4:id==='Sun'?.96:0}));
 };
+test('two distinct Mercury–Venus exact passes inside two hours are not merged or dropped',()=>{
+ const read=(at:Date):Point[]=>{
+  const h=(+at-BASE)/HOUR;
+  return sample(at).map(p=>p.id==='Mercury'
+   ?{...p,longitude:30+.1*(h-.5)*(h-1.5),speed:.1*(2*h-2)*24}
+   :p);
+ };
+ const events=scanWholeSky(new Date(BASE+HOUR),read,1,1)
+  .filter(e=>e.kind==='aspect'&&e.first==='Mercury'&&e.second==='Venus'&&e.angle===60);
+ assert.equal(events.length,2,'both crossings are distinct events');
+ assert.ok(Math.abs(+events[0].at-(BASE+.5*HOUR))<60000);
+ assert.ok(Math.abs(+events[1].at-(BASE+1.5*HOUR))<60000);
+});
+test('two exact Mercury–Venus contacts inside a single hour are separately detected',()=>{
+ const read=(at:Date):Point[]=>{
+  const h=(+at-BASE)/HOUR;
+  return sample(at).map(p=>p.id==='Mercury'
+   ?{...p,longitude:30+.1*(h-.25)*(h-.75),speed:.1*(2*h-1)*24}
+   :p);
+ };
+ const events=scanWholeSky(new Date(BASE+.5*HOUR),read,.5,.5)
+  .filter(e=>e.kind==='aspect'&&e.first==='Mercury'&&e.second==='Venus'&&e.angle===60);
+ assert.equal(events.length,2);
+ assert.ok(Math.abs(+events[0].at-(BASE+.25*HOUR))<60000);
+ assert.ok(Math.abs(+events[1].at-(BASE+.75*HOUR))<60000);
+});
 test('All ten major bodies must come from actual valid ephemeris points',()=>{
  const points=sample(new Date(BASE));
  const out=wholeSkyBroadcast(points,[],new Date(BASE),'ar');
@@ -34,6 +60,17 @@ test('Station direction is refined from signed real ephemeris velocity',()=>{
  assert.ok(changed,'actual sign change of speed');
  assert.equal(changed!.retrograde,false);
  assert.ok(Math.abs(+changed!.at-station)<60000);
+});
+test('zero-speed tangency without direction reversal does not invent a station',()=>{
+ const origin=BASE+2*HOUR;
+ const read=(date:Date):Point[]=>sample(date).map(p=>{
+  if(p.id!=='Mars')return p;
+  const h=(+date-origin)/HOUR;
+  return {...p,longitude:160+.0001*h*h*h,speed:.0072*h*h};
+ });
+ const stations=scanWholeSky(new Date(origin),read,3,3)
+   .filter(e=>e.kind==='station'&&e.first==='Mars');
+ assert.equal(stations.length,0);
 });
 test('An actual nonlunar event can drive the headline while all planets remain visible',()=>{
  const at=new Date(BASE+3*HOUR);
