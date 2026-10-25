@@ -39,3 +39,17 @@ export function natalDerivedAngles(chart:Chart,knownBirthTime:boolean):Auxiliary
  else points.push(make('Vertex',chart.vertex,0,'Vx','placidus-derived'));
  return {points,missing};
 }
+
+/** Human label without conflating Mean Node, True Node or asteroid Lilith. */
+const labels:Readonly<Record<string,readonly [string,string]>>={
+ MeanNorthNode:['العقدة الشمالية المتوسطة','Mean North Node'],
+ MeanSouthNode:['العقدة الجنوبية المتوسطة','Mean South Node'],
+ TrueNorthNode:['العقدة الشمالية الحقيقية','True North Node'],
+ TrueSouthNode:['العقدة الجنوبية الحقيقية','True South Node'],
+ Descendant:['الغارب','Descendant'],
+ IC:['وتد الأرض','Imum Coeli'],
+ Vertex:['نقطة الفيرتكس','Vertex']
+};
+export function auxiliaryName(id:string,arabic:boolean):string{
+ const pair=labels[id];return pair?pair[arabic?0:1]:id;
+}
