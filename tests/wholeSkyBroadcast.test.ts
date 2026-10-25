@@ -43,7 +43,7 @@ test('An actual nonlunar event can drive the headline while all planets remain v
  assert.match(briefing.title,/دا يقترب/);
  assert.equal(briefing.next?.first,'Mercury');
  assert.equal(briefing.planets.length,10);
- assert.doesNotMatch(briefing.title+' '+briefing.meaning+' '+briefing.action,/°|[0-9]\.[0-9]|تربيع|تسديس|تثليث/);
+ assert.doesNotMatch(briefing.title+' '+briefing.meaning+' '+briefing.action,/°|[0-9]\.[0-9]/);
 });
 test('Sky text is stable until real phase/event/planet change; no random clock cycling',()=>{
  const at=new Date(BASE+3*HOUR);
@@ -53,7 +53,7 @@ test('Sky text is stable until real phase/event/planet change; no random clock c
  const after=wholeSkyBroadcast(sample(new Date(+at+2*HOUR)),events,new Date(+at+2*HOUR),'ar');
  assert.notEqual(one.title,after.title);
  const language=occurrenceLanguage(events[0],'ar');
- assert.doesNotMatch(language.title+' '+language.description,/°|[0-9]\.[0-9]|تسديس/);
+ assert.match(language.title,/تسديس/); assert.doesNotMatch(language.description,/°|[0-9]\.[0-9]/);
 });
 test('Today UI uses whole-sky stream in simple and Pro, not lunar-only selection',()=>{
  const main=readFileSync('src/main.ts','utf8');
@@ -92,7 +92,7 @@ test('Planet sign entries and every sky event carry a distinct practical persona
  for(const row of readings){
   assert.ok(row.description.length>36);
   assert.ok(row.action.length>12);
-  assert.doesNotMatch(row.description+' '+row.action,/تغيّرت جهة الحركة|الحركة الظاهرية|تبدّل فلكي محسوب|اتصال فلكي بين|الفكرة الرمزية|حركة كوكبية|المعادلة|رياضيات|تسديس|تثليث|تربيع|°/);
+  assert.doesNotMatch(row.description+' '+row.action,/تغيّرت جهة الحركة|الحركة الظاهرية|تبدّل فلكي محسوب|اتصال فلكي بين|الفكرة الرمزية|حركة كوكبية|المعادلة|رياضيات|°/);
  }
  assert.notEqual(readings[0].description,readings[1].description);
  assert.notEqual(readings[1].description,readings[2].description);
@@ -133,4 +133,28 @@ test('Retrograde status is vivid orange; direct and station remain separately le
  assert.match(css,/font-weight:900/);
  assert.match(css,/\.mx-sky-planet small\.is-station\{/);
  assert.match(css,/\.mx-sky-planet small\.is-direct\{/);
+});
+
+test('retrograde sign crossings retain direction instead of generic direct ingress',()=>{
+ const read=(at:Date)=>sample(at).map(p=>{
+  if(p.id!=='Venus')return p;
+  const h=(+at-BASE)/HOUR;
+  return {...p,longitude:210.25-h*.05,speed:-1.2};
+ });
+ const events=scanWholeSky(new Date(BASE+3*HOUR),read,5,8);
+ const ingress=events.find(e=>e.kind==='ingress'&&e.first==='Venus'&&e.sign===6);
+ assert.ok(ingress,'Retrograde return from Scorpio into Libra must be recognized');
+ assert.equal(ingress!.retrograde,true);
+ assert.match(occurrenceLanguage(ingress!,'ar').title,/رجع متراجعاً إلى الميزان/);
+ assert.match(occurrenceLanguage(ingress!,'en').title,/returned retrograde to Libra/);
+});
+test('Moon-Sun conjunction is a New Moon while opposition is a Full Moon',()=>{
+ const at=new Date(BASE);
+ for(const [angle,arabic,english] of [[0,'محاق القمر','New Moon'],[180,'اكتمال القمر','Full Moon']] as const){
+  const sky={kind:'aspect',at,first:'Sun',second:'Moon',angle} as const;
+  assert.match(occurrenceLanguage(sky,'ar').title,new RegExp(arabic));
+  assert.match(occurrenceLanguage(sky,'en').title,new RegExp(english));
+ }
+ const difficult=occurrenceLanguage({kind:'aspect',at,first:'Moon',second:'Mars',angle:90},'ar');
+ assert.match(difficult.title,/تربيع/);
 });
