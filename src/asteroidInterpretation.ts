@@ -80,7 +80,7 @@ export const meanings:Readonly<Record<string,AsteroidMeaning>>={
 export function asteroidReading(item:NamedAsteroid,contact:NamedContact|undefined,english=false){
  const c=meanings[item.name];if(!c)throw Error('Missing original asteroid interpretation');
  const theme=english?c.enTheme:c.arTheme;
- const action=english?c.enAction:c.arAction;
+ const action=contact?(english?c.enAction:c.arAction):'';
  const natalName=contact?(({Sun:'شمسك',Moon:'قمرك',Mercury:'عطاردك',Venus:'زهرتك',Mars:'مريخك',Jupiter:'مشتريك',Saturn:'زحلك',Uranus:'أورانوسك',Neptune:'نبتونك',Pluto:'بلوتوك',Ascendant:'طالعك',MC:'مهنتك',Chiron:'كيرونك',Ceres:'سيريسك',Pallas:'بالاسك',Juno:'جونوك',Vesta:'فيستاك',Pholus:'فولوسك'} as Record<string,string>)[contact.natal.id]??contact.natal.id):'';
  const natalArea:Record<string,[string,string]>={
   Sun:['قراراتك وثقتك بنفسك','decisions and identity'],Moon:['حاجتك للراحة وردّ الفعل','emotional comfort'],Mercury:['طريقة حچيك وفهمك للآخر','communication and understanding'],
