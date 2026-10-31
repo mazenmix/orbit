@@ -22,7 +22,7 @@ test('Asteroid readings and evidence UI are narrative-first and confidential bir
 
 
 test('Moon is a full-sized main navigation item directly after Today on desktop and mobile',()=>{
- assert.match(main,/const primaryRoutes=\['today','chart','people','go','travelmode','calendar','more'\]/);
+ assert.match(main,/const primaryRoutes=\['today','chart','people','now','go','travelmode','calendar','more'\]/);
  assert.match(main,/function nav\(names:string\[\],mobile=false\)/);
  assert.match(main,/nav\(primaryRoutes\)/);
  assert.match(main,/nav\(primaryRoutes,true\)/);
@@ -34,6 +34,18 @@ test('Moon is a full-sized main navigation item directly after Today on desktop 
  assert.ok(main.includes("card('signals'"),'Keep existing Signals page discoverable');
  assert.ok(main.includes("function morePage()"));
  assert.ok(main.includes("localStorage.setItem('mx.uiMode',uiMode)"));
+});
+test('Now is below People and displays every distinct live meter as one compact vertical list',()=>{
+ assert.ok(main.includes("people:()=>t('الناس','People'),now:()=>t('Now','Now')"));
+ assert.ok(main.includes("case 'now':inner=nowPage();break"));
+ assert.ok(main.includes("now:15000"));
+ assert.ok(main.includes("screen==='now'||screen==='ai'"),'Now must unpin Time Machine selections');
+ const now=main.slice(main.indexOf('function nowPage(){'),main.indexOf('function goModePage(){'));
+ for(const required of ['derivedMetrics(sky.scores)','goModes(indicators)','goLifeGauges(sky.scores)','categories.map(category','moonWindow()','mx-now-list','mx-now-head','data-now-gauge','role="progressbar"'])assert.ok(now.includes(required),'Now is missing '+required);
+ assert.ok(!now.includes('<p>')&&!now.includes('<details'),'Now should contain no explanations');
+ const css=readFileSync('src/now.css','utf8');
+ assert.ok(css.includes('grid-template-columns:minmax(0,1fr)'));
+ assert.ok(css.includes('var(--metric-accent'));
 });
 test('Moon deep link remains under Today category without top duplicate or calendar copy',()=>{
  assert.match(main,/if\(route==='signals'\|\|route==='lunar'\)return 'today'/);
