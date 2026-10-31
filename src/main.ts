@@ -18,6 +18,7 @@ import './typography.css';
 import './focus.css';
 import './peopleCards.css';
 import './lifeGauges.css';
+import './now.css';
 import './moonMansions.css';
 import './navAlignment.css';
 import {lunarMansionWindow,type LunarMansionWindow} from './moonMansions.ts';
@@ -70,6 +71,7 @@ import {derivedMetrics,goModes,reviewContextGoMode,type GoDomain,type ContextGoR
 import {skyContext,contextGaugeBasis,contextGaugeNarrative,type SkyContext} from './skyContext.ts';
 import {travelMetricsByGroup,travelMetricReading} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
+import {goLifeGauges} from './lifeGauges.ts';
 import {supportive,difficult} from './math.ts';
 import {initEngine,report,defaultProfile,compatibility,chart,sunMoonState,confirmedEclipses,asteroidSwissRuntime,birthInstant,targets,localValue,zonedInstant,validateProfile,type Profile,type Report,type Chart} from './engine.ts';
 import {categories,category as evidenceCategory,aspects,angles,aspectNames,type Category,type Signal,type Evidence,type Dimension} from './math.ts';
@@ -170,12 +172,12 @@ function currentMansionWindow():LunarMansionWindow {
 }
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const personHue=(id:string)=>{const ids=profiles.map(p=>p.id).sort();return Math.round((Math.max(0,ids.indexOf(id))*137.508+28)%360)};
-const icon=(name:string)=>({today:'✦',signals:'⌁',people:'♧',chart:'◎',settings:'⚙',time:'◷',lunar:'☾',eclipses:'◑',asteroids:'✧',advanced:'◈',intel:'✦',go:'➤',travelmode:'<svg class="mx-plane-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5L21 16Z"/></svg>',calendar:'▦',more:'☷',ai:'✧',evidence:'⎔'}[name]??'·');
-const labels:Record<string,()=>string>={today:()=>t('اليوم','Today'),signals:()=>t('الإشارات','Signals'),people:()=>t('الناس','People'),chart:()=>t('خارطتي','My chart'),settings:()=>t('الإعدادات','Settings'),time:()=>t('آلة الزمن','Time Machine'),lunar:()=>t('القمر','Moon'),eclipses:()=>t('الكسوف والخسوف','Eclipses'),asteroids:()=>t('الكويكبات','Named asteroids'),advanced:()=>t('التوقيت المتقدم','Advanced timing'),calendar:()=>t('التقويم','Calendar'),more:()=>t('المزيد','More'),go:()=>t('Go Mode','Go Mode'),travelmode:()=>t('Travel Mode','Travel Mode'),intel:()=>t('Go Mode','Go Mode'),ai:()=>t('شرح Ai','Ai explanations'),evidence:()=>t('الدليل الفلكي','Astrological evidence')};
+const icon=(name:string)=>({today:'✦',signals:'⌁',people:'♧',now:'◉',chart:'◎',settings:'⚙',time:'◷',lunar:'☾',eclipses:'◑',asteroids:'✧',advanced:'◈',intel:'✦',go:'➤',travelmode:'<svg class="mx-plane-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5L21 16Z"/></svg>',calendar:'▦',more:'☷',ai:'✧',evidence:'⎔'}[name]??'·');
+const labels:Record<string,()=>string>={today:()=>t('اليوم','Today'),signals:()=>t('الإشارات','Signals'),people:()=>t('الناس','People'),now:()=>t('Now','Now'),chart:()=>t('خارطتي','My chart'),settings:()=>t('الإعدادات','Settings'),time:()=>t('آلة الزمن','Time Machine'),lunar:()=>t('القمر','Moon'),eclipses:()=>t('الكسوف والخسوف','Eclipses'),asteroids:()=>t('الكويكبات','Named asteroids'),advanced:()=>t('التوقيت المتقدم','Advanced timing'),calendar:()=>t('التقويم','Calendar'),more:()=>t('المزيد','More'),go:()=>t('Go Mode','Go Mode'),travelmode:()=>t('Travel Mode','Travel Mode'),intel:()=>t('Go Mode','Go Mode'),ai:()=>t('شرح Ai','Ai explanations'),evidence:()=>t('الدليل الفلكي','Astrological evidence')};
 let clockFormat: '24'|'12'=localStorage.getItem('mx.clockFormat')==='12'?'12':'24';
 let liveTimePinned=false,liveLastRender=0,liveMinute=-1,moonNarrativeLastMinute=-1,liveSkyLastTick=0;
 const LIVE_SKY_INTERVAL_MS=5000;
-const LIVE_CONTENT_INTERVAL_MS:Record<string,number>={today:10000,signals:20000,go:15000,intel:15000,travelmode:15000,lunar:15000,chart:20000,people:30000,time:30000,eclipses:60000,asteroids:45000,advanced:60000,evidence:25000,ai:30000,more:60000};
+const LIVE_CONTENT_INTERVAL_MS:Record<string,number>={today:10000,signals:20000,go:15000,intel:15000,travelmode:15000,lunar:15000,chart:20000,people:30000,now:15000,time:30000,eclipses:60000,asteroids:45000,advanced:60000,evidence:25000,ai:30000,more:60000};
 
 const natalAsteroidHtmlCache=new Map<string,string>();
 const dateText=(d:Date,options:Intl.DateTimeFormatOptions={dateStyle:'full',timeStyle:'short'})=>new Intl.DateTimeFormat('en-GB',{...options,timeZone:active.zone,numberingSystem:'latn',hour12:clockFormat==='12'}).format(d);
@@ -184,8 +186,8 @@ function average(r:Report){const supported=[...new Set(r.signals.map(s=>s.catego
 function getHeatmap(){const key=readingContext()+heatmapSpan;if(!heatmapCache||heatmapCache.key!==key)heatmapCache={key,cells:heatmapSpan===30?calculateHeatmap(selected,30,at=>getReport(at)):sampledHeatmap(selected,heatmapSpan,at=>getReport(at))};return heatmapCache.cells}
 function heatmapUI(){try{const cells=getHeatmap(),key=heatmapCategory;const score=(c:HeatCell)=>key==='average'?c.average:c.indices[key];const label=key==='average'?t('المعدل الرمزي','Symbolic average'):cat(key);return `<section class="panel heatmap-panel"><div class="section-title"><div><span class="eyebrow">TIME MACHINE · 30 / 90 / 365 DAYS</span><h2>${t('خارطة المؤشرات خلال شهر أو سنة','Month and year symbolic heatmaps')}</h2></div>${tag(t('مؤشرات رمزية','Symbolic indices'))}</div><label class="heat-label">${t('المجال','Category')} <select id="heat-category"><option value="average" ${key==='average'?'selected':''}>${t('معدل المجالات المتاحة','Available-category average')}</option>${categories.map(c=>`<option value="${c}" ${key===c?'selected':''}>${cat(c)}</option>`).join('')}</select></label><label class="heat-label">${t('المدة','Period')} <select id="heat-span"><option value="30" ${heatmapSpan===30?'selected':''}>30 ${t('يوم','days')}</option><option value="90" ${heatmapSpan===90?'selected':''}>90 ${t('يوم','days')}</option><option value="365" ${heatmapSpan===365?'selected':''}>365 ${t('يوم','days')}</option></select></label><div class="heatmap-grid">${cells.map(c=>{const raw=score(c),v=raw===null?null:Math.max(0,Math.min(100,Math.round(raw))),d=dateText(c.instant,{day:'2-digit',month:'short'}),coverage=key==='average'?c.coverage.present+'/'+c.coverage.total:'';const detail=v===null?t('غير متاح: لا توجد مؤشرات محسوبة لهذا المجال','Unavailable: no calculated evidence for this category'):v+'/100'+(coverage?' · '+t('المجالات المتاحة ','Available categories ')+coverage:'');return `<button class="heatmap-cell ${v===null?'heatmap-unavailable':'heatmap-'+heatmapBand(v)}" data-heat-at="${+c.instant}" aria-label="${esc(d+' '+label+' '+detail)}" title="${esc(d+' · '+label+' · '+detail)}"><small>${esc(d)}</small><b>${v===null?'—':v}</b>${coverage?`<small class="heatmap-coverage">${coverage}</small>`:''}</button>`}).join('')}</div></section>`}catch(e){return `<p class="alert">${t('تعذر حساب الـHeatmap: ','Could not calculate heatmap: ')}${esc(String(e))}</p>`}}
 
-/** Six destinations; Go Mode is its own first-class page directly after People. */
-const primaryRoutes=['today','chart','people','go','travelmode','calendar','more'];
+/** Now follows People; Go Mode remains a separate first-class page. */
+const primaryRoutes=['today','chart','people','now','go','travelmode','calendar','more'];
 function primarySection(route:string):string{
  if(route==='signals'||route==='lunar')return 'today';
  if(route==='asteroids')return 'chart';
@@ -227,7 +229,7 @@ function demoNotice(){
 function render(){
  liveLastRender=Date.now();
  // These top-level routes use compact headings: preserve time, location and profile tools.
- const hidePageHeadingTitle=['travelmode','go','people','chart','today','lunar','calendar','more','ai','settings','eclipses'].includes(screen);
+ const hidePageHeadingTitle=['travelmode','go','people','now','chart','today','lunar','calendar','more','ai','settings','eclipses'].includes(screen);
  document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.documentElement.lang=lang==='ar'?'ar-IQ':'en';
  document.documentElement.dataset.uiMode=uiMode;
  root.innerHTML=`<div class="shell ${uiMode==='simple'?'mx-simple':'mx-professional'}"><aside class="sidebar"><a class="brand" href="#today"><span class="brand-wordmark"><i>MX</i> Astro</span></a>${nav(primaryRoutes)}</aside><div class="workspace"><header class="topbar"><a class="mobile-brand" href="#today"><b class="brand-wordmark"><i>MX</i> Astro</b></a><div class="top-actions"><button class="language" id="language">${lang==='ar'?'EN':'عربي'}</button><button id="tools" class="icon-button mobile-tools" aria-label="${t('أدوات أكثر','More tools')}">⋯</button><button class="avatar" style="--mx-avatar-hue:${personHue(active.id)}" data-go="settings" aria-label="${t('الملف الشخصي','Profile')}">${esc(active.name.slice(0,1))}</button></div></header><main id="main"><div class="page-heading"><div>${hidePageHeadingTitle?'':`<div class="eyebrow">MX ASTRO · ${labels[primarySection(screen)]?.()??labels.today()}</div>${screen==='chart'||screen==='evidence'?'':`<h1>${labels[screen]?.()??labels.today()}</h1>`}`}<p><span id="live-page-clock">${dateText(selected)}</span> <span class="location">⌖ ${esc(placeCityLabel(screen==='chart'?chartOwnerProfile().city:active.city))}</span></p></div><div class="heading-actions"><label class="sr-only" for="active-profile">${t('الملف النشط','Active profile')}</label><select id="active-profile">${topProfileOptions()}</select><button class="icon-button" id="refresh" aria-label="${t('تحديث','Refresh')}">↻</button></div></div>${demoNotice()}${error?`<div class="alert">${esc(error)}</div>`:''}<div id="live-view-body">${!ready?`<section class="loading panel"><div class="orbital-loader">◎</div><h2>${t('دا أفتح مرصدك…','Opening your observatory…')}</h2><p>${t('تحميل المحرك والبيانات الفلكية المحلية.','Loading the local engine and ephemeris data.')}</p></section>`:content()}</div></main>${nav(primaryRoutes,true)}</div></div><dialog id="detail"><div id="dialog-content"></div></dialog><div class="toast" role="status" aria-live="polite" id="toast"></div>`;
@@ -240,7 +242,7 @@ function render(){
  if(screen==='calendar'&&ready)startCalendarWork();
  if(['asteroids','go','travelmode'].includes(screen)&&ready&&!asteroidAutoAttempted&&mountedAsteroidCount()<namedAsteroids.length&&location.hostname.endsWith('.pages.dev')){asteroidAutoAttempted=true;void refreshAsteroidEphemerides();}
 }
-function content(){if(!data)return screen==='settings'?settingsPage():screen==='more'?morePage():'<section class="panel"><p>'+t('الحساب غير متاح لهذي البيانات. راجع الملف قبل عرض نتائج جديدة.','Calculation unavailable for these inputs. Review the profile before showing new results.')+'</p><button class="secondary" data-go="settings">'+t('مراجعة بيانات الميلاد','Review birth details')+'</button></section>';let inner:string;switch(screen){case 'today':inner=uiMode==='simple'?focusedToday():today();break;case 'signals':inner=signalsPage();break;case 'chart':inner=chartPage();break;case 'time':inner=uiMode==='simple'?focusedTime():timePage();break;case 'lunar':inner=lunarPage();break;case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage();break;case 'eclipses':inner=eclipsesPage();break;case 'asteroids':inner=asteroidsPage();break;case 'advanced':inner=advancedPage();break;case 'intel':case 'go':inner=goModePage();break;case 'travelmode':inner=travelModePage();break;case 'people':inner=peoplePage();break;case 'evidence':inner=evidencePage();break;case 'ai':inner=aiPage();break;case 'settings':inner=settingsPage();break;case 'more':inner=morePage();break;default:screen='today';inner=today()}return sectionTabs()+(data.current.missing.length&&screen!=='settings'?'<p class="subtle" role="status">'+t('بيانات إضافية غير متاحة وتم استبعادها: ','Unavailable supplementary bodies omitted: ')+data.current.missing.map(id=>esc(planet(id))).join(' · ')+'</p>':'')+inner}
+function content(){if(!data)return screen==='settings'?settingsPage():screen==='more'?morePage():'<section class="panel"><p>'+t('الحساب غير متاح لهذي البيانات. راجع الملف قبل عرض نتائج جديدة.','Calculation unavailable for these inputs. Review the profile before showing new results.')+'</p><button class="secondary" data-go="settings">'+t('مراجعة بيانات الميلاد','Review birth details')+'</button></section>';let inner:string;switch(screen){case 'today':inner=uiMode==='simple'?focusedToday():today();break;case 'signals':inner=signalsPage();break;case 'chart':inner=chartPage();break;case 'time':inner=uiMode==='simple'?focusedTime():timePage();break;case 'lunar':inner=lunarPage();break;case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage();break;case 'eclipses':inner=eclipsesPage();break;case 'asteroids':inner=asteroidsPage();break;case 'advanced':inner=advancedPage();break;case 'intel':case 'go':inner=goModePage();break;case 'travelmode':inner=travelModePage();break;case 'people':inner=peoplePage();break;case 'now':inner=nowPage();break;case 'evidence':inner=evidencePage();break;case 'ai':inner=aiPage();break;case 'settings':inner=settingsPage();break;case 'more':inner=morePage();break;default:screen='today';inner=today()}return sectionTabs()+(data.current.missing.length&&screen!=='settings'&&screen!=='now'?'<p class="subtle" role="status">'+t('بيانات إضافية غير متاحة وتم استبعادها: ','Unavailable supplementary bodies omitted: ')+data.current.missing.map(id=>esc(planet(id))).join(' · ')+'</p>':'')+inner}
 function tag(text:string,cls=''){return `<span class="tag ${cls}">${text}</span>`}
 
 /** Restore the four daily gauges from existing calculated symbolic indices.
@@ -847,6 +849,40 @@ function liveAsteroidContacts(limit=6):string{
     return '<article><strong>'+esc(a.name)+'</strong><small>'+esc(planet(c.natal.id))+' · '+aspect(c.angle)+' · '+c.orb.toFixed(2)+'°</small><p>'+esc(reading.action)+'</p></article>';
    }).join('')+'</div></section>';
  }catch(e){console.warn('Named asteroid context unavailable',e);return ''}
+}
+
+/** Read-only Now dashboard: a single, compact list of the site's calculated meters.
+ * Travel and Today's four shortcuts already reuse the 29 Go metric IDs, so
+ * show each of those only once. Do not introduce a second scoring model. */
+function nowPage(){
+ const sky=liveGaugeSky(),indicators=derivedMetrics(sky.scores),decisions=goModes(indicators);
+ type NowRow={id:string;label:string;value:number;tone?:string};
+ const decisionNames:Record<GoDomain,[string,string]>={
+  work:['Go · العمل','Go · Work'],
+  social:['Go · التواصل الاجتماعي','Go · Social'],
+  relationships:['Go · العلاقات','Go · Relationships'],
+  travel:['Go · السفر','Go · Travel']
+ };
+ const rows:NowRow[]=[
+  ...categories.map(category=>({id:'today-'+category,label:t('اليوم','Today')+' · '+cat(category),value:data!.scores[category]})),
+  ...indicators.map(m=>({id:'metric-'+m.id,label:t(m.ar,m.en),value:m.value})),
+  ...decisions.map(d=>({id:'go-'+d.domain,label:t(...decisionNames[d.domain]),value:d.value})),
+  ...goLifeGauges(sky.scores).map(m=>({id:'life-'+m.id,label:t(m.name.ar,m.name.en),value:m.value}))
+ ];
+ try{
+  const moon=moonWindow(),at=+selected;
+  rows.push({id:'moon-sign',label:t('القمر','Moon'),value:Math.round(elapsedPercent(+moon.enteredAt,+moon.ingressAt,at)),tone:'mx-now-moon'});
+  rows.push({id:'moon-voc',label:t('خلو المسار','Void of Course'),value:Math.round(elapsedPercent(+moon.vocStartsAt,+moon.ingressAt,at)),tone:'mx-now-void '+(moon.isVoid?'is-voc':'is-clear')});
+ }catch(e){console.warn('Now Moon timing unavailable',e)}
+ return '<section class="mx-now-page" data-section="now" aria-label="Now"><div class="mx-now-list">'+
+  rows.map(({id,label,value,tone})=>{
+   const percent=Math.max(0,Math.min(100,Math.round(value))),style=tone??gaugeLevel(percent);
+   const safeLabel=esc(label);
+   return '<article class="metric-card mx-now-row '+style+'" data-now-gauge="'+esc(id)+'">'+
+    '<div class="mx-now-head"><strong>'+safeLabel+'</strong><b>'+percent+'<em>/100</em></b></div>'+
+    '<div class="meter" role="progressbar" aria-label="'+safeLabel+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"><i style="width:'+percent+'%"></i></div>'+
+    '</article>';
+  }).join('')+'</div></section>';
 }
 function goModePage(){
  const sky=liveGaugeSky(),indicators=derivedMetrics(sky.scores),go=goModes(indicators),r=data!;
@@ -1785,8 +1821,8 @@ function refreshLiveView(force=false){
  }catch(e){console.warn('Live calculations unavailable; keeping last valid view',e)}
 }
 
-function navigate(value:string){screen=labels[value]?value:'today';if(!liveTimePinned||screen==='today'||screen==='ai'){liveTimePinned=false;selected=new Date();recalculate()}location.hash=screen;render();if(screen==='ai'&&!aiConnection.checked)void refreshAIConnection();window.scrollTo({top:0,behavior:'instant'})}
-window.addEventListener('hashchange',()=>{const value=location.hash.slice(1);if(labels[value]&&value!==screen){screen=value;if(!liveTimePinned||screen==='today'||screen==='ai'){liveTimePinned=false;selected=new Date();recalculate()}render();if(screen==='ai'&&!aiConnection.checked)void refreshAIConnection()}});
+function navigate(value:string){screen=labels[value]?value:'today';if(!liveTimePinned||screen==='today'||screen==='now'||screen==='ai'){liveTimePinned=false;selected=new Date();recalculate()}location.hash=screen;render();if(screen==='ai'&&!aiConnection.checked)void refreshAIConnection();window.scrollTo({top:0,behavior:'instant'})}
+window.addEventListener('hashchange',()=>{const value=location.hash.slice(1);if(labels[value]&&value!==screen){screen=value;if(!liveTimePinned||screen==='today'||screen==='now'||screen==='ai'){liveTimePinned=false;selected=new Date();recalculate()}render();if(screen==='ai'&&!aiConnection.checked)void refreshAIConnection()}});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
 render();
 initEngine().then(v=>{engineVersion=v;ready=true;recalculate();render();void refreshAIConnection();if('serviceWorker' in navigator&&import.meta.env.PROD){
