@@ -7,6 +7,7 @@
 #live-view-body .mx-now-row .mx-now-head>b{white-space:nowrap;direction:ltr;font-size:19px;font-weight:750;font-variant-numeric:tabular-nums;color:var(--metric-accent,#b6a6ed);text-shadow:0 0 12px var(--metric-glow,transparent)}
 #live-view-body .mx-now-row .mx-now-head>b em{font-size:10px;font-weight:500;font-style:normal;color:#aeb5cc;text-shadow:none}
 #live-view-body .mx-now-row .meter{margin:0;height:7px;width:100%}
+#live-view-body .mx-now-row.mx-unavailable{--metric-accent:#788099;--metric-tint:rgba(116,121,143,.06);--metric-glow:transparent;opacity:.76}
 #live-view-body .mx-now-row.mx-now-moon{--metric-accent:#7fdfd4;--metric-tint:rgba(69,170,169,.12);--metric-glow:rgba(100,210,204,.18)}
 #live-view-body .mx-now-row.mx-now-void.is-clear{--metric-accent:#68e0a6;--metric-tint:rgba(68,192,131,.12);--metric-glow:rgba(68,192,131,.18)}
 #live-view-body .mx-now-row.mx-now-void.is-voc{--metric-accent:#f08b83;--metric-tint:rgba(222,106,104,.11);--metric-glow:rgba(222,106,104,.18)}
