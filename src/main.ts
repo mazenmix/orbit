@@ -856,7 +856,7 @@ function liveAsteroidContacts(limit=6):string{
  * show each of those only once. Do not introduce a second scoring model. */
 function nowPage(){
  const sky=liveGaugeSky(),indicators=derivedMetrics(sky.scores),decisions=goModes(indicators);
- type NowRow={id:string;label:string;value:number;tone?:string};
+ type NowRow={id:string;label:string;value:number|null;tone?:string};
  const decisionNames:Record<GoDomain,[string,string]>={
   work:['Go · العمل','Go · Work'],
   social:['Go · التواصل الاجتماعي','Go · Social'],
@@ -864,7 +864,7 @@ function nowPage(){
   travel:['Go · السفر','Go · Travel']
  };
  const rows:NowRow[]=[
-  ...categories.map(category=>({id:'today-'+category,label:t('اليوم','Today')+' · '+cat(category),value:data!.scores[category]})),
+  ...categories.map(category=>({id:'today-'+category,label:t('اليوم','Today')+' · '+cat(category),value:data!.signals.some(signal=>signal.category===category)?data!.scores[category]:null})), 
   ...indicators.map(m=>({id:'metric-'+m.id,label:t(m.ar,m.en),value:m.value})),
   ...decisions.map(d=>({id:'go-'+d.domain,label:t(...decisionNames[d.domain]),value:d.value})),
   ...goLifeGauges(sky.scores).map(m=>({id:'life-'+m.id,label:t(m.name.ar,m.name.en),value:m.value}))
@@ -876,11 +876,12 @@ function nowPage(){
  }catch(e){console.warn('Now Moon timing unavailable',e)}
  return '<section class="mx-now-page" data-section="now" aria-label="Now"><div class="mx-now-list">'+
   rows.map(({id,label,value,tone})=>{
-   const percent=Math.max(0,Math.min(100,Math.round(value))),style=tone??gaugeLevel(percent);
+   const available=value!==null&&Number.isFinite(value);
+   const percent=available?Math.max(0,Math.min(100,Math.round(value))):0,style=available?(tone??gaugeLevel(percent)):'mx-unavailable';
    const safeLabel=esc(label);
    return '<article class="metric-card mx-now-row '+style+'" data-now-gauge="'+esc(id)+'">'+
-    '<div class="mx-now-head"><strong>'+safeLabel+'</strong><b>'+percent+'<em>/100</em></b></div>'+
-    '<div class="meter" role="progressbar" aria-label="'+safeLabel+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"><i style="width:'+percent+'%"></i></div>'+
+    '<div class="mx-now-head"><strong>'+safeLabel+'</strong><b>'+(available?percent+'<em>/100</em>':'—')+'</b></div>'+
+    '<div class="meter"'+(available?' role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"':'')+' aria-label="'+safeLabel+'"><i style="width:'+percent+'%"></i></div>'+
     '</article>';
   }).join('')+'</div></section>';
 }
