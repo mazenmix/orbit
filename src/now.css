@@ -18,3 +18,31 @@
  #live-view-body .mx-now-row .mx-now-head>b{font-size:17px}
  .mobile-nav .nav-item>b{font-size:clamp(7px,1.95vw,9px)}
 }
+
+/* Now time-travel strip: fixed instant when browsing, live clock when reset. */
+#live-view-body .mx-now-time{width:100%;max-width:980px;margin:0 auto 12px;padding:13px 14px;border:1px solid #393751;background:linear-gradient(125deg,#1b1b30,#131727 75%);border-radius:14px}
+#live-view-body .mx-now-time-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+#live-view-body .mx-now-time-readout{min-width:0;display:flex;flex-direction:column;gap:3px}
+#live-view-body .mx-now-time-state{display:inline-flex;align-items:center;gap:6px;font-weight:750;font-size:10px;letter-spacing:.02em;color:#b3a8db}
+#live-view-body .mx-now-time-state>i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#b1a0e8}
+#live-view-body .mx-now-time-state.is-live{color:#73dfb6}
+#live-view-body .mx-now-time-state.is-live>i{background:#54d8a0;box-shadow:0 0 10px #54d8a077;animation:mx-now-heartbeat 2.8s ease-in-out infinite}
+#live-view-body .mx-now-time-readout time{color:#efeafa;font-size:14px;font-weight:750;font-variant-numeric:tabular-nums;line-height:1.4}
+#live-view-body .mx-now-time-readout>small{color:#a2adc8;font-size:10px}
+#live-view-body .mx-now-live{border:1px solid #555370;border-radius:10px;background:#25243b;color:#c9c0e9;padding:10px 13px;font-size:12px;font-weight:800;white-space:nowrap;flex-shrink:0}
+#live-view-body .mx-now-live.is-active{background:#143b31;border-color:#368d71;color:#8cf4c9;box-shadow:0 0 18px #40bb8830}
+#live-view-body .mx-now-time-jumps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:12px;direction:ltr}
+#live-view-body .mx-now-time-jumps>button{min-width:0;min-height:49px;border:1px solid #42405e;background:#222337;border-radius:10px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;padding:6px 3px}
+#live-view-body .mx-now-time-jumps>button>span{font-size:14px;line-height:1.2;font-weight:800;color:#d3c7ff;font-variant-numeric:tabular-nums}
+#live-view-body .mx-now-time-jumps>button>small{font-size:10px;line-height:1.4;color:#aeb9d5;text-align:center}
+#live-view-body .mx-now-time-jumps>button:hover{background:#2c2c47;border-color:#8178b9}
+#live-view-body .mx-now-time-jumps>button:active{transform:scale(.98)}
+@keyframes mx-now-heartbeat{0%,100%{opacity:1}50%{opacity:.5}}
+@media(max-width:760px){
+ #live-view-body .mx-now-time{padding:12px 11px;margin-bottom:10px}
+ #live-view-body .mx-now-time-readout time{font-size:12px}
+ #live-view-body .mx-now-time-jumps{gap:5px}
+ #live-view-body .mx-now-time-jumps>button{min-height:50px;padding:6px 2px}
+ #live-view-body .mx-now-time-jumps>button>small{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){#live-view-body .mx-now-time-state.is-live>i{animation:none}}
