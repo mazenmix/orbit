@@ -36,7 +36,7 @@ test('Travel Mode refuses fabricated or incomplete index data',()=>{
  assert.throws(()=>travelMetricsByGroup(all.map(x=>x.id==='sleep'?{...x,value:NaN}:x)),/Invalid Travel Mode/);
 });
 test('Travel Mode is a main navigation option immediately below Go Mode, not a submenu',()=>{
- assert.match(src,/const primaryRoutes=\['today','chart','people','go','travelmode','calendar','more'\]/);
+ assert.match(src,/const primaryRoutes=\['today','chart','people','now','go','travelmode','calendar','more'\]/);
  assert.match(src,/travelmode:\(\)=>t\('Travel Mode','Travel Mode'\)/);
  assert.match(src,/travelmode:'<svg class="mx-plane-icon"/);
  const navCss=readFileSync('src/navAlignment.css','utf8');
