@@ -22,7 +22,7 @@ test('Asteroid readings and evidence UI are narrative-first and confidential bir
 
 
 test('Moon is a full-sized main navigation item directly after Today on desktop and mobile',()=>{
- assert.match(main,/const primaryRoutes=\['today','chart','people','now','go','travelmode','calendar','more'\]/);
+ assert.match(main,/const primaryRoutes=\['today','chart','people','go','travelmode','calendar','more'\]/);
  assert.match(main,/function nav\(names:string\[\],mobile=false\)/);
  assert.match(main,/nav\(primaryRoutes\)/);
  assert.match(main,/nav\(primaryRoutes,true\)/);
@@ -35,10 +35,20 @@ test('Moon is a full-sized main navigation item directly after Today on desktop 
  assert.ok(main.includes("function morePage()"));
  assert.ok(main.includes("localStorage.setItem('mx.uiMode',uiMode)"));
 });
-test('Now is below People and displays every distinct live meter as one compact vertical list',()=>{
+test('Now is under Today and displays every distinct live meter as one compact vertical list',()=>{
+ assert.ok(main.includes("if(route==='signals'||route==='lunar'||route==='now')return 'today'"));
+ assert.ok(main.includes("return main+moon+now;"),'Now must render beside Moon within Today group, not after People');
+ assert.ok(main.includes("const nowActive=screen==='now'"));
+ assert.ok(main.includes("data-go=\\"now\\" class=\\"nav-item"));
  assert.ok(main.includes("people:()=>t('الناس','People'),now:()=>t('Now','Now')"));
  assert.ok(main.includes("case 'now':inner=nowPage();break"));
  assert.ok(main.includes("now:15000"));
+ const timeNav=main.slice(main.indexOf('function nowTimeNavigation(){'),main.indexOf('/** Read-only Now dashboard:'));
+ for(const step of ["'-day'","'-hour'","'+hour'","'+day'"])assert.ok(timeNav.includes(step),'Missing timeline step '+step);
+ for(const required of ['data-go-time-shift','data-now','liveTimePinned','dateText(selected','timezoneCityLabel(active.zone)'])assert.ok(timeNav.includes(required),'Missing Now time control '+required);
+ assert.ok(main.includes("updateTime(shiftGoTime(selected,active.zone,button.dataset.goTimeShift as GoTimeStep),true)"),'Time navigation must use the same ephemeris recompute as Go Mode');
+ assert.ok(main.includes("('[data-now]').forEach(b=>b.onclick=()=>updateTime(new Date(),false))"),'Live reset must unpin time');
+
  assert.ok(main.includes("screen==='now'||screen==='ai'"),'Now must unpin Time Machine selections');
  const now=main.slice(main.indexOf('function nowPage(){'),main.indexOf('function goModePage(){'));
  for(const required of ['derivedMetrics(sky.scores)','goModes(indicators)','goLifeGauges(sky.scores)','categories.map(category','moonWindow()','mx-now-list','mx-now-head','data-now-gauge','role="progressbar"'])assert.ok(now.includes(required),'Now is missing '+required);
@@ -49,6 +59,7 @@ test('Now is below People and displays every distinct live meter as one compact 
  const css=readFileSync('src/now.css','utf8');
  assert.ok(css.includes('grid-template-columns:minmax(0,1fr)'));
  assert.ok(css.includes('var(--metric-accent'));
+ assert.ok(css.includes('.mx-now-time-jumps'));
 });
 test('Moon deep link remains under Today category without top duplicate or calendar copy',()=>{
  assert.match(main,/if\(route==='signals'\|\|route==='lunar'\)return 'today'/);
