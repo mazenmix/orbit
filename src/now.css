@@ -1,0 +1,19 @@
+/* MX Astro Now: one compact, single-column glance at the existing gauges. */
+#live-view-body .mx-now-page{min-width:0;padding:0 0 24px}
+#live-view-body .mx-now-list{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;max-width:980px;margin:0 auto}
+#live-view-body .mx-now-row{min-width:0;padding:11px 14px;border-radius:12px;margin:0;display:grid;gap:8px}
+#live-view-body .mx-now-row .mx-now-head{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:12px}
+#live-view-body .mx-now-row .mx-now-head>strong{min-width:0;font-size:13px;line-height:1.5;font-weight:650;color:#e6e4f0;overflow-wrap:anywhere}
+#live-view-body .mx-now-row .mx-now-head>b{white-space:nowrap;direction:ltr;font-size:19px;font-weight:750;font-variant-numeric:tabular-nums;color:var(--metric-accent,#b6a6ed);text-shadow:0 0 12px var(--metric-glow,transparent)}
+#live-view-body .mx-now-row .mx-now-head>b em{font-size:10px;font-weight:500;font-style:normal;color:#aeb5cc;text-shadow:none}
+#live-view-body .mx-now-row .meter{margin:0;height:7px;width:100%}
+#live-view-body .mx-now-row.mx-now-moon{--metric-accent:#7fdfd4;--metric-tint:rgba(69,170,169,.12);--metric-glow:rgba(100,210,204,.18)}
+#live-view-body .mx-now-row.mx-now-void.is-clear{--metric-accent:#68e0a6;--metric-tint:rgba(68,192,131,.12);--metric-glow:rgba(68,192,131,.18)}
+#live-view-body .mx-now-row.mx-now-void.is-voc{--metric-accent:#f08b83;--metric-tint:rgba(222,106,104,.11);--metric-glow:rgba(222,106,104,.18)}
+@media(max-width:760px){
+ #live-view-body .mx-now-list{gap:7px}
+ #live-view-body .mx-now-row{padding:10px 11px;gap:7px}
+ #live-view-body .mx-now-row .mx-now-head>strong{font-size:12px}
+ #live-view-body .mx-now-row .mx-now-head>b{font-size:17px}
+ .mobile-nav .nav-item>b{font-size:clamp(7px,1.95vw,9px)}
+}
