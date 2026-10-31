@@ -851,9 +851,12 @@ function liveAsteroidContacts(limit=6):string{
  }catch(e){console.warn('Named asteroid context unavailable',e);return ''}
 }
 
-/** Read-only Now dashboard: a single, compact list of the site's calculated meters.
- * Travel and Today's four shortcuts already reuse the 29 Go metric IDs, so
- * show each of those only once. Do not introduce a second scoring model. */
+/** Read-only Now dashboard: all the site's gauges in a compact list.
+ * The eight headline domain meters use the same continuously calculated
+ * broad-sky scores as Go Mode, rather than exact-contact-only Today scores
+ * that may intentionally be unavailable when no tight natal contact exists.
+ * The Today page and its original evidence model remain unchanged.
+ * Travel and Today's shortcuts reuse the 29 metric IDs: no duplicates. */
 function nowPage(){
  const sky=liveGaugeSky(),indicators=derivedMetrics(sky.scores),decisions=goModes(indicators);
  type NowRow={id:string;label:string;value:number|null;tone?:string};
@@ -864,7 +867,7 @@ function nowPage(){
   travel:['Go · السفر','Go · Travel']
  };
  const rows:NowRow[]=[
-  ...categories.map(category=>({id:'today-'+category,label:t('اليوم','Today')+' · '+cat(category),value:data!.signals.some(signal=>signal.category===category)?data!.scores[category]:null})), 
+  ...categories.map(category=>({id:'today-'+category,label:cat(category),value:sky.scores[category]})),
   ...indicators.map(m=>({id:'metric-'+m.id,label:t(m.ar,m.en),value:m.value})),
   ...decisions.map(d=>({id:'go-'+d.domain,label:t(...decisionNames[d.domain]),value:d.value})),
   ...goLifeGauges(sky.scores).map(m=>({id:'life-'+m.id,label:t(m.name.ar,m.name.en),value:m.value}))
