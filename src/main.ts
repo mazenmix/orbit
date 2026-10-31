@@ -186,10 +186,10 @@ function average(r:Report){const supported=[...new Set(r.signals.map(s=>s.catego
 function getHeatmap(){const key=readingContext()+heatmapSpan;if(!heatmapCache||heatmapCache.key!==key)heatmapCache={key,cells:heatmapSpan===30?calculateHeatmap(selected,30,at=>getReport(at)):sampledHeatmap(selected,heatmapSpan,at=>getReport(at))};return heatmapCache.cells}
 function heatmapUI(){try{const cells=getHeatmap(),key=heatmapCategory;const score=(c:HeatCell)=>key==='average'?c.average:c.indices[key];const label=key==='average'?t('المعدل الرمزي','Symbolic average'):cat(key);return `<section class="panel heatmap-panel"><div class="section-title"><div><span class="eyebrow">TIME MACHINE · 30 / 90 / 365 DAYS</span><h2>${t('خارطة المؤشرات خلال شهر أو سنة','Month and year symbolic heatmaps')}</h2></div>${tag(t('مؤشرات رمزية','Symbolic indices'))}</div><label class="heat-label">${t('المجال','Category')} <select id="heat-category"><option value="average" ${key==='average'?'selected':''}>${t('معدل المجالات المتاحة','Available-category average')}</option>${categories.map(c=>`<option value="${c}" ${key===c?'selected':''}>${cat(c)}</option>`).join('')}</select></label><label class="heat-label">${t('المدة','Period')} <select id="heat-span"><option value="30" ${heatmapSpan===30?'selected':''}>30 ${t('يوم','days')}</option><option value="90" ${heatmapSpan===90?'selected':''}>90 ${t('يوم','days')}</option><option value="365" ${heatmapSpan===365?'selected':''}>365 ${t('يوم','days')}</option></select></label><div class="heatmap-grid">${cells.map(c=>{const raw=score(c),v=raw===null?null:Math.max(0,Math.min(100,Math.round(raw))),d=dateText(c.instant,{day:'2-digit',month:'short'}),coverage=key==='average'?c.coverage.present+'/'+c.coverage.total:'';const detail=v===null?t('غير متاح: لا توجد مؤشرات محسوبة لهذا المجال','Unavailable: no calculated evidence for this category'):v+'/100'+(coverage?' · '+t('المجالات المتاحة ','Available categories ')+coverage:'');return `<button class="heatmap-cell ${v===null?'heatmap-unavailable':'heatmap-'+heatmapBand(v)}" data-heat-at="${+c.instant}" aria-label="${esc(d+' '+label+' '+detail)}" title="${esc(d+' · '+label+' · '+detail)}"><small>${esc(d)}</small><b>${v===null?'—':v}</b>${coverage?`<small class="heatmap-coverage">${coverage}</small>`:''}</button>`}).join('')}</div></section>`}catch(e){return `<p class="alert">${t('تعذر حساب الـHeatmap: ','Could not calculate heatmap: ')}${esc(String(e))}</p>`}}
 
-/** Now follows People; Go Mode remains a separate first-class page. */
-const primaryRoutes=['today','chart','people','now','go','travelmode','calendar','more'];
+/** Now is in the Today navigation group, following Moon. */
+const primaryRoutes=['today','chart','people','go','travelmode','calendar','more'];
 function primarySection(route:string):string{
- if(route==='signals'||route==='lunar')return 'today';
+ if(route==='signals'||route==='lunar'||route==='now')return 'today';
  if(route==='asteroids')return 'chart';
  if(['time','eclipses','advanced'].includes(route))return 'calendar';
  if(route==='intel')return 'go'; // Keep legacy #intel bookmarks working.
@@ -213,13 +213,15 @@ function sectionTabs(){
 }
 function nav(names:string[],mobile=false){
  return `<nav class="${mobile?'mobile-nav':'nav'}" aria-label="${t('التنقل الرئيسي','Main navigation')}">${names.map(n=>{
-  // The Moon is a full-sized sibling immediately after Today on desktop and mobile.
+  // Moon and Now are full-sized choices under Today, on desktop and mobile.
   const active=n==='today'?(screen==='today'||screen==='signals'):primarySection(screen)===n;
   const main=`<button type="button" data-go="${n}" class="nav-item ${active?'active':''}" ${active?'aria-current="page"':''}><span>${icon(n)}</span><b>${labels[n]()}</b></button>`;
   if(n!=='today')return main;
   const moonActive=screen==='lunar';
   const moon=`<button type="button" data-go="lunar" class="nav-item ${moonActive?'active':''}" ${moonActive?'aria-current="page"':''}><span>${icon('lunar')}</span><b>${labels.lunar()}</b></button>`;
-  return main+moon;
+  const nowActive=screen==='now';
+  const now=`<button type="button" data-go="now" class="nav-item ${nowActive?'active':''}" ${nowActive?'aria-current="page"':''}><span>${icon('now')}</span><b>${labels.now()}</b></button>`;
+  return main+moon+now;
  }).join('')}</nav>`;
 }
 function demoNotice(){
@@ -851,6 +853,26 @@ function liveAsteroidContacts(limit=6):string{
  }catch(e){console.warn('Named asteroid context unavailable',e);return ''}
 }
 
+/** Compact time navigation for Now. Uses the same actual ephemeris/time actions as Go Mode. */
+function nowTimeNavigation(){
+ const at=dateText(selected,{weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+ const controls=[
+  ['-day',t('اليوم السابق','Previous day'),'−1d'],
+  ['-hour',t('الساعة السابقة','Previous hour'),'−1h'],
+  ['+hour',t('الساعة القادمة','Next hour'),'+1h'],
+  ['+day',t('اليوم القادم','Next day'),'+1d']
+ ] as const;
+ return '<section class="panel mx-now-time" aria-label="'+t('التنقل بالوقت','Time navigation')+'">'+
+  '<div class="mx-now-time-head"><div class="mx-now-time-readout">'+
+   '<span class="mx-now-time-state '+(liveTimePinned?'is-selected':'is-live')+'">'+
+    '<i aria-hidden="true"></i>'+(liveTimePinned?t('وقت مختار','Selected time'):t('مباشر الآن','Live now'))+'</span>'+
+   '<time datetime="'+selected.toISOString()+'">'+esc(at)+'</time>'+
+   '<small>'+esc(timezoneCityLabel(active.zone))+'</small></div>'+
+   '<button type="button" data-now class="mx-now-live '+(liveTimePinned?'':'is-active')+'" aria-pressed="'+(!liveTimePinned)+'">● LIVE ↻</button></div>'+
+  '<div class="mx-now-time-jumps">'+controls.map(([step,label,offset])=>
+   '<button type="button" data-go-time-shift="'+step+'" aria-label="'+esc(label)+'"><span>'+offset+'</span><small>'+label+'</small></button>'
+  ).join('')+'</div></section>';
+}
 /** Read-only Now dashboard: all the site's gauges in a compact list.
  * The eight headline domain meters use the same continuously calculated
  * broad-sky scores as Go Mode, rather than exact-contact-only Today scores
@@ -877,7 +899,7 @@ function nowPage(){
   rows.push({id:'moon-sign',label:t('القمر','Moon'),value:Math.round(elapsedPercent(+moon.enteredAt,+moon.ingressAt,at)),tone:'mx-now-moon'});
   rows.push({id:'moon-voc',label:t('خلو المسار','Void of Course'),value:Math.round(elapsedPercent(+moon.vocStartsAt,+moon.ingressAt,at)),tone:'mx-now-void '+(moon.isVoid?'is-voc':'is-clear')});
  }catch(e){console.warn('Now Moon timing unavailable',e)}
- return '<section class="mx-now-page" data-section="now" aria-label="Now"><div class="mx-now-list">'+
+ return '<section class="mx-now-page" data-section="now" aria-label="Now">'+nowTimeNavigation()+'<div class="mx-now-list">'+
   rows.map(({id,label,value,tone})=>{
    const available=value!==null&&Number.isFinite(value);
    const percent=available?Math.max(0,Math.min(100,Math.round(value))):0,style=available?(tone??gaugeLevel(percent)):'mx-unavailable';
