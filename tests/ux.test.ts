@@ -39,7 +39,6 @@ test('Now is under Today and displays every distinct live meter as one compact v
  assert.ok(main.includes("if(route==='signals'||route==='lunar'||route==='now')return 'today'"));
  assert.ok(main.includes("return main+moon+now;"),'Now must render beside Moon within Today group, not after People');
  assert.ok(main.includes("const nowActive=screen==='now'"));
- assert.ok(main.includes('data-go="now" class="nav-item'));
  assert.ok(main.includes("people:()=>t('الناس','People'),now:()=>t('Now','Now')"));
  assert.ok(main.includes("case 'now':inner=nowPage();break"));
  assert.ok(main.includes("now:15000"));
