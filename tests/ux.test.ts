@@ -39,7 +39,7 @@ test('Now is under Today and displays every distinct live meter as one compact v
  assert.ok(main.includes("if(route==='signals'||route==='lunar'||route==='now')return 'today'"));
  assert.ok(main.includes("return main+moon+now;"),'Now must render beside Moon within Today group, not after People');
  assert.ok(main.includes("const nowActive=screen==='now'"));
- assert.ok(main.includes("data-go=\\"now\\" class=\\"nav-item"));
+ assert.ok(main.includes('data-go="now" class="nav-item'));
  assert.ok(main.includes("people:()=>t('الناس','People'),now:()=>t('Now','Now')"));
  assert.ok(main.includes("case 'now':inner=nowPage();break"));
  assert.ok(main.includes("now:15000"));
@@ -62,7 +62,7 @@ test('Now is under Today and displays every distinct live meter as one compact v
  assert.ok(css.includes('.mx-now-time-jumps'));
 });
 test('Moon deep link remains under Today category without top duplicate or calendar copy',()=>{
- assert.match(main,/if\(route==='signals'\|\|route==='lunar'\)return 'today'/);
+ assert.match(main,/if\(route==='signals'\|\|route==='lunar'\|\|route==='now'\)return 'today'/);
  assert.match(main,/calendar:\['calendar','time','eclipses','advanced'\]/);
  assert.ok(!main.includes('mx-today-section-tabs'));
  const more=main.slice(main.indexOf('function morePage(){'),main.indexOf('function scoresHTML('));
