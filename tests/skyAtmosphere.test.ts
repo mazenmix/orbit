@@ -128,7 +128,7 @@ test('retrograde descriptions change with zodiac sign and explain Scorpio Mercur
  const mercury=retro.notes.find(n=>n.id==='retro:Mercury')!;
  const venus=retro.notes.find(n=>n.id==='retro:Venus')!;
  assert.match(mercury.arMeaning,/رسالة بيها تلميحات/);
- assert.match(venus.arMeaning,/اختبر الاهتمام بالسكوت/);
+ assert.match(venus.arMeaning,/لا تختبر الاهتمام بالسكوت/);
  const moved=skyClimate(chart({...positions,Mercury:10},{Mercury:-0.2,Venus:-0.1}));
  assert.notEqual(mercury.arMeaning,moved.notes.find(n=>n.id==='retro:Mercury')!.arMeaning);
 });
