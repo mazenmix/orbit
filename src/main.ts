@@ -411,7 +411,10 @@ function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,co
   const lunarAspect=e.kind==='aspect'&&(e.first==='Moon'||e.second==='Moon');
   // Keep the event and timestamp; the hero owns this event's full narrative.
   const aspectId=e.kind==='aspect'&&e.second&&e.angle!==undefined?[e.first,e.second].sort().join('|')+':'+e.angle:'';
-  const alreadyExplained=Boolean((heroTitle&&story.title===heroTitle)||(aspectId&&explainedAspects?.has(aspectId)));
+  // Moon events have a dedicated exhaustive Lunar timeline and are often listed
+  // simultaneously as current-sky notes. Keep their exact timestamps here, not
+  // duplicate their paragraphs and calls-to-action across Today.
+  const alreadyExplained=Boolean((compact&&lunarAspect)||(heroTitle&&story.title===heroTitle)||(aspectId&&explainedAspects?.has(aspectId)));
   const more=alreadyExplained?'<p class="mx-sky-feed-source">'+t('شرح هذا الاتصال موجود أعلى الصفحة.','This contact is explained above.')+'</p>':
    '<p class="mx-sky-feed-now"><b>'+t('هسه:','Now:')+'</b> '+esc(story.now)+'</p>'+
    (!lunarAspect&&story.next?'<p class="mx-sky-feed-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(story.next)+'</p>':'')+
