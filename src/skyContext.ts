@@ -135,13 +135,9 @@ export function contextGaugeNarrative(context:SkyContext,sources:readonly Catego
   'أقرب زاوية بين '+name+' و'+target+' فارقها '+p.orb.toFixed(1)+'°. ماكو اتصال ضمن 8°؛ الدرجة حيادية مو توقع.';
  const subject=subjects[p.natal]?.[english?1:0]??(english?'your priorities':'أولوياتك');
  const specific=skyAspectExplanation(p.transit,p.natal,p.angle,english);
- const skyNote=context.climate.notes.find(n=>n.kind==='aspect'&&n.categories.some(c=>sources.includes(c)));
- const currentSky=skyNote?(english?' Current sky: '+skyNote.enTitle+'. '+skyNote.enMeaning:' بالسماء هسه: '+skyNote.arTitle+'؛ '+skyNote.arMeaning):'';
- const challenging=p.angle===90||p.angle===180;
- const tip=challenging?
-  (english?'Review one concrete detail before taking action.':'دقّق معلومة مهمة قبل ما تتخذ خطوة.'):
-  (english?'Use this as a prompt for one specific, reversible step.':'استثمرها بخطوة صغيرة قابلة للتعديل.');
+ // The pair already supplies one precise action; GO / Travel append their own,
+ // and repeating a general Moon note on four unrelated gauges is misleading.
  return english?
-  name+' '+aspectName+' natal '+target+' ('+p.orb.toFixed(1)+'°): '+specific+' This concerns '+subject+'. '+tip+currentSky:
-  name+' '+aspectName+' '+target+' (فارق '+p.orb.toFixed(1)+'°): '+specific+' وهذا يخص '+subject+'. '+tip+currentSky;
+  name+' '+aspectName+' natal '+target+' ('+p.orb.toFixed(1)+'°): '+specific:
+  name+' '+aspectName+' '+target+' (فارق '+p.orb.toFixed(1)+'°): '+specific;
 }
