@@ -26,6 +26,51 @@ const relevance:Record<string,Partial<Record<Category,number>>>={
  Uranus:{timing:1,communication:.4,emotions:.4},Neptune:{emotions:.8,love:.45,communication:.3},
  Pluto:{emotions:.9,love:.65,recovery:.4,overview:.4}
 };
+/** Full Moon-sign vocabulary: no repeated generic sentence for eleven signs. */
+const moonSignMeanings:readonly {ar:string;en:string}[]=[
+ {ar:'حماس ومبادرة سريعة، بس الاستعجال ممكن يخلي الرد أقسى من المقصود. اختار شنو يستحق المواجهة.',en:'More initiative and impatience; a quick reply may sound harsher than intended. Choose your battles.'},
+ {ar:'حاجة للاستقرار والاطمئنان، ويّا احتمال التمسك بالرأي إذا أحد غيّر الخطة فجأة. وضّح احتياجك بهدوء.',en:'A preference for stability with possible stubbornness when plans change. State what you need calmly.'},
+ {ar:'كثرة حچي وأسئلة وتبدّل سريع بالانتباه؛ احتمال الرسائل تنفهم على غير قصدها. ثبّت المعنى قبل الرد.',en:'Quick conversations, curiosity and shifting attention; messages may be misunderstood. Clarify the meaning first.'},
+ {ar:'حساسية تجاه الأمان والاهتمام والأهل؛ كلمة عابرة ممكن تلمس موضوع قديم. اطلب الطمأنة بشكل واضح.',en:'Sensitivity around security, care and family; small remarks may revive old concerns. Ask clearly for reassurance.'},
+ {ar:'الكبرياء والحساسية تجاه التجاهل أو طريقة الكلام. خَلّ التعبير واضح بدون افتراض إساءة.',en:'Pride and sensitivity to being ignored or to wording; communicate clearly without assuming offense.'},
+ {ar:'التدقيق بالتفاصيل يزيد، ومعاه قابلية ملاحظة الأخطاء قبل المحاسن. قدّم الملاحظة بدون نقد شخصي.',en:'Greater focus on details and mistakes; give feedback without turning it into personal criticism.'},
+ {ar:'رغبة بالهدوء والإنصاف، ويّا تردد أو انزعاج من عدم التوازن بالعلاقة. احچي عن التوقعات بصراحة.',en:'A stronger pull toward fairness and harmony, with hesitation over imbalanced relationships. Discuss expectations directly.'},
+ {ar:'مشاعر عميقة وحذر بالثقة والحدود؛ ممكن السكوت ينفهم كرفض. اسأل قبل ما تفسّر النوايا.',en:'Intense feelings and sensitivity around trust or boundaries; silence may feel like rejection. Ask before assuming motives.'},
+ {ar:'صراحة ورغبة بالحرية والتجربة؛ المزحة أو الكلام المباشر ممكن ينفهم جارح. انتبه للنبرة.',en:'Candor and a desire for freedom or exploration; blunt remarks may sound hurtful. Watch the tone.'},
+ {ar:'تركيز على الواجب والمسؤولية، مع تحفظ بإظهار المشاعر. لا تخلّي الجدية تبين وكأنها برود.',en:'Focus on duty and responsibility with restrained feelings. Avoid letting seriousness look like indifference.'},
+ {ar:'حاجة للمسافة والاستقلال والتفكير المختلف؛ التعلّق الزايد ممكن يسبب شد. احترم مساحة الطرفين.',en:'A stronger need for independence and unconventional thinking; excessive pressure may create friction. Respect space.'},
+ {ar:'تعاطف وخيال وحساسية للنبرة والإيحاءات؛ فرّق بين اللي انحچى فعلاً واللي تخيّلته.',en:'Empathy, imagination and sensitivity to subtext; separate what was said from what you imagined.'}
+];
+const planetTopics:Record<string,[string,string]>={
+ Sun:['الثقة والقرارات','confidence and decisions'],Moon:['المشاعر وردود الفعل','emotions and reactions'],
+ Mercury:['الكلام وسوء الفهم','communication and interpretation'],Venus:['العلاقات والتقارب','relationships and affection'],
+ Mars:['الاندفاع والمواجهة','impulse and confrontation'],Jupiter:['التوسع والمبالغة','growth and exaggeration'],
+ Saturn:['الحدود والمسؤولية','boundaries and responsibility'],Uranus:['المفاجآت والاستقلال','surprises and independence'],
+ Neptune:['الخيال والوضوح','imagination and clarity'],Pluto:['النفوذ والسيطرة','power and control']
+};
+const practicalStep:Record<string,[string,string]>={
+ Mercury:['دقّق بالرسالة قبل الرد.','Clarify the message before responding.'],
+ Moon:['تأكد شنو حسّيت وشنو صار فعلاً.','Distinguish feelings from what happened.'],
+ Venus:['اسأل عن التوقعات بدون افتراض مشاعر الطرف الثاني.','Ask about expectations without assuming feelings.'],
+ Mars:['أجّل الرد المتسرع وخفف نبرة المواجهة.','Slow down before reacting aggressively.'],
+ Saturn:['وضّح الحدود والالتزام المطلوب.','Clarify boundaries and commitments.'],
+ Uranus:['خلي مساحة للتغيير بدون قرار مفاجئ.','Allow room for change without impulsive decisions.'],
+ Neptune:['تأكد من الوقائع قبل تفسير الإشارات.','Verify facts before reading into signals.'],
+ Pluto:['احترم حدود الطرفين ولا تحوّل الموضوع لصراع سيطرة.','Respect boundaries and avoid power struggles.'],
+ Jupiter:['راجع التفاصيل قبل الوعد الكبير.','Check details before overpromising.'],
+ Sun:['عبّر عن رأيك بدون ما تعتبر الاختلاف إهانة.','Express your view without treating disagreement as an insult.']
+};
+const retroMeaning:Record<string,{ar:string;en:string;weight:Partial<Record<Category,number>>}>={
+ Mercury:{ar:'مراجعة الكلام والرسائل والتفاهمات السابقة؛ تأكد من المعنى قبل اتخاذ موقف.',en:'Revisit messages and earlier agreements; verify meaning before reacting.',weight:{communication:-5,love:-2,emotions:-1}},
+ Venus:{ar:'مراجعة العلاقات والحساسيات العاطفية وسوء فهم النوايا. لا تفترض شعور الطرف الثاني.',en:'Reconsider relationships, emotional sensitivities and assumed intentions; ask rather than presume.',weight:{love:-5,emotions:-2,communication:-1}},
+ Mars:{ar:'مراجعة أسلوب المواجهة والطاقة والغضب؛ لا تعتبر التأخير فشلاً ولا تستعجل الحسم.',en:'Review confrontation, energy and frustration; do not confuse delay with failure.',weight:{energy:-3,emotions:-2}},
+ Jupiter:{ar:'مراجعة الفرص والوعود والتوسع؛ تأكد أن التوقعات تناسب الواقع.',en:'Reassess opportunities, promises and expansion against the facts.',weight:{timing:-2,overview:-2}},
+ Saturn:{ar:'إعادة تقييم المسؤوليات والحدود والتأجيلات؛ رتب الالتزامات قبل إضافة غيرها.',en:'Revisit responsibility, boundaries and delays; organize existing commitments.',weight:{recovery:-2,career:-2}},
+ Uranus:{ar:'عودة أسئلة الحرية والتغيير المفاجئ؛ جرّب تعديلات قابلة للرجوع.',en:'Revisit independence and sudden changes; use reversible experiments.',weight:{timing:-2}},
+ Neptune:{ar:'مراجعة التصورات والوعود الغامضة؛ فرّق بين الأمل والمعلومة المؤكدة.',en:'Reconsider unclear expectations and promises; separate hope from evidence.',weight:{emotions:-2,communication:-1}},
+ Pluto:{ar:'مراجعة حدود النفوذ والسيطرة والتمسك القديم؛ اختار اللي تگدر تغيّره فعلاً.',en:'Review control, influence and old attachments; focus on what you can change.',weight:{emotions:-2,love:-1}}
+};
+
 const negativeNew=([90,180] as number[]);
 const positiveNew=([60,120] as number[]);
 const specialized=(a:string,b:string,angle:number):[string,string]|null=>{
@@ -43,13 +88,27 @@ const specialized=(a:string,b:string,angle:number):[string,string]|null=>{
 function describe(a:string,b:string,angle:number):[string,string]{
  const special=specialized(a,b,angle);
  if(special)return special;
+ // Each pair combines two real planetary topics with the actual aspect class.
+ // This is a meaning template, not invented knowledge of anyone's intentions.
  const difficult=negativeNew.includes(angle),helpful=positiveNew.includes(angle);
- if(difficult)return ['توتر رمزي بين '+names[a][0]+' و'+names[b][0]+'؛ الكلام والتوقعات يحتاجن هدوء وتوضيح.',
-  'A symbolic tension between '+names[a][1]+' and '+names[b][1]+'; clarify words and expectations.'];
- if(helpful)return ['اتصال داعم رمزياً؛ استثمره بخطوة واضحة وهادئة بدون استعجال.',
-  'A symbolically supportive contact; take a clear, measured step.'];
- return ['اقتران يجمع موضوعين فلكيين؛ راقب شنو مهم إلك هسه قبل اتخاذ قرار.',
-  'A conjunction combines two symbolic themes; review priorities before acting.'];
+ const [firstAr,firstEn]=planetTopics[a],[secondAr,secondEn]=planetTopics[b];
+ const focus=a==='Mercury'||b==='Mercury'?'Mercury':a==='Moon'||b==='Moon'?'Moon':
+  a==='Venus'||b==='Venus'?'Venus':a==='Mars'||b==='Mars'?'Mars':
+  a==='Saturn'||b==='Saturn'?'Saturn':a==='Neptune'||b==='Neptune'?'Neptune':
+  a==='Pluto'||b==='Pluto'?'Pluto':a==='Uranus'||b==='Uranus'?'Uranus':a;
+ const [stepAr,stepEn]=practicalStep[focus];
+ if(difficult)return [
+  'شدّ بين '+firstAr+' و'+secondAr+'؛ '+(angle===90?'سرعة تضارب المواقف ممكن تصعّب التفاهم. ':'كل طرف ممكن يتمسك بوجهة نظر مقابلة. ')+stepAr,
+  'Tension between '+firstEn+' and '+secondEn+'; '+(angle===90?'conflicting priorities may quickly strain communication. ':'opposing positions may be harder to reconcile. ')+stepEn
+ ];
+ if(helpful)return [
+  'انسجام بين '+firstAr+' و'+secondAr+'؛ '+(angle===120?'سهولة أكبر بتنظيم هالموضوعين. ':'فرصة للتعاون وخطوة صغيرة عملية. ')+stepAr,
+  'A supportive link between '+firstEn+' and '+secondEn+'; '+(angle===120?'these themes may feel easier to coordinate. ':'use a small opportunity to cooperate. ')+stepEn
+ ];
+ return [
+  'تركيز قوي يجمع '+firstAr+' و'+secondAr+'؛ ممكن يصير الموضوع أوضح وأكثر إلحاحاً. '+stepAr,
+  'A conjunction intensifies '+firstEn+' and '+secondEn+'; the combined themes may feel more prominent. '+stepEn
+ ];
 }
 function aspectTone(a:string,b:string,angle:number){
  if(negativeNew.includes(angle))return -1;
@@ -88,35 +147,28 @@ export function skyClimate(current:Pick<Chart,'points'>):SkyClimate{
    arMeaning:words[0],enMeaning:words[1],categories:relevant,
    strength:closeness*priority,kind:'aspect'});
  }
- for(const id of ['Mercury','Venus']){
+ // All genuinely retrograde planets receive planet-specific explanations and weights.
+ for(const id of Object.keys(retroMeaning)){
   const p=byId.get(id);
   if(!p||p.speed>=-1e-7)continue;
   const sign=zodiac[Math.floor(((p.longitude%360)+360)%360/30)];
   const arSign=sign[0].startsWith('ال')?sign[0].slice(2):sign[0];
-  const isVenus=id==='Venus';
-  const relevant:Category[]=isVenus?['love','emotions','communication']:['communication','love','emotions'];
-  const arMeaning=isVenus?
-   'مراجعة العلاقات والحساسيات العاطفية وسوء فهم النوايا. لا تفترض شعور الطرف الثاني.':
-   'مراجعة الكلام والرسائل والتفاهمات السابقة؛ تأكد من المعنى قبل اتخاذ موقف.';
-  const enMeaning=isVenus?
-   'Reconsider relationships, emotional sensitivities and assumed intentions; ask rather than presume.':
-   'Revisit messages and earlier agreements; verify meaning before reacting.';
+  const meaning=retroMeaning[id],isVenus=id==='Venus';
+  const relevant=Object.keys(meaning.weight) as Category[];
   notes.push({id:'retro:'+id,arTitle:names[id][0]+' متراجع'+(isVenus?'ة':'')+' بال'+arSign,
    enTitle:names[id][1]+' retrograde in '+sign[1],
-   arMeaning,enMeaning,categories:relevant,strength:isVenus?1.85:1.6,kind:'retrograde'});
-  if(isVenus){weights.love.push(-5);weights.emotions.push(-2);weights.communication.push(-1);}
-  else {weights.communication.push(-5);weights.love.push(-2);weights.emotions.push(-1);}
+   arMeaning:meaning.ar,enMeaning:meaning.en,categories:relevant,
+   strength:id==='Venus'?1.85:id==='Mercury'?1.6:1.0,kind:'retrograde'});
+  for(const key of relevant)weights[key].push(meaning.weight[key]??0);
  }
  const moon=byId.get('Moon');
  if(moon){
   const sign=zodiac[Math.floor(((moon.longitude%360)+360)%360/30)];
   const arSign=sign[0].startsWith('ال')?sign[0].slice(2):sign[0];
-  const leo=Math.floor(((moon.longitude%360)+360)%360/30)===4;
+  const signIndex=Math.floor(((moon.longitude%360)+360)%360/30);
+  const meaning=moonSignMeanings[signIndex];
   notes.push({id:'moon:sign',arTitle:'القمر بال'+arSign,enTitle:'Moon in '+sign[1],
-   arMeaning:leo?'الكبرياء والحساسية تجاه التجاهل أو طريقة الكلام. خَلّ التعبير واضح بدون افتراض إساءة.':
-    'رمزياً، لون القمر الحالي يغيّر موضوع الانتباه العاطفي؛ لاحظ ردود فعلك بدون حكم مسبق.',
-   enMeaning:leo?'Pride and sensitivity to being ignored or to wording; communicate clearly.':
-    'The Moon’s current sign shifts symbolic emotional emphasis; notice reactions without presuming motives.',
+   arMeaning:meaning.ar,enMeaning:meaning.en,
    categories:['emotions','love','recovery'],strength:1.7,kind:'moon-sign'});
  }
  const adjustments=Object.fromEntries(keys.map(key=>{
