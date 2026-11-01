@@ -51,7 +51,8 @@ test('Now is under Today and displays every distinct live meter in four-column r
  assert.ok(main.includes("screen==='now'||screen==='ai'"),'Now must unpin Time Machine selections');
  const now=main.slice(main.indexOf('function nowPage(){'),main.indexOf('function goModePage(){'));
  for(const required of ['derivedMetrics(sky.scores)','goModes(indicators)','goLifeGauges(sky.scores)','categories.map(category','moonWindow()','mx-now-list','mx-now-head','data-now-gauge','role="progressbar"'])assert.ok(now.includes(required),'Now is missing '+required);
- assert.ok(now.includes("label:cat(category),value:sky.scores[category]"),'Now domain gauges must reuse continuous sky-context scores');
+ assert.ok(now.includes("value:sky.scores[category]"),'Now domain gauges must reuse continuous sky-context scores');
+  assert.ok(now.includes("الصورة العامة · الأساسي")&&now.includes("الصورة العامة · المركّب"),'Show separate base and composite overview labels');
  assert.ok(now.includes("label:t('القمر','Moon')+' · '+signName(moon.sign*30)"),'Now Moon gauge must show the current lunar zodiac sign');
  assert.ok(readFileSync('src/now.css','utf8').includes('--metric-accent:#ffa43b'),'Now Moon gauge must use orange accent');
  assert.ok(!now.includes("t('اليوم','Today')+' · '+cat(category)"),'Do not prefix Now gauge names with Today');
