@@ -142,7 +142,7 @@ const nameAr:Record<string,string>={
 };
 const angleAr:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
 const angleEn:Record<number,string>={0:'conjunction',60:'sextile',90:'square',120:'trine',180:'opposition'};
-export type TravelCardReading={summary:string;basis:string;detail:string};
+export type TravelCardReading={summary:string;basis:string;detail:string;scene:string;contactKey:string|null};
 
 /** A transparent, testable explanation for the exact sources of each card.
  * The leading contact is restricted to that card's source categories, not
@@ -167,13 +167,14 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
  const preferred=entries.find(e=>e.category===activityFocus[metric.id as TravelCardId]);
  const active=(preferred?.contacts.some(c=>c.strength>0&&c.tone!==0)?preferred:undefined)??
   ranked.find(e=>e.contacts.some(c=>c.strength>0&&c.tone!==0));
- let evidence='',specific='';
+ let evidence='',specific='',contactKey:string|null=null;
  if(active){
   const sign=Math.sign(active.score-50);
   const contributions=[...active.contacts].filter(c=>c.strength>0&&c.tone!==0).sort((a,b)=>
    Number(Math.sign(b.tone)===sign)-Number(Math.sign(a.tone)===sign)||
    Math.abs(b.tone*b.strength)-Math.abs(a.tone*a.strength)||a.orb-b.orb);
   const contact=contributions[0] as SkyContact;
+  contactKey=contact.transit+':'+contact.natal+':'+contact.angle;
   specific=skyAspectExplanation(contact.transit,contact.natal,contact.angle,english);
   const body=english?contact.transit:(nameAr[contact.transit]??contact.transit);
   const natal=english?contact.natal:(nameAr[contact.natal]??contact.natal);
@@ -193,12 +194,8 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
    'حاجة جسمك للنوم أهم من هذا التقييم.'):
   metric.id==='sexuality'||metric.id==='chemistry'?(english?'It never measures another person’s attraction or consent.':
    'الدرجة ما تقيس انجذاب أو موافقة شخص ثاني.'):'';
- // Current sky notes are secondary detail, selected by this card's TOPIC,
- // not copied into every unrelated card just because source categories overlap.
- const focus=activityFocus[metric.id as TravelCardId];
- const skyReason=sky.climate.notes.find(n=>n.kind==='aspect'&&n.categories.includes(focus))??
-  sky.climate.notes.find(n=>n.kind==='retrograde'&&n.categories.includes(focus));
- const skyText=skyReason?(english?skyReason.enTitle+': '+skyReason.enMeaning:skyReason.arTitle+': '+skyReason.arMeaning):'';
- const detail=(english?'Source indices: ':'المجالات الداخلة بالحساب: ')+basis+'. '+evidence+(skyText?' '+skyText:'')+(riskNote?' '+riskNote:'');
- return {summary:pair[english?1:0]+(specific?' '+specific:''),basis,detail};
+ // Sky weather is counted in the index; do not repeat its paragraph on every card.
+ const detail=(english?'Source indices: ':'المجالات الداخلة بالحساب: ')+basis+'. '+evidence+(riskNote?' '+riskNote:'');
+ const scene=pair[english?1:0];
+ return {summary:scene+(specific?' '+specific:''),scene,contactKey,basis,detail};
 }
