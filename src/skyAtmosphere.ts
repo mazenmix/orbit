@@ -60,6 +60,25 @@ const practicalStep:Record<string,[string,string]>={
  Jupiter:['راجع التفاصيل قبل الوعد الكبير.','Check details before overpromising.'],
  Sun:['عبّر عن رأيك بدون ما تعتبر الاختلاف إهانة.','Express your view without treating disagreement as an insult.']
 };
+/** Retrograde meanings include actual zodiac-specific behavior, not an identical message in every sign. */
+const retroSignFocus:readonly [string,string][]=[
+ ['بالحمل، لا تستعجل رسالة أو مواجهة بس لأنك تريد تنهي الموضوع اليوم.','In Aries, do not rush a message or confrontation just to finish it today.'],
+ ['بالثور، راجع قيمة الالتزام أو المصروف قبل ما تتمسك بخطة قديمة.','In Taurus, reconsider the cost or value of an old commitment.'],
+ ['بالجوزاء، تحقق من نسختين مختلفتين للخبر قبل ما تنقل أي معلومة.','In Gemini, compare conflicting accounts before sharing a story.'],
+ ['بالسرطان، لا تعامل ذكرى قديمة كدليل على موقف شخص منك هسه.','In Cancer, do not treat a memory as evidence of someone’s present intentions.'],
+ ['بالأسد، لا تربط كرامتك بسرعة الرد أو مقدار المدح اللي تسمعه.','In Leo, avoid tying your worth to a quick reply or praise.'],
+ ['بالعذراء، صحح تفصيلاً واحداً بدل ما تفتح قائمة أخطاء بلا نهاية.','In Virgo, correct one specific detail rather than every imperfection.'],
+ ['بالميزان، وضّح شنو تعطي وشنو تتوقع بدل اختبار الطرف الثاني بالسكوت.','In Libra, discuss mutual expectations instead of testing someone through silence.'],
+ ['بالعقرب، التلميح مو اعتراف؛ اسأل عن المقصود بدل تفتيش النوايا.','In Scorpio, hints are not admissions; ask directly rather than interrogating intent.'],
+ ['بالقوس، قبل وعد السفر أو الدراسة دقق الموعد والكلفة والالتزامات.','In Sagittarius, double-check travel or study promises and their costs.'],
+ ['بالجدي، لا تضيف مسؤولية جديدة قبل ما تغلق القديمة أو تعدّل موعدها.','In Capricorn, finish or reschedule existing responsibilities before taking more.'],
+ ['بالدلو، لا تفاجئ الناس بتغيير نظام مشترك من غير ما تحچي وياهم.','In Aquarius, discuss a change to shared routines before springing it on others.'],
+ ['بالحوت، افصل شعورك عن دليل فعلي قبل ما تبني عليه قرار.','In Pisces, separate intuition from verifiable evidence before deciding.']
+];
+const retroSpecific:Readonly<Record<string,[string,string]>>={
+ 'Mercury:Scorpio':['إذا وصلت رسالة بيها تلميحات أو رجع حچي قديم، لا تفسر السكوت كاتهام. اسأل عن قصد الجملة قبل الرد.','If an old topic or cryptic message returns, do not assume hidden accusations. Clarify the words first.'],
+ 'Venus:Libra':['خلاف قديم حول التقدير أو المبادرة ممكن ينفتح للنقاش. لا تختبر الاهتمام بالسكوت؛ احچي شنو تحتاج واترك للطرف الثاني حرية الجواب.','An old disagreement about affection or effort may come up. Say what you need instead of testing the other person with silence.']
+};
 const retroMeaning:Record<string,{ar:string;en:string;weight:Partial<Record<Category,number>>}>={
  Mercury:{ar:'مراجعة الكلام والرسائل والتفاهمات السابقة؛ تأكد من المعنى قبل اتخاذ موقف.',en:'Revisit messages and earlier agreements; verify meaning before reacting.',weight:{communication:-5,love:-2,emotions:-1}},
  Venus:{ar:'مراجعة العلاقات والحساسيات العاطفية وسوء فهم النوايا. لا تفترض شعور الطرف الثاني.',en:'Reconsider relationships, emotional sensitivities and assumed intentions; ask rather than presume.',weight:{love:-5,emotions:-2,communication:-1}},
@@ -236,10 +255,14 @@ export function skyClimate(current:Pick<Chart,'points'>):SkyClimate{
   const sign=zodiac[Math.floor(((p.longitude%360)+360)%360/30)];
   const arSign=sign[0].startsWith('ال')?sign[0].slice(2):sign[0];
   const meaning=retroMeaning[id],isVenus=id==='Venus';
+  const context=retroSpecific[id+':'+sign[1]];
+  const signFocus=retroSignFocus[Math.floor(((p.longitude%360)+360)%360/30)];
+  const narrative=context?.[0]??meaning.ar+' '+signFocus[0];
+  const narrativeEn=context?.[1]??meaning.en+' '+signFocus[1];
   const relevant=Object.keys(meaning.weight) as Category[];
   notes.push({id:'retro:'+id,arTitle:names[id][0]+' متراجع'+(isVenus?'ة':'')+' بال'+arSign,
    enTitle:names[id][1]+' retrograde in '+sign[1],
-   arMeaning:meaning.ar,enMeaning:meaning.en,categories:relevant,
+   arMeaning:narrative,enMeaning:narrativeEn,categories:relevant,
    strength:id==='Venus'?1.85:id==='Mercury'?1.6:1.0,kind:'retrograde'});
   for(const key of relevant)weights[key].push(meaning.weight[key]??0);
  }
