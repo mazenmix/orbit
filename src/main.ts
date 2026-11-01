@@ -636,7 +636,18 @@ function focusedCalendar(){
  '<div class="mx-calendar-compact is-expanded">'+astroCalendarPage()+'</div>';
 }
 function focusedTime(){
- const short=distinctPriority(rankPrioritySignals({signals:data!.signals,natal:data!.natal,knownBirthTime:active.known,complete:data!.complete}),3,copy).map(({signal,factor})=>{const info=copy(signal);return '<div class="mx-focus-event"><span class="mx-event-mark">'+categoryLabels[signal.category][2]+'</span><div><strong>'+esc(info.title)+'</strong><small>'+esc(info.action)+(factor?' · '+planet(factor.transit.id)+' '+aspect(factor.angle)+' '+planet(factor.natal.id)+' ('+factor.orb.toFixed(2)+'°)':'')+'</small></div></div>'}).join('');
+ const major=new Set(['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto']);
+ const short=distinctPriority(rankPrioritySignals({signals:data!.signals,natal:data!.natal,knownBirthTime:active.known,complete:data!.complete}),3,copy).map(({signal,factor})=>{
+  const info=copy(signal,factor);
+  const hasExactContact=Boolean(factor&&major.has(factor.transit.id)&&major.has(factor.natal.id)&&[0,60,90,120,180].includes(factor.angle));
+  const title=factor?planet(factor.transit.id)+' '+aspect(factor.angle)+' '+planet(factor.natal.id):info.title;
+  // For a major calculated pair use its distinct authored concrete meaning.
+  // For supplementary bodies the category-specific first action is more
+  // informative than speculative planet-pair text or repeated metacommentary.
+  const meaning=hasExactContact?skyAspectExplanation(factor!.transit.id,factor!.natal.id,factor!.angle,lang==='en'):
+   info.action.split(/(?<=[.!؟])\s+/)[0];
+  return '<div class="mx-focus-event"><span class="mx-event-mark">'+categoryLabels[signal.category][2]+'</span><div><strong>'+esc(title)+'</strong><small>'+esc(meaning)+(factor?' · '+factor.orb.toFixed(2)+'°':'')+'</small></div></div>';
+ }).join('');
  return '<section class="panel time-controls mx-time-compact"><div><span class="eyebrow">TIME MACHINE</span><h2>'+t('اختار يوم وساعة','Select a date and time')+'</h2><p>'+t('الحسابات تنعاد لموعدك المختار، بدون تخمين أيام غير محسوبة.','Calculations update to the selected moment; unsampled times are not guessed.')+'</p></div><form id="time-form"><label>'+t('التاريخ والوقت','Date & time')+'<input required name="moment" id="time-input" type="datetime-local" min="1800-01-01T00:00" max="2399-12-31T23:59" value="'+localValue(selected,active.zone)+'"></label><small>'+esc(timezoneCityLabel(active.zone))+'</small><button class="primary">'+t('احسب اللحظة','Calculate moment')+' ↗</button></form><div class="quick-times">'+[-24,-6,6,24,168].map(h=>'<button class="chip" data-shift="'+h+'">'+(h>0?'+':'')+h+' '+t('ساعة','h')+'</button>').join('')+'<button class="chip" data-now>'+t('هسه','Now')+'</button></div></section>'+
  '<section class="panel mx-focus-panel"><h2>'+t('أبرز 3 نتائج لهذا الوقت','Top 3 results for this moment')+'</h2>'+short+'<p class="mx-focus-note">'+t('هذه تفسيرات رمزية لاتصالات محسوبة، وليست توقعات مؤكدة.','These are symbolic readings of calculated aspects, not certain forecasts.')+'</p><div class="mx-focus-actions"><button class="secondary" data-go="evidence">'+t('التفصيل الحسابي','Evidence')+' ↗</button><button class="secondary" data-go="calendar">'+t('التقويم','Calendar')+'</button></div></section>';
 }
