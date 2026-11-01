@@ -33,12 +33,20 @@ test('Cloudflare legacy response shape is supported',async()=>{
 test('model and quota failures return actionable errors without upstream secrets',async()=>{
  const env={AI:{run:async()=>{throw Error('sensitive provider diagnostic')}}};
  const r=await onRequestPost({request:req(valid),env});
- assert.equal(r.status,503);assert.equal((await r.json()).code,'AI_UNAVAILABLE');
+ assert.equal(r.status,200);
+ const body=await r.json();
+ assert.equal(body.quality,'grounded-fallback');
+ assert.equal(body.review.status,'editorial-replacement');
+ assert.ok(!JSON.stringify(body).includes('sensitive provider diagnostic'));
 });
 test('incomplete reasoning is never presented as an explanation',async()=>{
  const env={AI:{run:async()=>({response:'<think>unfinished reasoning'})}};
  const r=await onRequestPost({request:req(valid),env});
- assert.equal(r.status,502);assert.equal((await r.json()).code,'AI_EMPTY_RESPONSE');
+ assert.equal(r.status,200);
+ const body=await r.json();
+ assert.equal(body.quality,'grounded-fallback');
+ assert.ok(body.explanation.length>40);
+ assert.ok(!body.explanation.includes('<think>'));
 });
 test('invalid JSON and arbitrary planet names are rejected before inference',async()=>{
  let called=false;const env={AI:{run:async()=>{called=true;return {response:'unused'}}}};
