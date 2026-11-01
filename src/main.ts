@@ -896,7 +896,7 @@ function nowPage(){
  ];
  try{
   const moon=moonWindow(),at=+selected;
-  rows.push({id:'moon-sign',label:t('القمر','Moon'),value:Math.round(elapsedPercent(+moon.enteredAt,+moon.ingressAt,at)),tone:'mx-now-moon'});
+  rows.push({id:'moon-sign',label:t('القمر','Moon')+' · '+signName(moon.sign*30),value:Math.round(elapsedPercent(+moon.enteredAt,+moon.ingressAt,at)),tone:'mx-now-moon'});
   rows.push({id:'moon-voc',label:t('خلو المسار','Void of Course'),value:Math.round(elapsedPercent(+moon.vocStartsAt,+moon.ingressAt,at)),tone:'mx-now-void '+(moon.isVoid?'is-voc':'is-clear')});
  }catch(e){console.warn('Now Moon timing unavailable',e)}
  return '<section class="mx-now-page" data-section="now" aria-label="Now">'+nowTimeNavigation()+'<div class="mx-now-list">'+
