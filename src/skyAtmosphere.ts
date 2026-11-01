@@ -98,7 +98,7 @@ function describe(a:string,b:string,angle:number):[string,string]{
   a==='Pluto'||b==='Pluto'?'Pluto':a==='Uranus'||b==='Uranus'?'Uranus':a;
  const [stepAr,stepEn]=practicalStep[focus];
  if(difficult)return [
-  'شدّ بين '+firstAr+' و'+secondAr+'؛ '+(angle===90?'سرعة تضارب المواقف ممكن تصعّب التفاهم. ':'كل طرف ممكن يتمسك بوجهة نظر مقابلة. ')+stepAr,
+  'شدّ بين '+firstAr+' و'+secondAr+'؛ '+(angle===90?'سرعة تضارب المواقف ممكن تصعّب التفاهم. ':'كل طرف ممكن يتمسك برأي مختلف. ')+stepAr,
   'Tension between '+firstEn+' and '+secondEn+'; '+(angle===90?'conflicting priorities may quickly strain communication. ':'opposing positions may be harder to reconcile. ')+stepEn
  ];
  if(helpful)return [
