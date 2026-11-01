@@ -39,3 +39,40 @@ test('no arbitrary retrograde score when planets move forward, and invalid bodie
  assert.deepEqual(first,skyClimate(base));
  assert.throws(()=>skyClimate(chart({Sun:12,Moon:12})),/Insufficient sky/);
 });
+
+test('all twelve Moon signs have distinct, real-time interpretations',()=>{
+ const base={Sun:11,Moon:1,Mercury:41,Venus:85,Mars:151,Jupiter:177,Saturn:217,Uranus:250,Neptune:288,Pluto:337};
+ const notes=Array.from({length:12},(_,index)=>{
+  const climate=skyClimate(chart({...base,Moon:index*30+12}));
+  const moon=climate.notes.find(note=>note.id==='moon:sign');
+  assert.ok(moon,'Moon note available for zodiac sign '+index);
+  assert.ok(moon.arMeaning.length>50);
+  assert.ok(!moon.arMeaning.includes('لون القمر الحالي'),'No general fallback');
+  return moon.arMeaning;
+ });
+ assert.equal(new Set(notes).size,12,'Moon narratives change with Moon sign');
+});
+test('changing sky aspect produces a new specific explanation, without stale November wording',()=>{
+ const sample={Sun:12,Moon:31,Mercury:0,Venus:160,Mars:90,Jupiter:210,Saturn:225,Uranus:260,Neptune:300,Pluto:340};
+ const harsh=skyClimate(chart(sample));
+ const mercurySquare=harsh.notes.find(n=>n.id==='aspect:Mercury:Mars:90');
+ assert.ok(mercurySquare);
+ assert.match(mercurySquare.arMeaning,/كلام حاد/);
+ const helpful=skyClimate(chart({...sample,Mars:60}));
+ const mercurySextile=helpful.notes.find(n=>n.id==='aspect:Mercury:Mars:60');
+ assert.ok(mercurySextile);
+ assert.notEqual(mercurySextile.arMeaning,mercurySquare.arMeaning);
+ assert.match(mercurySextile.arMeaning,/الكلام وسوء الفهم|المواجهة/);
+ assert.ok(!helpful.notes.some(n=>n.id==='aspect:Mercury:Mars:90'));
+});
+test('Saturn and outer planet retrogrades get their own real-motion readings',()=>{
+ const base={Sun:17,Moon:52,Mercury:71,Venus:103,Mars:134,Jupiter:169,Saturn:188,Uranus:251,Neptune:282,Pluto:314};
+ const climate=skyClimate(chart(base,{Saturn:-.04,Neptune:-.005}));
+ const saturn=climate.notes.find(n=>n.id==='retro:Saturn');
+ const neptune=climate.notes.find(n=>n.id==='retro:Neptune');
+ assert.ok(saturn&&neptune);
+ assert.ok(saturn.arMeaning.includes('المسؤوليات'));
+ assert.ok(neptune.arMeaning.includes('التصورات'));
+ assert.notEqual(saturn.arMeaning,neptune.arMeaning);
+ assert.ok(climate.adjustments.career!==0);
+});
