@@ -2,7 +2,7 @@ import {aspects,distance,houseNumber,type Point} from './math.ts';
 import type {Chart} from './engine.ts';
 import {occurrenceLanguage,type SkyBodyId,type WholeSkyOccurrence} from './wholeSkyBroadcast.ts';
 import type {SkyLanguage} from './todaySkyBrief.ts';
-import {skyAspectExplanation} from './skyAtmosphere.ts';
+import {skyAspectScene} from './skyAtmosphere.ts';
 
 /** Use birth-chart houses and precisely computed planetary positions to make
  * event meanings personal. We never claim actual future external happenings.
@@ -154,8 +154,9 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
    // planetary template. Duration cannot be inferred from a paired name.
    const lunar=event.first==='Moon'||event.second==='Moon';
    // The calculated planetary pair is the story; a natal house only locates its topic.
-   const contactReading=skyAspectExplanation(event.first,event.second!,event.angle??-1,lang==='en');
-   now=contactReading;
+   const contact=skyAspectScene(event.first,event.second!,event.angle??-1,lang==='en');
+   now=contact.meaning;
+   if(contact.action)action=contact.action;
    later=lunar?(lang==='ar'?'التأويل يخص الفترة القريبة من وقت الاتصال القمري فقط؛ لا يمتد لأسابيع من دون عامل فلكي منفصل.':
     'The interpretation concerns the short Moon-aspect window, not weeks ahead without separate calculated evidence.'):
     (houseTopic?txt(houseTopic.later,lang):txt(second.later,lang))+' '+caution;
@@ -188,7 +189,7 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
  // A close calculated transit-to-natal contact remains personal without a
  // known birth time; natal-Moon or house claims still require it.
  const natalContactTopic=link&&natalFocus[link.natal.id]?txt(natalFocus[link.natal.id],lang):null;
- const prefix=houseTopic?(lang==='ar'?'بخارطتك، هذا يخص '+houseTopic.area.ar+': ':'In your natal chart, this concerns '+houseTopic.area.en+': '):'';
+ const prefix=event.kind==='aspect'?'':houseTopic?(lang==='ar'?'بخارطتك، هذا يخص '+houseTopic.area.ar+': ':'In your natal chart, this concerns '+houseTopic.area.en+': '):'';
  return {
   title:human.title,
   now:prefix+(soon?phaseNow+' ':'')+now,
