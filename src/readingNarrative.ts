@@ -142,9 +142,11 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
  const roleA=focus(e.transit.id,language),roleB=focus(e.natal.id,language);
  const labelA=(headings[e.transit.id]??domains[s.category])[p];
  const labelB=(headings[e.natal.id]??domains[s.category])[p];
- // Name the actual verified contact, not a repeated 'harmony between' heading.
- // Category is already shown separately on Signals and Evidence cards.
- const title=first+' '+angle+' '+second;
+ // User-facing headlines express the actual daily-life situation; orbital labels
+ // remain only in the separately shown basis and Evidence calculation.
+ const specific=skyAspectExplanation(e.transit.id,e.natal.id,e.angle,language==='en');
+ const phrase=specific.replace(/^(?:تگدر تستثمر فرصة بسيطة:|الانتباه ينشد لهالموضوع:|A small opportunity:|The focus is concentrated here:)\s*/u,'').split(/[.؟؛!]/u)[0].trim();
+ const title=phrase.length>115?phrase.slice(0,114).replace(/\s+\S*$/u,'')+'…':phrase;
  const takeaway=language==='ar'?
   tension?'القراءة تبرز شدّاً محتملاً بين '+roleA+' وبين '+roleB+'. إذا ظهر عندك تردد بقرار أو اختلاف بحوار، حدد الأولوية اللي تحتاج معالجة أولاً بدل ما تضغط على نفسك وتحسم بسرعة.':
   merged?'الموضوع الأبرز يجمع بين '+roleA+' وبين '+roleB+'. إذا واجهت موقفاً مشابهاً، اسأل نفسك: شنو أعرفه فعلاً وشنو مجرد توقع؟ هالفرق يساعدك تقرر أوضح.':
@@ -154,7 +156,6 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
   'The pattern symbolically favors coordinating '+roleA+' and '+roleB+', provided real circumstances support it.';
  const place=home?(language==='ar'?' أقرب مجال حتى تراجع هذا الموضوع هو '+home+'.':' The area to reflect on is '+home+'.'):'';
  const balance=contrast?(language==='ar'?' ويقابله '+name(contrast.transit.id,language)+' '+(aspects[contrast.angle]?.[p]??'اتصال')+' '+name(contrast.natal.id,language)+' داخل نفس المجال.':' Another calculated contact is '+name(contrast.transit.id,language)+' '+(aspects[contrast.angle]?.[p]??'aspect')+' '+name(contrast.natal.id,language)+'.'):'';
- const specific=skyAspectExplanation(e.transit.id,e.natal.id,e.angle,language==='en');
  const good=(language==='ar'?'على صعيد '+area+'، ':'In '+area+', ')+specific+place+balance;
  const caution=language==='ar'?
   'مثال عملي: '+everydayCases[s.category][0] :
