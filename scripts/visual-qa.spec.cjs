@@ -506,13 +506,13 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
  });
 }
 for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
- test(device+' standalone Go Mode navigation includes 29 metrics and four GO cards',async({browser},testInfo)=>{
+ test(device+' standalone Go Mode navigation includes 33 metrics and four GO cards',async({browser},testInfo)=>{
   const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,isMobile:device==='iphone',hasTouch:device==='iphone'});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/#today',{waitUntil:'domcontentloaded'});
   await expect(page.locator('.mx-today-sky svg.chart-wheel')).toBeVisible({timeout:75000});
-  await expect(page.locator('[data-today-gauge]')).toHaveCount(0);
+  await expect(page.locator('#live-view-body .mx-sky-new-indicators [data-today-gauge]')).toHaveCount(4);
   const nav=device==='iphone'?page.locator('.mobile-nav'):page.locator('.sidebar .nav');
   await expect(nav.locator('[data-go]')).toHaveCount(9);
   const routes=await nav.locator('[data-go]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-go')));
@@ -520,7 +520,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await nav.locator('[data-go="go"]').click();
   await expect(page).toHaveURL(/#go$/);
   await expect(page.locator('#live-view-body [data-section="go"]')).toBeVisible({timeout:75000});
-  await expect(page.locator('.mx-go-mode-indicators .metric-card')).toHaveCount(29);
+  await expect(page.locator('.mx-go-mode-indicators .metric-card')).toHaveCount(33);
   await expect(page.locator('.go-card')).toHaveCount(4);
   await expect(page.locator('.mx-go-mode-page [data-today-gauge]')).toHaveCount(4);
   await expect(page.locator('[data-intel-tab]')).toHaveCount(0);
@@ -535,7 +535,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   expect(overflow,'horizontal overflow').toBeLessThan(8);
   await page.goto('/#intel',{waitUntil:'domcontentloaded'});
-  await expect(page.locator('.mx-go-mode-indicators .metric-card')).toHaveCount(29);
+  await expect(page.locator('.mx-go-mode-indicators .metric-card')).toHaveCount(33);
   await expect(page.locator('.go-card')).toHaveCount(4);
   await page.goto('/#more',{waitUntil:'domcontentloaded'});
   await expect(page.locator('button[data-go="intel"]')).toHaveCount(0);
@@ -625,7 +625,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   const over=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   expect(over,'No horizontal overflow').toBeLessThan(8);
   await nav.locator('[data-go="go"]').click();
-  await expect(page.locator('.mx-go-mode-indicators .metric-card')).toHaveCount(29);
+  await expect(page.locator('.mx-go-mode-indicators .metric-card')).toHaveCount(33);
   await expect(page.locator('.go-card')).toHaveCount(4);
   expect(errors).toEqual([]);
   await context.close();
@@ -646,7 +646,7 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   const wheel=page.locator('#live-view-body .mx-today-sky svg.chart-wheel');
   await wheel.waitFor({state:'visible',timeout:80000});
   await expect(page.locator('#live-view-body .mx-today-sky')).toBeVisible();
-  await expect(page.locator('#live-view-body .mx-today-gauges')).toHaveCount(0);
+  await expect(page.locator('#live-view-body .mx-sky-new-indicators [data-today-gauge]')).toHaveCount(4);
   const panel=await page.locator('.mx-today-sky').boundingBox();
   expect(panel.width,'Today sky should be a compact panel').toBeLessThanOrEqual(500);
   // Regression: upcoming items follow the planet movement card, 3/2/1 across viewports.
