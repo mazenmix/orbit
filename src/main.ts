@@ -69,6 +69,7 @@ import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
 import {derivedMetrics,goModes,reviewContextGoMode,type GoDomain,type ContextGoReview,type MetricResult} from './metrics.ts';
 import {skyContext,contextGaugeBasis,contextGaugeNarrative,type SkyContext} from './skyContext.ts';
+import type {SkyNote} from './skyAtmosphere.ts';
 import {travelMetricsByGroup,travelMetricReading} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
 import {goLifeGauges} from './lifeGauges.ts';
@@ -273,6 +274,34 @@ function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,
    '<details class="mx-travel-gauge-detail"><summary>'+t('سبب الدرجة','Why this score')+'</summary><p>'+esc(travel.detail)+'</p></details>':'')+
   '</article>';
 }
+
+/** Brief, calculated explanations of the current sky, shared by Today and Now. */
+function skyWeatherPanel(compact=false){
+ const climate=liveGaugeSky().climate;
+ const priority=['aspect:Mars:Mercury:90','aspect:Mercury:Mars:90','retro:Venus','moon:sign','aspect:Moon:Pluto:180','aspect:Pluto:Moon:180'];
+ const order=(note:SkyNote)=>{const index=priority.indexOf(note.id);return index<0?99:index;};
+ const selectedNotes=[...climate.notes].sort((a,b)=>order(a)-order(b)||b.strength-a.strength).slice(0,compact?4:5);
+ const rows=selectedNotes.map(note=>'<article class="mx-sky-weather-note"><strong>'+esc(t(note.arTitle,note.enTitle))+'</strong><span>'+esc(t(note.arMeaning,note.enMeaning))+'</span></article>').join('');
+ return '<section class="panel mx-sky-weather" aria-label="'+t('قراءة اتصالات السماء','Current sky connections')+'">'+
+  (compact?'<details class="mx-weather-disclosure"><summary>'+t('ليش تتغير الكيجات؟ · اتصالات السماء','Why the gauges change · Sky connections')+'</summary>':
+   '<h2>'+t('شنو دا يصير بالسماء؟','What is happening in the sky?')+'</h2>')+
+  '<div class="mx-sky-weather-list">'+rows+'</div>'+
+  '<small>'+t('الكيجات تمزج اتصالات السماء الحالية ويّه خارطتك الشخصية. الدرجات قراءات فلكية رمزية، مو قياسات لمشاعر الناس.','Gauges blend live sky contacts with natal transits. Scores are symbolic, not measurements of other people’s emotions.')+'</small>'+
+  (compact?'</details>':'')+'</section>';
+}
+function newRelationshipGauges(){
+ const rows=derivedMetrics(liveGaugeSky().scores);
+ const selectedIds=['dialogue','relationStability','composure','personalBalance'];
+ const cards=selectedIds.map(id=>{
+  const metric=rows.find(x=>x.id===id);
+  if(!metric)throw Error('Missing specialist atmosphere indicator: '+id);
+  return quickGaugeCard(metric,'✦');
+ }).join('');
+ return '<section class="panel mx-today-gauges mx-quick-gauges mx-sky-new-indicators">'+
+  '<div class="mx-today-gauge-header"><h2>'+t('التفاهم وردود الفعل','Understanding & reactions')+'</h2></div>'+
+  '<div class="mx-focus-metrics">'+cards+'</div></section>';
+}
+
 function todayQuickGauges(r:Report,insideGo=false){
  const available=derivedMetrics(liveGaugeSky().scores);
  const items=[
@@ -474,6 +503,7 @@ function focusedToday(){
  activity+'<small class="mx-sky-live-checked" aria-label="'+t('وقت آخر حساب','Last calculation')+'">'+esc(clock)+'</small>'+
  '</section>'+
  (brief?planetLiveStatus(brief):'<p role="status">'+esc(skyFailure)+'</p>')+
+ newRelationshipGauges()+skyWeatherPanel()+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('الأحداث الفلكية القادمة · كل الكواكب','Upcoming events · all planets')+'</h2>'+
  '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-upcoming">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.'),true):'')+'</div></section>'+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('آخر ما تغير بالسماء','Recent sky changes')+'</h2>'+
@@ -610,7 +640,7 @@ function todayMoonGaugePanel(){
   return '<section class="panel mx-today-moon-gauges"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2><p>'+t('حساب توقيت القمر غير متاح حالياً.','Moon timing is currently unavailable.')+'</p></section>';
  }
 }
-function today(){const r=data!,primary=r.signals[0],text=primary?copy(primary):null;let sky:WholeSkyBroadcast|null=null;try{sky=currentWholeSky()}catch(e){console.warn('Pro Today whole-sky brief unavailable',e)}const personal=sky?mainPersonalEvent(sky):null;return `<div class="dashboard-grid mx-today-compact"><div class="main-column"><section class="hero panel"><div class="hero-top"><span class="live-label"><i class="status-dot"></i>${t('بث السماء كلها · الآن','WHOLE-SKY LIVE')}</span><span class="subtle">${dateText(selected,{hour:'2-digit',minute:'2-digit'})}</span></div><div class="hero-copy">${tag(t('مرحباً','Welcome')+' '+esc(active.name),'violet')}<h2>${esc(sky?.title??t('القراءة الفلكية غير متاحة هسه','Sky brief unavailable'))}</h2><p><b>${t('هسه:','Now:')}</b> ${esc(personal?.now??sky?.meaning??t('رصد السماء ما اكتمل؛ ما نعرض قراءة قديمة على أنها مباشرة.','Sky verification is unavailable; no old reading is presented as live.'))}</p>${personal?'<p class="mx-sky-reading-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(personal.next)+'</p>':''}<p class="mx-focus-story-action"><b>${t('شنو تسوي؟','What to do:')}</b> ${esc(personal?.action??sky?.action??t('ارجع بعد تحديث الحسابات.','Retry once calculations are available.'))}</p><small class="mx-sky-live-checked">${t('آخر حساب للسماء:','Sky calculated:')} ${dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</small><div class="hero-bottom"><button class="primary" data-go="evidence">${t('ليش هاي القراءة؟','Why this reading?')} <span>↗</span></button><button class="secondary mx-ai-context" data-go="ai">✧ ${t('شرح Ai','Explain with Ai')}</button></div></div><div class="hero-orbit" aria-hidden="true"><i></i><i></i><i></i><span>✦</span><b>☾</b><em>·</em></div></section>${scoresHTML(r)}<div class="section-title"><h2>${t('إشارات تستحق انتباهك','Signals worth your attention')}</h2><button class="text-button" data-go="signals">${t('كل الإشارات','All signals')} ↗</button></div><div class="signal-list">${distinctHighlights(r.signals,copy,3,1).map(({item,index})=>signalCard(item,index)).join('')||`<p class="empty panel">${t('ماكو إشارات إضافية مختلفة عن القراءة الرئيسية ضمن الأورب المحدد.','No additional distinct signals beyond the headline reading within the configured orbs.')}</p>`}</div></div><aside class="right-column">${todaySkyWheel(r)}<section class="panel lunar-card"><span class="moon-glyph">☾</span><span class="eyebrow">${t('القمر وخارطتك','THE MOON & YOUR CHART')}</span><h3>${signName(r.current.points.find(p=>p.id==='Moon')!.longitude)}</h3><p>${esc(moonPersonalSummary(r,active.known,lang))}</p><button class="text-button" data-go="evidence">${t('شوف التفاصيل','View details')} ↗</button></section><button class="panel time-shortcut" data-go="time"><span>◷</span><div><b>${t('آلة الزمن','Time Machine')}</b><p>${t('أي تاريخ. منظور جديد.','Another date. A new perspective.')}</p></div><b>↗</b></button>${todayMoonGaugePanel()}</aside></div>`}
+function today(){const r=data!,primary=r.signals[0],text=primary?copy(primary):null;let sky:WholeSkyBroadcast|null=null;try{sky=currentWholeSky()}catch(e){console.warn('Pro Today whole-sky brief unavailable',e)}const personal=sky?mainPersonalEvent(sky):null;return `<div class="dashboard-grid mx-today-compact"><div class="main-column"><section class="hero panel"><div class="hero-top"><span class="live-label"><i class="status-dot"></i>${t('بث السماء كلها · الآن','WHOLE-SKY LIVE')}</span><span class="subtle">${dateText(selected,{hour:'2-digit',minute:'2-digit'})}</span></div><div class="hero-copy">${tag(t('مرحباً','Welcome')+' '+esc(active.name),'violet')}<h2>${esc(sky?.title??t('القراءة الفلكية غير متاحة هسه','Sky brief unavailable'))}</h2><p><b>${t('هسه:','Now:')}</b> ${esc(personal?.now??sky?.meaning??t('رصد السماء ما اكتمل؛ ما نعرض قراءة قديمة على أنها مباشرة.','Sky verification is unavailable; no old reading is presented as live.'))}</p>${personal?'<p class="mx-sky-reading-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(personal.next)+'</p>':''}<p class="mx-focus-story-action"><b>${t('شنو تسوي؟','What to do:')}</b> ${esc(personal?.action??sky?.action??t('ارجع بعد تحديث الحسابات.','Retry once calculations are available.'))}</p><small class="mx-sky-live-checked">${t('آخر حساب للسماء:','Sky calculated:')} ${dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</small><div class="hero-bottom"><button class="primary" data-go="evidence">${t('ليش هاي القراءة؟','Why this reading?')} <span>↗</span></button><button class="secondary mx-ai-context" data-go="ai">✧ ${t('شرح Ai','Explain with Ai')}</button></div></div><div class="hero-orbit" aria-hidden="true"><i></i><i></i><i></i><span>✦</span><b>☾</b><em>·</em></div></section>${scoresHTML(r)}${newRelationshipGauges()}${skyWeatherPanel()}<div class="section-title"><h2>${t('إشارات تستحق انتباهك','Signals worth your attention')}</h2><button class="text-button" data-go="signals">${t('كل الإشارات','All signals')} ↗</button></div><div class="signal-list">${distinctHighlights(r.signals,copy,3,1).map(({item,index})=>signalCard(item,index)).join('')||`<p class="empty panel">${t('ماكو إشارات إضافية مختلفة عن القراءة الرئيسية ضمن الأورب المحدد.','No additional distinct signals beyond the headline reading within the configured orbs.')}</p>`}</div></div><aside class="right-column">${todaySkyWheel(r)}<section class="panel lunar-card"><span class="moon-glyph">☾</span><span class="eyebrow">${t('القمر وخارطتك','THE MOON & YOUR CHART')}</span><h3>${signName(r.current.points.find(p=>p.id==='Moon')!.longitude)}</h3><p>${esc(moonPersonalSummary(r,active.known,lang))}</p><button class="text-button" data-go="evidence">${t('شوف التفاصيل','View details')} ↗</button></section><button class="panel time-shortcut" data-go="time"><span>◷</span><div><b>${t('آلة الزمن','Time Machine')}</b><p>${t('أي تاريخ. منظور جديد.','Another date. A new perspective.')}</p></div><b>↗</b></button>${todayMoonGaugePanel()}</aside></div>`}
 function trend(hours:number){
  const rows=Array.from({length:9},(_,i)=>{const at=new Date(Math.min(Date.UTC(2399,11,31,23,59),+selected+i*hours/8*3600000));return {at,value:average(getReport(at))}});
  let connected=false;
@@ -908,7 +938,7 @@ function nowPage(){
     '<div class="mx-now-head"><strong>'+safeLabel+'</strong><b>'+(available?percent+'<em>/100</em>':'—')+'</b></div>'+
     '<div class="meter"'+(available?' role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"':'')+' aria-label="'+safeLabel+'"><i style="width:'+percent+'%"></i></div>'+
     '</article>';
-  }).join('')+'</div></section>';
+  }).join('')+'</div></section>'+skyWeatherPanel(true);
 }
 function goModePage(){
  const sky=liveGaugeSky(),indicators=derivedMetrics(sky.scores),go=goModes(indicators),r=data!;
