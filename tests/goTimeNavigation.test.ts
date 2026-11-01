@@ -67,7 +67,7 @@ test('Travel Mode has identical time selector above its 12 recalculated gauges',
  assert.match(nav,/data-go-time-shift="\+hour"/);
  assert.match(nav,/data-go-time-shift="\+day"/);
  assert.match(travel,/derivedMetrics\(liveGaugeSky\(\)\.scores\)/);
- assert.match(travel,/quickGaugeCard\(metric,travelSymbol\(id\),undefined,id\)/);
+ assert.match(travel,/quickGaugeCard\(metric,travelSymbol\(id\),undefined,id,seenTravelContacts\)/);
  const src=readFileSync('src/focus.css','utf8');
  assert.match(src,/#live-view-body \.mx-go-time-nav\{/);
 });
