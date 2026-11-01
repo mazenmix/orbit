@@ -92,6 +92,15 @@ Return one JSON object with explanation (the two reader-facing paragraphs) and g
  const symbolicIndices=Object.fromEntries(Object.entries(indices).map(([k,v])=>[k,String(v)+'/100 (symbolic index, not a probability)']));
  const context:AIAdviceContext={language:input.language,support:describe(strongestSupporting),challenge:describe(strongestChallenging),events:eclipseEvents,evidence,supplemental:extendedEvidence,strict:true,plainLanguage:true,comparisonAvailable:Object.values(comparison).some(v=>v!==null)};
  const interpretationPlan=calculatedNarrativeFactors(context);
+ // Preserve trustworthy client ephemeris input even when upstream LLM is unavailable.
+ // The response is explicitly labeled as editorial, not model generated.
+ const localFallback=(reason:string)=>json({
+  explanation:groundedPlainFallback(context),model:'local-editorial',provider:'local-rules',
+  quality:'grounded-fallback',calculatedAt,
+  review:{corrected:true,grounded:false,status:'editorial-replacement',
+   checks:['calculated-factor-meaning','unsupported-outcomes'],adjustments:[],
+   modelReasonCodes:[reason],reasonCodes:[reason]}
+ });
  const messages:Message[]=[{role:'system',content:system},{role:'user',content:JSON.stringify({calculatedAt,comparison,indices:symbolicIndices,strongestSupporting:describe(strongestSupporting),strongestChallenging:describe(strongestChallenging),evidence:evidence.map(describe),interpretationPlan,supplementalNamedAsteroids:extendedEvidence,verifiedUpcomingEclipses:eclipseEvents})+'\n/no_think'}];
  try{
   const runModel=async(send:Message[])=>{
@@ -131,7 +140,7 @@ Return one JSON object with explanation (the two reader-facing paragraphs) and g
   };
   const first=await runModel(messages);
   let checked=review(first),retried=false;
-  if(!checked)return json({error:'Ai returned no explanation. Please retry.',code:'AI_EMPTY_RESPONSE'},502);
+  if(!checked)return localFallback('model-empty-response');
   const modelReasonCodes=[...checked.problems,...(checked.framingAdded?['missing-symbolic-framing']:[])];
   if(checked.fallback){
    // Do not silently show a canned paragraph just because the model omitted
@@ -149,10 +158,10 @@ Return one JSON object with explanation (the two reader-facing paragraphs) and g
     if(reviewed&&!reviewed.fallback)checked=reviewed;
    }catch{ /* The verified calculation-grounded fallback remains available. */ }
   }
-  if(!checked.text)return json({error:'No grounded explanation available.',code:'AI_EMPTY_RESPONSE'},502);
+  if(!checked.text)return localFallback('model-empty-response');
   return json({explanation:checked.text,model:status.model,provider:status.provider,
    quality:checked.fallback?'grounded-fallback':'reviewed-model',calculatedAt,
    review:{corrected:retried||checked.framingAdded,grounded:!checked.fallback,status:checked.fallback?'editorial-replacement':'passed-bounded-checks',checks:['unsupported-outcomes','symbolic-framing','calculated-factor-meaning','counter-evidence'],adjustments:checked.framingAdded?['symbolic-framing']:[],modelReasonCodes,reasonCodes:checked.fallback?checked.problems:[]}});
 
- }catch{return json({error:input.language==='ar'?'خدمة Ai على السيرفر غير متاحة حالياً. تحقق من تفعيل Workers AI وحصته بحساب Cloudflare، وجرّب مرة ثانية.':'Ai is unavailable. Check Workers AI activation and quota in Cloudflare, then retry.',code:'AI_UNAVAILABLE'},503)}
+ }catch{return localFallback('model-service-error')}
 }
