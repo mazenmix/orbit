@@ -16,7 +16,7 @@ test('all eight domains including recovery receive real ephemeris-based context'
  assert.equal(sky.domains.recovery.primary.orb,0);
  assert.equal(sky.domains.recovery.scope,'tight');
  assert.ok(Object.values(sky.domains).every(domain=>domain.contacts===domain.contributors.length&&domain.contributors.length<=2));
- assert.ok(Object.values(sky.domains).every(domain=>contextScore(domain.contributors)===domain.score));
+ assert.ok(Object.values(sky.domains).every(domain=>contextScore(domain.contributors,domain.skyAdjustment)===domain.score));
  const metrics=derivedMetrics(sky.scores);
  assert.equal(metrics.length,29);
  assert.ok(metrics.every(x=>x.value>=1&&x.value<=99));
