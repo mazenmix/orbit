@@ -801,3 +801,25 @@ test('GO and Travel screen narratives do not recite the same long sentence on mu
  const travel=await uniqueSentences('.mx-travel-gauge-summary');
  expect(travel.duplicates,'Travel activity-specific summaries must not duplicate each other').toEqual([]);
 });
+
+for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
+ test(device+' production narrative fixes: Today one Lunar link, Now unique overview and Evidence dedup',async({browser})=>{
+  const ctx=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,isMobile:device==='iphone',hasTouch:device==='iphone'});
+  const page=await ctx.newPage();
+  await page.goto('/#today',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('.mx-events-lunar-link')).toHaveCount(1,{timeout:80000});
+  await expect(page.locator('.mx-sky-feed-source')).toHaveCount(0);
+  await page.goto('/#now',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('[data-now-gauge="today-overview"]')).toContainText('الأساسي');
+  await expect(page.locator('[data-now-gauge="metric-overview"]')).toContainText('المركّب');
+  await page.goto('/#evidence',{waitUntil:'domcontentloaded'});
+  await page.locator('.narrative-evidence').first().waitFor({state:'visible',timeout:80000});
+  const reasons=await page.locator('.decision-line').allTextContents();
+  assertNoDuplicates(reasons);
+  await ctx.close();
+ });
+}
+function assertNoDuplicates(values){
+ const nonempty=values.map(s=>s.trim()).filter(Boolean);
+ if(new Set(nonempty).size!==nonempty.length)throw Error('Repeated Evidence decision analysis on same page');
+}
