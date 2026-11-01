@@ -35,7 +35,7 @@ test('Moon is a full-sized main navigation item directly after Today on desktop 
  assert.ok(main.includes("function morePage()"));
  assert.ok(main.includes("localStorage.setItem('mx.uiMode',uiMode)"));
 });
-test('Now is under Today and displays every distinct live meter in five-column rows',()=>{
+test('Now is under Today and displays every distinct live meter in four-column rows',()=>{
  assert.ok(main.includes("if(route==='signals'||route==='lunar'||route==='now')return 'today'"));
  assert.ok(main.includes("return main+moon+now;"),'Now must render beside Moon within Today group, not after People');
  assert.ok(main.includes("const nowActive=screen==='now'"));
@@ -58,8 +58,8 @@ test('Now is under Today and displays every distinct live meter in five-column r
  assert.ok(!now.includes('data!.signals.some('),'A lack of a close personal contact must not blank Now gauges');
  assert.ok(!now.includes('<p>')&&!now.includes('<details'),'Now should contain no explanations');
  const css=readFileSync('src/now.css','utf8');
- assert.ok(css.includes('grid-template-columns:repeat(5,minmax(0,1fr))'));
- assert.ok(css.includes('@container (max-width:700px)'),'Now gauges must adapt to narrow screens');
+ assert.ok(css.includes('grid-template-columns:repeat(4,minmax(0,1fr))'));
+ assert.ok(css.includes('@container (max-width:500px)'),'Now gauges must adapt to narrow screens');
  assert.ok(!css.includes('display:contents'),'Restore original two-line gauge card design');
  assert.ok(css.includes('var(--metric-accent'));
  assert.ok(css.includes('.mx-now-time-jumps'));
