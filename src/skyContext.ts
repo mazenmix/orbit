@@ -1,5 +1,6 @@
 import {angles,distance,clamp,type Category,type Point} from './math.ts';
 import type {Chart} from './engine.ts';
+import {skyClimate,type SkyClimate} from './skyAtmosphere.ts';
 
 /**
  * Second, explicitly contextual lens for GO / Travel scores.
@@ -11,8 +12,8 @@ import type {Chart} from './engine.ts';
  */
 export type SkyScope='tight'|'wide'|'background';
 export type SkyContact={transit:string;natal:string;angle:number;orb:number;strength:number;tone:number};
-export type SkyDomain={category:Category;score:number;scope:SkyScope;primary:SkyContact;contacts:number;contributors:readonly SkyContact[]};
-export type SkyContext={scores:Record<Category,number>;domains:Record<Category,SkyDomain>};
+export type SkyDomain={category:Category;score:number;scope:SkyScope;primary:SkyContact;contacts:number;contributors:readonly SkyContact[];skyAdjustment:number};
+export type SkyContext={scores:Record<Category,number>;domains:Record<Category,SkyDomain>;climate:SkyClimate};
 const anchors:Record<Category,readonly string[]>={
  overview:['Sun','Ascendant'],
  career:['MC','Saturn','Sun'],
@@ -33,9 +34,10 @@ function tonalValue(planet:string,angle:number){
  return positive.has(planet)?0.9:difficult.has(planet)?-0.8:0.25;
 }
 /** Shared calculation for a contextual value and its decision review. */
-export function contextScore(contacts:readonly SkyContact[]):number{
+export function contextScore(contacts:readonly SkyContact[],skyAdjustment=0):number{
+ if(!Number.isFinite(skyAdjustment)||Math.abs(skyAdjustment)>16)throw Error('Invalid current-sky adjustment');
  if(contacts.some(c=>!Number.isFinite(c.strength)||c.strength<0||c.strength>1||!Number.isFinite(c.tone)||c.tone< -1||c.tone>1))throw Error('Invalid contextual contribution');
- return Math.round(clamp(50+contacts.reduce((value,c)=>value+c.tone*c.strength*20,0)));
+ return Math.round(clamp(50+contacts.reduce((value,c)=>value+c.tone*c.strength*20,0)+skyAdjustment));
 }
 function targetPoints(natal:Chart,known:boolean):Point[]{
  const list=natal.points.filter(p=>known||p.id!=='Moon').slice();
@@ -51,6 +53,7 @@ export function skyContext(natal:Chart,current:Chart,known:boolean):SkyContext{
  const targets=targetPoints(natal,known);
  const transits=current.points.filter(p=>major.has(p.id));
  if(transits.length<8)throw Error('Insufficient principal ephemeris positions for contextual gauges');
+ const climate=skyClimate(current);
  const domains={} as Record<Category,SkyDomain>;
  const scores={} as Record<Category,number>;
  for(const category of categories){
@@ -73,12 +76,13 @@ export function skyContext(natal:Chart,current:Chart,known:boolean):SkyContext{
    contributors.push(candidate);seen.add(candidate.transit);
    if(contributors.length===2)break;
   }
-  const score=contextScore(contributors);
+  const skyAdjustment=climate.adjustments[category];
+  const score=contextScore(contributors,skyAdjustment);
   const scope:SkyScope=primary.orb<=2.2?'tight':primary.orb<=8?'wide':'background';
-  domains[category]={category,score,scope,primary,contacts:contributors.length,contributors};
+  domains[category]={category,score,scope,primary,contacts:contributors.length,contributors,skyAdjustment};
   scores[category]=score;
  }
- return {scores,domains};
+ return {scores,domains,climate};
 }
 const arNames:Record<string,string>={Sun:'الشمس',Moon:'القمر',Mercury:'عطارد',Venus:'الزهرة',Mars:'المريخ',Jupiter:'المشتري',Saturn:'زحل',Uranus:'أورانوس',Neptune:'نبتون',Pluto:'بلوتو',Ascendant:'الطالع',MC:'وسط السماء'};
 const arAngles:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
