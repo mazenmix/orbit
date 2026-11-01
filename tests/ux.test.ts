@@ -52,6 +52,8 @@ test('Now is under Today and displays every distinct live meter in five-column r
  const now=main.slice(main.indexOf('function nowPage(){'),main.indexOf('function goModePage(){'));
  for(const required of ['derivedMetrics(sky.scores)','goModes(indicators)','goLifeGauges(sky.scores)','categories.map(category','moonWindow()','mx-now-list','mx-now-head','data-now-gauge','role="progressbar"'])assert.ok(now.includes(required),'Now is missing '+required);
  assert.ok(now.includes("label:cat(category),value:sky.scores[category]"),'Now domain gauges must reuse continuous sky-context scores');
+ assert.ok(now.includes("label:t('القمر','Moon')+' · '+signName(moon.sign*30)"),'Now Moon gauge must show the current lunar zodiac sign');
+ assert.ok(readFileSync('src/now.css','utf8').includes('--metric-accent:#ffa43b'),'Now Moon gauge must use orange accent');
  assert.ok(!now.includes("t('اليوم','Today')+' · '+cat(category)"),'Do not prefix Now gauge names with Today');
  assert.ok(!now.includes('data!.signals.some('),'A lack of a close personal contact must not blank Now gauges');
  assert.ok(!now.includes('<p>')&&!now.includes('<details'),'Now should contain no explanations');
