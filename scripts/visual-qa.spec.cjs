@@ -785,3 +785,19 @@ for(const [device,width,height] of [['desktop',1440,900],['tablet',820,1180],['i
   await context.close();
  });
 }
+
+test('GO and Travel screen narratives do not recite the same long sentence on multiple gauges',async({page})=>{
+ const uniqueSentences=async(selector)=>{
+  const paragraphs=await page.locator(selector).allTextContents();
+  const sentences=paragraphs.flatMap(p=>p.split(/[.؟؛]/u).map(s=>s.replace(/\s+/g,' ').trim()).filter(s=>s.length>=55));
+  return {total:sentences.length,distinct:new Set(sentences).size,duplicates:sentences.filter((s,i)=>sentences.indexOf(s)!==i)};
+ };
+ await page.goto('/#go',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.go-decision')).toHaveCount(4,{timeout:75000});
+ const go=await uniqueSentences('.go-decision');
+ expect(go.duplicates,'GO must narrate the same sky scenario only once').toEqual([]);
+ await page.goto('/#travelmode',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.mx-travel-gauge-summary')).toHaveCount(12,{timeout:75000});
+ const travel=await uniqueSentences('.mx-travel-gauge-summary');
+ expect(travel.duplicates,'Travel activity-specific summaries must not duplicate each other').toEqual([]);
+});
