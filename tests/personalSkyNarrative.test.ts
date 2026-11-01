@@ -136,3 +136,12 @@ test('a personal full Moon reads the verified Sun–Moon axis rather than one na
  const unknownReading=personalSkyStory({event,at:NOW,natal:natal(0,false),skyAtEvent:exactlyOpposite,knownBirthTime:false,lang:'ar'});
  assert.doesNotMatch(unknownReading.next,/البدر يربط رمزياً بين/);
 });
+
+test('today hero Moon–Saturn is one coherent reading rather than unrelated dating advice',()=>{
+ const event:WholeSkyOccurrence={kind:'aspect',first:'Moon',second:'Saturn',angle:120,at:NOW};
+ const story=make(event);
+ assert.match(story.now,/هدوء المشاعر|مسؤولية مأجلة/);
+ assert.match(story.action,/مهمة واحدة|مسؤول عنها|تسليمها/);
+ assert.doesNotMatch(story.now,/التعارف والرومانسية|بخارطتك، هذا يخص/);
+ assert.doesNotMatch(story.action,/اقترح لقاء|انتظر تجاوب/);
+});
