@@ -110,6 +110,12 @@ function describe(a:string,b:string,angle:number):[string,string]{
   'A conjunction intensifies '+firstEn+' and '+secondEn+'; the combined themes may feel more prominent. '+stepEn
  ];
 }
+/** Current and progressed Moon use the same sign vocabulary but different source dates. */
+export function moonSignExplanation(longitude:number,english=false):string{
+ if(!Number.isFinite(longitude))return english?'Moon position unavailable.':'موقع القمر مو محسوب لهذا الوقت.';
+ const index=Math.floor((((longitude%360)+360)%360)/30);
+ return moonSignMeanings[index][english?'en':'ar'];
+}
 /** Birth-chart angles and six minor bodies are explanatory topics, NOT extra sky-climate weights. */
 const natalTopics:Record<string,{topic:[string,string];step:[string,string]}>={
  Ascendant:{topic:['حضورك والانطباع الأول','first impressions and presence'],step:['خلّي أسلوبك واضح ومريح بدون مبالغة.','Keep your presentation clear and natural.']},
