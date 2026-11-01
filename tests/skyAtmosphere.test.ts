@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {skyClimate,moonSignExplanation} from '../src/skyAtmosphere.ts';
+import {skyClimate,moonSignExplanation,skyAspectExplanation} from '../src/skyAtmosphere.ts';
 import {skyContext,contextScore} from '../src/skyContext.ts';
 import {derivedMetrics} from '../src/metrics.ts';
 import type {Chart} from '../src/engine.ts';
@@ -96,4 +96,28 @@ test('progressed Moon sign narratives differ across twelve signs',()=>{
  assert.equal(new Set(narratives).size,12);
  for(const s of narratives)assert.ok(s.length>35);
  assert.match(moonSignExplanation(168),/التدقيق|ملاحظة/);
+});
+
+test('forty-five distinct planetary pairs describe real scenarios, without generic aspect filler',()=>{
+ const bodies=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+ const descriptions:string[]=[];
+ for(let i=0;i<bodies.length;i++)for(let j=i+1;j<bodies.length;j++){
+  const risk=skyAspectExplanation(bodies[i],bodies[j],90);
+  const aid=skyAspectExplanation(bodies[i],bodies[j],120);
+  assert.ok(risk.length>75&&aid.length>75,bodies[i]+' '+bodies[j]);
+  assert.doesNotMatch(risk+aid,/انسجام بين .* و.*؛ سهولة أكبر|تأكد شنو حسّيت وشنو صار فعلاً|فرصة للتعاون وخطوة صغيرة عملية/);
+  assert.notEqual(risk,aid);
+  descriptions.push(risk+'|'+aid);
+ }
+ assert.equal(descriptions.length,45);
+ assert.equal(new Set(descriptions).size,45);
+ const moonSaturn=skyAspectExplanation('Moon','Saturn',120);
+ const moonMercury=skyAspectExplanation('Moon','Mercury',90);
+ const moonVenus=skyAspectExplanation('Moon','Venus',60);
+ const sunMoon=skyAspectExplanation('Sun','Moon',90);
+ assert.match(moonSaturn,/مسؤولية مأجلة/);
+ assert.match(moonMercury,/كلمة عابرة/);
+ assert.match(moonVenus,/رسالة اهتمام/);
+ assert.match(sunMoon,/قرار تريد تحسمه/);
+ assert.equal(new Set([moonSaturn,moonMercury,moonVenus,sunMoon]).size,4);
 });
