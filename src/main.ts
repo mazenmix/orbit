@@ -299,7 +299,7 @@ function skyWeatherPanel(compact=false){
   (compact?'<details class="mx-weather-disclosure"><summary>'+t('ليش تتغير الكيجات؟ · اتصالات السماء','Why the gauges change · Sky connections')+'</summary>':
    '<h2>'+t('شنو دا يصير بالسماء؟','What is happening in the sky?')+'</h2>')+
   '<div class="mx-sky-weather-list">'+rows+'</div>'+
-  '<small>'+t('الكيجات تمزج اتصالات السماء الحالية ويّه خارطتك الشخصية. الدرجات قراءات فلكية رمزية، مو قياسات لمشاعر الناس.','Gauges blend live sky contacts with natal transits. Scores are symbolic, not measurements of other people’s emotions.')+'</small>'+
+  ''+
   (compact?'</details>':'')+'</section>';
 }
 function newRelationshipGauges(){
@@ -391,8 +391,10 @@ function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,co
  return events.map(e=>{
   const story=personalEventStory(e);
   const time=dateText(e.at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+  // Moon windows are hours long; do not repeat an unrelated canned "next stage" paragraph.
+  const lunarAspect=e.kind==='aspect'&&(e.first==='Moon'||e.second==='Moon');
   const more='<p class="mx-sky-feed-now"><b>'+t('هسه:','Now:')+'</b> '+esc(story.now)+'</p>'+
-   '<p class="mx-sky-feed-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(story.next)+'</p>'+
+   (!lunarAspect&&story.next?'<p class="mx-sky-feed-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(story.next)+'</p>':'')+
    '<p class="mx-sky-feed-action"><strong>'+t('شنو تسوي؟','What to do:')+'</strong> '+esc(story.action)+'</p>';
   return '<article class="mx-sky-feed-item'+(compact?' mx-sky-feed-compact':'')+'" data-sky-event="'+esc(e.kind+':'+e.first+':'+(e.second??''))+'">'+
    '<div><strong>'+esc(story.title)+'</strong><time datetime="'+e.at.toISOString()+'">'+esc(time)+'</time></div>'+
@@ -509,9 +511,9 @@ function focusedToday(){
  '<section class="panel mx-focus-hero" data-sky-reading-id="'+esc(brief?.identity??'unavailable')+'">'+
  '<div class="mx-focus-heading"><span class="mx-focus-eyebrow">✦ '+t('بث حركة السماء هسه','WHOLE-SKY LIVE')+'</span><span class="tag cyan">'+(liveTimePinned?t('وقت مختار','SELECTED'):'LIVE')+'</span></div>'+
  '<h2>'+esc(brief?.title??t('رصد السماء غير متاح','Sky report unavailable'))+'</h2>'+
- '<p class="mx-sky-movement">'+esc(brief?.movement??t('بانتظار الحساب','Awaiting verification'))+'</p>'+
+ ''+
  '<p class="mx-sky-meaning"><b>'+t('هسه: ','Now: ')+'</b>'+esc(message)+'</p>'+
- (personalized?'<p class="mx-sky-reading-next"><b>'+t('المرحلة الجاية: ','Next: ')+'</b>'+esc(personalized.next)+'</p>':'')+
+ (personalized&&!personalized.title.includes(t('القمر','Moon'))&&personalized.next?'<p class="mx-sky-reading-next"><b>'+t('المرحلة الجاية: ','Next: ')+'</b>'+esc(personalized.next)+'</p>':'')+
  (brief?'<p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(personalized?.action??brief.action)+'</p>':'')+
  activity+'<small class="mx-sky-live-checked" aria-label="'+t('وقت آخر حساب','Last calculation')+'">'+esc(clock)+'</small>'+
  '</section>'+
@@ -1196,8 +1198,20 @@ function moonAspectNarrative(event:LunarWindow['events'][number]){
 function moonMomentNarrative(window:LunarWindow){
  const future=window.events.find(e=>+e.time>+selected);
  if(window.isVoid)return t('خلّي هالفترة للأعمال البسيطة ومراجعة التفاصيل إذا يفيدك. ما معناها أن اليوم سيّئ، ولا تحدد مصير أي قرار.','Use this interval for routine tasks and reviewing details; it does not make the day bad or determine your decisions.');
- return future?moonAspectNarrative(future):
-  t('ماكو موضوع إضافي قوي بهالوقت حتى ننسب إله حدث من خيالنا. اعتمد على الوقائع قبل أي قرار.','No additional strong theme stands out. Use actual circumstances when deciding.');
+ if(future){
+  const suggestions:Record<string,[string,string]>={
+   Sun:['التفاهم بين قرارك ومزاجك يحتاج هدوء قبل الحسم.','Keep an important decision separate from temporary mood.'],
+   Mercury:['خلي رسالتك واضحة قبل ما تتفاعل ويا كلام مبهم.','Clarify an ambiguous message before reacting.'],
+   Venus:['الاهتمام اللطيف يكفي؛ لا تقرأ التجاوب على كيفك.','Show care without assuming how someone feels.'],
+   Mars:['فرغ التوتر بحركة أو مهمة بدل المواجهة السريعة.','Use a task to release energy rather than rushing into conflict.'],
+   Jupiter:['لا تكبّر الخطة قبل ما تعرف شكد تحتاج وقت وجهد.','Check the time and energy before expanding the plan.'],
+   Saturn:['رتّب مسؤولية معلقة وحدد موعد واقعي لإنجازها.','Organize one obligation and give it a realistic deadline.']
+  };
+  const advice=suggestions[future.target]??['حدد خطوة واحدة تگدر تراجع نتيجتها.','Choose one step you can evaluate.'];
+  return t('أقرب اتصال قمري يخص '+planet(future.target)+'. '+advice[0],
+    'The next Moon aspect concerns '+planet(future.target)+'. '+advice[1]);
+ }
+ return t('ماكو اتصال قمري رئيسي قادم ضمن هذا البرج.','No further exact major Moon aspect occurs in this sign.');
 }
 
 function moonSignLiveHtml(sign:number,r:Report):string{
@@ -1264,7 +1278,7 @@ function lunarPage(){
   const w=moonWindow(),last=w.lastAspect,when=w.isVoid?w.ingressAt:w.vocStartsAt;
   const date=(at:Date)=>dateText(at,{weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
   const tile=(label:string,at:Date,cls:string,symbol:'entered'|'next'|'voc-start'|'voc-end')=>'<div class="premium-time-tile '+cls+'"><div class="time-tile-top"><span class="mx-lunar-tile-icon">'+lunarUiIcon(symbol)+'</span><small>'+label+'</small></div><time datetime="'+at.toISOString()+'">'+date(at)+'</time><span class="time-tile-zone">'+esc(timezoneCityLabel(active.zone))+'</span></div>';
-  const lastLabel=last?moonAspectNarrative(last):t('ماكو موضوع إضافي مهيمن بهالفترة.','No additional dominant theme in this interval.');
+  const lastLabel=last?planet('Moon')+' '+aspect(last.angle)+' '+planet(last.target):t('ماكو اتصال قمري دقيق إضافي بهالفترة.','No additional exact Moon aspect in this interval.');
   return '<div class="lunar-premium-grid"><section class="panel lunar-premium-card"><div class="lunar-card-heading"><span class="lunar-emblem" aria-hidden="true">'+lunarUiIcon('moon')+'</span><div><small>'+t('موقع القمر الحالي · بث حي','CURRENT MOON SIGN · LIVE')+'</small><h2>'+signName(w.sign*30)+'</h2></div></div>'+lunarGaugeMarkup('moon',w.enteredAt,w.ingressAt,w.enteredAt,w.vocStartsAt)+'<div class="mx-moon-sign-reading" id="mx-moon-sign-reading" data-moon-sign="'+w.sign+'">'+moonSignLiveHtml(w.sign,data!)+'</div><div class="premium-time-pair">'+tile(t('دخل البرج الحالي','Entered current sign'),w.enteredAt,'lunar-muted','entered')+tile(t('يدخل البرج القادم','Next sign ingress'),w.ingressAt,'lunar-teal','next')+'</div></section>'+
    '<section class="panel lunar-premium-card mx-voc-status '+(w.isVoid?'is-voc':'is-clear')+'" data-voc-start="'+(+w.vocStartsAt)+'" data-voc-end="'+(+w.ingressAt)+'"><div class="lunar-card-heading"><span class="lunar-emblem violet" aria-hidden="true">'+lunarUiIcon('void')+'</span><div><small>VOID OF COURSE</small><h2>'+ (w.isVoid?t('القمر خالي المسار الآن','Moon is void-of-course'):t('القمر ماشي عدل','Moon is on course'))+'</h2></div></div>'+lunarGaugeMarkup('voc',w.vocStartsAt,w.ingressAt,w.enteredAt,w.vocStartsAt)+'<p>'+t('إذا عندك قرار مهم، راجع ظروفه ومعلوماته الفعلية. التوقيت يساعدك ترتب، مو يقرر عنك.','For important decisions, check the actual facts first. Timing helps with planning, not predicting results.')+'</p><div class="premium-time-pair">'+tile(t('بداية خلو المسار','VOC begins'),w.vocStartsAt,'lunar-violet','voc-start')+tile(t('نهاية خلو المسار','VOC ends'),w.ingressAt,'lunar-gold','voc-end')+'</div></section></div>'+lunarMansionMarkup()+
    '<section class="panel lunar-advice-card"><div class="lunar-advice-head"><div><span class="eyebrow">MX EYE · EXPLAINED TIMING</span><h2>'+t('شنو معناه بهاللحظة؟','How to use this timing')+'</h2></div><span class="lunar-advice-badge">'+(w.isVoid?t('خلو المسار فعّال','Void-of-course active'):t('القمر يتحرك باتجاه اتصالاته','Moon approaching aspects'))+'</span></div><p class="mx-lunar-explained">'+moonMomentNarrative(w)+'</p><div class="lunar-last-aspect"><small>'+t('آخر اتصال دقيق قبل الانتقال','Last exact major aspect')+'</small><strong>'+lastLabel+'</strong>'+(last?'<time datetime="'+last.time.toISOString()+'">'+date(last.time)+'</time>':'')+'</div><div class="button-row"><button id="export-lunar-calendar" class="primary">'+(w.isVoid?t('أضف موعد انتقال القمر للتقويم','Add next ingress to calendar'):t('أضف بداية خلو المسار للتقويم','Add VOC start to calendar'))+'</button><button class="secondary" data-go="time">'+t('افتح آلة الزمن','Open Time Machine')+'</button></div><small>'+t('تذكير التقويم: ','Calendar reminder: ')+date(when)+'</small></section>'+
