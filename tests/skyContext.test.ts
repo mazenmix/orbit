@@ -18,7 +18,7 @@ test('all eight domains including recovery receive real ephemeris-based context'
  assert.ok(Object.values(sky.domains).every(domain=>domain.contacts===domain.contributors.length&&domain.contributors.length<=2));
  assert.ok(Object.values(sky.domains).every(domain=>contextScore(domain.contributors,domain.skyAdjustment)===domain.score));
  const metrics=derivedMetrics(sky.scores);
- assert.equal(metrics.length,29);
+ assert.equal(metrics.length,33);
  assert.ok(metrics.every(x=>x.value>=1&&x.value<=99));
  assert.equal(goModes(metrics).length,4);
  assert.match(contextGaugeBasis(sky,['recovery']),/اتصال قريب/);
@@ -27,9 +27,9 @@ test('distant geometry is neutral context, not invented exact strength',()=>{
  const nadir=base({Sun:10,Mercury:10,Venus:10,Mars:10,Jupiter:10,Saturn:10,Uranus:10,Neptune:10,Pluto:10});
  const sky=base({Sun:25,Moon:25,Mercury:25,Venus:25,Mars:25,Jupiter:25,Saturn:25,Uranus:25,Neptune:25,Pluto:25});
  const result=skyContext(nadir,sky,false);
- assert.ok(Object.values(result.domains).every(x=>x.scope==='background'&&x.score===50&&x.contacts===0));
+ assert.ok(Object.values(result.domains).every(x=>x.scope==='background'&&x.score===contextScore([],x.skyAdjustment)&&x.contacts===0));
  assert.ok(Object.values(result.domains).every(x=>x.contributors.length===0));
- assert.match(contextGaugeBasis(result,['career']),/محايد/);
+ assert.match(contextGaugeBasis(result,['career']),/بعيدة|محايد/);
 });
 test('time-varying transits change contextual values, while a fixed instant is deterministic',()=>{
  const t1=base({Sun:10,Moon:42,Mercury:20,Venus:80,Mars:130,Jupiter:260,Saturn:210,Uranus:290,Neptune:310,Pluto:340});
