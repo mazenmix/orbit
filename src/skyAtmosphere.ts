@@ -211,6 +211,20 @@ export function skyAspectExplanation(first:string,second:string,angle:number,eng
   'Cooperation between '+one+' and '+two+' may feel easier. '+action:
   'انسجام بين '+one+' و'+two+'؛ التنسيق بينهم أسهل رمزياً. '+action;
 }
+/** Split an authored pair scene into meaning and a matching real-world action.
+ * Avoid mixing a Moon–Saturn story with an unrelated natal-house action. */
+export function skyAspectScene(first:string,second:string,angle:number,english=false):{meaning:string;action:string}{
+ const complete=skyAspectExplanation(first,second,angle,english);
+ const pair=pairScenes[[first,second].sort().join('|')];
+ if(!pair)return {meaning:complete,action:''};
+ const exact=specialized(first,second,angle);
+ if(exact){
+  const separator=complete.lastIndexOf('. ');
+  if(separator>0)return {meaning:complete.slice(0,separator+1),action:complete.slice(separator+2)};
+ }
+ const action=pair[english?5:2];
+ return complete.endsWith(' '+action)?{meaning:complete.slice(0,-action.length).trim(),action}:{meaning:complete,action};
+}
 function aspectTone(a:string,b:string,angle:number){
  if(negativeNew.includes(angle))return -1;
  if(positiveNew.includes(angle))return 1;
