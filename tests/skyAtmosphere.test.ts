@@ -121,3 +121,14 @@ test('forty-five distinct planetary pairs describe real scenarios, without gener
  assert.match(sunMoon,/قرار تريد تحسمه/);
  assert.equal(new Set([moonSaturn,moonMercury,moonVenus,sunMoon]).size,4);
 });
+
+test('retrograde descriptions change with zodiac sign and explain Scorpio Mercury and Libra Venus concretely',()=>{
+ const positions={Sun:20,Moon:151,Mercury:224,Venus:198,Mars:101,Jupiter:170,Saturn:201,Uranus:289,Neptune:359,Pluto:320};
+ const retro=skyClimate(chart(positions,{Mercury:-0.2,Venus:-0.1}));
+ const mercury=retro.notes.find(n=>n.id==='retro:Mercury')!;
+ const venus=retro.notes.find(n=>n.id==='retro:Venus')!;
+ assert.match(mercury.arMeaning,/رسالة بيها تلميحات/);
+ assert.match(venus.arMeaning,/اختبر الاهتمام بالسكوت/);
+ const moved=skyClimate(chart({...positions,Mercury:10},{Mercury:-0.2,Venus:-0.1}));
+ assert.notEqual(mercury.arMeaning,moved.notes.find(n=>n.id==='retro:Mercury')!.arMeaning);
+});
