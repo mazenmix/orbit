@@ -91,12 +91,13 @@ export function asteroidReading(item:NamedAsteroid,contact:NamedContact|undefine
  };
  const aspectAr:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
  const aspectEn:Record<number,string>={0:'conjunction',60:'sextile',90:'square',120:'trine',180:'opposition'};
+ const targetArea=contact?(natalArea[contact.natal.id]??['أولوياتك','your priorities']):null;
  const angleMeaning=contact?(
    contact.angle===90||contact.angle===180?
-    (english?'There may be a symbolic tension to examine, not evidence that trouble will occur.':'هذا يرمز لشدّ يحتاج توازن، مو دليل أن مشكلة راح تصير.'):
+    (english?'Tension between '+theme+' and '+targetArea![1]+'; resolve the competing priority before acting.':'شدّ بين '+theme+' وبين '+targetArea![0]+'؛ وضّح الأولوية والحدود قبل القرار.'):
    contact.angle===0?
-    (english?'The themes converge; their outcome is not predetermined.':'الدلالتين يجتمعن، بس النتيجة ما تنحسب من الخارطة.'):
-    (english?'This aspect suggests room for cooperation when backed by real actions.':'الزاوية تطرح مجال للتنسيق إذا التصرفات الواقعية تدعمه.')
+    (english?'Strong focus combines '+theme+' with '+targetArea![1]+'; avoid making one need override the other.':'تركيز يجمع '+theme+' ويا '+targetArea![0]+'؛ لا تخلي حاجة تطغى على الثانية.'):
+    (english?'A supportive link between '+theme+' and '+targetArea![1]+'; use one concrete, reversible step.':'تعاون أسهل بين '+theme+' ويا '+targetArea![0]+'؛ جرّب خطوة محددة قابلة للتعديل.')
   ):'';
  const emphasis=!contact?(english?'No tight natal contact at this selected moment.':'ماكو اتصال ولادي قريب بهاللحظة.'):english?
   (item.name+' '+aspectEn[contact.angle]+' natal '+contact.natal.id+' (orb '+contact.orb.toFixed(2)+'°). The symbolic theme meets '+(natalArea[contact.natal.id]?.[1]??'a natal priority')+'. '+angleMeaning):

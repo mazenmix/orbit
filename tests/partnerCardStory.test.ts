@@ -16,6 +16,7 @@ test('synastry pair is only named when present in computed evidence',()=>{
  const one=partnerCardStory(items[0],d,today,[]);
  const two=partnerCardStory(items[0],d,today,[e]);
  assert.equal(one.factorAr,'');
- assert.match(two.factorAr,/الزهرة/);
- assert.match(two.factorEn,/trine/);
+ assert.match(two.ar,/الزهرة/);
+ assert.match(two.en,/trine/);
+ assert.equal(two.factorAr,''); // No redundant technical caption below the actual explanation.
 });

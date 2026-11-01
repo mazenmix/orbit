@@ -155,7 +155,7 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
  const place=home?(language==='ar'?' أقرب مجال حتى تراجع هذا الموضوع هو '+home+'.':' The area to reflect on is '+home+'.'):'';
  const balance=contrast?(language==='ar'?' وأكو جانب معاكس بنفس القراءة؛ لذلك لا تعتبر الصورة كلها سهلة أو كلها صعبة.':' A competing theme is present, so avoid treating the whole situation as either easy or difficult.'):'';
  const specific=skyAspectExplanation(e.transit.id,e.natal.id,e.angle,language==='en');
- const good=(language==='ar'?'على صعيد '+area+'، '+first+' '+angle+' '+second+': ':'In '+area+', '+first+' '+angle+' '+second+': ')+specific+place+balance;
+ const good=(language==='ar'?'على صعيد '+area+'، ':'In '+area+', ')+specific+place+balance;
  const caution=language==='ar'?
   'مثال عملي: '+everydayCases[s.category][0] :
   'A practical example: '+everydayCases[s.category][1];

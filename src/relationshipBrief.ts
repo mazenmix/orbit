@@ -1,3 +1,4 @@
+import {skyAspectExplanation} from './skyAtmosphere.ts';
 import type {SynastryEvidence} from './math.ts';
 import {synastryPlainReading,type TwoLanguage} from './relationshipPlain.ts';
 
@@ -91,6 +92,14 @@ export function relationshipBrief(evidence:readonly SynastryEvidence[]):Relation
  const selected=new Set([attractionContact,sexualContact].filter(Boolean));
  const harmonyContact=supportive.find(e=>!selected.has(e))??supportive[0]??null;
  const challengeContact=challenging.find(e=>!selected.has(e))??challenging[0]??null;
+ const explain=(e:SynastryEvidence|null):TwoLanguage=>e?{
+  ar:skyAspectExplanation(e.first.id,e.second.id,e.angle),
+  en:skyAspectExplanation(e.first.id,e.second.id,e.angle,true)
+ }:{ar:'',en:''};
+ const amplify=(base:TwoLanguage,e:SynastryEvidence|null):TwoLanguage=>{
+  const specific=explain(e);
+  return {ar:base.ar+(specific.ar?' '+specific.ar:''),en:base.en+(specific.en?' '+specific.en:'')};
+ };
  const harmony=synastryPlainReading(harmonyContact??undefined,'harmony');
  const challenge=synastryPlainReading(challengeContact??undefined,'challenge');
  const attraction=attractionContact?meaningFor(attractionContact,'attraction'):initial;
@@ -100,6 +109,6 @@ export function relationshipBrief(evidence:readonly SynastryEvidence[]):Relation
   return {ar:trim(full.ar),en:trim(full.en)};
  };
  return {attraction,sexual,attractionContact,sexualContact,
-  harmony:focusedMeaning(harmony.meaning),harmonyAction:harmony.advice,harmonyTitle:harmony.title,harmonyContact,
-  challenge:focusedMeaning(challenge.meaning),challengeAction:challenge.advice,challengeTitle:challenge.title,challengeContact};
+  harmony:focusedMeaning(amplify(harmony.meaning,harmonyContact)),harmonyAction:harmony.advice,harmonyTitle:harmony.title,harmonyContact,
+  challenge:focusedMeaning(amplify(challenge.meaning,challengeContact)),challengeAction:challenge.advice,challengeTitle:challenge.title,challengeContact};
 }

@@ -1,3 +1,4 @@
+import {skyAspectExplanation} from './skyAtmosphere.ts';
 import type {Chart} from './engine.ts';
 import {distance,houseNumber} from './math.ts';
 
@@ -158,6 +159,7 @@ export function natalPortrait(chart:Chart,knownTime:boolean,language:Language):s
  const saturn=relevant(chart,'Saturn'),jupiter=relevant(chart,'Jupiter');
  if(!sun||!mercury||!venus||!mars)return [language==='ar'?'بيانات الميلاد ناقصة؛ ما أگدر أطلع بصمة شخصية موثوقة من غير حساب مكتمل.':'Birth information is incomplete, so a personal reading cannot be supported.'];
  const choice=link(chart,'Sun',['Saturn','Mercury','Mars','Jupiter'],knownTime);
+ const clear=(first:string,c:Link|null)=>c?' '+skyAspectExplanation(first,c.id,c.angle,language==='en'):'';
  const feeling=moon?link(chart,'Moon',['Venus','Mercury','Saturn','Sun'],knownTime):null;
  const romance=link(chart,'Venus',['Mars','Saturn','Moon','Sun'],knownTime);
  const work=link(chart,'Mercury',['Saturn','Jupiter','Mars','Sun'],knownTime);
@@ -168,20 +170,20 @@ export function natalPortrait(chart:Chart,knownTime:boolean,language:Language):s
  };
  if(language==='ar'){
   return [
-   'بالتأويل الرمزي للشمس في '+signs[signIndex(sun)].ar+'، ممكن '+suit(decision,sun,language)+'. وعطارد في '+signs[signIndex(mercury)].ar+' يرمز إلى أسلوب تفكير قد يشبه '+suit(thinking,mercury,language)+'.'+linkText(choice,language)+life(sun,'decision')+(choice?.angle===90||choice?.angle===180?' إذا صار شدّ بقرار، اختار شنو يهمك أولاً قبل ما تضغط على نفسك.':' إذا عندك قرار مهم، حدد خطوة واقعية تگدر تراجع نتيجتها.'),
+   'بالتأويل الرمزي للشمس في '+signs[signIndex(sun)].ar+'، ممكن '+suit(decision,sun,language)+'. وعطارد في '+signs[signIndex(mercury)].ar+' يرمز إلى أسلوب تفكير قد يشبه '+suit(thinking,mercury,language)+'.'+linkText(choice,language)+clear('Sun',choice)+life(sun,'decision')+(choice?.angle===90||choice?.angle===180?' إذا صار شدّ بقرار، اختار شنو يهمك أولاً قبل ما تضغط على نفسك.':' إذا عندك قرار مهم، حدد خطوة واقعية تگدر تراجع نتيجتها.'),
    moon?
-    'القمر في '+signs[signIndex(moon)].ar+' يرمز، بالتفسير التقليدي، إلى احتياج قد يوصف بأنك '+suit(emotion,moon,language)+'. والزهرة في '+signs[signIndex(venus)].ar+' تضيف معنى '+suit(intimacy,venus,language)+'.'+linkText(feeling,language)+life(moon,'emotion')+(feeling?.angle===90||feeling?.angle===180?' إذا أحد ضايقك، وضح شنو تحتاج قبل ما تفسر نواياه.':' إذا صار موقف حساس، قارن انطباعك بتصرف الشخص الحقيقي.'):
+    'القمر في '+signs[signIndex(moon)].ar+' يرمز، بالتفسير التقليدي، إلى احتياج قد يوصف بأنك '+suit(emotion,moon,language)+'. والزهرة في '+signs[signIndex(venus)].ar+' تضيف معنى '+suit(intimacy,venus,language)+'.'+linkText(feeling,language)+clear('Moon',feeling)+life(moon,'emotion')+(feeling?.angle===90||feeling?.angle===180?' إذا أحد ضايقك، وضح شنو تحتاج قبل ما تفسر نواياه.':' إذا صار موقف حساس، قارن انطباعك بتصرف الشخص الحقيقي.'):
     'بمشاعرك، بدون ساعة ولادة مؤكدة ما أگدر أحدد حاجتك النفسية من موضع غير محسوب. لكن بأسلوب التقارب ممكن '+suit(intimacy,venus,language)+'. خذ الكلام كموضوع للتفكير، مو وصف مؤكد.',
-   'في القراءة الرمزية، الزهرة في '+signs[signIndex(venus)].ar+' تشير إلى أسلوب محتمل بالعلاقات: '+suit(intimacy,venus,language)+'. والمريخ في '+signs[signIndex(mars)].ar+' يرمز إلى مبادرة قد تكون '+suit(action,mars,language)+'.'+linkText(romance,language)+life(venus,'romance')+(romance?.angle===90||romance?.angle===180?' لذلك إذا اختلف الإيقاع بينك وبين شريك، ناقش الحدود بصراحة.':' إذا تريد تتقرب لشخص، خلّي تجاوبه الواقعي هو المعيار.'),
-   'في موضوع الشغل والتواصل، عطارد في '+signs[signIndex(mercury)].ar+' يطرح رمزياً أسلوب '+suit(thinking,mercury,language)+'. '+(saturn?'وأكثر شي يحتاج انتباهك هو '+suit(commitments,saturn,language)+'. ':jupiter?'والفرص تميل ترتبط عندك بـ'+suit(decision,jupiter,language)+'. ':'')+linkText(work,language)+life(mercury,'work')+(work?.angle===90||work?.angle===180?' تجنّب توعد تحت الضغط قبل توضح التفاصيل.':' اختار مهمة محددة وقيّم النتيجة قبل ما توسّع التزامك.')
+   'في القراءة الرمزية، الزهرة في '+signs[signIndex(venus)].ar+' تشير إلى أسلوب محتمل بالعلاقات: '+suit(intimacy,venus,language)+'. والمريخ في '+signs[signIndex(mars)].ar+' يرمز إلى مبادرة قد تكون '+suit(action,mars,language)+'.'+linkText(romance,language)+clear('Venus',romance)+life(venus,'romance')+(romance?.angle===90||romance?.angle===180?' لذلك إذا اختلف الإيقاع بينك وبين شريك، ناقش الحدود بصراحة.':' إذا تريد تتقرب لشخص، خلّي تجاوبه الواقعي هو المعيار.'),
+   'في موضوع الشغل والتواصل، عطارد في '+signs[signIndex(mercury)].ar+' يطرح رمزياً أسلوب '+suit(thinking,mercury,language)+'. '+(saturn?'وأكثر شي يحتاج انتباهك هو '+suit(commitments,saturn,language)+'. ':jupiter?'والفرص تميل ترتبط عندك بـ'+suit(decision,jupiter,language)+'. ':'')+linkText(work,language)+clear('Mercury',work)+life(mercury,'work')+(work?.angle===90||work?.angle===180?' تجنّب توعد تحت الضغط قبل توضح التفاصيل.':' اختار مهمة محددة وقيّم النتيجة قبل ما توسّع التزامك.')
   ];
  }
  return [
-  'In decisions you may '+suit(decision,sun,language)+'. In thinking, you may '+suit(thinking,mercury,language)+'.'+linkText(choice,language)+life(sun,'decision')+(choice?.angle===90||choice?.angle===180?' Under pressure, identify your priority before trying to settle everything.':' For an important decision, test one reversible step first.'),
+  'In decisions you may '+suit(decision,sun,language)+'. In thinking, you may '+suit(thinking,mercury,language)+'.'+linkText(choice,language)+clear('Sun',choice)+life(sun,'decision')+(choice?.angle===90||choice?.angle===180?' Under pressure, identify your priority before trying to settle everything.':' For an important decision, test one reversible step first.'),
   moon?
-   'Emotionally you may '+suit(emotion,moon,language)+'. In showing affection, you may '+suit(intimacy,venus,language)+'.'+linkText(feeling,language)+life(moon,'emotion')+(feeling?.angle===90||feeling?.angle===180?' If upset, state what you need before assuming intent.':' If a situation feels sensitive, compare impressions with actual behavior.'):
+   'Emotionally you may '+suit(emotion,moon,language)+'. In showing affection, you may '+suit(intimacy,venus,language)+'.'+linkText(feeling,language)+clear('Moon',feeling)+life(moon,'emotion')+(feeling?.angle===90||feeling?.angle===180?' If upset, state what you need before assuming intent.':' If a situation feels sensitive, compare impressions with actual behavior.'):
    'Your emotional needs cannot be inferred confidently without a known birth time. In expressing affection, you may '+suit(intimacy,venus,language)+'. This is for reflection, not a factual personality assessment.',
-  'In relationships, you may '+suit(intimacy,venus,language)+'. When initiating, you may '+suit(action,mars,language)+'.'+linkText(romance,language)+life(venus,'romance')+(romance?.angle===90||romance?.angle===180?' If your preferred pace differs, discuss boundaries directly.':' When interested in someone, their actual response matters most.'),
-  'At work and in conversations you may '+suit(thinking,mercury,language)+'. '+(saturn?'A useful caution is '+suit(commitments,saturn,language)+'. ':jupiter?'Opportunities may involve '+suit(decision,jupiter,language)+'. ':'')+linkText(work,language)+life(mercury,'work')+(work?.angle===90||work?.angle===180?' Avoid committing under pressure before clarifying the facts.':' Define one task and judge its outcome before expanding your obligations.')
+  'In relationships, you may '+suit(intimacy,venus,language)+'. When initiating, you may '+suit(action,mars,language)+'.'+linkText(romance,language)+clear('Venus',romance)+life(venus,'romance')+(romance?.angle===90||romance?.angle===180?' If your preferred pace differs, discuss boundaries directly.':' When interested in someone, their actual response matters most.'),
+  'At work and in conversations you may '+suit(thinking,mercury,language)+'. '+(saturn?'A useful caution is '+suit(commitments,saturn,language)+'. ':jupiter?'Opportunities may involve '+suit(decision,jupiter,language)+'. ':'')+linkText(work,language)+clear('Mercury',work)+life(mercury,'work')+(work?.angle===90||work?.angle===180?' Avoid committing under pressure before clarifying the facts.':' Define one task and judge its outcome before expanding your obligations.')
  ];
 }
