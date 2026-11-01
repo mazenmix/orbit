@@ -20,9 +20,14 @@
  .mobile-nav .nav-item>b{font-size:clamp(7px,1.95vw,9px)}
 }
 
-/* Retain four cards per row except on very narrow mobile screens. */
+/* Now stays four gauges per row on phones, with compact stacked labels. */
 @container (max-width:500px){
- #live-view-body .mx-now-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #live-view-body .mx-now-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+ #live-view-body .mx-now-row{padding:9px 5px!important;gap:6px}
+ #live-view-body .mx-now-row .mx-now-head{flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px}
+ #live-view-body .mx-now-row .mx-now-head>strong{font-size:10px;line-height:1.25;min-height:2.6em;max-width:100%}
+ #live-view-body .mx-now-row .mx-now-head>b{font-size:16px}
+ #live-view-body .mx-now-row .mx-now-head>b em{font-size:9px}
 }
 
 /* Now time-travel strip: fixed instant when browsing, live clock when reset. */
