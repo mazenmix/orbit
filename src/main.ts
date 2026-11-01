@@ -427,7 +427,7 @@ function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,co
   return '<article class="mx-sky-feed-item'+(compact?' mx-sky-feed-compact':'')+'" data-sky-event="'+esc(e.kind+':'+e.first+':'+(e.second??''))+'">'+
    '<div><strong>'+esc(story.title)+'</strong><time datetime="'+e.at.toISOString()+'">'+esc(time)+'</time></div>'+
    (e.kind==='aspect'?'':'<p class="mx-sky-feed-context">'+esc(story.focus)+'</p>')+
-   (compact?'<details class="mx-sky-event-details"><summary>'+t('اقرأ التفاصيل','Read details')+'</summary>'+more+'</details>':more)+'</article>';
+   (compact?(alreadyExplained?'':'<details class="mx-sky-event-details"><summary>'+t('اقرأ التفاصيل','Read details')+'</summary>'+more+'</details>'):more)+'</article>';
  }).join('');
 }
 // Station timelines are shared by all ten cards and retained between live
@@ -548,7 +548,7 @@ function focusedToday(){
  '</section>'+
  (brief?planetLiveStatus(brief):'<p role="status">'+esc(skyFailure)+'</p>')+
  newRelationshipGauges()+skyWeatherPanel(false,personalized?.title,explainedAspects)+
- '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('الأحداث الفلكية القادمة · كل الكواكب','Upcoming events · all planets')+'</h2>'+
+ '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('الأحداث الفلكية القادمة · كل الكواكب','Upcoming events · all planets')+'</h2><button type="button" class="secondary mx-events-lunar-link" data-go="lunar">'+t('اتصالات القمر بالتفصيل','Detailed Moon aspects')+'</button>'+
  '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-upcoming">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.'),true,personalized?.title,explainedAspects):'')+'</div></section>'+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('آخر ما تغير بالسماء','Recent sky changes')+'</h2>'+
  '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-recent">'+(brief?wholeSkyEventItems(brief.latest,t('ماكو حدث دقيق مسجل بالفترة الحالية.','No recent exact event.'),true,personalized?.title,explainedAspects):'')+'</div></section>'+
@@ -976,8 +976,8 @@ function nowPage(){
   travel:['Go · السفر','Go · Travel']
  };
  const rows:NowRow[]=[
-  ...categories.map(category=>({id:'today-'+category,label:cat(category),value:sky.scores[category]})),
-  ...indicators.map(m=>({id:'metric-'+m.id,label:t(m.ar,m.en),value:m.value})),
+  ...categories.map(category=>({id:'today-'+category,label:category==='overview'?t('الصورة العامة · الأساسي','Overview · base'):cat(category),value:sky.scores[category]})),
+  ...indicators.map(m=>({id:'metric-'+m.id,label:m.id==='overview'?t('الصورة العامة · المركّب','Overview · composite'):t(m.ar,m.en),value:m.value})),
   ...decisions.map(d=>({id:'go-'+d.domain,label:t(...decisionNames[d.domain]),value:d.value})),
   ...goLifeGauges(sky.scores).map(m=>({id:'life-'+m.id,label:t(m.name.ar,m.name.en),value:m.value}))
  ];
@@ -1337,10 +1337,14 @@ function evidencePage(){
  const mood=review.contradictory?t('إشارات متعاكسة: لا تتسرع بقرار واحد','Mixed signals: avoid a one-sided decision'):review.tone==='supportive'?t('أكو عناصر داعمة واضحة، لكن النتائج تعتمد على أفعالك','Supportive themes exist, but choices still matter'):review.tone==='challenging'?t('الوضع يدعو للتأني ومراجعة التفاصيل','The moment suggests slowing down and checking details'):t('ماكو عامل مهيمن واضح ضمن القراءة','No dominant theme stands out clearly');
  const resolutions=resolveDecisions(r.evidence,r.signals);
  const sections=distinctPriority(rankPrioritySignals({signals:r.signals,natal:r.natal,knownBirthTime:active.known,complete:r.complete}),6,copy);
+ const shownDecisionReasons=new Set<string>();
  const narrative=sections.map(({signal:s})=>{const c=copy(s),digest=resolutions.find(d=>d.category===s.category)!;
  const strongest=[...s.factors].sort((a,b)=>b.weight-a.weight)[0];
+ const decision=decisionExplanation(digest,lang==='ar');
+ const uniqueDecision=!shownDecisionReasons.has(decision);
+ shownDecisionReasons.add(decision);
  const why=strongest?t('السبب الفلكي: ','Astrological reason: ')+planet(strongest.transit.id)+' '+aspect(strongest.angle)+' '+planet(strongest.natal.id)+'؛ '+(strongest.applying?t('الاتصال يقترب من الاكتمال.','the contact is approaching.'):t('الاتصال يبتعد حالياً عن الدقة.','the contact is currently moving away from exactness.')):t('ماكو اتصال فلكي قوي لهذا المجال.','No strong contact for this area.');
- return '<article class="narrative-evidence"><div class="narrative-heading"><span>'+categoryLabels[s.category][2]+'</span><h3>'+cat(s.category)+'</h3><b class="reading-level '+gaugeLevel(s.score)+'">'+s.score+'</b></div><h3>'+esc(c.title)+'</h3><p>'+esc(c.good)+'</p><p class="advice-action"><strong>'+t('شنو تسوي: ','What to do: ')+'</strong>'+esc(c.action)+'</p><p class="advice-caution">'+esc(c.careful)+'</p><small>'+esc(why)+'</small>'+'<p class="decision-line '+(digest.mixed?'decision-mixed':'')+'">'+decisionExplanation(digest,lang==='ar')+'</p></article>'}).join('');
+ return '<article class="narrative-evidence"><div class="narrative-heading"><span>'+categoryLabels[s.category][2]+'</span><h3>'+cat(s.category)+'</h3><b class="reading-level '+gaugeLevel(s.score)+'">'+s.score+'</b></div><h3>'+esc(c.title)+'</h3><p>'+esc(c.good)+'</p><p class="advice-action"><strong>'+t('شنو تسوي: ','What to do: ')+'</strong>'+esc(c.action)+'</p><p class="advice-caution">'+esc(c.careful)+'</p><small>'+esc(why)+'</small>'+(uniqueDecision?'<p class="decision-line '+(digest.mixed?'decision-mixed':'')+'">'+esc(decision)+'</p>':'')+'</article>'}).join('');
  return '<section class="panel insight-lead"><h2>'+mood+'</h2><p>'+t('هاي قراءة رمزية تربط كل فكرة باتصال محسوب، وبعدها تنطيك نصيحة عملية. لا تعتبر الدرجة وعد بحدث أو معرفة لنوايا شخص آخر.','These symbolic readings tie each theme to a calculated contact and a practical action, not an event guarantee or access to another person’s mind.')+'</p><button class="secondary" id="export-report">'+t('نزّل تفاصيل الحساب إذا تحتاجها','Export technical calculation details')+'</button></section>'+
  '<div class="narrative-grid">'+(narrative||'<section class="panel">'+t('الاتصالات الحالية قليلة؛ اختار لحظة ثانية من آلة الزمن لقراءة مختلفة.','Few current contacts; select another moment in Time Machine.')+'</section>')+'</div>'+
  '<details class="panel evidence-technical"><summary>'+t('للمهتمين: الأرقام والزوايا الفلكية التفصيلية','For advanced users: detailed positions and aspect geometry')+'</summary><div class="eclipse-contacts">'+r.evidence.map(e=>'<span><b>'+esc(technical(e))+'</b></span>').join('')+'</div></details>';
