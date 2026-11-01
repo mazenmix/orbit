@@ -145,8 +145,11 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
  // User-facing headlines express the actual daily-life situation; orbital labels
  // remain only in the separately shown basis and Evidence calculation.
  const specific=skyAspectExplanation(e.transit.id,e.natal.id,e.angle,language==='en');
- const phrase=specific.split(/[:.؟؛!]/u).filter(Boolean).map(x=>x.trim()).filter(Boolean);
- const headline=phrase.length>1?phrase[phrase.length-1]:phrase[0]??specific.trim();
+ // Prefer the concrete *situation*, not either a generic preamble or the
+ // final imperative. The latter is already shown in the action field.
+ const firstSentence=specific.split(/[.؟؛!]/u)[0].trim();
+ const pieces=firstSentence.split(':').map(x=>x.trim()).filter(Boolean);
+ const headline=pieces[pieces.length-1]??firstSentence;
  const title=headline.length>115?headline.slice(0,114).replace(/\s+\S*$/u,'')+'…':headline;
  const takeaway=language==='ar'?
   tension?'القراءة تبرز شدّاً محتملاً بين '+roleA+' وبين '+roleB+'. إذا ظهر عندك تردد بقرار أو اختلاف بحوار، حدد الأولوية اللي تحتاج معالجة أولاً بدل ما تضغط على نفسك وتحسم بسرعة.':
