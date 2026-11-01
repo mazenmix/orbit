@@ -3,7 +3,7 @@ import type {DecisionDetail} from './decisionUltra.ts';
 import {contextScore,type SkyContext,type SkyContact} from './skyContext.ts';
 /** Transparent derived SYMBOLIC indicators. Not 23 independently measured outcomes. */
 type Inputs=Record<Category,number>;
-export type MetricName='overview'|'career'|'focus'|'productivity'|'money'|'communication'|'social'|'reputation'|'love'|'romance'|'attraction'|'chemistry'|'emotional'|'calm'|'energy'|'motivation'|'recovery'|'sleep'|'timing'|'travel'|'adventure'|'caution'|'luck'|'sexuality'|'desire'|'nightlife'|'dating'|'newpeople'|'risk';
+export type MetricName='overview'|'career'|'focus'|'productivity'|'money'|'communication'|'social'|'reputation'|'love'|'romance'|'attraction'|'chemistry'|'emotional'|'calm'|'energy'|'motivation'|'recovery'|'sleep'|'timing'|'travel'|'adventure'|'caution'|'luck'|'sexuality'|'desire'|'nightlife'|'dating'|'newpeople'|'risk'|'dialogue'|'relationStability'|'composure'|'personalBalance';
 export type MetricSpec={id:MetricName;ar:string;en:string;source:Category[];inverted?:boolean};
 export const metricSpecs:readonly MetricSpec[]=[
  {id:'overview',ar:'الصورة العامة',en:'Overview',source:['overview','timing','energy','emotions']},
@@ -34,7 +34,11 @@ export const metricSpecs:readonly MetricSpec[]=[
  {id:'nightlife',ar:'طلعة ليلية',en:'Night-out planning',source:['energy','timing','recovery']},
  {id:'dating',ar:'لقاء بنات · تعارف',en:'Dating initiative',source:['love','communication','timing']},
  {id:'newpeople',ar:'ناس جدد',en:'Meeting new people',source:['communication','love','energy']},
- {id:'risk',ar:'الحذر العام',en:'General caution readiness',source:['timing','emotions','recovery']}
+ {id:'risk',ar:'الحذر العام',en:'General caution readiness',source:['timing','emotions','recovery']},
+ {id:'dialogue',ar:'صفاء الحوار',en:'Dialogue clarity',source:['communication','emotions','recovery']},
+ {id:'relationStability',ar:'استقرار العلاقات',en:'Relationship stability',source:['love','communication','emotions']},
+ {id:'composure',ar:'سعة الصدر',en:'Composure',source:['emotions','recovery','energy']},
+ {id:'personalBalance',ar:'التوازن الشخصي',en:'Personal balance',source:['emotions','recovery','timing']}
 ];
 export type MetricResult=MetricSpec & {value:number;formula:string};
 export function derivedMetrics(input:Inputs):MetricResult[]{
@@ -117,7 +121,7 @@ export function reviewContextGoMode(mode:GoDecision,metrics:readonly MetricResul
   const contributors=domain.contributors;
   if(!Array.isArray(contributors)||contributors.length>2||domain.contacts!==contributors.length||
    new Set(contributors.map(c=>c.transit)).size!==contributors.length)throw Error('Invalid contextual Go Mode contributors');
-  if(domain.score!==context.scores[category]||domain.score!==contextScore(contributors))throw Error('Contextual score and contributors disagree');
+  if(domain.score!==context.scores[category]||domain.score!==contextScore(contributors,domain.skyAdjustment))throw Error('Contextual score and contributors disagree');
   const active=contributors.filter(c=>c.strength>0&&c.tone!==0);
   if(!active.length){missing.push(category);continue;}
   contacts.push(...active);
