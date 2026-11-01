@@ -58,7 +58,7 @@ test('Now is under Today and displays every distinct live meter in four-column r
  assert.ok(!now.includes('data!.signals.some('),'A lack of a close personal contact must not blank Now gauges');
  assert.ok(!now.includes('<p>')&&!now.includes('<details'),'Now should contain no explanations');
  const css=readFileSync('src/now.css','utf8');
- assert.ok(css.includes('grid-template-columns:repeat(4,minmax(0,1fr))'));
+ assert.ok(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))'),'Now grid must show three wider cards per row');
  assert.ok(css.includes('@container (max-width:500px)'),'Now gauges must adapt to narrow screens');
  assert.ok(!css.includes('display:contents'),'Restore original two-line gauge card design');
  assert.ok(css.includes('var(--metric-accent'));
