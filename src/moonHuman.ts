@@ -17,6 +17,20 @@ const mood:readonly (readonly [Bi,Bi,Bi])[]=[
  [['تجربة أسلوب جديد أو التواصل ويا ناس مختلفين ممكن يفيدك.','A new approach or conversation with different people may help.'],['جرّب حل غير مألوف لمشكلة بسيطة وخلي خيار الرجوع متاح.','Try an alternative for a small problem and keep the option to revert.'],['الاستقلال ما يحتاج قطيعة أو صدمة للطرف الثاني.','Independence does not require sudden rupture.']],
  [['الخيال والراحة والإبداع ممكن يساعدنك تشوف الموضوع من جهة ثانية.','Imagination, rest and creativity can offer perspective.'],['إذا شدّك احتمال عاطفي، اكتب المعلومة المؤكدة وحدها قبل ما تتوقع.','If a romantic possibility interests you, list only confirmed facts before imagining outcomes.'],['لا تعتبر الانطباع وحده دليل على نية شخص.','An impression is not evidence of another person’s intentions.']]
 ];
+const moonPracticalNext:readonly [string,string][]=[
+ ['إذا تحمست لمواجهة، اكتب مطلبك قبل ما تتصل بأحد.','If you feel like confronting someone, write your request before calling.'],
+ ['إذا تغير موعد، اطلب تأكيداً ولا تتمسك بالخطة من باب العناد.','If plans change, ask for confirmation rather than resisting automatically.'],
+ ['إذا كثرت الرسائل، خلّ جوابك على سؤال واحد حتى ما تضيع الفكرة.','When messages pile up, answer one question at a time.'],
+ ['إذا ذكّرك كلام أحد بموقف قديم، اسأله عن اليوم مو عن أمس.','When words recall old hurts, clarify the present situation.'],
+ ['إذا تريد تقدير، احچي عن إنجازك بدون ما تختبر انتباه الآخرين.','Share what you achieved without testing whether people notice.'],
+ ['صحّح معلومة واحدة مهمة وخلّ ملاحظتك عن العمل مو الشخص.','Correct one important detail without attacking the person.'],
+ ['من يزعجك اختلاف التوقعات، حدد شنو تعتبره عدلاً واسأل الطرف الثاني.','If expectations differ, explain what feels fair to you.'],
+ ['إذا الشك بدأ يزيد، اسأل سؤال مباشر بدل تفتيش نوايا الشخص.','If suspicion grows, ask a direct question rather than guessing motives.'],
+ ['إذا تريد تغير جو، اختار طلعة بسيطة وما توعد فوق إمكاناتك.','If you need a change, suggest a simple plan you can keep.'],
+ ['إذا عندك مسؤولية، حدد موعدها ولا تحول التعب إلى صمت ويا المقربين.','If a duty weighs on you, set its deadline and explain your capacity.'],
+ ['إذا تحتاج مساحة، خبر الناس بدل ما تختفي فجأة.','If you need space, say so instead of disappearing abruptly.'],
+ ['إذا إحساسك قوي، سجل الحقيقة المؤكدة قبل ما تكتب رسالة حساسة.','If feelings run high, note the verified facts before sending a sensitive message.']
+];
 export function moonHumanReading(sign:number,report:Report,knownTime:boolean,language:'ar'|'en'):string[]{
  const idx=language==='ar'?0:1,item=mood[sign];
  if(!item)return [];
@@ -26,6 +40,6 @@ export function moonHumanReading(sign:number,report:Report,knownTime:boolean,lan
  // The live Moon-to-planet interpretation appears below in the lunar timing panel.
  // This sign card only describes sign guidance and a distinct verified natal contact.
  const personal=story?story.good:(language==='ar'?'ماكو اتصال قمري قوي ويا خارطة ميلادك بهاللحظة.':'No close Moon-to-natal contact is active at this moment.');
- const action=story?story.action:(language==='ar'?'اختار خطوة واقعية صغيرة وحدد شلون تعرف إذا نفعت.':'Choose a small practical step and decide how to evaluate it.');
+ const action=story?story.action:moonPracticalNext[sign][idx];
  return [item[0][idx],item[1][idx],item[2][idx],personal,action];
 }
