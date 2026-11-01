@@ -414,8 +414,13 @@ function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,co
   // Moon events have a dedicated exhaustive Lunar timeline and are often listed
   // simultaneously as current-sky notes. Keep their exact timestamps here, not
   // duplicate their paragraphs and calls-to-action across Today.
-  const alreadyExplained=Boolean((compact&&lunarAspect)||(heroTitle&&story.title===heroTitle)||(aspectId&&explainedAspects?.has(aspectId)));
-  const more=alreadyExplained?'<p class="mx-sky-feed-source">'+t('شرح هذا الاتصال موجود أعلى الصفحة.','This contact is explained above.')+'</p>':
+  const shownInHero=Boolean(heroTitle&&story.title===heroTitle);
+  const shownInWeather=Boolean(aspectId&&explainedAspects?.has(aspectId));
+  const lunarTimelineOnly=Boolean(compact&&lunarAspect&&!shownInHero&&!shownInWeather);
+  const alreadyExplained=Boolean((compact&&lunarAspect)||shownInHero||shownInWeather);
+  const more=alreadyExplained?(lunarTimelineOnly?
+    '<p class="mx-sky-feed-source">'+t('تفاصيل هذا الاتصال القمري موجودة بقسم القمر.','This Moon contact is explained in the Lunar section.')+'</p><button type="button" class="secondary" data-go="lunar">'+t('افتح القمر','Open Lunar')+'</button>':
+    '<p class="mx-sky-feed-source">'+t('شرح هذا الاتصال موجود أعلى الصفحة.','This contact is explained above.')+'</p>'):
    '<p class="mx-sky-feed-now"><b>'+t('هسه:','Now:')+'</b> '+esc(story.now)+'</p>'+
    (!lunarAspect&&story.next?'<p class="mx-sky-feed-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(story.next)+'</p>':'')+
    '<p class="mx-sky-feed-action"><strong>'+t('شنو تسوي؟','What to do:')+'</strong> '+esc(story.action)+'</p>';
