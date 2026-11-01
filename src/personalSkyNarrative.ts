@@ -155,7 +155,7 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
    const lunar=event.first==='Moon'||event.second==='Moon';
    // The calculated planetary pair is the story; a natal house only locates its topic.
    const contactReading=skyAspectExplanation(event.first,event.second!,event.angle??-1,lang==='en');
-   now=contactReading+(houseTopic?(lang==='ar'?' بخارطتك يلامس '+houseTopic.area.ar+'.':' In your natal chart the related area is '+houseTopic.area.en+'.'):'');
+   now=contactReading;
    later=lunar?(lang==='ar'?'التأويل يخص الفترة القريبة من وقت الاتصال القمري فقط؛ لا يمتد لأسابيع من دون عامل فلكي منفصل.':
     'The interpretation concerns the short Moon-aspect window, not weeks ahead without separate calculated evidence.'):
     (houseTopic?txt(houseTopic.later,lang):txt(second.later,lang))+' '+caution;
@@ -188,7 +188,7 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
  // A close calculated transit-to-natal contact remains personal without a
  // known birth time; natal-Moon or house claims still require it.
  const natalContactTopic=link&&natalFocus[link.natal.id]?txt(natalFocus[link.natal.id],lang):null;
- const prefix=houseTopic?(lang==='ar'?'بخريطتك هذا يرتبط بـ'+houseTopic.area.ar+'. ':'In your chart this concerns '+houseTopic.area.en+'. '):'';
+ const prefix=houseTopic?(lang==='ar'?'بخارطتك، هذا يخص '+houseTopic.area.ar+': ':'In your natal chart, this concerns '+houseTopic.area.en+': '):'';
  return {
   title:human.title,
   now:prefix+(soon?phaseNow+' ':'')+now,
