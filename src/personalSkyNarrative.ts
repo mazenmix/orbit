@@ -153,7 +153,9 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
    // A fast Moon aspect must never inherit Jupiter/Saturn's weeks-long
    // planetary template. Duration cannot be inferred from a paired name.
    const lunar=event.first==='Moon'||event.second==='Moon';
-   now=skyAspectExplanation(event.first,event.second!,event.angle??-1,lang==='en')+' '+(houseTopic?txt(houseTopic.now,lang):txt(planetTopic.now,lang));
+   // The calculated planetary pair is the story; a natal house only locates its topic.
+   const contactReading=skyAspectExplanation(event.first,event.second!,event.angle??-1,lang==='en');
+   now=contactReading+(houseTopic?(lang==='ar'?' بخارطتك يلامس '+houseTopic.area.ar+'.':' In your natal chart the related area is '+houseTopic.area.en+'.'):'');
    later=lunar?(lang==='ar'?'التأويل يخص الفترة القريبة من وقت الاتصال القمري فقط؛ لا يمتد لأسابيع من دون عامل فلكي منفصل.':
     'The interpretation concerns the short Moon-aspect window, not weeks ahead without separate calculated evidence.'):
     (houseTopic?txt(houseTopic.later,lang):txt(second.later,lang))+' '+caution;
