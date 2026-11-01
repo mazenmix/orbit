@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {skyContext,contextGaugeBasis,contextScore} from '../src/skyContext.ts';
+import {skyContext,contextGaugeBasis,contextGaugeContactKey,contextScore} from '../src/skyContext.ts';
 import {derivedMetrics,goModes} from '../src/metrics.ts';
 import type {Chart} from '../src/engine.ts';
 const base=(degrees:Record<string,number>,at='2026-11-01T11:32:00Z'):Chart=>({
@@ -54,4 +54,13 @@ test('fails explicitly on missing required planetary ephemerides',()=>{
 
 test('contextual contribution scoring rejects invalid strengths instead of making a verdict',()=>{
  assert.throws(()=>contextScore([{transit:'Venus',natal:'Moon',angle:120,orb:0,strength:NaN,tone:1}]),/Invalid contextual contribution/);
+});
+
+test('GO repetition control tracks exact planetary aspect identity instead of source-score label',()=>{
+ const current=base({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334});
+ const sky=skyContext(natal,current,true);
+ const candidate=Object.values(sky.domains).find(d=>d.scope!=='background');
+ assert.ok(candidate);
+ assert.equal(contextGaugeContactKey(sky,[candidate!.category]),candidate!.primary.transit+':'+candidate!.primary.natal+':'+candidate!.primary.angle);
+ assert.equal(contextGaugeContactKey(sky,[candidate!.category,candidate!.category]),contextGaugeContactKey(sky,[candidate!.category]));
 });
