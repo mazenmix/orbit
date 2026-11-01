@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {skyClimate,moonSignExplanation,skyAspectExplanation} from '../src/skyAtmosphere.ts';
+import {skyClimate,moonSignExplanation,skyAspectExplanation,skyAspectScene} from '../src/skyAtmosphere.ts';
 import {skyContext,contextScore} from '../src/skyContext.ts';
 import {derivedMetrics} from '../src/metrics.ts';
 import type {Chart} from '../src/engine.ts';
@@ -131,4 +131,15 @@ test('retrograde descriptions change with zodiac sign and explain Scorpio Mercur
  assert.match(venus.arMeaning,/لا تختبر الاهتمام بالسكوت/);
  const moved=skyClimate(chart({...positions,Mercury:10},{Mercury:-0.2,Venus:-0.1}));
  assert.notEqual(mercury.arMeaning,moved.notes.find(n=>n.id==='retro:Mercury')!.arMeaning);
+});
+
+test('a Moon-Saturn scene produces the same-topic advice, not a random house action',()=>{
+ const scene=skyAspectScene('Moon','Saturn',120);
+ assert.match(scene.meaning,/مسؤولية مأجلة/);
+ assert.match(scene.action,/مهمة واحدة/);
+ assert.doesNotMatch(scene.meaning+scene.action,/لقاء|تعارف|موعد عاطفي/);
+ const moonMercury=skyAspectScene('Moon','Mercury',90);
+ assert.match(moonMercury.meaning,/كلمة عابرة/);
+ assert.match(moonMercury.action,/اسأل عن قصده/);
+ assert.notEqual(scene.action,moonMercury.action);
 });
