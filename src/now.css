@@ -1,6 +1,6 @@
-/* MX Astro Now: original gauge card design in rows of four. */
+/* MX Astro Now: readable gauge cards in rows of three. */
 #live-view-body .mx-now-page{min-width:0;padding:0 0 24px;container-type:inline-size}
-#live-view-body .mx-now-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:980px;margin:0 auto}
+#live-view-body .mx-now-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:980px;margin:0 auto}
 #live-view-body .mx-now-row{min-width:0;padding:11px 10px!important;border-radius:12px;margin:0;display:grid;gap:8px}
 #live-view-body .mx-now-row .mx-now-head{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px}
 #live-view-body .mx-now-row .mx-now-head>strong{min-width:0;font-size:13px;line-height:1.5;font-weight:650;color:#e6e4f0;overflow-wrap:anywhere}
@@ -20,14 +20,14 @@
  .mobile-nav .nav-item>b{font-size:clamp(7px,1.95vw,9px)}
 }
 
-/* Now stays four gauges per row on phones, with compact stacked labels. */
+/* Now stays three gauges per row on phones, with readable stacked labels. */
 @container (max-width:500px){
- #live-view-body .mx-now-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
- #live-view-body .mx-now-row{padding:9px 5px!important;gap:6px}
+ #live-view-body .mx-now-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ #live-view-body .mx-now-row{padding:12px 8px!important;gap:8px}
  #live-view-body .mx-now-row .mx-now-head{flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px}
- #live-view-body .mx-now-row .mx-now-head>strong{font-size:10px;line-height:1.25;min-height:2.6em;max-width:100%}
- #live-view-body .mx-now-row .mx-now-head>b{font-size:16px}
- #live-view-body .mx-now-row .mx-now-head>b em{font-size:9px}
+ #live-view-body .mx-now-row .mx-now-head>strong{font-size:12px;line-height:1.4;min-height:2.8em;max-width:100%}
+ #live-view-body .mx-now-row .mx-now-head>b{font-size:19px}
+ #live-view-body .mx-now-row .mx-now-head>b em{font-size:10px}
 }
 
 /* Now time-travel strip: fixed instant when browsing, live clock when reset. */
