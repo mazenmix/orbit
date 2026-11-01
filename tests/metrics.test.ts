@@ -1,10 +1,10 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {metricSpecs,derivedMetrics,goModes,metricCoverage,observedMetric} from '../src/metrics.ts';
 const categories={overview:50,career:70,love:80,communication:60,energy:75,emotions:40,recovery:55,timing:65};
-test('29 named symbolic indicators use eight source indices without invented probabilities',()=>{
+test('33 named symbolic indicators use eight source indices without invented probabilities',()=>{
  const result=derivedMetrics(categories);
- assert.equal(metricSpecs.length,29);
- assert.equal(new Set(result.map(x=>x.id)).size,29);
+ assert.equal(metricSpecs.length,33);
+ assert.equal(new Set(result.map(x=>x.id)).size,33);
  assert.ok(result.every(x=>x.value>=1&&x.value<=99));
  assert.equal(result.find(x=>x.id==='career')?.value,70);
  assert.equal(result.find(x=>x.id==='caution')?.value,60);
