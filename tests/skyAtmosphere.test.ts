@@ -143,3 +143,20 @@ test('a Moon-Saturn scene produces the same-topic advice, not a random house act
  assert.match(moonMercury.action,/اسأل عن قصده/);
  assert.notEqual(scene.action,moonMercury.action);
 });
+
+test('every one of 225 major aspects has pair-sensitive Iraqi narrative with a concrete actionable interpretation',()=>{
+ const ids=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+ const angles=[0,60,90,120,180];
+ const stories:string[]=[];
+ for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){
+  const styles=angles.map(angle=>skyAspectExplanation(ids[i],ids[j],angle));
+  assert.equal(new Set(styles).size,5,ids[i]+' '+ids[j]+': aspect-specific interpretation required');
+  for(const story of styles){
+   assert.ok(story.length>=50,ids[i]+' '+ids[j]+' should have nontrivial meaning');
+   assert.doesNotMatch(story,/تأكد شنو حسّيت وشنو صار فعلاً|سهولة أكبر بتنظيم هالموضوعين|القراءة تربط هالزاوية|راجع نوع الاتصال والجرمين/);
+   stories.push(story);
+  }
+ }
+ assert.equal(stories.length,225);
+ assert.equal(new Set(stories).size,225);
+});
