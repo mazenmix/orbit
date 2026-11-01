@@ -278,9 +278,22 @@ function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,
 /** Brief, calculated explanations of the current sky, shared by Today and Now. */
 function skyWeatherPanel(compact=false){
  const climate=liveGaugeSky().climate;
- const priority=['aspect:Mars:Mercury:90','aspect:Mercury:Mars:90','retro:Venus','moon:sign','aspect:Moon:Pluto:180','aspect:Pluto:Moon:180'];
- const order=(note:SkyNote)=>{const index=priority.indexOf(note.id);return index<0?99:index;};
- const selectedNotes=[...climate.notes].sort((a,b)=>order(a)-order(b)||b.strength-a.strength).slice(0,compact?4:5);
+ // Current contacts replace older ones as their orbs widen or new aspects form.
+ // Reserve room for exact sky aspects, the live Moon sign and an active retrograde.
+ const ordered=(kind:SkyNote['kind'])=>climate.notes.filter(n=>n.kind===kind)
+  .sort((a,b)=>b.strength-a.strength||a.id.localeCompare(b.id));
+ const aspectNotes=ordered('aspect'),retroNotes=ordered('retrograde'),moonNote=ordered('moon-sign')[0];
+ const selectedNotes:SkyNote[]=[];
+ const add=(note:SkyNote|undefined)=>{if(note&&!selectedNotes.some(x=>x.id===note.id))selectedNotes.push(note);};
+ for(const note of aspectNotes.slice(0,2))add(note);
+ add(retroNotes[0]);
+ add(moonNote);
+ const limit=compact?4:5;
+ for(const note of [...aspectNotes.slice(2),...retroNotes.slice(1),...climate.notes].sort((a,b)=>b.strength-a.strength||a.id.localeCompare(b.id))){
+  if(selectedNotes.length>=limit)break;
+  add(note);
+ }
+ selectedNotes.length=limit;
  const rows=selectedNotes.map(note=>'<article class="mx-sky-weather-note"><strong>'+esc(t(note.arTitle,note.enTitle))+'</strong><span>'+esc(t(note.arMeaning,note.enMeaning))+'</span></article>').join('');
  return '<section class="panel mx-sky-weather" aria-label="'+t('قراءة اتصالات السماء','Current sky connections')+'">'+
   (compact?'<details class="mx-weather-disclosure"><summary>'+t('ليش تتغير الكيجات؟ · اتصالات السماء','Why the gauges change · Sky connections')+'</summary>':
