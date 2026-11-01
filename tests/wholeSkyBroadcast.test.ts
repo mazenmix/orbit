@@ -40,7 +40,7 @@ test('Today scans sufficient actual sky history for the recent-events grid',()=>
  const main=readFileSync('src/main.ts','utf8');
  assert.match(main,/scanWholeSky\(selected,at=>chart\(at,active,false,false\)\.points,72,48\)/);
  const focus=main.slice(main.indexOf('function focusedToday(){'),main.indexOf('/** A stable daily scan'));
- assert.match(focus,/wholeSkyEventItems\(brief\.latest,[^\n]*,true\)/);
+ assert.match(focus,/wholeSkyEventItems\(brief\.latest,[^\n]*,true,personalized\?\.title\)/);
 });
 test('Exact whole-sky roots include NON-lunar Mercury-Venus contact and Mercury sign ingress',()=>{
  const events=scanWholeSky(new Date(BASE+3*HOUR),sample,5,9);
