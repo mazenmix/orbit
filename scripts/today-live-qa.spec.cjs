@@ -3,9 +3,13 @@ test('compact Today Moon and VOC green gauges verify actual current-sky evidence
  await page.goto('/#today',{waitUntil:'domcontentloaded'});
  const hero=page.locator('.mx-focus-hero');
  await expect(hero).toBeVisible({timeout:75000});
- const movement=hero.locator('.mx-sky-movement');
- await expect(movement).toBeVisible();
- expect((await movement.innerText()).trim().length).toBeGreaterThan(12);
+ const meaning=hero.locator('.mx-sky-meaning');
+ await expect(meaning).toBeVisible();
+ expect((await meaning.innerText()).trim().length).toBeGreaterThan(12);
+ // The hero no longer repeats a separate movement paragraph; assert the visible meaning and matching action.
+ const action=hero.locator('.mx-focus-story-action');
+ await expect(action).toBeVisible();
+ expect((await action.innerText()).trim().length).toBeGreaterThan(12);
  const checked=hero.locator('.mx-sky-live-checked');
  await expect(checked).toContainText(/الحساب الفلكي|Sky calculated/);
  await expect(page.locator('.mx-sky-planets .mx-sky-planet')).toHaveCount(10);
