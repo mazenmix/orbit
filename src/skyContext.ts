@@ -100,7 +100,7 @@ export function contextGaugeBasis(context:SkyContext,sources:readonly Category[]
  const prefix=row.scope==='tight'?
   (english?'Close aspect':'اتصال قريب'):
   row.scope==='wide'?(english?'Wide context':'اتصال واسع'):
-   (english?'Distant geometry, neutral baseline':'أقرب زاوية بعيدة · مؤشر محايد');
+   (row.skyAdjustment!==0?(english?'Distant natal geometry; active current sky':'زاوية ميلادية بعيدة · السماء الحالية مؤثرة'):(english?'Distant geometry, neutral baseline':'أقرب زاوية بعيدة · مؤشر محايد'));
  return prefix+' · '+name+' '+relation+' '+target+' · '+p.orb.toFixed(1)+'°';
 }
 
@@ -127,6 +127,9 @@ export function contextGaugeNarrative(context:SkyContext,sources:readonly Catego
   Ascendant:['الانطباع الأول والحضور','presence and first impressions'],
   MC:['العمل والمسؤوليات العامة','career and public roles']
  };
+ if(row.scope==='background'&&row.skyAdjustment!==0)return english?
+  'No close natal transit; current sky contacts shift this index by '+row.skyAdjustment+' points.':
+  'ماكو اتصال قريب مع خارطة الميلاد؛ اتصالات الكواكب الحالية غيّرت المؤشر بمقدار '+row.skyAdjustment+' نقطة.';
  if(row.scope==='background')return english?
   'The nearest '+name+'–'+target+' aspect is '+p.orb.toFixed(1)+'° away. No close aspect was calculated; the 50-point reading is a neutral context marker, not a forecast.':
   'أقرب زاوية بين '+name+' و'+target+' فارقها '+p.orb.toFixed(1)+'°. ماكو اتصال ضمن 8°؛ الدرجة حيادية مو توقع.';
