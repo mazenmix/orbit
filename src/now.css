@@ -52,3 +52,15 @@
  #live-view-body .mx-now-time-jumps>button>small{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){#live-view-body .mx-now-time-state.is-live>i{animation:none}}
+
+/* Sky-to-sky explanations, concise in Today and collapsed in Now. */
+#live-view-body .mx-sky-weather{margin:12px 0;padding:14px 16px;min-width:0;max-width:980px}
+#live-view-body .mx-sky-weather h2{font-size:16px;margin:0 0 11px}
+#live-view-body .mx-sky-weather-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#live-view-body .mx-sky-weather-note{border:1px solid rgba(148,136,210,.27);border-radius:11px;background:rgba(100,86,153,.07);padding:10px 12px;min-width:0;display:flex;flex-direction:column;gap:6px}
+#live-view-body .mx-sky-weather-note strong{font-size:13px;color:#e6d7ff;font-weight:750}
+#live-view-body .mx-sky-weather-note span{font-size:12px;line-height:1.65;color:#c4cee1}
+#live-view-body .mx-sky-weather small{display:block;color:#9faac3;line-height:1.5;font-size:10px;margin-top:9px}
+#live-view-body .mx-weather-disclosure summary{cursor:pointer;color:#ceb9ff;font-weight:700;font-size:13px;padding:2px 0 10px}
+#live-view-body .mx-sky-new-indicators{margin:12px 0;max-width:980px}
+@media(max-width:640px){#live-view-body .mx-sky-weather-list{grid-template-columns:1fr}#live-view-body .mx-sky-weather{padding:12px}}
