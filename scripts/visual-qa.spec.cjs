@@ -514,9 +514,9 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   await expect(page.locator('.mx-today-sky svg.chart-wheel')).toBeVisible({timeout:75000});
   await expect(page.locator('[data-today-gauge]')).toHaveCount(0);
   const nav=device==='iphone'?page.locator('.mobile-nav'):page.locator('.sidebar .nav');
-  await expect(nav.locator('[data-go]')).toHaveCount(8);
+  await expect(nav.locator('[data-go]')).toHaveCount(9);
   const routes=await nav.locator('[data-go]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-go')));
-  expect(routes).toEqual(['today','lunar','chart','people','go','travelmode','calendar','more']);
+  expect(routes).toEqual(['today','lunar','now','chart','people','go','travelmode','calendar','more']);
   await nav.locator('[data-go="go"]').click();
   await expect(page).toHaveURL(/#go$/);
   await expect(page.locator('#live-view-body [data-section="go"]')).toBeVisible({timeout:75000});
@@ -577,7 +577,7 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
    rows.map(row=>[row.getAttribute('data-indicator-id'),Number.parseInt(row.querySelector('b')?.textContent??'',10)])));
   const nav=device==='iphone'?page.locator('.mobile-nav'):page.locator('.sidebar .nav');
   const options=await nav.locator('[data-go]').evaluateAll(rows=>rows.map(row=>row.getAttribute('data-go')));
-  expect(options).toEqual(['today','lunar','chart','people','go','travelmode','calendar','more']);
+  expect(options).toEqual(['today','lunar','now','chart','people','go','travelmode','calendar','more']);
   await nav.locator('[data-go="travelmode"]').click();
   await expect(page).toHaveURL(/#travelmode$/);
   await expect(page.locator('[data-section="travelmode"]')).toBeVisible({timeout:75000});
