@@ -104,6 +104,16 @@ export function contextGaugeBasis(context:SkyContext,sources:readonly Category[]
  return prefix+' · '+name+' '+relation+' '+target+' · '+p.orb.toFixed(1)+'°';
 }
 
+/** Stable content identity: unlike score-label or orb, this identifies the
+ * exact transit-to-natal aspect shared by several derived GO gauges. */
+export function contextGaugeContactKey(context:SkyContext,sources:readonly Category[]):string|null{
+ const rows=[...new Set(sources)].map(category=>context.domains[category]).filter(Boolean);
+ rows.sort((x,y)=>x.primary.orb-y.primary.orb||x.category.localeCompare(y.category));
+ const row=rows[0];
+ if(!row||row.scope==='background')return null;
+ const p=row.primary;
+ return p.transit+':'+p.natal+':'+p.angle;
+}
 /** Concise interpretation based on an actual calculated contact.
  * This is a traditional astrological reading, not an observed life event. */
 export function contextGaugeNarrative(context:SkyContext,sources:readonly Category[],english=false):string{
