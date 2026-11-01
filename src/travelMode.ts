@@ -1,3 +1,4 @@
+import {skyAspectExplanation} from './skyAtmosphere.ts';
 import type {MetricName,MetricResult} from './metrics.ts';
 
 /** The twelve indicators chosen for travel in the Philippines.
@@ -166,13 +167,14 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
  const preferred=entries.find(e=>e.category===activityFocus[metric.id as TravelCardId]);
  const active=(preferred?.contacts.some(c=>c.strength>0&&c.tone!==0)?preferred:undefined)??
   ranked.find(e=>e.contacts.some(c=>c.strength>0&&c.tone!==0));
- let evidence='';
+ let evidence='',specific='';
  if(active){
   const sign=Math.sign(active.score-50);
   const contributions=[...active.contacts].filter(c=>c.strength>0&&c.tone!==0).sort((a,b)=>
    Number(Math.sign(b.tone)===sign)-Number(Math.sign(a.tone)===sign)||
    Math.abs(b.tone*b.strength)-Math.abs(a.tone*a.strength)||a.orb-b.orb);
   const contact=contributions[0] as SkyContact;
+  specific=skyAspectExplanation(contact.transit,contact.natal,contact.angle,english);
   const body=english?contact.transit:(nameAr[contact.transit]??contact.transit);
   const natal=english?contact.natal:(nameAr[contact.natal]??contact.natal);
   const relation=english?angleEn[contact.angle]:angleAr[contact.angle];
@@ -191,9 +193,12 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
    'حاجة جسمك للنوم أهم من هذا التقييم.'):
   metric.id==='sexuality'||metric.id==='chemistry'?(english?'It never measures another person’s attraction or consent.':
    'الدرجة ما تقيس انجذاب أو موافقة شخص ثاني.'):'';
- const skyReason=sky.climate.notes.find(n=>n.kind==='aspect'&&n.categories.some(c=>source.includes(c)))??
-  sky.climate.notes.find(n=>n.kind==='retrograde'&&n.categories.some(c=>source.includes(c)));
+ // Current sky notes are secondary detail, selected by this card's TOPIC,
+ // not copied into every unrelated card just because source categories overlap.
+ const focus=activityFocus[metric.id as TravelCardId];
+ const skyReason=sky.climate.notes.find(n=>n.kind==='aspect'&&n.categories.includes(focus))??
+  sky.climate.notes.find(n=>n.kind==='retrograde'&&n.categories.includes(focus));
  const skyText=skyReason?(english?skyReason.enTitle+': '+skyReason.enMeaning:skyReason.arTitle+': '+skyReason.arMeaning):'';
  const detail=(english?'Source indices: ':'المجالات الداخلة بالحساب: ')+basis+'. '+evidence+(skyText?' '+skyText:'')+(riskNote?' '+riskNote:'');
- return {summary:pair[english?1:0]+(skyText?' '+skyText:''),basis,detail};
+ return {summary:pair[english?1:0]+(specific?' '+specific:''),basis,detail};
 }
