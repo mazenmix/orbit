@@ -279,7 +279,7 @@ function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,
 }
 
 /** Brief, calculated explanations of the current sky, shared by Today and Now. */
-function skyWeatherPanel(compact=false,heroTitle?:string){
+function skyWeatherPanel(compact=false,heroTitle?:string,explainedAspects?:Set<string>){
  const climate=liveGaugeSky().climate;
  // Do not restate the central Today event in the current-sky explanations.
  // Matching includes both bodies AND angle; the Now panel still lists all contacts.
@@ -305,6 +305,11 @@ function skyWeatherPanel(compact=false,heroTitle?:string){
   add(note);
  }
  selectedNotes.length=limit;
+ for(const note of selectedNotes){
+  if(note.kind!=='aspect')continue;
+  const [,a,b,angle]=note.id.split(':');
+  if(a&&b&&angle)explainedAspects?.add([a,b].sort().join('|')+':'+angle);
+ }
  const rows=selectedNotes.map(note=>'<article class="mx-sky-weather-note"><strong>'+esc(t(note.arTitle,note.enTitle))+'</strong><span>'+esc(t(note.arMeaning,note.enMeaning))+'</span></article>').join('');
  return '<section class="panel mx-sky-weather" aria-label="'+t('قراءة اتصالات السماء','Current sky connections')+'">'+
   (compact?'<details class="mx-weather-disclosure"><summary>'+t('ليش تتغير الكيجات؟ · اتصالات السماء','Why the gauges change · Sky connections')+'</summary>':
@@ -397,7 +402,7 @@ function mainPersonalEvent(brief:WholeSkyBroadcast):PersonalSkyStory|null{
  try{return personalEventStory(event,event.at.valueOf()===selected.valueOf()?data!.current.points:undefined)}
  catch(err){console.warn('Personal sky context unavailable',err);return null}
 }
-function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,compact=false,heroTitle?:string){
+function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,compact=false,heroTitle?:string,explainedAspects?:Set<string>){
  if(!events.length)return '<p class="mx-focus-note">'+empty+'</p>';
  return events.map(e=>{
   const story=personalEventStory(e);
@@ -405,7 +410,8 @@ function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,co
   // Moon windows are hours long; do not repeat an unrelated canned "next stage" paragraph.
   const lunarAspect=e.kind==='aspect'&&(e.first==='Moon'||e.second==='Moon');
   // Keep the event and timestamp; the hero owns this event's full narrative.
-  const alreadyExplained=Boolean(heroTitle&&story.title===heroTitle);
+  const aspectId=e.kind==='aspect'&&e.second&&e.angle!==undefined?[e.first,e.second].sort().join('|')+':'+e.angle:'';
+  const alreadyExplained=Boolean((heroTitle&&story.title===heroTitle)||(aspectId&&explainedAspects?.has(aspectId)));
   const more=alreadyExplained?'<p class="mx-sky-feed-source">'+t('شرح هذا الاتصال موجود أعلى الصفحة.','This contact is explained above.')+'</p>':
    '<p class="mx-sky-feed-now"><b>'+t('هسه:','Now:')+'</b> '+esc(story.now)+'</p>'+
    (!lunarAspect&&story.next?'<p class="mx-sky-feed-next"><b>'+t('المرحلة الجاية:','Next:')+'</b> '+esc(story.next)+'</p>':'')+
@@ -520,6 +526,7 @@ function focusedToday(){
   eventCard(t('آخر حدث بالسماء','Last sky event'),brief.recent)+eventCard(t('أقرب حدث بالسماء','Next sky event'),brief.next)+'</div>':'';
  const clock=t('الحساب الفلكي: ','Sky calculated: ')+dateText(r.at,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
  const personalized=brief?mainPersonalEvent(brief):null;
+ const explainedAspects=new Set<string>();
  const message=personalized?.now??brief?.meaning??t('تعذّر التحقق من موقع واحد أو أكثر من الكواكب؛ ما راح نعرض حدث غير محسوب.','One or more sky positions could not be verified. Unverified events are not shown.');
  return '<div class="mx-focused-dashboard mx-full-sky-today"><div class="mx-focus-main">'+
  '<section class="panel mx-focus-hero" data-sky-reading-id="'+esc(brief?.identity??'unavailable')+'">'+
@@ -532,11 +539,11 @@ function focusedToday(){
  activity+'<small class="mx-sky-live-checked" aria-label="'+t('وقت آخر حساب','Last calculation')+'">'+esc(clock)+'</small>'+
  '</section>'+
  (brief?planetLiveStatus(brief):'<p role="status">'+esc(skyFailure)+'</p>')+
- newRelationshipGauges()+skyWeatherPanel(false,personalized?.title)+
+ newRelationshipGauges()+skyWeatherPanel(false,personalized?.title,explainedAspects)+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('الأحداث الفلكية القادمة · كل الكواكب','Upcoming events · all planets')+'</h2>'+
- '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-upcoming">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.'),true,personalized?.title):'')+'</div></section>'+
+ '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-upcoming">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.'),true,personalized?.title,explainedAspects):'')+'</div></section>'+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('آخر ما تغير بالسماء','Recent sky changes')+'</h2>'+
- '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-recent">'+(brief?wholeSkyEventItems(brief.latest,t('ماكو حدث دقيق مسجل بالفترة الحالية.','No recent exact event.'),true,personalized?.title):'')+'</div></section>'+
+ '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-recent">'+(brief?wholeSkyEventItems(brief.latest,t('ماكو حدث دقيق مسجل بالفترة الحالية.','No recent exact event.'),true,personalized?.title,explainedAspects):'')+'</div></section>'+
  '</div><aside class="mx-focus-aside">'+todaySkyWheel(r)+
  '<button type="button" class="panel time-shortcut mx-today-time-shortcut" data-go="time"><span>◷</span><div><b>'+t('آلة الزمن','Time Machine')+'</b><p>'+t('أي تاريخ. منظور جديد.','Another date. A new perspective.')+'</p></div><b>↗</b></button>'+
  '<section class="panel mx-focus-panel mx-focus-lunar-status '+(moonIsVoid?'is-voc':'is-clear')+'" data-voc-start="'+moonVocStart+'" data-voc-end="'+moonVocEnd+'"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+
