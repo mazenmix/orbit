@@ -73,42 +73,78 @@ const retroMeaning:Record<string,{ar:string;en:string;weight:Partial<Record<Cate
 
 const negativeNew=([90,180] as number[]);
 const positiveNew=([60,120] as number[]);
-const specialized=(a:string,b:string,angle:number):[string,string]|null=>{
- const pair=[a,b].sort().join(':');
- if(pair==='Mars:Mercury'&&angle===90)return [
-  'كلام حاد، ردود دفاعية، وسرعة تحوّل النقاش إلى جدال. اسأل عن المقصود قبل الرد.',
-  'Sharp words, defensive reactions and a tendency for discussions to escalate; clarify intent first.'
- ];
- if(pair==='Moon:Pluto'&&angle===180)return [
-  'شدّ وجذب عاطفي وحساسية تجاه السيطرة والحدود. لا تحوّل اختلاف بسيط إلى معركة.',
-  'Emotional push and pull, sensitivity around control and boundaries; avoid escalating disagreements.'
- ];
- return null;
+
+/** Forty-five editorially authored pair situations; no shared vague 'harmony between themes' template. */
+const pairScenes:Record<string,[string,string,string,string,string,string]>={
+ "Moon|Sun":["قرار تريد تحسمه وانت منزعج ممكن يعاكس احتياجك للراحة؛ وتطلع كلمتك أقسى من قصدك.","من تحدد شنو يهمك وشنو مضايقك، يصير أسهل تختار الخطوة بدون ما تكبت إحساسك.","انتظر لحد ما تهدأ، واكتب سبب القرار بجملة واحدة.","A decision made while upset may conflict with your need for rest.","Clarifying what matters and what hurts can make a calm decision easier.","Wait until you settle, then write the reason for your choice."],
+ "Mercury|Moon":["رسالة عادية ممكن تنفهم تجريح لأن المزاج سبق الفهم، فترد على معنى محد كاله.","الكلام عن شعورك بصيغة واضحة يسهل التفاهم بدل التلميح والعتب.","اسأل شنو المقصود قبل الرد، واحچي عن الشي اللي ضايقك تحديداً.","A normal message can sting when feelings race ahead of comprehension.","Clear words about a feeling can prevent unnecessary assumptions.","Ask what was meant before replying."],
+ "Moon|Venus":["حاجتك للاهتمام ممكن تخليك تقرأ تأخير الرد كأنه تجاهل، رغم ما عندك دليل.","مبادرة لطيفة ورسالة قصيرة ممكن توصل المودة من غير ضغط أو اختبار للطرف الثاني.","عبّر عن اهتمامك مرة واحدة وخلي الرد الحقيقي يحدد الخطوة الجاية.","A delayed reply might feel like rejection without evidence.","A gentle gesture can communicate care without pressure.","Express care once and allow room for a real reply."],
+ "Mars|Moon":["من تعصب، ممكن تتصرف بسرعة حتى تدافع عن نفسك ثم تندم على نبرة الكلام.","الحماس يتحول لفعل مفيد إذا فرغت توترك بمهمة أو حركة بدل الجدال.","ابتعد دقايق عن النقاش، وبعدها احچي بالمطلوب مو بالاتهام.","Anger can prompt a defensive reaction you later regret.","Energy helps when directed toward a task rather than a fight.","Pause the argument, then state your request."],
+ "Jupiter|Moon":["الحماس لوعد كبير أو طلعة ممكن يغطي على تعبك أو احتياجك الفعلي للراحة.","التفاؤل يرفع المعنويات إذا ما حمّلت نفسك أو غيرك توقعات أكبر من الممكن.","خلّ الخطة بسيطة وقابلة للتأجيل، واحسب وقتك وطاقة يومك.","Big plans can overlook your actual emotional energy.","Optimism helps when promises stay manageable.","Make plans flexible and account for your energy."],
+ "Moon|Saturn":["ضغط المسؤوليات ممكن يخليك تكتم ضيقك وتفسّر الطلب البسيط كعبء إضافي.","هدوء المزاج يساعدك ترتب التزام قديم، وتوضح للناس شنو تگدر تنجزه فعلاً.","اكتب شغلة واحدة لازم تنتهي، وحدد مسؤولها وموعدها بهدوء.","Responsibility can feel heavier when feelings go unspoken.","Emotional steadiness helps organize an outstanding commitment.","Write one task, its owner and a realistic deadline."],
+ "Moon|Uranus":["تغيير مفاجئ بالخطة ممكن يستفزك ويخليك تقطع تواصل أو تلغي موعد بعصبية.","المرونة تخليك تغير جوك أو تجرب حل غير معتاد بدون ما تخرب ترتيباتك.","غيّر تفصيل صغير بالخطة وخلي قرارك الكبير لبعد ما تهدأ.","A surprise change in plans can provoke an abrupt reaction.","Flexibility makes room for novelty without disrupting everything.","Change one small detail and avoid drastic decisions."],
+ "Moon|Neptune":["إحساس قوي تجاه سكوت شخص قد يتحول بقصتك إلى حقيقة ما حد أكدها.","الخيال والتعاطف يساعدنك تفهم الاحتمالات إذا فصلت الشعور عن الخبر.","ميّز اللي صار فعلاً عن اللي تخيلته، واسأل قبل ما تحكم.","Silence may invite a story that nobody confirmed.","Empathy helps when feelings are kept separate from evidence.","Separate facts from guesses before confronting anyone."],
+ "Moon|Pluto":["شدّ وجذب عاطفي وحساسية تجاه السيطرة والحدود؛ الاختلاف البسيط ممكن يتحول لمعركة.","معرفة سبب ردّة فعلك تساعدك تحچي عن حدودك من دون تفتيش بنوايا الآخرين.","سمّ الشي اللي يزعجك وحدد حدّك بهدوء، ولا تختبر ولاء أحد.","Emotional push and pull can turn a small disagreement into a control struggle.","Naming the emotion can support a clear boundary.","State your boundary calmly rather than testing loyalty."],
+ "Mercury|Sun":["تريد تثبت رأيك بسرعة، فتقاطع أحد أو تتمسك بصياغة كلامك بدل مضمون الموضوع.","تحديد الفكرة الأساسية يسهل عرض قرارك على الناس ويحسن التفاهم.","لخص قرارك بثلاث جمل واسمع الاعتراض كامل قبل ما تجاوب.","Defending your view too quickly may obscure the actual point.","Clear priorities help you present a decision.","Summarize your point and hear objections fully."],
+ "Sun|Venus":["رغبتك بالتقدير ممكن تخليك تجامل على حساب موقفك أو توافق وأنت مو مقتنع.","تگدر تظهر ذوقك واهتمامك بثقة من غير ما تتخلى عن رأيك.","گول شنو يعجبك وشنو ما يناسبك بكلام لطيف ومباشر.","Seeking appreciation can lead to agreement you do not mean.","You can show warmth without abandoning your priorities.","State your preference politely and clearly."],
+ "Mars|Sun":["الإصرار على الفوز بالنقاش قد يدفعك ترفع الصوت أو تسرع بتنفيذ قرار ناقص.","الشجاعة تخدم هدفك إذا وجهتها لخطوة عمل محددة بدل إثبات القوة.","حدد النتيجة اللي تريدها قبل المبادرة وابتعد عن معركة كرامة.","The urge to win can turn an ordinary decision into a contest.","Courage works best when focused on a specific task.","Define the outcome and avoid pride contests."],
+ "Jupiter|Sun":["الثقة الزايدة بفرصة جديدة ممكن تخليك توعد بأكثر من وقتك أو إمكاناتك.","التوسع يصير مفيد إذا عندك هدف واضح وخطوة أولى تگدر تنفذها.","اختبر فرصة واحدة بتكلفة محددة قبل التزام طويل.","Overconfidence can lead to promises beyond your capacity.","Ambition helps when tied to a workable first step.","Test one opportunity with a defined cost."],
+ "Saturn|Sun":["التزامات الشغل ممكن تضغط على قرارك الشخصي وتخليك تشوف أي تأخير كفشل.","الانضباط يخدم خطتك إذا قسمت المسؤولية وحافظت على حقك بالراحة.","راجع أهم موعد وحدد شنو تگدر تلتزم بيه فعلاً.","Duties may crowd out your own priorities.","Discipline helps when commitments are realistic.","Review the deadline and renegotiate what you cannot deliver."],
+ "Sun|Uranus":["رغبة مفاجئة بتغيير طريقك ممكن تخليك تهدم ترتيب شغال بس لأنك متضايق.","فكرة جديدة تفتح خيار إذا جربتها بصورة صغيرة وما قطعت جسورك.","جرّب تعديل واحد قابل للرجوع قبل ما تغير المسار كله.","A sudden wish for change can threaten a working plan.","A small experiment can create genuine options.","Try one reversible change before a major switch."],
+ "Neptune|Sun":["صورة مثالية عن نفسك أو مشروع قد تخفي نقص بالتفاصيل اللي يحتاج قرارك.","الإلهام يصير مفيد لما تحوله لمعلومات ونتيجة قابلة للفحص.","اطلب رقم أو موعد أو دليل واحد قبل ما تلتزم.","An idealized plan may hide missing details.","Inspiration becomes useful when checked against facts.","Ask for one verifiable detail before committing."],
+ "Pluto|Sun":["الإصرار على السيطرة على القرار ممكن يخلّي الحوار معركة نفوذ مو بحث عن حل.","القدرة على التغيير تتحسن من تركز على أفعالك مو التحكم برد غيرك.","حدد الشي اللي بإيدك وعدّل تصرفك بدل فرض رأيك.","Trying to control a decision can become a power struggle.","Change is easier when focused on your own actions.","Adjust what you control rather than forcing agreement."],
+ "Mercury|Venus":["مجاملة مبهمة أو رسالة فيها تلميح ممكن تنفهم وعد أو اهتمام أكثر من قصدك.","الكلام اللطيف والواضح يساعد على تقريب المسافة أو إنهاء سوء فهم.","اكتب قصدك صراحة بجملة قصيرة من غير اختبارات عاطفية.","A vague compliment can be mistaken for a bigger promise.","Kind, direct language can ease a misunderstanding.","Say what you mean without emotional tests."],
+ "Mars|Mercury":["كلام حاد، ردود دفاعية، وسرعة تحوّل النقاش إلى جدال لأنك تريد تجاوب قبل ما تفهم.","سرعة التفكير تخدمك بحسم مشكلة لو استخدمت السؤال بدل المواجهة.","وقف الرد المتسرع واسأل عن المقصود قبل الاعتراض.","Sharp words and defensive replies can turn discussion into an argument.","Fast thinking can solve problems when paired with curiosity.","Clarify the point before objecting."],
+ "Jupiter|Mercury":["معلومات كثيرة أو اقتراح كبير قد يغريك تنشر خبر قبل ما تتأكد من مصدره.","شرح فكرة واسعة يصير أسهل إذا قسمت التفاصيل وربطتها بخطوة عملية.","ثبت المعلومة الأساسية والمصدر قبل ما ترسل أو تعد.","A big idea may tempt you to repeat unverified information.","A broader idea becomes practical when organized clearly.","Check the source before sharing or promising."],
+ "Mercury|Saturn":["نقاش عن موعد أو تعليمات قد يصير ثقيل لأن طرف يريد سرعة والثاني يدقق التفاصيل.","الكلام المنظم يساعدك تثبت اتفاق مهني أو تحل التباس بمسؤولية.","اكتب المطلوب ومنو مسؤول ومتى التسليم حتى ما يتكرر الخلاف.","Deadlines and detailed instructions can slow a conversation.","Structured communication can establish a workable agreement.","Write the task, owner and deadline."],
+ "Mercury|Uranus":["خبر مفاجئ أو فكرة سريعة قد تدفعك ترد قبل ما تستوعب أثرها.","حل جديد يطلع من سؤال مختلف إذا عطيته فرصة للفحص.","سجل الفكرة وبعدين اختبرها بدل إرسال قرار فوري.","Unexpected news may trigger a rushed reply.","An unusual question can unlock a better solution.","Write the idea down and test it first."],
+ "Mercury|Neptune":["كلام ناقص أو رسالة مبهمة ممكن يخليك تبني قرار على تفسير من عندك.","الحدس يساعدك تطرح سؤال مناسب إذا ما عوضت بيه المعلومة المفقودة.","اطلب توضيحاً مكتوباً للكلمة أو الموعد اللي مو مفهوم.","Vague wording can lead you to decide based on assumptions.","Intuition can guide a better question, not replace evidence.","Request written clarification of the ambiguous point."],
+ "Mercury|Pluto":["سؤال عادي قد ينقلب تحقيق إذا تريد تعرف كل تفاصيل شخص أو اتفاق.","التركيز يساعدك تكشف ثغرة مهمة من غير ضغط أو تشكيك.","اسأل سؤال محدد وخلّ للشخص مساحة يجاوب.","A normal question can become an interrogation.","Focused inquiry can uncover a real issue respectfully.","Ask one precise question without pressuring anyone."],
+ "Mars|Venus":["واحد يريد يقرب بسرعة والثاني يحتاج مساحة، وقد ينفهم التأخير كرفض.","المبادرة واللطافة يشتغلن سوى إذا كان الاهتمام متبادل والحدود واضحة.","اعرض موعداً بسيطاً وخلي الموافقة والإيقاع للطرفين.","One person may want closeness faster than the other.","Initiative can work with warmth when interest is mutual.","Suggest a low-pressure plan and respect the reply."],
+ "Jupiter|Venus":["حماس عاطفي أو شراء مغرٍ ممكن يخليك تصرف أكثر مما نويت لإرضاء أحد.","المتعة تصير أريح إذا عرفت حدود الميزانية والتوقعات من البداية.","حدد سقف الصرف أو طبيعة العلاقة قبل الوعد.","Enthusiasm in love or spending can inflate expectations.","Pleasure is easier when budgets and expectations are clear.","Set limits before making promises."],
+ "Saturn|Venus":["المسؤولية أو قلة الوقت قد تنفهم برود عاطفي حتى لو القصد ترتيب الأمور.","الثبات يظهر بأفعال صغيرة منتظمة بدل وعود كبيرة ما تلحگ عليها.","وضح وقتك الحقيقي واتفگوا على طريقة اهتمام ممكنة.","Limited time may be mistaken for a lack of care.","Consistency can communicate affection better than big promises.","Explain your availability and agree on a realistic rhythm."],
+ "Uranus|Venus":["رغبة بالحرية أو مفاجأة بالعلاقة ممكن تربك الطرف الثاني إذا ما اتفگتوا.","تجربة شي جديد بالعلاقة تكون ألطف من الطرفين يختارون بإرادتهم.","اسأل عن راحة الطرف الثاني قبل تغيير الخطة.","Surprise or a need for freedom can unsettle a partner.","Novelty works better when both people choose it.","Ask before changing shared plans."],
+ "Neptune|Venus":["المثالية قد تخليك تشوف اهتمام ما انقال أو تتجاهل حد واضح.","الحنان يصير أصدق من تبني العلاقة على الكلام والتصرف الحقيقي.","فرق بين رغبتك وبين موافقة الطرف الثاني الفعلية.","Idealization can make an imagined interest feel real.","Affection is stronger when grounded in actions.","Check actual consent rather than guessing desire."],
+ "Pluto|Venus":["الانشداد القوي ممكن يصير غيرة أو رغبة بمعرفة كل تحركات الطرف الثاني.","الصدق بشأن الخوف والثقة يساعد القرب من دون سيطرة.","احچي عن حدودك ولا تفتش أو تختبر الشخص.","Strong attraction can slide into jealousy or monitoring.","Honesty about fears can build trust without control.","Discuss boundaries without testing loyalty."],
+ "Jupiter|Mars":["حماس البداية ممكن يخليك تفتح أكثر من مشروع وتستهلك طاقتك بسرعة.","الاندفاع يصير إنجاز إذا ركزت الجهد على هدف قابل للقياس.","ابدأ بمهمة واحدة وقس نتيجتها قبل التوسع.","Starting too many projects can drain your energy.","Drive produces results when focused on one measurable goal.","Complete one task before expanding."],
+ "Mars|Saturn":["تريد تنجز بسرعة بس الالتزامات أو التعليمات توقفك، فتتعصب وتستعجل.","الصبر مع خطة تنفيذ يحول الحماس لإنجاز ثابت.","قسم المهمة لمراحل واحسب وقت كل مرحلة.","Urgency may clash with rules or limited time.","Patience and a plan can turn effort into steady progress.","Break the task into realistic stages."],
+ "Mars|Uranus":["ردة فعل سريعة لتغيير مفاجئ ممكن تدفعك تقطع علاقة أو تلغي ترتيبات.","جرأة التجربة تنفع إذا عندك خيار رجوع واضح.","لا تحسم وأنت معصب؛ جرّب البديل أولاً.","A surprise can provoke a drastic reaction.","Experimentation helps when you can reverse course.","Test the alternative before committing."],
+ "Mars|Neptune":["حماس لشي مو واضح ممكن يضيع الجهد أو يخليك تتعامل مع إشاعة كحقيقة.","طاقتك تنصرف صح من تحدد هدف واضح وتعرف منو مسؤول.","قبل المباشرة، اسأل عن النتيجة المطلوبة والدليل.","Energy can be wasted on a vague or imagined goal.","Effort works better when the target is clear.","Confirm the outcome and evidence before acting."],
+ "Mars|Pluto":["الإصرار على فرض النتيجة ممكن يحول الخلاف إلى تحدي قوة.","التصميم يساعدك تغير وضع صعب إذا ركزت على خطواتك وحدودك.","انسحب من صراع الكرامة وحدد طلباً واحداً واقعياً.","A need to dominate can escalate conflict.","Determination helps when focused on your own steps.","Exit the power contest and state one request."],
+ "Jupiter|Saturn":["الفرصة تبدو كبيرة، بس الوقت أو الميزانية ما يسمحون بكل الوعود.","التوسع المدروس يصير أقوى إذا قسمته مراحل واضحة.","احسب الكلفة والموعد قبل ما توقع التزام جديد.","Opportunity may exceed available time or budget.","Gradual growth can be more sustainable.","Calculate cost and timing before committing."],
+ "Jupiter|Uranus":["فرصة مفاجئة قد تغريك تقفز على خيار قديم بدون فحص العواقب.","التغيير المفيد يصير من توازن بين التجربة والبديل الآمن.","اختبر الفكرة بحجم صغير وخلي خطة بديلة.","A sudden opportunity can invite an untested leap.","Innovation works best with a controlled trial.","Test small and keep a backup."],
+ "Jupiter|Neptune":["وعد كبير أو فرصة خيالية قد تخفي شروط ما قريتها.","الأمل يساعدك تبدأ إذا سألـت عن الأرقام والتفاصيل.","تحقق من السعر والمدة ومنو ينفذ الوعد.","An attractive promise may hide missing conditions.","Hope is useful when paired with verification.","Verify the terms, price and responsible party."],
+ "Jupiter|Pluto":["رغبتك بالتوسع قد تدفعك تسيطر على قرار جماعي أو تراهن على نتيجة.","التأثير يكون أقوى إذا شاركت الهدف والمسؤولية بدل احتكارها.","استشر شخص معني قبل ما توسع الالتزام.","Ambition may tempt you to control a collective decision.","Shared responsibility can strengthen a plan.","Consult those affected before expanding."],
+ "Saturn|Uranus":["التغيير السريع يصطدم بالقواعد القديمة وقد يخليك تنهي خطة نافعة دفعة واحدة.","تعديل خطوة واحدة يخليك تجدد الروتين من غير خسارة الاستقرار.","بدل جزء من النظام وجربه أسبوع قبل التعميم.","New ideas can clash with existing obligations.","Small adjustments allow innovation without chaos.","Change one routine and assess the result."],
+ "Neptune|Saturn":["قواعد واضحة تتعارض ويا توقع مبهم، فيصير لوم لأن الاتفاق ما كان مكتوب.","الحدود تساعدك تحول فكرة جميلة إلى خطة قابلة للتنفيذ.","ثبت التفاصيل والمواعيد والحد الأدنى للالتزام.","Unclear expectations can clash with firm obligations.","Boundaries can turn an ideal into a workable plan.","Put terms, deadlines and minimum commitments in writing."],
+ "Pluto|Saturn":["المسؤولية الثقيلة قد تتحول لسيطرة أو خوف من فقدان التحكم.","مراجعة نظام قديم تخليك تغيره من دون صراع ويا أصحابه.","حدد شنو لازم يتغير ومنو يقرر، خطوة بخطوة.","Heavy responsibility can become a struggle for control.","Revising a system can help without forcing others.","Define what changes and who decides."],
+ "Neptune|Uranus":["فكرة غريبة أو خبر صادم ممكن يخلط الحقيقة بالتخمين.","الإبداع يفتح احتمال جديد إذا اختبرته بدل الانبهار بيه.","اسأل عن مصدر الخبر وجرب الفكرة تجريباً محدوداً.","Striking news can mix novelty with speculation.","Creativity benefits from a practical test.","Check the source and try a limited experiment."],
+ "Pluto|Uranus":["رغبة بتغيير جذري قد تدفعك لقطع اتفاق أو نظام ما عدك بديل إله.","التغيير العميق يصير أكثر أماناً من تحدد مشكلة واحدة قابلة للإصلاح.","جهّز بديل قبل إلغاء القديم.","Radical change can dismantle a system without a replacement.","Deep improvement starts with one fixable problem.","Prepare an alternative before replacing the old one."],
+ "Neptune|Pluto":["الإصرار على كشف نوايا خفية قد يخليك تفسر كل إشارة كدليل.","فهم دوافعك يساعدك تشوف الحقيقة بدون الدخول بدوامة شك.","اطلب دليل مباشر ولا تحاول تقرأ أفكار الناس.","Searching for hidden motives can turn guesses into certainty.","Self-reflection can reduce suspicion and clarify facts.","Ask for evidence rather than reading minds."],
 };
+const exactScenes:Record<string,[string,string]>={
+ 'Moon|Saturn|120':['هدوء المشاعر يساعدك تكمّل مسؤولية مأجلة من غير توتر أو دفاعية. حدّد مهمة واحدة ومنو مسؤول عنها ووقت تسليمها.','Calmer emotions can help finish a postponed responsibility without defensiveness. Set one task, owner and deadline.'],
+ 'Moon|Saturn|60':['ممكن ترتاح نفسياً من تسوي خطوة بسيطة بواجب متراكم. رتّب أول مهمة بدل ما تفكر بكل الالتزامات دفعة واحدة.','A small step on an overdue task may ease the mental load. Start with just one duty.'],
+ 'Moon|Sun|90':['قرار تريد تحسمه بسرعة ممكن يتعارض ويا شعور داخلي ما حچيته. لا تتخذ موقف وانت متضايق؛ سمّي الشي اللي ضاغط عليك أولاً.','A rushed decision may conflict with feelings you have not expressed. Name what is upsetting you before deciding.'],
+ 'Mercury|Moon|90':['كلمة عابرة ممكن تبين جارحة لأن مزاجك متوتر، وتجاوب على تفسيرك مو كلام الشخص. اسأل عن قصده قبل الاعتراض.','A harmless remark may sound hurtful when you are stressed. Ask what was meant before challenging it.'],
+ 'Moon|Venus|60':['رسالة اهتمام قصيرة أو مجاملة واضحة ممكن تخفف سوء فهم وتقرّب الجو. لا تعتبر تجاوب الطرف الثاني مضمون؛ خله يقرر بنفسه.','A kind, brief message may ease tension. Allow the other person to choose whether to respond.'],
+ 'Mars|Mercury|90':['كلام حاد، ردود دفاعية، وسرعة تحوّل النقاش إلى جدال. إذا اختلفت على رسالة أو تعليمات، اسأل عن المقصود قبل الرد.','Sharp words and defensive replies could escalate a conversation. Clarify the original message first.'],
+ 'Moon|Pluto|180':['شدّ وجذب عاطفي وحساسية تجاه السيطرة والحدود. إذا حسّيت أن أحد يضغط عليك، حدّد الحد المطلوب بدل تحويل الاختلاف لمعركة.','Emotional push and pull may turn into control struggles. State your boundary instead of escalating.']
+};
+const specialized=(a:string,b:string,angle:number):[string,string]|null=>exactScenes[[a,b].sort().join('|')+'|'+angle]??null;
 function describe(a:string,b:string,angle:number):[string,string]{
  const special=specialized(a,b,angle);
  if(special)return special;
- // Each pair combines two real planetary topics with the actual aspect class.
- // This is a meaning template, not invented knowledge of anyone's intentions.
- const difficult=negativeNew.includes(angle),helpful=positiveNew.includes(angle);
- const [firstAr,firstEn]=planetTopics[a],[secondAr,secondEn]=planetTopics[b];
- const focus=a==='Mercury'||b==='Mercury'?'Mercury':a==='Moon'||b==='Moon'?'Moon':
-  a==='Venus'||b==='Venus'?'Venus':a==='Mars'||b==='Mars'?'Mars':
-  a==='Saturn'||b==='Saturn'?'Saturn':a==='Neptune'||b==='Neptune'?'Neptune':
-  a==='Pluto'||b==='Pluto'?'Pluto':a==='Uranus'||b==='Uranus'?'Uranus':a;
- const [stepAr,stepEn]=practicalStep[focus];
- if(difficult)return [
-  'شدّ بين '+firstAr+' و'+secondAr+'؛ '+(angle===90?'سرعة تضارب المواقف ممكن تصعّب التفاهم. ':'كل طرف ممكن يتمسك برأي مختلف. ')+stepAr,
-  'Tension between '+firstEn+' and '+secondEn+'; '+(angle===90?'conflicting priorities may quickly strain communication. ':'opposing positions may be harder to reconcile. ')+stepEn
- ];
- if(helpful)return [
-  'انسجام بين '+firstAr+' و'+secondAr+'؛ '+(angle===120?'سهولة أكبر بتنظيم هالموضوعين. ':'فرصة للتعاون وخطوة صغيرة عملية. ')+stepAr,
-  'A supportive link between '+firstEn+' and '+secondEn+'; '+(angle===120?'these themes may feel easier to coordinate. ':'use a small opportunity to cooperate. ')+stepEn
- ];
- return [
-  'تركيز قوي يجمع '+firstAr+' و'+secondAr+'؛ ممكن يصير الموضوع أوضح وأكثر إلحاحاً. '+stepAr,
-  'A conjunction intensifies '+firstEn+' and '+secondEn+'; the combined themes may feel more prominent. '+stepEn
- ];
+ const scene=pairScenes[[a,b].sort().join('|')];
+ if(!scene)throw Error('Missing editorial pair scene: '+a+' '+b);
+ const [risk,ease,step,riskEn,easeEn,stepEn]=scene;
+ if(angle===90)return [risk+' '+step,riskEn+' '+stepEn];
+ if(angle===180)return ['إذا انقسم موقفك بين رغبتين، '+risk+' '+step,
+  'When two priorities pull in opposite directions, '+riskEn+' '+stepEn];
+ if(angle===60)return ['تگدر تستثمر فرصة بسيطة: '+ease+' '+step,
+  'A small opportunity: '+easeEn+' '+stepEn];
+ if(angle===120)return [ease+' '+step,easeEn+' '+stepEn];
+ return ['الانتباه ينشد لهالموضوع: '+ease+' '+step,'The focus is concentrated here: '+easeEn+' '+stepEn];
 }
 /** Current and progressed Moon use the same sign vocabulary but different source dates. */
 export function moonSignExplanation(longitude:number,english=false):string{
