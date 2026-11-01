@@ -1,3 +1,4 @@
+import {skyAspectExplanation} from './skyAtmosphere.ts';
 import type {Dimension,SynastryEvidence} from './math.ts';
 import type {IntimacyTheme,PartnerInsight} from './peopleInsights.ts';
 
@@ -87,5 +88,9 @@ export function partnerCardStory(x:PartnerInsight,d:Record<Dimension,number>,tod
  if(!chosen)return {ar:words![0],en:words![1],factorAr:'',factorEn:''};
  seen.add(chosen.first.id+'/'+chosen.second.id+'/'+chosen.angle);
  const a=names[chosen.first.id]??[chosen.first.id,chosen.first.id],b=names[chosen.second.id]??[chosen.second.id,chosen.second.id],kind=aspectLabels[chosen.angle];
- return {ar:words![0],en:words![1],factorAr:'من حساب الخارطتين: '+a[0]+' و'+b[0]+' · '+kind[0]+'.',factorEn:'Computed contact: '+a[1]+' and '+b[1]+' · '+kind[1]+'.'};
+ const comment=skyAspectExplanation(chosen.first.id,chosen.second.id,chosen.angle);
+ const commentEn=skyAspectExplanation(chosen.first.id,chosen.second.id,chosen.angle,true);
+ return {ar:words![0]+' '+a[0]+' '+kind[0]+' '+b[0]+': '+comment,
+  en:words![1]+' '+a[1]+' '+kind[1]+' '+b[1]+': '+commentEn,
+  factorAr:'',factorEn:''};
 }

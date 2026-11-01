@@ -1,3 +1,4 @@
+import {skyAspectExplanation} from './skyAtmosphere.ts';
 import type {Evidence,Signal} from './math.ts';
 import {rankedFactors,supportive,difficult} from './math.ts';
 import type {RelationshipWindow} from './relationshipWindows.ts';
@@ -80,7 +81,9 @@ export function relationshipDayReading(day:RelationshipWindow,mode:Kind,period:r
  const delta=nearest(period,day,mode);
  const comparisonAr=Math.abs(delta)<3?'قريب من وسط الفترة':delta>0?'أعلى من وسط الفترة بـ'+delta+' درجات':'أقل من وسط الفترة بـ'+Math.abs(delta)+' درجات';
  const comparisonEn=Math.abs(delta)<3?'close to the period midpoint':delta>0?delta+' points above the period midpoint':Math.abs(delta)+' points below the period midpoint';
- return {ar:natural.ar,en:natural.en,
+ const specific=factor?skyAspectExplanation(factor.transit.id,factor.natal.id,factor.angle):'';
+ const specificEn=factor?skyAspectExplanation(factor.transit.id,factor.natal.id,factor.angle,true):'';
+ return {ar:natural.ar+(specific?' '+specific:''),en:natural.en+(specificEn?' '+specificEn:''),
   reasonAr:mode==='message'?'بالحساب: مؤشر التواصل اليوم '+day.source.communication+'/100؛ '+comparisonAr+'.':'بالحساب: التقارب '+day.source.love+' والنشاط '+day.source.energy+'؛ '+comparisonAr+'.',
   reasonEn:mode==='message'?'Calculated communication index: '+day.source.communication+'/100; '+comparisonEn+'.':'Calculated closeness: '+day.source.love+' and energy: '+day.source.energy+'; '+comparisonEn+'.',
   factor:factor?.id??null};

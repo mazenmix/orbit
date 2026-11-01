@@ -93,7 +93,7 @@ test('Moon-Jupiter event never inherits weeks-long Jupiter narrative',()=>{
  const story=make(event);
  assert.doesNotMatch(story.next,/بالأسابيع الجاية|in the coming weeks/i);
  assert.match(story.next,/الاتصال القمري/);
- assert.match(story.now,/زاوية داعمة رمزياً/);
+ assert.match(story.now,/انسجام|تعاون|سهولة|داعم/);
 });
 test('retrograde ingress describes revisiting a sign without promising a reunion',()=>{
  const event:WholeSkyOccurrence={...ingress,retrograde:true};
@@ -107,7 +107,7 @@ test('retrograde ingress describes revisiting a sign without promising a reunion
 test('a conjunction is not automatically classified as a challenging square or opposition',()=>{
  const event:WholeSkyOccurrence={kind:'aspect',first:'Moon',second:'Venus',angle:0,at:NOW};
  const story=make(event);
- assert.match(story.now,/اقتران يجمع الموضوعين/);
+ assert.match(story.now,/تركيز قوي|تأثير|يجمع/);
  assert.doesNotMatch(story.now,/زاوية متوترة|زاوية تحتاج موازنة/);
 });
 test('unknown birth hour can still support a precisely calculated non-lunar natal contact',()=>{

@@ -1,3 +1,4 @@
+import {skyAspectExplanation} from './skyAtmosphere.ts';
 /** Short, event-specific interpretations for calculated exact Moon and natal-transit
  * timestamps. Timing is astronomical; effects are traditional symbolic themes. */
 export type FocusReadingInput={
@@ -74,5 +75,5 @@ export function focusEventReading(event:FocusReadingInput,language:'ar'|'en'):{e
  const effect=event.kind==='personal-aspect'?
   (ar?'اتصال شخصي يربط '+moving.theme.ar+' بـ'+target.theme.ar+'. ':'A personal contact connects '+moving.theme.en+' with '+target.theme.en+'. '):
   (ar?'اتصال القمر يربط الحالة العاطفية بـ'+target.theme.ar+'. ':'This Moon contact connects emotional response with '+target.theme.en+'. ');
- return {effect:effect+select(angle)+'.',action:select(target.step)+'.'};
+ return {effect:effect+select(angle)+'. '+skyAspectExplanation(t!,event.target!,event.angle!,!ar),action:select(target.step)+'.'};
 }

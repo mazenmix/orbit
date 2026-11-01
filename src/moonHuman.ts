@@ -1,3 +1,4 @@
+import {skyClimate} from './skyAtmosphere.ts';
 import type {Report} from './engine.ts';
 import {signalStory} from './readingNarrative.ts';
 import {category,type Signal} from './math.ts';
@@ -23,7 +24,9 @@ export function moonHumanReading(sign:number,report:Report,knownTime:boolean,lan
  const relevant=report.evidence.filter(e=>e.transit.id==='Moon'&&(knownTime||!['Moon','Ascendant','MC'].includes(e.natal.id))).sort((a,b)=>b.weight-a.weight||a.orb-b.orb);
  const e=relevant[0];
  const story=e?signalStory({category:category(e),score:50,tier:'C',tone:'neutral',factors:[e]} as Signal,report.natal,knownTime,language):null;
- const personal=story?story.good:(language==='ar'?'ماكو عامل شخصي قوي إضافي بهالوقت، فالأفضل تقيّم يومك من الواقع مو من فرضية.':'No strong personal factor stands out, so base decisions on real circumstances.');
+ const moonSky=skyClimate(report.current).notes.find(n=>n.kind==='aspect'&&(n.id.startsWith('aspect:Moon:')||n.id.includes(':Moon:')));
+ const skyText=moonSky?(language==='ar'?moonSky.arTitle+': '+moonSky.arMeaning:moonSky.enTitle+': '+moonSky.enMeaning):'';
+ const personal=(story?story.good:(language==='ar'?'ماكو اتصال ولادي قريب للقمر بهالوقت.':'No close natal Moon contact at this time.'))+(skyText?' '+skyText:'');
  const action=story?story.action:(language==='ar'?'اختار خطوة واقعية صغيرة وحدد شلون تعرف إذا نفعت.':'Choose a small practical step and decide how to evaluate it.');
  return [item[0][idx],item[1][idx],item[2][idx],personal,action];
 }

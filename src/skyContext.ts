@@ -1,6 +1,6 @@
 import {angles,distance,clamp,type Category,type Point} from './math.ts';
 import type {Chart} from './engine.ts';
-import {skyClimate,type SkyClimate} from './skyAtmosphere.ts';
+import {skyClimate,skyAspectExplanation,type SkyClimate} from './skyAtmosphere.ts';
 
 /**
  * Second, explicitly contextual lens for GO / Travel scores.
@@ -134,11 +134,14 @@ export function contextGaugeNarrative(context:SkyContext,sources:readonly Catego
   'The nearest '+name+'–'+target+' aspect is '+p.orb.toFixed(1)+'° away. No close aspect was calculated; the 50-point reading is a neutral context marker, not a forecast.':
   'أقرب زاوية بين '+name+' و'+target+' فارقها '+p.orb.toFixed(1)+'°. ماكو اتصال ضمن 8°؛ الدرجة حيادية مو توقع.';
  const subject=subjects[p.natal]?.[english?1:0]??(english?'your priorities':'أولوياتك');
+ const specific=skyAspectExplanation(p.transit,p.natal,p.angle,english);
+ const skyNote=context.climate.notes.find(n=>n.kind==='aspect'&&n.categories.some(c=>sources.includes(c)));
+ const currentSky=skyNote?(english?' Current sky: '+skyNote.enTitle+'. '+skyNote.enMeaning:' بالسماء هسه: '+skyNote.arTitle+'؛ '+skyNote.arMeaning):'';
  const challenging=p.angle===90||p.angle===180;
  const tip=challenging?
   (english?'Review one concrete detail before taking action.':'دقّق معلومة مهمة قبل ما تتخذ خطوة.'):
   (english?'Use this as a prompt for one specific, reversible step.':'استثمرها بخطوة صغيرة قابلة للتعديل.');
  return english?
-  name+' '+aspectName+' natal '+target+' ('+p.orb.toFixed(1)+'°): this astrological lens concerns '+subject+'. '+tip:
-  name+' '+aspectName+' '+target+' (فارق '+p.orb.toFixed(1)+'°): القراءة تربط هالزاوية بموضوع '+subject+'. '+tip;
+  name+' '+aspectName+' natal '+target+' ('+p.orb.toFixed(1)+'°): '+specific+' This concerns '+subject+'. '+tip+currentSky:
+  name+' '+aspectName+' '+target+' (فارق '+p.orb.toFixed(1)+'°): '+specific+' وهذا يخص '+subject+'. '+tip+currentSky;
 }

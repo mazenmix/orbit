@@ -2,6 +2,7 @@ import {aspects,distance,houseNumber,type Point} from './math.ts';
 import type {Chart} from './engine.ts';
 import {occurrenceLanguage,type SkyBodyId,type WholeSkyOccurrence} from './wholeSkyBroadcast.ts';
 import type {SkyLanguage} from './todaySkyBrief.ts';
+import {skyAspectExplanation} from './skyAtmosphere.ts';
 
 /** Use birth-chart houses and precisely computed planetary positions to make
  * event meanings personal. We never claim actual future external happenings.
@@ -152,9 +153,7 @@ export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}
    // A fast Moon aspect must never inherit Jupiter/Saturn's weeks-long
    // planetary template. Duration cannot be inferred from a paired name.
    const lunar=event.first==='Moon'||event.second==='Moon';
-   now=(houseTopic?txt(houseTopic.now,lang):txt(planetTopic.now,lang))+' '+
-    (lang==='ar'?(balanced?'زاوية داعمة رمزياً، مو ضمان لنتيجة.':challenging?'زاوية متوترة رمزياً، مو توقع حدوث مشكلة.':'اقتران يجمع الموضوعين رمزياً، بدون حكم مسبق على النتيجة.'):
-     (balanced?'This is a symbolically supportive aspect, not a promised outcome.':challenging?'This is a symbolically challenging aspect, not a prediction of trouble.':'This conjunction combines the themes symbolically without a predetermined outcome.'));
+   now=skyAspectExplanation(event.first,event.second!,event.angle??-1,lang==='en')+' '+(houseTopic?txt(houseTopic.now,lang):txt(planetTopic.now,lang));
    later=lunar?(lang==='ar'?'التأويل يخص الفترة القريبة من وقت الاتصال القمري فقط؛ لا يمتد لأسابيع من دون عامل فلكي منفصل.':
     'The interpretation concerns the short Moon-aspect window, not weeks ahead without separate calculated evidence.'):
     (houseTopic?txt(houseTopic.later,lang):txt(second.later,lang))+' '+caution;

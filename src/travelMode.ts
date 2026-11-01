@@ -191,6 +191,9 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
    'حاجة جسمك للنوم أهم من هذا التقييم.'):
   metric.id==='sexuality'||metric.id==='chemistry'?(english?'It never measures another person’s attraction or consent.':
    'الدرجة ما تقيس انجذاب أو موافقة شخص ثاني.'):'';
- const detail=(english?'Source indices: ':'المجالات الداخلة بالحساب: ')+basis+'. '+evidence+(riskNote?' '+riskNote:'');
- return {summary:pair[english?1:0],basis,detail};
+ const skyReason=sky.climate.notes.find(n=>n.kind==='aspect'&&n.categories.some(c=>source.includes(c)))??
+  sky.climate.notes.find(n=>n.kind==='retrograde'&&n.categories.some(c=>source.includes(c)));
+ const skyText=skyReason?(english?skyReason.enTitle+': '+skyReason.enMeaning:skyReason.arTitle+': '+skyReason.arMeaning):'';
+ const detail=(english?'Source indices: ':'المجالات الداخلة بالحساب: ')+basis+'. '+evidence+(skyText?' '+skyText:'')+(riskNote?' '+riskNote:'');
+ return {summary:pair[english?1:0]+(skyText?' '+skyText:''),basis,detail};
 }

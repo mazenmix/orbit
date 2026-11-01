@@ -110,6 +110,13 @@ function describe(a:string,b:string,angle:number):[string,string]{
   'A conjunction intensifies '+firstEn+' and '+secondEn+'; the combined themes may feel more prominent. '+stepEn
  ];
 }
+/** Shared reading of a verified planetary aspect, for all astronomical and natal sections. */
+export function skyAspectExplanation(first:string,second:string,angle:number,english=false):string{
+ if(!names[first]||!names[second]||!(angle in aspects))return english?
+  'Read the verified contact and its subject before drawing a conclusion.':
+  'راجع نوع الاتصال والجرمين المحسوبين قبل الاستنتاج، بدون تخمين.';
+ return describe(first,second,angle)[english?1:0];
+}
 function aspectTone(a:string,b:string,angle:number){
  if(negativeNew.includes(angle))return -1;
  if(positiveNew.includes(angle))return 1;

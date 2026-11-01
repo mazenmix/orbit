@@ -69,7 +69,7 @@ import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
 import {derivedMetrics,goModes,reviewContextGoMode,type GoDomain,type ContextGoReview,type MetricResult} from './metrics.ts';
 import {skyContext,contextGaugeBasis,contextGaugeNarrative,type SkyContext} from './skyContext.ts';
-import type {SkyNote} from './skyAtmosphere.ts';
+import {skyAspectExplanation,type SkyNote} from './skyAtmosphere.ts';
 import {travelMetricsByGroup,travelMetricReading} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
 import {goLifeGauges} from './lifeGauges.ts';
@@ -1177,18 +1177,12 @@ function bindAstroCalendar(){
 }
 
 function moonAspectNarrative(event:LunarWindow['events'][number]){
- const topics:Record<string,[string,string,string,string]>={
-  Sun:['قرار يخص ثقتك بنفسك','a decision about identity','إذا محتار، وضّح أولويتك قبل الجواب.','If unsure, clarify your priority before responding.'],
-  Mercury:['حوار أو خبر يحتاج فهم','a conversation needing clarity','إذا الكلام مبهم، اسأل بدل ما تفترض.','If wording is vague, ask instead of assuming.'],
-  Venus:['التقارب والتقدير','affection and appreciation','خلي الاهتمام واضح وخفيف وشوف الرد الحقيقي.','Express interest gently and assess the real response.'],
-  Mars:['المبادرة وردّة الفعل','initiative and reactions','اختار فعل محسوب بدل رد قد تندم عليه.','Choose a measured step instead of reacting impulsively.'],
-  Jupiter:['التوسع والتعلم','growth and learning','راجع التفاصيل قبل الوعد بشي أكبر.','Check the details before making big commitments.'],
-  Saturn:['الالتزام والمسؤولية','commitment and responsibilities','حدد حدودك والمطلوب منك قبل الموافقة.','Define your limits and the task before agreeing.']
- };
- const item=topics[event.target]??['موضوع يحتاج انتباه','a topic worth attention','خلّي الواقع هو المعيار.','Use reality as the yardstick.'];
- const tension=event.angle===90||event.angle===180;
- return t('بهذا الاتصال يبرز رمزياً موضوع '+item[0]+'. '+(tension?'قد تتزاحم أولويتان؛ لا تتسرع بالحسم. ':'يمكنك التعامل مع الموضوع بخطوة هادئة. ')+item[2],
-  'This aspect symbolically concerns '+item[1]+'. '+(tension?'Two priorities may pull against each other; avoid rushing. ':'A measured approach may help. ')+item[3]);
+ const meaning=skyAspectExplanation('Moon',event.target,event.angle,lang==='en');
+ const names:Record<string,[string,string]>={Sun:['الشمس','Sun'],Mercury:['عطارد','Mercury'],Venus:['الزهرة','Venus'],Mars:['المريخ','Mars'],Jupiter:['المشتري','Jupiter'],Saturn:['زحل','Saturn'],Uranus:['أورانوس','Uranus'],Neptune:['نبتون','Neptune'],Pluto:['بلوتو','Pluto']};
+ const anglesAr:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
+ const anglesEn:Record<number,string>={0:'conjunction',60:'sextile',90:'square',120:'trine',180:'opposition'};
+ const who=names[event.target]??[event.target,event.target];
+ return t('القمر '+(anglesAr[event.angle]??'اتصال')+' '+who[0]+': ', 'Moon '+(anglesEn[event.angle]??'aspect')+' '+who[1]+': ')+meaning;
 }
 function moonMomentNarrative(window:LunarWindow){
  const future=window.events.find(e=>+e.time>+selected);
