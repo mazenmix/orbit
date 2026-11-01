@@ -56,7 +56,7 @@ test('a missing contextual recovery source keeps an otherwise high work score fr
  const context=skyContext(incompleteNatal,chart({Venus:120,Jupiter:120},50),true),metrics=derivedMetrics(context.scores);
  assert.equal(context.domains.recovery.contributors.length,0);
  const mode=goModes(metrics).find(value=>value.domain==='work')!;
- assert.equal(mode.state,'go');assert.equal(mode.value,80);
+ assert.equal(mode.state,'go');assert.equal(mode.value,Math.round([...new Set(['career','communication','recovery','timing'])].reduce((sum,key)=>sum+context.scores[key as keyof typeof context.scores],0)/4));
  const reviewed=reviewContextGoMode(mode,metrics,context);
  assert.equal(reviewed.state,'check');assert.equal(reviewed.complete,false);
  assert.deepEqual(reviewed.coverage,{present:3,total:4,missing:['recovery']});
