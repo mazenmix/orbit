@@ -182,6 +182,52 @@ const natalTopics:Record<string,{topic:[string,string];step:[string,string]}>={
  Vesta:{topic:['التركيز والالتزام بهدف محدد','focus and commitment to a task'],step:['احمِ وقتك لمهمة واحدة بدل التشتت.','Protect time for one priority.']},
  Pholus:{topic:['التفاصيل الصغيرة اللي تغيّر مسار القرار','small details with wider consequences'],step:['راجع أثر القرار الصغير قبل ما توسّع الخطوة.','Check the small decision before expanding it.']}
 };
+/** A planet provides the trigger; an actually calculated natal angle or minor
+ * body supplies its own practical setting. Neither a generic 'harmony between'
+ * sentence nor an unsupported prediction is shown for this class of aspects. */
+const planetTrigger:Record<string,[string,string]>={
+ Sun:["قرار شخصي أو طريقة ظهورك قدّام الناس","a personal decision or how you present yourself"],
+ Moon:["ردّة فعل عاطفية أو حاجتك للطمأنينة","an emotional reaction or the need for reassurance"],
+ Mercury:["رسالة أو نقاش أو معلومة ناقصة","a message, a discussion or missing information"],
+ Venus:["اهتمام عاطفي أو تقييمك لعلاقة","affection or your assessment of a relationship"],
+ Mars:["مبادرة سريعة أو مواجهة ما محسوب حسابها","a quick initiative or an avoidable confrontation"],
+ Jupiter:["فرصة كبيرة أو وعد يصعب تنفيذه","a big opportunity or a difficult promise"],
+ Saturn:["مسؤولية مؤجلة أو موعد ضاغط","an overdue responsibility or a pressing deadline"],
+ Uranus:["تغيير مفاجئ بخطتك","a surprise change to your plans"],
+ Neptune:["توقع جميل بس تفاصيله مبهمة","an appealing but unclear expectation"],
+ Pluto:["رغبة قوية بالسيطرة على نتيجة قرار","a strong urge to control an outcome"],
+};
+const extraScenes:Record<string,[string,string,string,string,string,string]>={
+ Ascendant:["الانطباع الأول: ممكن توصل نبرة غير اللي تقصدها، فينصرف الاهتمام عن الموضوع نفسه.","الانطباع الأول: گول فكرتك بجملة واضحة واختار أسلوب يخلّي الطرف الثاني يفهم قصدك.","قبل لقاء أو رسالة مهمة، جرّب صياغة مختصرة من غير مبالغة.","First impressions: your tone may distract from the point you intend.","First impressions: a clear opening can communicate your intention without pressure.","Use one brief, straightforward opening in a meeting or message."],
+ MC:["الشغل والسمعة: الاستعجال بالموافقة ممكن يخلّيك تتعهد بشي ما عندك وقت إله.","الشغل والسمعة: ترتيب المطلوب وموعده يعطي كلامك وزن أكبر من الوعود الواسعة.","ثبت منو مسؤول عن المهمة وموعد التسليم قبل أي اتفاق.","Career: a rushed yes can create a commitment you cannot meet.","Career: clear deliverables build trust better than broad promises.","Set the owner and deadline before committing."],
+ Chiron:["نقطة حساسة من تجربة قديمة ممكن تخليك تفسّر ملاحظة بسيطة كنقد شخصي.","كلمة صريحة وهادئة تفسح مجال للتفاهم من غير ما تتجاهل الحساسية القديمة.","اسأل عن قصد الملاحظة قبل ما تربطها بتجربة سابقة.","An older sensitivity may make simple feedback feel personal.","Calm, candid language can support understanding without dismissing sensitivity.","Clarify the feedback before linking it to past experiences."],
+ Ceres:["انتبه: تقديم الرعاية للآخرين أكثر من طاقتك ممكن يخلي احتياجك الشخصي يتأجل.","الرعاية المتوازنة تبدي من طلب محدد تگدر تسويه من غير ما تستنزف وقتك.","گول شنو تگدر تقدمه وشنو ما تگدر عليه هذا الأسبوع.","Care for others can crowd out your own basic needs.","Balanced care begins with a specific offer that respects your capacity.","Say what you can and cannot provide this week."],
+ Pallas:["خطة تبدو ذكية ممكن تتعثر إذا أغفلت تفصيلاً أساسياً أو اعتمدت على تخمين.","مراجعة النمط والتفاصيل تگدر تكشف حل أبسط من تدوير نفس المشكلة.","دوّن المعطيات الثابتة والثغرة الوحيدة اللي تحتاج تحقق.","A clever plan can fail when one key assumption goes unchecked.","Spotting the pattern can reveal a simpler route.","List verified facts and the one gap needing a check."],
+ Juno:["اعتبار التلميح وعداً قد يسبب خلاف على حدود الاتفاق أو مسؤوليات الطرفين.","اتفاق صريح على المطلوب يخلي كل طرف يعرف التزامه قبل ما يبدي.","اسأل شنو متفقين عليه فعلاً، وشنو بعده مجرد اقتراح.","Treating a hint as a promise can create conflict over commitments.","A clear agreement defines each person's responsibilities.","Confirm what was agreed and what is only a suggestion."],
+ Vesta:["الانشغال بكل التفاصيل ممكن يشتت وقتك عن المهمة اللي وعدت تكملها.","وقت قصير بلا مقاطعة يكفي حتى تدفع مهمتك الأساسية للأمام.","حدد مهمة واحدة وسوِّ إلها فترة تركيز قابلة للقياس.","Competing details can distract from the task you committed to.","A short uninterrupted focus block can move the priority forward.","Choose one task and a measurable focus period."],
+ Pholus:["قرار يبدو بسيط ممكن يفتح تبعات ما حسبت حسابها، خصوصاً إذا صعب التراجع عنه.","مراجعة الخطوة الصغيرة قبل تنفيذها تساعدك تتجنب سلسلة التزامات مو ضرورية.","اكتب نتيجتين محتملتين وخلي طريق رجوع واضح.","A small decision can trigger consequences that are hard to reverse.","Checking a small step can prevent an unwanted chain of commitments.","List two plausible consequences and keep an exit option."],
+};
+function supplementalAspect(first:string,second:string,angle:number,english:boolean):string{
+ const extra=extraScenes[first]?first:extraScenes[second]?second:null;
+ if(!extra)return english?'This contact has no verified object-specific narrative.':'هالاتصال ما عنده قراءة مخصصة مدعومة؛ مو صحيح نخترع تفسير.';
+ const main=extra===first?second:first;
+ const tr=planetTrigger[main]??[extraScenes[main]?.[0]??'تأثير ثاني مرتبط بنفس الموضوع',extraScenes[main]?.[3]??'a related secondary theme'];
+ const [problem,chance,step,problemEn,chanceEn,stepEn]=extraScenes[extra];
+ const driver=tr[english?1:0];
+ if(english){
+  if(angle===90)return 'A pressure point around '+driver+': '+problemEn+' '+stepEn;
+  if(angle===180)return 'Two sides may disagree over '+driver+': '+problemEn+' '+stepEn;
+  if(angle===0)return 'A concentrated focus on '+driver+': '+chanceEn+' '+stepEn;
+  if(angle===60)return 'A small opening around '+driver+': '+chanceEn+' '+stepEn;
+  return 'There is room for a smoother choice around '+driver+': '+chanceEn+' '+stepEn;
+ }
+ if(angle===90)return 'ممكن يصير ضغط بخصوص '+driver+': '+problem+' '+step;
+ if(angle===180)return 'إذا اختلف طرفين بخصوص '+driver+': '+problem+' '+step;
+ if(angle===0)return 'الاهتمام مركز هسه على '+driver+': '+chance+' '+step;
+ if(angle===60)return 'أكو فرصة صغيرة تخص '+driver+': '+chance+' '+step;
+ return 'تگدر ترتب موضوع '+driver+' بهدوء: '+chance+' '+step;
+}
+
 /** Shared interpretation of verified real contacts, without invented orbs or hidden sky data. */
 export function skyAspectExplanation(first:string,second:string,angle:number,english=false):string{
  if(!(angle in aspects))return english?'No supported calculated aspect.':'ماكو زاوية محسوبة مدعومة لهذا الاتصال.';
@@ -195,21 +241,7 @@ export function skyAspectExplanation(first:string,second:string,angle:number,eng
   if(angle===0)return english?'A strong focus on '+role+'. '+step:'تركيز قوي على '+role+'؛ انتبه لا تبالغ بالموضوع. '+step;
   return english?'A supportive link within '+role+'. '+step:'انسجام نسبي بموضوع '+role+'؛ استثمره بشي عملي. '+step;
  }
- const firstTopic=natalTopics[first]?.topic??planetTopics[first];
- const secondTopic=natalTopics[second]?.topic??planetTopics[second];
- if(!firstTopic||!secondTopic)return english?'The calculated contact has no supported interpretation for these objects.':'الاتصال محسوب، بس ماكو تفسير موثوق لهذني الجرمين؛ ما راح نخترع معنى.';
- const focus=natalTopics[first]??natalTopics[second];
- const action=(focus?.step??practicalStep[first]??practicalStep[second])[english?1:0];
- const one=firstTopic[english?1:0],two=secondTopic[english?1:0];
- if(angle===90||angle===180)return english?
-  'Tension between '+one+' and '+two+'; competing priorities may be harder to reconcile. '+action:
-  'شدّ بين '+one+' و'+two+'؛ ممكن تتعارض الأولويات أو يحتاج الموضوع توضيح. '+action;
- if(angle===0)return english?
-  'These contacts concentrate attention on '+one+' and '+two+'. '+action:
-  'تركيز يجمع '+one+' ويا '+two+'؛ ممكن يصير هالموضوع أكثر إلحاحاً. '+action;
- return english?
-  'Cooperation between '+one+' and '+two+' may feel easier. '+action:
-  'انسجام بين '+one+' و'+two+'؛ التنسيق بينهم أسهل رمزياً. '+action;
+ return supplementalAspect(first,second,angle,english);
 }
 /** Split an authored pair scene into meaning and a matching real-world action.
  * Avoid mixing a Moon–Saturn story with an unrelated natal-house action. */
