@@ -22,8 +22,14 @@ concurrency:
   cancel-in-progress: true
 jobs:
   responsive-browser:
+    # Run the two real browser engines independently. A single sequential
+    # Chromium+WebKit job previously exceeded the 15-minute job budget.
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, webkit]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -43,11 +49,11 @@ jobs:
       - name: Test desktop and iPhone-size UI
         run: |
           pnpm exec vite preview --host 127.0.0.1 --port 4173 > /tmp/astro-preview.log 2>&1 &
-          /tmp/astro-qa/node_modules/.bin/playwright test --config scripts/playwright.config.cjs
+          /tmp/astro-qa/node_modules/.bin/playwright test --config scripts/playwright.config.cjs --project=${{ matrix.project }} --fully-parallel --workers=2
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mx-astro-visual-qa
+          name: mx-astro-visual-qa-${{ matrix.project }}
           path: artifacts/ui-qa
           retention-days: 7
           if-no-files-found: warn
