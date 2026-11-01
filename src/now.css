@@ -1,39 +1,30 @@
-/* MX Astro Now: ultra-compact, single-line gauges (~5x denser than original stacked cards).
-   Keep labels, numbers, meter progress, existing semantic colors and time navigation. */
-#live-view-body .mx-now-page{min-width:0;padding:0 0 24px}
-#live-view-body .mx-now-list{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;max-width:980px;margin:0 auto}
-#live-view-body .mx-now-row{
- min-width:0;min-height:18px;padding:0 8px!important;border-radius:6px!important;margin:0;
- display:grid;grid-template-columns:minmax(145px,.46fr) minmax(45px,1fr) max-content;
- align-items:center;column-gap:8px;direction:rtl
-}
-#live-view-body .mx-now-row .mx-now-head{display:contents}
-#live-view-body .mx-now-row .mx-now-head>strong{
- grid-column:1;grid-row:1;min-width:0;font-size:12px;line-height:1.12;font-weight:650;
- color:#e6e4f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
-}
-#live-view-body .mx-now-row .mx-now-head>b{
- grid-column:3;grid-row:1;white-space:nowrap;direction:ltr;font-size:13px;line-height:1.15;
- font-weight:750;font-variant-numeric:tabular-nums;color:var(--metric-accent,#b6a6ed);
- text-shadow:0 0 12px var(--metric-glow,transparent)
-}
-#live-view-body .mx-now-row .mx-now-head>b em{font-size:9px;font-weight:500;font-style:normal;color:#aeb5cc;text-shadow:none}
-#live-view-body .mx-now-row .meter{
- grid-column:2;grid-row:1;min-width:0;margin:0!important;height:4px;width:100%
-}
+/* MX Astro Now: original gauge card design in rows of five. */
+#live-view-body .mx-now-page{min-width:0;padding:0 0 24px;container-type:inline-size}
+#live-view-body .mx-now-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;max-width:980px;margin:0 auto}
+#live-view-body .mx-now-row{min-width:0;padding:11px 10px!important;border-radius:12px;margin:0;display:grid;gap:8px}
+#live-view-body .mx-now-row .mx-now-head{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px}
+#live-view-body .mx-now-row .mx-now-head>strong{min-width:0;font-size:13px;line-height:1.5;font-weight:650;color:#e6e4f0;overflow-wrap:anywhere}
+#live-view-body .mx-now-row .mx-now-head>b{white-space:nowrap;direction:ltr;font-size:19px;font-weight:750;font-variant-numeric:tabular-nums;color:var(--metric-accent,#b6a6ed);text-shadow:0 0 12px var(--metric-glow,transparent)}
+#live-view-body .mx-now-row .mx-now-head>b em{font-size:10px;font-weight:500;font-style:normal;color:#aeb5cc;text-shadow:none}
+#live-view-body .mx-now-row .meter{margin:0!important;height:7px;width:100%}
 #live-view-body .mx-now-row.mx-unavailable{--metric-accent:#788099;--metric-tint:rgba(116,121,143,.06);--metric-glow:transparent;opacity:.76}
 #live-view-body .mx-now-row.mx-now-moon{--metric-accent:#7fdfd4;--metric-tint:rgba(69,170,169,.12);--metric-glow:rgba(100,210,204,.18)}
 #live-view-body .mx-now-row.mx-now-void.is-clear{--metric-accent:#68e0a6;--metric-tint:rgba(68,192,131,.12);--metric-glow:rgba(68,192,131,.18)}
 #live-view-body .mx-now-row.mx-now-void.is-voc{--metric-accent:#f08b83;--metric-tint:rgba(222,106,104,.11);--metric-glow:rgba(222,106,104,.18)}
 @media(max-width:760px){
- #live-view-body .mx-now-list{gap:2px}
- #live-view-body .mx-now-row{
-  grid-template-columns:minmax(108px,.52fr) minmax(30px,1fr) max-content;
-  column-gap:5px;min-height:18px;padding:0 6px!important
- }
- #live-view-body .mx-now-row .mx-now-head>strong{font-size:11px}
- #live-view-body .mx-now-row .mx-now-head>b{font-size:12px}
+ #live-view-body .mx-now-list{gap:7px}
+ #live-view-body .mx-now-row{padding:10px 8px!important;gap:7px}
+ #live-view-body .mx-now-row .mx-now-head>strong{font-size:12px}
+ #live-view-body .mx-now-row .mx-now-head>b{font-size:17px}
  .mobile-nav .nav-item>b{font-size:clamp(7px,1.95vw,9px)}
+}
+
+/* Retain five cards per row on desktop; use fewer columns only on narrow view panels. */
+@container (max-width:700px){
+ #live-view-body .mx-now-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@container (max-width:440px){
+ #live-view-body .mx-now-list{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 /* Now time-travel strip: fixed instant when browsing, live clock when reset. */
