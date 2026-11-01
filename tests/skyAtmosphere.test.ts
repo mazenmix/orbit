@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {skyClimate} from '../src/skyAtmosphere.ts';
+import {skyClimate,moonSignExplanation} from '../src/skyAtmosphere.ts';
 import {skyContext,contextScore} from '../src/skyContext.ts';
 import {derivedMetrics} from '../src/metrics.ts';
 import type {Chart} from '../src/engine.ts';
@@ -89,4 +89,11 @@ test('all supported natal planets, angles and minor bodies have a specific descr
  }
  assert.notEqual(skyAspectExplanation('Mercury','Chiron',90),skyAspectExplanation('Mercury','MC',90));
  assert.notEqual(skyAspectExplanation('Moon','Moon',120),skyAspectExplanation('Moon','Moon',90));
+});
+
+test('progressed Moon sign narratives differ across twelve signs',()=>{
+ const narratives=Array.from({length:12},(_,i)=>moonSignExplanation(12+30*i));
+ assert.equal(new Set(narratives).size,12);
+ for(const s of narratives)assert.ok(s.length>35);
+ assert.match(moonSignExplanation(168),/التدقيق|ملاحظة/);
 });
