@@ -1,5 +1,6 @@
 import type {Point} from './math.ts';
 import {bisectAngle} from './timing.ts';
+import {skyAspectExplanation} from './skyAtmosphere.ts';
 import {currentSkyContacts,type SkyAspect,type SkyLanguage} from './todaySkyBrief.ts';
 
 /** Whole-sky event engine. Every event time is refined against the actual
@@ -161,9 +162,7 @@ export function occurrenceLanguage(e:WholeSkyOccurrence,lang:SkyLanguage):{title
  const key=[e.first,another].sort().join('|');
  const detail=pairDetails[key];
  const tense=e.angle===90||e.angle===180;
- const context=detail?(arabic?detail.ar:detail.en):
-  arabic?'إذا عندك موضوع يجمع '+base.theme+' و'+dictionary[another].theme+'، خلّ اهتمامك بالخطوة اللي تگدر تسويها فعلاً.':
-   'For matters involving '+base.englishTheme+' and '+dictionary[another].englishTheme+', focus on a step you can actually take.';
+ const context=skyAspectExplanation(e.first,another,e.angle,lang==='en');
  const isSolarLunar=(e.first==='Sun'&&another==='Moon')||(e.first==='Moon'&&another==='Sun');
  const lunation= isSolarLunar&&e.angle===180?(arabic?'اكتمال القمر — مقابلة الشمس والقمر':'Full Moon — Sun–Moon opposition'):
   isSolarLunar&&e.angle===0?(arabic?'محاق القمر — اقتران الشمس والقمر':'New Moon — Sun–Moon conjunction'):null;
@@ -171,7 +170,7 @@ export function occurrenceLanguage(e:WholeSkyOccurrence,lang:SkyLanguage):{title
  const aspectName=aspectLabels[e.angle]??null;
  if(!aspectName)throw Error('Unsupported aspect angle');
  return {title:lunation??pair(e.first,another,lang)+' · '+(arabic?aspectName[0]:aspectName[1]),
-  description:context+(tense?(arabic?' لا تستعجل بالحسم.':' Avoid a rushed decision.'):(arabic?' جرّب خطوة صغيرة وواضحة.':' Take one small, clear step.')),
+  description:context,
   action:detail?(arabic?detail.doAr:detail.doEn):(arabic?second.doAr:second.doEn)};
 }
 export type WholeSkyBroadcast={
