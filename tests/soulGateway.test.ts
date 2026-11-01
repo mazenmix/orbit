@@ -24,7 +24,11 @@ test('Soul Qwen3 receives only allowed topics and actual numeric evidence, never
 });
 test('Invalid model response cannot override locally calculated Soul DNA interpretations',async()=>{
  const env={AI:{run:async()=>({response:'not JSON'})}};
- assert.equal((await onRequestPost({request:req(v),env})).status,502);
+ const result=await onRequestPost({request:req(v),env});
+ assert.equal(result.status,200);
+ const body=await result.json();
+ assert.equal(body.quality,'verified-editorial-fallback');
+ assert.equal(body.fallbackReason,'invalid-structure');
 });
 
 test('Qwen3 repeated clauses are replaced by a labeled editorial fallback',async()=>{
