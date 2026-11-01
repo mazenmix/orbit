@@ -279,11 +279,19 @@ function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,
 }
 
 /** Brief, calculated explanations of the current sky, shared by Today and Now. */
-function skyWeatherPanel(compact=false){
+function skyWeatherPanel(compact=false,heroTitle?:string){
  const climate=liveGaugeSky().climate;
+ // Do not restate the central Today event in the current-sky explanations.
+ // Matching includes both bodies AND angle; the Now panel still lists all contacts.
+ const isCentral=(note:SkyNote)=>{
+  if(!heroTitle||note.kind!=='aspect')return false;
+  const [first,angle,second]=t(note.arTitle,note.enTitle).split(' ');
+  return Boolean(first&&second&&angle&&heroTitle.includes(first)&&heroTitle.includes(second)&&heroTitle.includes(angle));
+ };
+ const visibleNotes=climate.notes.filter(n=>!isCentral(n));
  // Current contacts replace older ones as their orbs widen or new aspects form.
  // Reserve room for exact sky aspects, the live Moon sign and an active retrograde.
- const ordered=(kind:SkyNote['kind'])=>climate.notes.filter(n=>n.kind===kind)
+ const ordered=(kind:SkyNote['kind'])=>visibleNotes.filter(n=>n.kind===kind)
   .sort((a,b)=>b.strength-a.strength||a.id.localeCompare(b.id));
  const aspectNotes=ordered('aspect'),retroNotes=ordered('retrograde'),moonNote=ordered('moon-sign')[0];
  const selectedNotes:SkyNote[]=[];
@@ -292,7 +300,7 @@ function skyWeatherPanel(compact=false){
  add(retroNotes[0]);
  add(moonNote);
  const limit=compact?4:5;
- for(const note of [...aspectNotes.slice(2),...retroNotes.slice(1),...climate.notes].sort((a,b)=>b.strength-a.strength||a.id.localeCompare(b.id))){
+ for(const note of [...aspectNotes.slice(2),...retroNotes.slice(1),...visibleNotes].sort((a,b)=>b.strength-a.strength||a.id.localeCompare(b.id))){
   if(selectedNotes.length>=limit)break;
   add(note);
  }
@@ -524,7 +532,7 @@ function focusedToday(){
  activity+'<small class="mx-sky-live-checked" aria-label="'+t('وقت آخر حساب','Last calculation')+'">'+esc(clock)+'</small>'+
  '</section>'+
  (brief?planetLiveStatus(brief):'<p role="status">'+esc(skyFailure)+'</p>')+
- newRelationshipGauges()+skyWeatherPanel()+
+ newRelationshipGauges()+skyWeatherPanel(false,personalized?.title)+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('الأحداث الفلكية القادمة · كل الكواكب','Upcoming events · all planets')+'</h2>'+
  '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-upcoming">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.'),true,personalized?.title):'')+'</div></section>'+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('آخر ما تغير بالسماء','Recent sky changes')+'</h2>'+
@@ -1043,7 +1051,7 @@ function asteroidsPage(){
  for(const contact of contacts)if(!activated.has(contact.transit.id))activated.set(contact.transit.id,contact);
  return '<div class="section-title"><div><span class="eyebrow">MX ASTRO · ASTEROID STORIES</span><h2>'+t('الكويكبات: شنو تعني إلك؟','Asteroids: what do these themes mean?')+'</h2></div></div>'+
  '<section class="panel asteroid-intro"><h2>'+t('تفسير مختلف لكل كويكب','A unique reading for every asteroid')+'</h2><p>'+t('الموقع والدرجة والحركة محسوبة للوقت المختار. إذا أكو اتصال قريب ويا خارطتك نعرضه بالزاوية والفارق، وإذا ماكو نوضح هذا بدون اختراع تأثير شخصي.','Positions, degrees and motion are calculated for the selected time. Close natal contacts show the angle and orb; without one, no personal effect is invented.')+'</p><div class="button-row"><button class="primary" id="load-named-asteroids" '+(asteroidLoading?'disabled':'')+'>'+(asteroidLoading?t('جار تحميل الحسابات…','Loading calculations…'):count===56?t('حدّث حسابات الكويكبات','Refresh asteroid calculations'):t('فعّل حساباتي للكويكبات الـ56','Calculate my 56 asteroid positions'))+'</button><button class="secondary" data-go="time">'+t('غيّر وقت القراءة','Change reading time')+'</button></div><small id="asteroid-progress" role="status">'+(asteroidProgress?esc(asteroidProgress):count+' / 56 '+t('مواقع فلكية متاحة للحساب','ephemerides currently loaded'))+'</small>'+(asteroidFailures.length?'<details><summary>'+t('بعض البيانات غير متاحة؛ شوف التفاصيل','Some data is unavailable; see details')+'</summary>'+asteroidFailures.map(x=>'<p>'+esc(x.name)+': '+esc(x.reason)+'</p>').join('')+'</details>':'')+'</section>'+
- '<section class="panel"><div class="section-title"><h2>'+t('مواقع الكويكبات واتصالاتها ويا خارطتك','Asteroid positions and natal contacts')+'</h2><label class="heat-label">'+t('اختار المجال','Filter by theme')+' <select id="asteroid-category"><option value="all">'+t('الكل','All')+'</option>'+categories.map(c=>'<option value="'+c+'" '+(asteroidCategory===c?'selected':'')+'>'+cat(c)+'</option>').join('')+'</select></label></div><div class="asteroids-grid reading-asteroids">'+filtered.map(a=>{const point=map.get(a.name),near=activated.get(a.name),r=currentAsteroidReading(a,point,near,lang==='en');return '<article class="asteroid-item meaning-card"><div class="meaning-head"><h3>'+esc(a.name)+'</h3><span class="'+(near?'reading-active':'reading-neutral')+'">'+(point?(near?t('اتصال شخصي محسوب','Calculated natal contact'):t('موضع محسوب · بلا اتصال قريب','Position calculated · no close natal aspect')):t('بانتظار حساب الموقع','Awaiting position calculation'))+'</span></div><p>'+esc(r.theme)+'</p>'+(near&&r.action?'<p class="advice-action">'+esc(r.action)+'</p>':'')+(near?'<p class="mx-asteroid-evidence">'+esc(r.emphasis)+'</p>':'')+(point?'<details><summary>'+t('الموضع المحسوب','Actual ephemeris position')+'</summary><small>MPC '+a.number+' · '+signName(point.longitude)+' · '+(point.longitude%30).toFixed(3)+'°</small></details>':'')+'</article>'}).join('')+'</div></section>'+
+ '<section class="panel"><div class="section-title"><h2>'+t('مواقع الكويكبات واتصالاتها ويا خارطتك','Asteroid positions and natal contacts')+'</h2><label class="heat-label">'+t('اختار المجال','Filter by theme')+' <select id="asteroid-category"><option value="all">'+t('الكل','All')+'</option>'+categories.map(c=>'<option value="'+c+'" '+(asteroidCategory===c?'selected':'')+'>'+cat(c)+'</option>').join('')+'</select></label></div><div class="asteroids-grid reading-asteroids">'+filtered.map(a=>{const point=map.get(a.name),near=activated.get(a.name),r=currentAsteroidReading(a,point,near,lang==='en');return '<article class="asteroid-item meaning-card"><div class="meaning-head"><h3>'+esc(a.name)+'</h3><span class="'+(near?'reading-active':'reading-neutral')+'">'+(point?(near?t('اتصال شخصي محسوب','Calculated natal contact'):t('موضع محسوب · بلا اتصال قريب','Position calculated · no close natal aspect')):t('بانتظار حساب الموقع','Awaiting position calculation'))+'</span></div>'+(point?'<p>'+esc(r.theme)+'</p>':'')+(near&&r.action?'<p class="advice-action">'+esc(r.action)+'</p>':'')+(near?'<p class="mx-asteroid-evidence">'+esc(r.emphasis)+'</p>':'')+(point?'<details><summary>'+t('الموضع المحسوب','Actual ephemeris position')+'</summary><small>MPC '+a.number+' · '+signName(point.longitude)+' · '+(point.longitude%30).toFixed(3)+'°</small></details>':'')+'</article>'}).join('')+'</div></section>'+
  (contacts.length?'<details class="panel asteroid-technical"><summary>'+t('الاتصالات المحسوبة مع خارطة الميلاد (للتدقيق فقط)','Calculated natal aspects (advanced details)')+' · '+contacts.length+'</summary><div class="eclipse-contacts">'+contacts.slice(0,60).map(e=>'<span><b>'+esc(e.transit.id)+' → '+esc(planet(e.natal.id))+'</b> '+aspect(e.angle)+' · '+e.orb.toFixed(2)+'°</span>').join('')+'</div></details>':'');
 }
 const eclipseCountryNames=new Map<string,string>();
