@@ -1341,8 +1341,11 @@ function evidencePage(){
  const narrative=sections.map(({signal:s})=>{const c=copy(s),digest=resolutions.find(d=>d.category===s.category)!;
  const strongest=[...s.factors].sort((a,b)=>b.weight-a.weight)[0];
  const decision=decisionExplanation(digest,lang==='ar');
- const uniqueDecision=!shownDecisionReasons.has(decision);
- shownDecisionReasons.add(decision);
+ // Sensitive score changes share ONE page-wide explanation even if their
+ // individual domains carry different introductory mixed-signal prefixes.
+ const decisionKey=digest.sensitive?'source-sensitivity':decision;
+ const uniqueDecision=!shownDecisionReasons.has(decisionKey);
+ shownDecisionReasons.add(decisionKey);
  const why=strongest?t('السبب الفلكي: ','Astrological reason: ')+planet(strongest.transit.id)+' '+aspect(strongest.angle)+' '+planet(strongest.natal.id)+'؛ '+(strongest.applying?t('الاتصال يقترب من الاكتمال.','the contact is approaching.'):t('الاتصال يبتعد حالياً عن الدقة.','the contact is currently moving away from exactness.')):t('ماكو اتصال فلكي قوي لهذا المجال.','No strong contact for this area.');
  return '<article class="narrative-evidence"><div class="narrative-heading"><span>'+categoryLabels[s.category][2]+'</span><h3>'+cat(s.category)+'</h3><b class="reading-level '+gaugeLevel(s.score)+'">'+s.score+'</b></div><h3>'+esc(c.title)+'</h3><p>'+esc(c.good)+'</p><p class="advice-action"><strong>'+t('شنو تسوي: ','What to do: ')+'</strong>'+esc(c.action)+'</p><p class="advice-caution">'+esc(c.careful)+'</p><small>'+esc(why)+'</small>'+(uniqueDecision?'<p class="decision-line '+(digest.mixed?'decision-mixed':'')+'">'+esc(decision)+'</p>':'')+'</article>'}).join('');
  return '<section class="panel insight-lead"><h2>'+mood+'</h2><p>'+t('هاي قراءة رمزية تربط كل فكرة باتصال محسوب، وبعدها تنطيك نصيحة عملية. لا تعتبر الدرجة وعد بحدث أو معرفة لنوايا شخص آخر.','These symbolic readings tie each theme to a calculated contact and a practical action, not an event guarantee or access to another person’s mind.')+'</p><button class="secondary" id="export-report">'+t('نزّل تفاصيل الحساب إذا تحتاجها','Export technical calculation details')+'</button></section>'+
