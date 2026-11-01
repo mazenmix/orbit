@@ -92,6 +92,7 @@ export function skyClimate(current:Pick<Chart,'points'>):SkyClimate{
   const p=byId.get(id);
   if(!p||p.speed>=-1e-7)continue;
   const sign=zodiac[Math.floor(((p.longitude%360)+360)%360/30)];
+  const arSign=sign[0].startsWith('ال')?sign[0].slice(2):sign[0];
   const isVenus=id==='Venus';
   const relevant:Category[]=isVenus?['love','emotions','communication']:['communication','love','emotions'];
   const arMeaning=isVenus?
@@ -100,7 +101,7 @@ export function skyClimate(current:Pick<Chart,'points'>):SkyClimate{
   const enMeaning=isVenus?
    'Reconsider relationships, emotional sensitivities and assumed intentions; ask rather than presume.':
    'Revisit messages and earlier agreements; verify meaning before reacting.';
-  notes.push({id:'retro:'+id,arTitle:names[id][0]+' متراجع'+(isVenus?'ة':'')+' بال'+sign[0],
+  notes.push({id:'retro:'+id,arTitle:names[id][0]+' متراجع'+(isVenus?'ة':'')+' بال'+arSign,
    enTitle:names[id][1]+' retrograde in '+sign[1],
    arMeaning,enMeaning,categories:relevant,strength:isVenus?1.85:1.6,kind:'retrograde'});
   if(isVenus){weights.love.push(-5);weights.emotions.push(-2);weights.communication.push(-1);}
@@ -109,8 +110,9 @@ export function skyClimate(current:Pick<Chart,'points'>):SkyClimate{
  const moon=byId.get('Moon');
  if(moon){
   const sign=zodiac[Math.floor(((moon.longitude%360)+360)%360/30)];
+  const arSign=sign[0].startsWith('ال')?sign[0].slice(2):sign[0];
   const leo=Math.floor(((moon.longitude%360)+360)%360/30)===4;
-  notes.push({id:'moon:sign',arTitle:'القمر بال'+sign[0],enTitle:'Moon in '+sign[1],
+  notes.push({id:'moon:sign',arTitle:'القمر بال'+arSign,enTitle:'Moon in '+sign[1],
    arMeaning:leo?'الكبرياء والحساسية تجاه التجاهل أو طريقة الكلام. خَلّ التعبير واضح بدون افتراض إساءة.':
     'رمزياً، لون القمر الحالي يغيّر موضوع الانتباه العاطفي؛ لاحظ ردود فعلك بدون حكم مسبق.',
    enMeaning:leo?'Pride and sensitivity to being ignored or to wording; communicate clearly.':
