@@ -68,7 +68,7 @@ test('Travel cards reuse the exact Sex/Love/Emotions/Work quick gauge component,
  const go=main.slice(main.indexOf('function goModePage(){'),main.indexOf('function travelSymbol('));
  assert.match(main,/function quickGaugeCard\(m:MetricResult,symbol:string/);
  assert.match(today,/quickGaugeCard\(found,item.symbol,\[item.ar,item.en\]\)/);
- assert.match(travel,/group\.rows\.map\(\(\{id,metric\}\)=>quickGaugeCard\(metric,travelSymbol\(id\),undefined,id\)\)/);
+ assert.match(travel,/group\.rows\.map\(\(\{id,metric\}\)=>quickGaugeCard\(metric,travelSymbol\(id\),undefined,id,seenTravelContacts\)\)/);
  assert.match(travel,/class="mx-focus-metrics mx-travel-grid"/);
  assert.match(travel,/mx-quick-gauges/);
  assert.match(go,/indicators\.map\(m=>indicatorGaugeCard\(m\)\)/);
@@ -144,4 +144,13 @@ test('risk and rest do not reverse the meaning of red, yellow and green',()=>{
  assert.match(travelMetricReading(derivedMetrics(low.scores).find(x=>x.id==='risk')!,low).detail,/مو قياس لخطر فعلي/);
  const risk=derivedMetrics(high.scores).find(x=>x.id==='risk')!;
  assert.equal(risk.value,90,'A high readiness score must never be painted red');
+});
+
+test('Travel shares one sky contact narration per page and never repeats the global sky description in every card',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const view=readFileSync(new URL('../src/main.ts',import.meta.url),'utf8');
+ const source=readFileSync(new URL('../src/travelMode.ts',import.meta.url),'utf8');
+ assert.match(view,/seenTravelContacts=new Set<string>\(\)/);
+ assert.match(view,/repeated\?travel\.scene:travel\.summary/);
+ assert.doesNotMatch(source,/skyText\?' '\+skyText/);
 });
