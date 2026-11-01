@@ -20,7 +20,8 @@ test('Evidence prints identical decision sensitivity paragraph once per screen',
  const evidence=src.slice(src.indexOf('function evidencePage(){'),src.indexOf('function zoneChoices(',src.indexOf('function evidencePage(){')));
  assert.match(evidence,/shownDecisionReasons=new Set<string>\(\)/);
  assert.match(evidence,/uniqueDecision\?/);
- assert.match(evidence,/shownDecisionReasons\.add\(decision\)/);
+ assert.match(evidence,/shownDecisionReasons\.add\(decisionKey\)/);
+ assert.match(evidence,/digest\.sensitive\?'source-sensitivity':decision/);
 });
 test('Now clarifies overview base 92 vs derived overview 58 instead of two identically named scores',()=>{
  const src=main(),now=src.slice(src.indexOf('function nowPage(){'),src.indexOf('function nowTimeNavigation(',src.indexOf('function nowPage(){'))>0?src.indexOf('function nowTimeNavigation(',src.indexOf('function nowPage(){')):src.indexOf('function nowPage(){')+3200);
