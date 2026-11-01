@@ -68,7 +68,7 @@ import {subscribeBackgroundPush,unsubscribeBackgroundPush,sendBackgroundPushTest
 import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './progressions.ts';
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
 import {derivedMetrics,goModes,reviewContextGoMode,type GoDomain,type ContextGoReview,type MetricResult} from './metrics.ts';
-import {skyContext,contextGaugeBasis,contextGaugeNarrative,type SkyContext} from './skyContext.ts';
+import {skyContext,contextGaugeBasis,contextGaugeNarrative,contextGaugeContactKey,type SkyContext} from './skyContext.ts';
 import {skyAspectExplanation,moonSignExplanation,type SkyNote} from './skyAtmosphere.ts';
 import {travelMetricsByGroup,travelMetricReading} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
@@ -989,9 +989,10 @@ function goModePage(){
     travel:['راجع الحجز والنقل والوقت قبل ما تثبّت أي قرار.','Verify booking, transport and timing before committing.']
    };
    const advice=memo.strongest?mxGoNarrative(d.domain,state,memo):t(...contextualAdvice[d.domain]);
+   const key=contextGaugeContactKey(sky,memo.sourceCategories);
+   const alreadySeen=Boolean(key&&seenGoContacts.has(key));
+   if(key)seenGoContacts.add(key);
    const context=contextGaugeNarrative(sky,memo.sourceCategories,lang==='en');
-   const alreadySeen=seenGoContacts.has(basis);
-   seenGoContacts.add(basis);
    const narrative=(alreadySeen?'':context+' ')+advice;
    return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><small class="mx-metric-coverage">'+esc(basis)+'</small><p class="go-decision">'+narrative+'</p></div>'
   }).join('')+'</div>'
