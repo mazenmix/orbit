@@ -398,7 +398,7 @@ function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,co
    '<p class="mx-sky-feed-action"><strong>'+t('شنو تسوي؟','What to do:')+'</strong> '+esc(story.action)+'</p>';
   return '<article class="mx-sky-feed-item'+(compact?' mx-sky-feed-compact':'')+'" data-sky-event="'+esc(e.kind+':'+e.first+':'+(e.second??''))+'">'+
    '<div><strong>'+esc(story.title)+'</strong><time datetime="'+e.at.toISOString()+'">'+esc(time)+'</time></div>'+
-   '<p class="mx-sky-feed-context">'+esc(story.focus)+'</p>'+
+   (e.kind==='aspect'?'':'<p class="mx-sky-feed-context">'+esc(story.focus)+'</p>')+
    (compact?'<details class="mx-sky-event-details"><summary>'+t('اقرأ التفاصيل','Read details')+'</summary>'+more+'</details>':more)+'</article>';
  }).join('');
 }
