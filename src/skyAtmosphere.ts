@@ -110,12 +110,45 @@ function describe(a:string,b:string,angle:number):[string,string]{
   'A conjunction intensifies '+firstEn+' and '+secondEn+'; the combined themes may feel more prominent. '+stepEn
  ];
 }
-/** Shared reading of a verified planetary aspect, for all astronomical and natal sections. */
+/** Birth-chart angles and six minor bodies are explanatory topics, NOT extra sky-climate weights. */
+const natalTopics:Record<string,{topic:[string,string];step:[string,string]}>={
+ Ascendant:{topic:['حضورك والانطباع الأول','first impressions and presence'],step:['خلّي أسلوبك واضح ومريح بدون مبالغة.','Keep your presentation clear and natural.']},
+ MC:{topic:['الشغل والسمعة والمسؤولية','career, reputation and responsibility'],step:['حدد المطلوب بالشغل والموعد قبل الالتزام.','Clarify the work scope and deadline.']},
+ Chiron:{topic:['حساسية التجارب القديمة وتعلّم التعامل وياها','sensitivity from past experience and growth'],step:['اختار ردّ هادئ وما تربط الحاضر تلقائياً بالماضي.','Respond to the present rather than assuming old patterns.']},
+ Ceres:{topic:['العناية بالآخرين واحتياجاتك','caregiving and personal needs'],step:['حدد شنو تگدر تقدمه من دون ما تهمل نفسك.','Set caring boundaries without neglecting yourself.']},
+ Pallas:{topic:['حلّ المشاكل والتخطيط','problem solving and strategy'],step:['قسم المشكلة لخطوتين واضحين قبل التنفيذ.','Break the problem into two clear steps.']},
+ Juno:{topic:['الالتزام والإنصاف بالاتفاقات','commitment and fairness in agreements'],step:['اتفق على الحدود والمسؤوليات بالكلام الواضح.','Discuss commitments and boundaries directly.']},
+ Vesta:{topic:['التركيز والالتزام بهدف محدد','focus and commitment to a task'],step:['احمِ وقتك لمهمة واحدة بدل التشتت.','Protect time for one priority.']},
+ Pholus:{topic:['التفاصيل الصغيرة اللي تغيّر مسار القرار','small details with wider consequences'],step:['راجع أثر القرار الصغير قبل ما توسّع الخطوة.','Check the small decision before expanding it.']}
+};
+/** Shared interpretation of verified real contacts, without invented orbs or hidden sky data. */
 export function skyAspectExplanation(first:string,second:string,angle:number,english=false):string{
- if(!names[first]||!names[second]||!(angle in aspects))return english?
-  'Read the verified contact and its subject before drawing a conclusion.':
-  'راجع نوع الاتصال والجرمين المحسوبين قبل الاستنتاج، بدون تخمين.';
- return describe(first,second,angle)[english?1:0];
+ if(!(angle in aspects))return english?'No supported calculated aspect.':'ماكو زاوية محسوبة مدعومة لهذا الاتصال.';
+ if(names[first]&&names[second]){
+  // Two occurrences of the same planet refer to a transit-to-natal contact, not two distinct themes.
+  if(first!==second)return describe(first,second,angle)[english?1:0];
+  const role=planetTopics[first][english?1:0],step=practicalStep[first][english?1:0];
+  if(angle===90||angle===180)return english?
+   'A tension around '+role+' can make priorities compete. '+step:
+   'شدّ حول '+role+'؛ ممكن تتزاحم الأولويات أو تصعب المرونة. '+step;
+  if(angle===0)return english?'A strong focus on '+role+'. '+step:'تركيز قوي على '+role+'؛ انتبه لا تبالغ بالموضوع. '+step;
+  return english?'A supportive link within '+role+'. '+step:'انسجام نسبي بموضوع '+role+'؛ استثمره بشي عملي. '+step;
+ }
+ const firstTopic=natalTopics[first]?.topic??planetTopics[first];
+ const secondTopic=natalTopics[second]?.topic??planetTopics[second];
+ if(!firstTopic||!secondTopic)return english?'The calculated contact has no supported interpretation for these objects.':'الاتصال محسوب، بس ماكو تفسير موثوق لهذني الجرمين؛ ما راح نخترع معنى.';
+ const focus=natalTopics[first]??natalTopics[second];
+ const action=(focus?.step??practicalStep[first]??practicalStep[second])[english?1:0];
+ const one=firstTopic[english?1:0],two=secondTopic[english?1:0];
+ if(angle===90||angle===180)return english?
+  'Tension between '+one+' and '+two+'; competing priorities may be harder to reconcile. '+action:
+  'شدّ بين '+one+' و'+two+'؛ ممكن تتعارض الأولويات أو يحتاج الموضوع توضيح. '+action;
+ if(angle===0)return english?
+  'These contacts concentrate attention on '+one+' and '+two+'. '+action:
+  'تركيز يجمع '+one+' ويا '+two+'؛ ممكن يصير هالموضوع أكثر إلحاحاً. '+action;
+ return english?
+  'Cooperation between '+one+' and '+two+' may feel easier. '+action:
+  'انسجام بين '+one+' و'+two+'؛ التنسيق بينهم أسهل رمزياً. '+action;
 }
 function aspectTone(a:string,b:string,angle:number){
  if(negativeNew.includes(angle))return -1;

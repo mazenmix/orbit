@@ -76,3 +76,17 @@ test('Saturn and outer planet retrogrades get their own real-motion readings',()
  assert.notEqual(saturn.arMeaning,neptune.arMeaning);
  assert.ok(climate.adjustments.career!==0);
 });
+
+test('all supported natal planets, angles and minor bodies have a specific description for each aspect',async()=>{
+ const {skyAspectExplanation}=await import('../src/skyAtmosphere.ts');
+ const bodies=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Ascendant','MC','Chiron','Ceres','Pallas','Juno','Vesta','Pholus'];
+ for(const body of bodies)for(const angle of [0,60,90,120,180]){
+  const ar=skyAspectExplanation('Venus',body,angle);
+  const en=skyAspectExplanation('Venus',body,angle,true);
+  assert.ok(ar.length>55&&en.length>45,'Missing explanation for '+body+' '+angle);
+  assert.doesNotMatch(ar,/راجع نوع الاتصال والجرمين|ماكو تفسير موثوق/);
+  assert.doesNotMatch(ar,/(?:تربيع|تثليث|تسديس|مقابلة|اقتران)/);
+ }
+ assert.notEqual(skyAspectExplanation('Mercury','Chiron',90),skyAspectExplanation('Mercury','MC',90));
+ assert.notEqual(skyAspectExplanation('Moon','Moon',120),skyAspectExplanation('Moon','Moon',90));
+});

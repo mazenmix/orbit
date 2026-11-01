@@ -142,9 +142,7 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
  const roleA=focus(e.transit.id,language),roleB=focus(e.natal.id,language);
  const labelA=(headings[e.transit.id]??domains[s.category])[p];
  const labelB=(headings[e.natal.id]??domains[s.category])[p];
- const title=language==='ar'?
-  (labelA===labelB?'ركز على '+labelA:'وازن بين '+labelA+' و'+labelB):
-  (labelA===labelB?'Focus on '+labelA:'Balance '+labelA+' with '+labelB);
+ const title=first+' '+angle+' '+second;
  const takeaway=language==='ar'?
   tension?'القراءة تبرز شدّاً محتملاً بين '+roleA+' وبين '+roleB+'. إذا ظهر عندك تردد بقرار أو اختلاف بحوار، حدد الأولوية اللي تحتاج معالجة أولاً بدل ما تضغط على نفسك وتحسم بسرعة.':
   merged?'الموضوع الأبرز يجمع بين '+roleA+' وبين '+roleB+'. إذا واجهت موقفاً مشابهاً، اسأل نفسك: شنو أعرفه فعلاً وشنو مجرد توقع؟ هالفرق يساعدك تقرر أوضح.':
