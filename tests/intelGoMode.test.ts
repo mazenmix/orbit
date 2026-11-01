@@ -34,7 +34,7 @@ test('Go Mode remains a standalone top-level destination immediately after Now',
  assert.ok(!main.includes("data-intel-tab"),'No internal indicators/Go tabs should remain');
 });
 
-test('Go Mode contains all 29 metrics, all four daily gauges and all four decision cards on one screen',()=>{
+test('Go Mode contains all 33 metrics, all four daily gauges and all four decision cards on one screen',()=>{
  const start=main.indexOf('function goModePage(){');
  const end=main.indexOf('function asteroidsPage(){',start);
  const view=main.slice(start,end);
@@ -54,7 +54,7 @@ test('Go Mode contains all 29 metrics, all four daily gauges and all four decisi
  assert.match(view,/goCards\+renderGoLifeGauges\(sky\.scores,categories\)\+allIndicators/);
  for(const id of indicatorIds)assert.ok(main.includes("id:'"+id+"'"),id);
  const metrics=derivedMetrics(inputs);
- assert.equal(metrics.length,29,'All 29 computed indices are available');
+ assert.equal(metrics.length,33,'All 33 computed indices are available');
 });
 
 test('Today replaces its top gauges with a professional current-sky wheel in both UI modes',()=>{
