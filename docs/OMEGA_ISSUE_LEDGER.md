@@ -113,3 +113,25 @@ The above establishes **100% pass of the newly defined 18-route smoke matrix**, 
 **Still open / must not falsely certify:** production authenticated/saved real-profile lifecycle (without accessing personal secrets); all arbitrary AI-generated paraphrase equivalence across contexts; external origin abuse / rate limiting of costly AI endpoint without a configured managed rate-limit rule; full correctness of Cloudflare push scheduler with its D1/VAPID infrastructure; and completion of the expanded latest browser interaction workflow. A green smoke matrix is not a claim of 100% defect-free software.
 
 **Separate project caution:** Cloudflare Pages: `orbit` has at times failed to build; the `mxastro` target succeeded and serves the exact checked Git commit. Do not conflate those deployment checks.
+
+
+## Production integration readiness: verified, not inferred (2026-11-03)
+
+Public non-sensitive health endpoints on the deployed `d843b31905e2aa3d24cae5f3a9dde766024db9e9` application were interrogated directly. They returned:
+
+- `GET /api/explain`: `configured: true`, provider `cloudflare`, model `@cf/qwen/qwen3-30b-a3b-fp8`. Live-Qwen CI also passes.
+- `GET /api/sync`: `configured: false`, `storage: not-connected`. **OPEN INFRA-001**: Cloudflare Pages D1 binding `MX_SYNC_DB` must be provisioned for encrypted cross-device sync.
+- `GET /api/push`: `configured: false`, `schedulerEnabled: false`, `vapidPublicKey: null`. **OPEN INFRA-002**: Cloudflare D1 binding `MX_SYNC_DB`, VAPID public/private keys and a working scheduled sender must be provisioned before claiming background notification delivery.
+- `GET /build-info.json` returned exactly `d843b31905e2aa3d24cae5f3a9dde766024db9e9`, proving which source revision was served on `mxastro.pages.dev`.
+
+No Cloudflare administrative write connector/account session was available to provision production D1, secrets, or scheduler in this audit. These deployment prerequisites must never be marked as tested or operational based merely on successful JavaScript unit tests.
+
+**Application tests at this revision:**
+- [Build with mandatory full 56-body Swiss asteroid smoke](https://github.com/mazenmix/orbit/actions/runs/41546502794) — success; latest measured source test count is at least 587 with zero skips from the prior build, with extra source-only E2E test corrections.
+- [Profile screenshot/device QA](https://github.com/mazenmix/orbit/actions/runs/41546502815) — success.
+- [Today live-wheel QA](https://github.com/mazenmix/orbit/actions/runs/41546502803) — success.
+- [Chromium + WebKit visual and Qwen QA](https://github.com/mazenmix/orbit/actions/runs/41546502830) — check full matrix conclusion independently. The original E2E scenario incorrectly expected pinned Now time to persist across *re-entering* Now, conflicting with the explicitly tested LIVE-on-navigation rule. Updated scenario validates **in-place language switch** retains pinned time while **re-entering** Now resets to LIVE. Chromium passed on the corrected code; WebKit was still in progress when this entry was written.
+
+### 100% scope accounting
+
+The defined 18-screen × 2-viewport × 2-browser smoke coverage, full deterministic unit tests, 56/56 real named asteroid calculations and pinned historical numeric vectors can achieve 100% **for their stated finite test sets**. The claim "all defects in an open-ended application are proven absent" is not formally verifiable. The two unconfigured cloud integrations are explicit functional gaps. Keep them open until production API health endpoints and actual end-to-end encrypted sync and scheduled Web Push deliveries verify true.
