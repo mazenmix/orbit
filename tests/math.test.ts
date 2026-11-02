@@ -40,3 +40,18 @@ test('relationship dimensions without a relevant close aspect have no claimed ev
  assert.equal(compatibilityHasEvidence('emotional',contacts),false);
  assert.equal(compatibilityHasEvidence('attraction',[]),false);
 });
+
+test('synastry never creates fabricated contacts or double-counts duplicated natal bodies',()=>{
+ const valid=[point('Venus',0)];
+ assert.throws(()=>synastry([{...valid[0],longitude:NaN}],[point('Mars',120)]),/Invalid first synastry/);
+ assert.throws(()=>synastry(valid,[point('Mars',Infinity)]),/Invalid second synastry/);
+ assert.throws(()=>synastry([...valid,...valid],[point('Mars',120)]),/Repeated first synastry/);
+ assert.throws(()=>synastry(valid,[point('Mars',120),point('Mars',120)]),/Repeated second synastry/);
+ const evidence=synastry(valid,[point('Mars',120)]);
+ assert.equal(evidence.length,1);
+ assert.ok(Number.isFinite(compatibilityScore('attraction',evidence)));
+ assert.throws(()=>compatibilityScore('attraction',[{...evidence[0],influence:NaN}]),/Invalid calculated synastry/);
+ assert.throws(()=>compatibilityHasEvidence('attraction',[{...evidence[0],orb:NaN}]),/Invalid calculated synastry/);
+ assert.throws(()=>compatibilityScore('attraction',evidence,Infinity),/Invalid compatibility scoring/);
+ assert.throws(()=>compatibilityScore('attraction',evidence,1,NaN),/Invalid compatibility scoring/);
+});

@@ -105,7 +105,21 @@ export function profectionCategory(house:number):Category{return [2,6,10].includ
 export function scores(items:Signal[],house:number){const out=Object.fromEntries(categories.map(c=>[c,50])) as Record<Category,number>;for(const s of items)out[s.category]=s.score;if(Number.isInteger(house)&&house>=1&&house<=12){const c=profectionCategory(house);if(items.some(s=>s.category===c))out[c]=Math.min(99,out[c]+5)}return out}
 export function houseNumber(lon:number,cusps:number[]){if(cusps.length!==12)return 0;for(let i=0;i<12;i++){const start=normalize(cusps[i]);const arc=normalize(cusps[(i+1)%12]-start);if(normalize(lon-start)<arc)return i+1}return 0}
 export type SynastryEvidence={first:Point;second:Point;angle:number;orb:number;influence:number};
-export function synastry(a:Point[],b:Point[]):SynastryEvidence[]{const out:SynastryEvidence[]=[];for(const first of a)for(const second of b){
+export function synastry(a:Point[],b:Point[]):SynastryEvidence[]{
+ // NaN comparisons such as (orb > max) evaluate false, allowing an invented
+ // contact with NaN influence through the old loop. Duplicate planet records
+ // likewise multiply compatibility contributions. Validate both charts first.
+ for(const [label,points] of [['first',a],['second',b]] as const){
+  const seen=new Set<string>();
+  for(const point of points){
+   if(typeof point.id!=='string'||!point.id.trim()||!Number.isFinite(point.longitude)||
+    point.longitude<0||point.longitude>=360||!Number.isFinite(point.speed))
+    throw Error('Invalid '+label+' synastry coordinates');
+   if(seen.has(point.id))throw Error('Repeated '+label+' synastry body: '+point.id);
+   seen.add(point.id);
+  }
+ }
+ const out:SynastryEvidence[]=[];for(const first of a)for(const second of b){
  const ids=[first.id,second.id],pair=[...ids].sort().join('|'),sep=distance(first.longitude,second.longitude);
  const max=ids.includes('Sun')||ids.includes('Moon')?6:ids.includes('Ascendant')?5:ids.some(i=>['Mercury','Venus','Mars'].includes(i))?4.5:3.5;
  const angle=angles.reduce<number>((best,x)=>Math.abs(sep-x)<Math.abs(sep-best)?x:best,0),orb=Math.abs(sep-angle);if(orb>max)continue;
@@ -124,13 +138,25 @@ const relevance:Record<Dimension,Record<string,number>>={
 /** Report whether a compatibility dimension has an actually calculated close
  * aspect that contributes to its rubric. The neutral 50 score alone is not
  * evidence of attraction, intimacy, communication or mutual intent. */
+function validatedSynastryEvidence(evidence:readonly SynastryEvidence[]){
+ for(const e of evidence)if(![0,60,90,120,180].includes(e.angle)||
+  !Number.isFinite(e.orb)||e.orb<0||e.orb>6||!Number.isFinite(e.influence)||
+  e.influence<=0||e.influence>1||!Number.isFinite(e.first.longitude)||
+  !Number.isFinite(e.second.longitude))
+  throw Error('Invalid calculated synastry evidence');
+}
 export function compatibilityHasEvidence(dim:Dimension,evidence:readonly SynastryEvidence[]):boolean{
+ validatedSynastryEvidence(evidence);
  return evidence.some(e=>{
   const pair=[e.first.id,e.second.id].sort().join('|');
   return (relevance[dim][pair]??0)>0;
  });
 }
-export function compatibilityScore(dim:Dimension,evidence:SynastryEvidence[],factor=1,bonus=0){let delta=bonus;for(const e of evidence){const pair=[e.first.id,e.second.id].sort().join('|'),r=relevance[dim][pair]??0;let g:number;
+export function compatibilityScore(dim:Dimension,evidence:SynastryEvidence[],factor=1,bonus=0){
+ if(!Number.isFinite(factor)||factor<0||factor>2||!Number.isFinite(bonus))
+  throw Error('Invalid compatibility scoring parameters');
+ validatedSynastryEvidence(evidence);
+ let delta=bonus;for(const e of evidence){const pair=[e.first.id,e.second.id].sort().join('|'),r=relevance[dim][pair]??0;let g:number;
  if(dim==='conflict')g=challenging(e)?1:harmonious(e)?-.42:/Mars|Pluto|Uranus/.test(pair)?.68:.18;
  else if(harmonious(e))g=1;else if(challenging(e))g=(dim==='attraction'||dim==='sexual')?(pair==='Mars|Venus'||pair.includes('Pluto')?.35:-.48):-.78;
  else g=pair.includes('Saturn')?(dim==='stability'?.82:-.18):.82;
