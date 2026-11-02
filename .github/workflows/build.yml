@@ -24,6 +24,21 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: pnpm build
+      - name: Produce machine-readable static Omega inventory
+        run: |
+          node scripts/omega-inventory.mjs artifacts/omega-inventory.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const inventory=JSON.parse(fs.readFileSync("artifacts/omega-inventory.json","utf8"));
+            if(!inventory.modules?.length||!inventory.routes?.length||!inventory.testFiles?.length)
+              throw new Error("Source/route/test inventory is incomplete");
+            console.log(JSON.stringify(inventory.counts));
+          '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mx-astro-omega-static-inventory
+          path: artifacts/omega-inventory.json
+          if-no-files-found: error
       - name: Live Swiss asteroid smoke (informational)
         continue-on-error: true
         env:
