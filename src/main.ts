@@ -22,7 +22,7 @@ import './now.css';
 import './moonMansions.css';
 import './navAlignment.css';
 import {lunarMansionWindow,type LunarMansionWindow} from './moonMansions.ts';
-import {astroCalendarDays,firstTwelveCalendarMonths,astroCalendarGridPosition,calendarDaySynthesis,calendarMomentEvidence,CALENDAR_SAMPLE_HOURS,type AstroCalendarDay,type AstroCalendarRating,type CalendarDayRating} from './astroCalendar.ts';
+import {astroCalendarFullMonths,astroCalendarGridPosition,calendarDaySynthesis,calendarMomentEvidence,CALENDAR_SAMPLE_HOURS,type AstroCalendarDay,type AstroCalendarRating,type CalendarDayRating} from './astroCalendar.ts';
 import {optionalComparison,distinctParagraphs} from './reading.ts';
 import {narrativeEvidence} from './narrativeEvidence.ts';
 import {CALCULATION_VERSION} from './engine.ts';
@@ -60,7 +60,7 @@ import {soulCategories,soulTopics} from './soulData.ts';
 import {relationshipWindows,bestWindows} from './relationshipWindows.ts';
 import {relationshipDayReading} from './relationshipDayNarrative.ts';
 import {lunarWindow,type LunarWindow} from './timing.ts';
-import {vocPhase,vocColorState,elapsedPercent} from './liveVoc.ts';
+import {vocPhase,vocColorState,elapsedPercent,vocDisplayProgress} from './liveVoc.ts';
 import {calendarEvent,calendarDownload} from './calendar.ts';
 import {encryptBackup,decryptBackup} from './secureBackup.ts';
 import {isVaultConfigured,vaultOpened,setupVault,flushVault,vaultPending,unlockVaultWithUI} from './vault.ts';
@@ -981,7 +981,8 @@ function nowPage(){
  try{
   const moon=moonWindow(),at=+selected;
   rows.push({id:'moon-sign',label:t('تقدّم القمر بالبرج','Moon sign progress')+' · '+signName(moon.sign*30),value:Math.round(elapsedPercent(+moon.enteredAt,+moon.ingressAt,at)),tone:'mx-now-moon'});
-  rows.push({id:'moon-voc',label:moon.isVoid?t('تقدّم خلو المسار · فعّال','VOC progress · active'):t('خلو المسار · لم يبدأ','Void of course · not started'),value:Math.round(elapsedPercent(+moon.vocStartsAt,+moon.ingressAt,at)),tone:'mx-now-void '+(moon.isVoid?'is-voc':'is-clear')});
+  const voc=vocDisplayProgress(+moon.enteredAt,+moon.vocStartsAt,+moon.ingressAt,at);
+   rows.push({id:'moon-voc',label:voc.phase==='active'?t('تقدّم خلو المسار · فعّال','VOC progress · active'):t('التقدّم نحو خلو المسار · لم يبدأ','Progress toward VOC · not started'),value:Math.round(voc.percent),tone:'mx-now-void '+(voc.phase==='active'?'is-voc':'is-clear')});
  }catch(e){console.warn('Now Moon timing unavailable',e)}
  return '<section class="mx-now-page" data-section="now" aria-label="Now">'+nowTimeNavigation()+'<div class="mx-now-list">'+
   rows.map(({id,label,value,tone})=>{
@@ -1153,7 +1154,7 @@ function astroCalendarToday(){
 function initializeAstroCalendar(){
  const today=astroCalendarToday(),version=JSON.stringify([active,today]);
  if(version===calendarVersion)return;
- calendarVersion=version;calendarAnchor=today;calendarDays=firstTwelveCalendarMonths(astroCalendarDays(today));
+ calendarVersion=version;calendarAnchor=today;calendarDays=astroCalendarFullMonths(today);
  calendarSnapshots.clear();calendarFailures.clear();calendarNatal=null;calendarCursor=0;calendarGeneration++;calendarRunning=false;calendarSelected=today;
 }
 function calendarColorLabel(color:AstroCalendarRating['color']){

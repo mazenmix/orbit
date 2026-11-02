@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {astroCalendarDays,firstTwelveCalendarMonths,astroCalendarGridPosition,colorizeAstroDay,calendarColorForScore,fortuneContactWeight,fortuneContactTone} from '../src/astroCalendar.ts';
+import {astroCalendarDays,astroCalendarFullMonths,firstTwelveCalendarMonths,astroCalendarGridPosition,colorizeAstroDay,calendarColorForScore,fortuneContactWeight,fortuneContactTone} from '../src/astroCalendar.ts';
 const aspect=(angle:number,transit='Venus',orb=.1,weight=.9)=>({
  id:transit+'-'+angle+'-Sun',transit:{id:transit,symbol:'✦',longitude:100,speed:1},
  natal:{id:'Sun',symbol:'☉',longitude:100,speed:0},angle,orb,maximumOrb:2,applying:true,weight,exact:null
@@ -83,4 +83,18 @@ test('calendar cells align to explicit Monday-through-Sunday columns even under 
   assert.ok(p.column>=1&&p.column<=7&&p.row>=1);
  }
  for(const args of [[-1,0],[7,0],[0,-1],[NaN,0],[2,1.5]])assert.throws(()=>astroCalendarGridPosition(args[0],args[1]));
+});
+
+
+test('visible year includes the complete current month and the eleven complete following months',()=>{
+ const november=astroCalendarFullMonths('2026-11-02');
+ assert.equal(november[0].iso,'2026-11-01');
+ assert.equal(november.at(-1)?.iso,'2027-10-31');
+ assert.equal(new Set(november.map(x=>x.monthKey)).size,12);
+ assert.equal(november.find(x=>x.iso==='2026-11-02')?.day,2);
+ const leap=astroCalendarFullMonths('2028-02-29');
+ assert.equal(leap[0].iso,'2028-02-01');
+ assert.equal(leap.at(-1)?.iso,'2029-01-31');
+ assert.ok(leap.some(x=>x.iso==='2028-02-29'));
+ assert.throws(()=>astroCalendarFullMonths('2026-02-31'));
 });

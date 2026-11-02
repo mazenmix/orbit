@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {vocPhase,vocColorState,vocRemaining,remainingPercent,elapsedPercent} from '../src/liveVoc.ts';
+import {vocPhase,vocColorState,vocRemaining,remainingPercent,elapsedPercent,vocDisplayProgress} from '../src/liveVoc.ts';
 test('Void of Course begins and ends at the exact calculated boundaries',()=>{
  const start=Date.UTC(2026,9,18,19,23,0),end=start+77*60*1000;
  assert.equal(vocPhase(start,end,start-1),'upcoming');
@@ -77,4 +77,15 @@ test('Both Today and lunar page bind elapsed percentages to their calculated int
  assert.doesNotMatch(gauge,/remainingPercent\(/);
  assert.match(status,/progress\[data-moon-progress\]/);
  assert.match(status,/elapsedPercent\(from,to,now\)/);
+});
+
+test('Now VOC progress advances before onset and through its actual interval',()=>{
+ const entered=0,start=8000,end=12000;
+ assert.deepEqual(vocDisplayProgress(entered,start,end,4000),{phase:'upcoming',percent:50});
+ assert.deepEqual(vocDisplayProgress(entered,start,end,6000),{phase:'upcoming',percent:75});
+ assert.deepEqual(vocDisplayProgress(entered,start,end,8000),{phase:'active',percent:0});
+ assert.deepEqual(vocDisplayProgress(entered,start,end,10000),{phase:'active',percent:50});
+ assert.deepEqual(vocDisplayProgress(entered,start,end,12000),{phase:'elapsed',percent:100});
+ assert.deepEqual(vocDisplayProgress(NaN,start,end,4000),{phase:'elapsed',percent:0});
+ assert.deepEqual(vocDisplayProgress(9000,start,end,4000),{phase:'elapsed',percent:0});
 });

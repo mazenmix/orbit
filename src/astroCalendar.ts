@@ -163,6 +163,13 @@ export function astroCalendarDays(today:string):AstroCalendarDay[]{
  return days;
 }
 
+/** Display twelve COMPLETE calendar months from the visitor's current month.
+ * Unlike the rolling-day API, do not discard dates earlier this month. */
+export function astroCalendarFullMonths(today:string):AstroCalendarDay[]{
+ const days=astroCalendarDays(today); // validates date and leap day
+ return astroCalendarDays(days[0].monthKey+'-01');
+}
+
 /** The 12 visible calendar cards start with the current month and end with
  * the eleventh following month, in chronological order. A rolling 365-day
  * source may include a thirteenth partial month; that extra card is omitted.

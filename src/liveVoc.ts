@@ -26,3 +26,12 @@ export function elapsedPercent(start:number,end:number,now:number):number{
  if(!Number.isFinite(start)||!Number.isFinite(end)||!Number.isFinite(now)||end<=start)return 0;
  return Math.max(0,Math.min(100,100*(now-start)/(end-start)));
 }
+/** The upcoming period advances toward the exact start; the active period
+ * advances toward ingress. This avoids a motionless zero gauge before VOC. */
+export function vocDisplayProgress(enteredAt:number,vocStartsAt:number,ingressAt:number,now:number):{phase:VocPhase;percent:number}{
+ if(![enteredAt,vocStartsAt,ingressAt,now].every(Number.isFinite)||
+  enteredAt>vocStartsAt||vocStartsAt>=ingressAt)return {phase:'elapsed',percent:0};
+ const phase=vocPhase(vocStartsAt,ingressAt,now);
+ const percent=phase==='upcoming'?elapsedPercent(enteredAt,vocStartsAt,now):elapsedPercent(vocStartsAt,ingressAt,now);
+ return {phase,percent};
+}

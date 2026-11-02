@@ -412,7 +412,7 @@ test('Calendar shows all twelve months immediately and has no show-more control'
  const surface=main.slice(main.indexOf('function focusedCalendar(){'),main.indexOf('function focusedTime(){'));
  assert.doesNotMatch(surface,/calendar-expand|calendarExpanded|إظهار شهرين|إظهار كل الأشهر/);
  assert.match(surface,/mx-calendar-compact is-expanded/);
- assert.match(main,/calendarDays=firstTwelveCalendarMonths\(astroCalendarDays\(today\)\)/);
+ assert.match(main,/calendarDays=astroCalendarFullMonths\(today\)/);
  assert.match(main,/function calendarTargetDays\(\):number\{return calendarDays\.length;\}/);
  assert.doesNotMatch(focus,/astro-cal-month:nth-child\(n\+3\)\{display:none\}/);
  assert.match(cal,/\.astro-cal-months\[dir="ltr"\]/);
