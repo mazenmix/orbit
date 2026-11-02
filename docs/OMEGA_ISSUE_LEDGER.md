@@ -62,3 +62,32 @@ Additional root-cause work was committed to `main` and run through GitHub CI. Th
 - `https://mxastro.pages.dev/` loaded with fresh rendered Greenwich demo and calculated-sky content after the provider deployment check. A successful live page load alone does not prove the four corrected edge cases were hit in production.
 
 **Remaining acceptance work:** Dynamic browser interaction for the entire route/profile/time matrix, fully source-grounded bilingual semantic-claim audit, independently root-solved numerical vectors across the full ephemeris and historical range, and a production-version check coupled to the actual edge-case behavior. No “100% complete” claim is warranted.
+
+
+## Full route/browser acceptance expansion — 2026-11-03
+
+**Latest tested application revision:** `338093066936f15045da572367547407f300c399`.
+
+### Corrected and regression-tested
+
+| Issue | Source repair | Verification |
+| --- | --- | --- |
+| OMEGA-010 · Same sky event narrated twice in Today | `src/skyEventIdentity.ts` introduces timestamped astronomical identity (kind, moving body, target, angle/sign/direction). Hero/timeline share that ID, not localized title strings; Moon identification uses actual body IDs. Commits `a89b1e48`, `f37ef296` (legacy source test update). | `tests/skyEventIdentity.test.ts`, full unit/build PASS |
+| OMEGA-011 · Numeric claims lost by text de-dup | `paragraphFingerprint` used to remove all punctuation, silently collapsing e.g. 1.2° and 12°, 10:30 and 1030, or signed measurements. Preserves significant numeric separators and signs while normalizing Arabic diacritics/letters. Commit `7dcb8322`. | `tests/reading.test.ts` arithmetic/angle/time regression PASS |
+| OMEGA-012 · Same-planet interpretation duplicated across distinct aspect geometries | Former semantic template reused identical wording for square vs opposition and sextile vs trine. Five different practical meanings now authored for each principal self-planet aspect in natural Iraqi Arabic and English, without exposing angular jargon in the daily prose. Commits `7f702544`, `33809306`. | `tests/skyAtmosphere.test.ts` matrix for 10 planets × 5 aspects × 2 languages, editorial jargon-quality suite PASS |
+| OMEGA-013 · Missing exhaustive route rendering gate | New browser smoke matrix exercises **all 18 route keys**, at **1440px desktop and 390px iPhone** widths, on **Chromium and WebKit**, asserting rendered content, no unhandled browser exception, no fatal error alert, no NaN/undefined in visible text, and bounded horizontal overflow. Commit `519989ff`. | https://github.com/mazenmix/orbit/actions/runs/41543051529 — both browser engines **SUCCESS** |
+| OMEGA-014 · Independent astronomical reference regression not encoded | Added verified independent PySwissEph UTC fixtures for Moon–Jupiter conjunction 2026-11-02 22:50:34 UTC, Moon–Venus sextile 2026-11-03 00:10:29 UTC, Moon Virgo ingress 2026-11-03 08:27:45 UTC, plus Moon VOC ordering and location-independent geocentric coordinates. Commit `43731571`. | `tests/astronomyReference.test.ts` PASS on revision `33809306` |
+
+### Verified acceptance for application revision `33809306`
+
+- **Build/test** https://github.com/mazenmix/orbit/actions/runs/41543051510 — **SUCCESS**. The node test report recorded **581 tests, 580 passes, 0 fails** (one test not passed/skipped); build, static inventory, and Swiss smoke all successful.
+- **Browser QA** https://github.com/mazenmix/orbit/actions/runs/41543051529 — **SUCCESS**, including **Chromium SUCCESS**, **WebKit SUCCESS**, and a successful `live-qwen` CI job.
+- **Cloudflare Pages: mxastro** — GitHub commit check **SUCCESS** on `33809306`. **Cloudflare Pages: orbit** is a separate provider check and reports failure; do not mistake it for the target application's deployment.
+- **Live site** https://mxastro.pages.dev/ — separately fetched JS-rendered production content for all 18 route URLs. Several snapshots were captured before asynchronous hydration completed; those cannot independently validate full loaded-page functionality. The desktop/iPhone browser test matrix did complete successfully on the build preview.
+- Number of combinations of route × viewport × browser in the **route smoke matrix**: 18 × 2 × 2 = **72**. These are basic rendering/exception/overflow checks, **not 72 distinct user-action scenarios**.
+
+### Strict 100% distinction
+
+The above establishes **100% pass of the newly defined 18-route smoke matrix**, not 100% perfection of the entire application's astronomy, content generation, usability, security, integrations, user profiles, and actual production behavior. Full scientific validation of astrological predictions is not achievable from software tests; numerical ephemeris data and deterministic calculations can be verified, while narrative interpretation is editorial/symbolic.
+
+**Open acceptance:** production interaction tests against authenticated/saved real user profiles, a comprehensive semantic-equivalence check for paraphrases across all narrative modules, independent multi-epoch/multi-location ephemeris comparison beyond the pinned 2026 sample, deeper security and resilience testing, and a robust live-release build identifier check. Do not claim these complete.
