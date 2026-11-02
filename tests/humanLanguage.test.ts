@@ -66,7 +66,8 @@ test('reader interfaces keep exact calculations inside optional disclosures',()=
  const main=readFileSync('src/main.ts','utf8');
  const soul=readFileSync('src/soulUI.ts','utf8');
  assert.ok(main.includes('moonHumanReading(sign,r,active.known,lang)'));
- assert.ok(main.includes('humanPartner(brief.attractionContact'));
+ assert.ok(main.includes('relationshipEditorial(brief)'),'Relationship summary must use distinct, evidence-based editorial notes');
+ assert.ok(main.includes('reading.sexual.body'),'Attraction and intimate chemistry must have separate readings');
  assert.ok(main.includes('natalPortrait(r.natal,person.known,lang)')); // Retained personalized natal reading
  assert.ok(main.includes('case \'evidence\':inner=evidencePage()'));
  const focused=main.slice(main.indexOf('function focusedToday(){'),main.indexOf('/** A stable daily scan'));
