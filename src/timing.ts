@@ -36,7 +36,15 @@ export function exactCrossings(read:SkyReader,transit:string,target:string,angle
    const next=diff(t,phase);
    if(prev*next<=0&&Math.abs(prev-next)<180){
     const time=bisectAngle(x=>diff(x,phase),previous,t);
-    if(time&&!events.some(e=>Math.abs(+e.time-+time)<120000))events.push({time,transit,target,angle,phase});
+    // A sampled zero can be a tangent rather than a genuine aspect
+    // crossing. Verify the signed angular error on BOTH sides of the
+    // refined root; never publish a contact from a touch alone.
+    if(time){
+     const before=diff(+time-60000,phase),after=diff(+time+60000,phase);
+     const crosses=before*after<0&&Math.abs(before-after)<180;
+     if(crosses&&!events.some(e=>Math.abs(+e.time-+time)<120000))
+      events.push({time,transit,target,angle,phase});
+    }
    }
    if(t===+to)break;
    previous=t;prev=next;

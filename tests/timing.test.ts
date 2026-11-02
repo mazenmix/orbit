@@ -33,3 +33,17 @@ test('search refuses invalid spans and unsupported aspect types',()=>{
 });
 
 test('incomplete VOC data fails instead of inventing a void window',()=>{assert.throws(()=>lunarWindow(new Date(start),at=>mock(at).filter(p=>p.id!=='Saturn')),/VOC ephemeris body: Saturn/)});
+
+test('a sampled zero that only touches the aspect is NOT an exact event',()=>{
+ const center=start+2*3600000;
+ const tangent:SkyReader=at=>{
+  const hours=(+at-center)/3600000;
+  return [{id:'Moon',longitude:20+hours*hours},{id:'Sun',longitude:20}];
+ };
+ const crossings=exactCrossings(tangent,'Moon','Sun',0,new Date(start),new Date(start+4*3600000),1);
+ assert.equal(crossings.length,0,'touching zero cannot fabricate a perfected aspect');
+ const real:SkyReader=at=>[{id:'Moon',longitude:20+(+at-center)/3600000},{id:'Sun',longitude:20}];
+ const verified=exactCrossings(real,'Moon','Sun',0,new Date(start),new Date(start+4*3600000),1);
+ assert.equal(verified.length,1,'a true zero crossing at a sample boundary remains detectable');
+ assert.ok(Math.abs(+verified[0].time-center)<=60000);
+});
