@@ -428,7 +428,7 @@ test('Calendar shows all twelve months immediately and has no show-more control'
 });
 
 test('GO decision displays only one practical explanation while keeping source arithmetic in expandable details',()=>{
- const src=main();
+ const src=main;
  const section=src.slice(src.indexOf('function goModePage(){'),src.indexOf('function travelSymbol('));
  assert.match(section,/const basis=contextGoScoreBasis\(d,indicators,sky,lang==='en'\)/);
  assert.match(section,/class="go-evidence"/);
