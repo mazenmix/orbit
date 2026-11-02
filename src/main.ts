@@ -1390,8 +1390,7 @@ function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
  const romantic=c.romantic;
  const evidence=(note:typeof reading.attraction)=>
   note.source?'<small class="mx-brief-evidence">'+
-   (note.sharedSource?t('نفس الزاوية الفلكية أعلاه','Same chart aspect as above')+': ':'')+
-   (note.sharedSource?'':t('الاتصال المحسوب','Calculated contact')+': ')+text(note.source)+'</small>':'';
+   (note.sharedSource?t('نفس الاتصال المذكور بالجاذبية','Same aspect as attraction'):t('الاتصال المحسوب','Calculated contact')+': '+text(note.source))+'</small>':'';
  const card=(icon:string,labelAr:string,labelEn:string,note:NonNullable<typeof reading.harmony>)=>
   '<article class="mx-brief-card metric-card"><small>'+icon+' '+t(labelAr,labelEn)+'</small><h3>'+text(note.title)+'</h3>'+
   '<p>'+text(note.body)+'</p>'+evidence(note)+
