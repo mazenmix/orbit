@@ -94,7 +94,7 @@ test('GO negative composite prioritizes a genuine challenging contributor over a
  const supportive={transit:'Sun',natal:'Sun',angle:120,orb:0,strength:1,tone:1};
  const challenging={transit:'Mars',natal:'Uranus',angle:90,orb:1,strength:.85,tone:-1};
  const career={...seed.domains.career,score:contextScore([supportive]),contacts:1,contributors:[supportive]};
- const timing={...seed.domains.timing,score:contextScore([challenging]),contacts:1,contributors:[challenging]};
+ const timing={...seed.domains.timing,score:contextScore([challenging],-16),skyAdjustment:-16,contacts:1,contributors:[challenging]};
  const context={...seed,domains:{...seed.domains,career,timing}};
  assert.ok(Math.round((career.score+timing.score)/2)<50);
  assert.equal(contextGaugeContactKey(context,['career','timing']),'Mars:Uranus:90');
