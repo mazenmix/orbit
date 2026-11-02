@@ -864,3 +864,47 @@ function assertNoDuplicates(values){
  const nonempty=values.map(s=>s.trim()).filter(Boolean);
  if(new Set(nonempty).size!==nonempty.length)throw Error('Repeated Evidence decision analysis on same page');
 }
+
+
+/** OMEGA smoke matrix: visit every real route in both supported viewport classes.
+ * A page is not considered covered just because its TypeScript compiles.
+ * Screens with optional astronomical evidence may show an explicit unavailable
+ * state; they must not crash, show NaN/undefined values, or clip horizontally.
+ */
+for(const [viewportName,width,height] of [['desktop',1440,900],['iphone',390,844]]){
+ test('OMEGA 18-route live browser smoke · '+viewportName,async({page})=>{
+  test.setTimeout(8*60*1000);
+  const exceptions=[];
+  page.on('pageerror',error=>exceptions.push(error.message));
+  await page.setViewportSize({width,height});
+  await page.goto('/#today',{waitUntil:'domcontentloaded'});
+  await page.locator('#app .shell').waitFor({state:'visible',timeout:75000});
+  await page.locator('#live-view-body .loading').waitFor({state:'hidden',timeout:75000});
+  const routes=['today','signals','chart','time','lunar','calendar','eclipses','asteroids','advanced','intel','go','travelmode','people','now','evidence','ai','settings','more'];
+  const visited=[];
+  for(const route of routes){
+   await page.goto('/#'+route,{waitUntil:'domcontentloaded'});
+   await page.locator('#live-view-body').waitFor({state:'attached',timeout:20000});
+   await expect.poll(()=>page.locator('#live-view-body').evaluate(node=>{
+    const copy=(node.textContent??'').trim();
+    return copy.length>15&&!node.querySelector('.loading');
+   }),{timeout:30000,message:'Route '+route+' did not render'}).toBe(true);
+   const status=await page.evaluate(()=>{
+    const view=document.querySelector('#live-view-body');
+    return {
+     contentLength:view?.textContent?.trim().length??0,
+     overflow:document.documentElement.scrollWidth-window.innerWidth,
+     fatal:!!view?.querySelector('.alert'),
+     rawNaN:/(?:^|[^a-z])(?:NaN|undefined)(?:$|[^a-z])/i.test((view?.textContent??'').replace(/\bnot undefined\b/gi,'')),
+    };
+   });
+   expect(status.contentLength,'Rendered '+route+' content').toBeGreaterThan(15);
+   expect(status.fatal,'Fatal alert in '+route).toBe(false);
+   expect(status.rawNaN,'Broken displayed numeric data in '+route).toBe(false);
+   expect(status.overflow,'Document overflow on '+route+' at '+width).toBeLessThan(10);
+   visited.push(route);
+  }
+  expect(visited).toHaveLength(18);
+  expect(exceptions,'Unhandled browser exceptions across '+viewportName+': '+exceptions.join(' ; ')).toEqual([]);
+ });
+}
