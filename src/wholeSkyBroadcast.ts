@@ -89,7 +89,14 @@ export function scanWholeSky(at:Date,read:WholeSkyReader,hoursBack=18,hoursAhead
     if(fa*fb>0||Math.abs(fa-fb)>90)continue;
     const fn=(t:number)=>signed(point(t,first).longitude-point(t,second).longitude-phase);
     const root=bisectAngle(fn,a,b,.1);
-    if(root&&Math.abs(fn(+root))<.02)emit({kind:'aspect',at:root,first,second,angle});
+    if(root&&Math.abs(fn(+root))<.02){
+     // A sampled zero can be a tangent (touch) rather than a perfected
+     // aspect. Confirm the signed angular difference changes sign on
+     // either side; use the same true-crossing principle as lunar timing.
+     const before=fn(+root-60000),after=fn(+root+60000);
+     if(before*after<0&&Math.abs(before-after)<90)
+      emit({kind:'aspect',at:root,first,second,angle});
+    }
    }
   }
  }

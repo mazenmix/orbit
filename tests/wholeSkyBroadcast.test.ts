@@ -247,3 +247,20 @@ test('Compact planetary gauges show exact localized station date and minute with
  assert.match(main,/tickPlanetMotionGauges/);
 });
 
+
+test('whole-sky exact scanner rejects a tangent zero at a sample boundary, but keeps a real crossing',()=>{
+ const start=Date.parse('2026-11-02T12:00:00Z'),center=start+2*3600000;
+ const bodies=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+ const make=(t:Date,real:boolean)=>bodies.map((id,i)=>{
+  const hours=(+t-center)/3600000;
+  return {id,symbol:id,speed:id==='Moon'?real?1:hours*2:0,
+   longitude:id==='Sun'?20:id==='Moon'?20+(real?hours:hours*hours):(i*37+12)%360};
+ });
+ const tangent=scanWholeSky(new Date(start),at=>make(at,false),0,4);
+ assert.equal(tangent.some(e=>e.kind==='aspect'&&e.first==='Sun'&&e.second==='Moon'&&e.angle===0),false,
+  'a contact that only touches the zero angle cannot be reported as exact');
+ const crossing=scanWholeSky(new Date(start),at=>make(at,true),0,4);
+ const exact=crossing.filter(e=>e.kind==='aspect'&&e.first==='Sun'&&e.second==='Moon'&&e.angle===0);
+ assert.equal(exact.length,1);
+ assert.ok(Math.abs(+exact[0].at-center)<=60000);
+});
