@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {relationshipBrief} from '../src/relationshipBrief.ts';
+import {synastryPlainReading} from '../src/relationshipPlain.ts';
 import type {SynastryEvidence} from '../src/math.ts';
 const p=(id:string)=>({id,symbol:'·',longitude:100,speed:0});
 const aspect=(a:string,b:string,angle:number,orb=.5,influence=.9):SynastryEvidence=>({first:p(a),second:p(b),angle,orb,influence});
@@ -40,4 +41,19 @@ test('challenge copy stays specific to a calculated Sun-Neptune square',()=>{
  assert.match(item.challengeTitle.ar,/التوقعات/);
  assert.match(item.challenge.ar,/التربيع/);
  assert.match(item.challengeAction.ar,/التوقعات/);
+});
+
+test('bespoke synastry stories never append an unrelated second paragraph for the same contact',()=>{
+ const harmonious=aspect('Venus','Mars',120);
+ const challenge=aspect('Sun','Neptune',90);
+ const item=relationshipBrief([harmonious,challenge]);
+ assert.equal(item.harmony.ar,synastryPlainReading(harmonious,'harmony').meaning.ar);
+ assert.equal(item.challenge.ar,synastryPlainReading(challenge,'challenge').meaning.ar);
+ assert.match(item.harmony.ar,/الزهرة بالمريخ/);
+ assert.match(item.challenge.ar,/التوقعات/);
+});
+test('unrecognized synastry objects do not display engine template-warning text',()=>{
+ const item=relationshipBrief([aspect('MysteryBody','AnotherBody',60)]);
+ assert.doesNotMatch(item.harmony.ar,/ما عنده قراءة مخصصة|ماكو زاوية محسوبة مدعومة/);
+ assert.doesNotMatch(item.harmony.en,/no verified object-specific narrative/i);
 });

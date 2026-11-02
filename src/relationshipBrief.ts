@@ -92,13 +92,24 @@ export function relationshipBrief(evidence:readonly SynastryEvidence[]):Relation
  const selected=new Set([attractionContact,sexualContact].filter(Boolean));
  const harmonyContact=supportive.find(e=>!selected.has(e))??supportive[0]??null;
  const challengeContact=challenging.find(e=>!selected.has(e))??challenging[0]??null;
+ // The Sun–Neptune square and Venus–Mars harmony already have bespoke
+ // complete narratives in relationshipPlain. Appending a second sky-aspect
+ // story repeats the same subject and advice verbatim in these boxes.
+ const alreadyDetailed=(e:SynastryEvidence|null,kind:'harmony'|'challenge')=>
+  !!e&&((kind==='harmony'&&joined(e)==='Mars|Venus'&&(e.angle===60||e.angle===120))||
+  (kind==='challenge'&&joined(e)==='Neptune|Sun'&&e.angle===90));
  const explain=(e:SynastryEvidence|null):TwoLanguage=>e?{
   ar:skyAspectExplanation(e.first.id,e.second.id,e.angle),
   en:skyAspectExplanation(e.first.id,e.second.id,e.angle,true)
  }:{ar:'',en:''};
- const amplify=(base:TwoLanguage,e:SynastryEvidence|null):TwoLanguage=>{
+ const amplify=(base:TwoLanguage,e:SynastryEvidence|null,kind:'harmony'|'challenge'):TwoLanguage=>{
+  if(alreadyDetailed(e,kind))return base;
   const specific=explain(e);
-  return {ar:base.ar+(specific.ar?' '+specific.ar:''),en:base.en+(specific.en?' '+specific.en:'')};
+  // If a pair is outside the authored object vocabulary, do not clutter
+  // the user-facing reading with a technical missing-template notice.
+  const ar=specific.ar.includes('ما عنده قراءة مخصصة')?'':specific.ar;
+  const en=specific.en.includes('no verified object-specific narrative')?'':specific.en;
+  return {ar:base.ar+(ar?' '+ar:''),en:base.en+(en?' '+en:'')};
  };
  const harmony=synastryPlainReading(harmonyContact??undefined,'harmony');
  const challenge=synastryPlainReading(challengeContact??undefined,'challenge');
@@ -109,6 +120,6 @@ export function relationshipBrief(evidence:readonly SynastryEvidence[]):Relation
   return {ar:trim(full.ar),en:trim(full.en)};
  };
  return {attraction,sexual,attractionContact,sexualContact,
-  harmony:focusedMeaning(amplify(harmony.meaning,harmonyContact)),harmonyAction:harmony.advice,harmonyTitle:harmony.title,harmonyContact,
-  challenge:focusedMeaning(amplify(challenge.meaning,challengeContact)),challengeAction:challenge.advice,challengeTitle:challenge.title,challengeContact};
+  harmony:focusedMeaning(amplify(harmony.meaning,harmonyContact,'harmony')),harmonyAction:harmony.advice,harmonyTitle:harmony.title,harmonyContact,
+  challenge:focusedMeaning(amplify(challenge.meaning,challengeContact,'challenge')),challengeAction:challenge.advice,challengeTitle:challenge.title,challengeContact};
 }
