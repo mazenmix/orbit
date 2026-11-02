@@ -259,10 +259,11 @@ test('Moon is a standard-size navigation option after Today, without duplicate t
  await page.goto('/#today',{waitUntil:'domcontentloaded'});
  await page.locator('.sidebar .nav-item').first().waitFor({timeout:75000});
  const buttons=page.locator('.sidebar .nav > .nav-item');
- await expect(buttons).toHaveCount(8);
+ await expect(buttons).toHaveCount(9);
  await expect(buttons.nth(0)).toHaveAttribute('data-go','today');
  await expect(buttons.nth(1)).toHaveAttribute('data-go','lunar');
  await expect(buttons.nth(1)).toContainText('القمر');
+  await expect(buttons.nth(2)).toHaveAttribute('data-go','now');
  await expect(page.locator('.mx-section-tabs')).toHaveCount(0);
  const style=await buttons.nth(1).evaluate(el=>{
   const siblings=Array.from(el.parentElement.children);
@@ -296,9 +297,10 @@ test('Moon has the same full-size mobile navigation button and opens the origina
  await page.setViewportSize({width:390,height:844});
  await page.goto('/#today',{waitUntil:'domcontentloaded'});
  const nav=page.locator('.mobile-nav');
- await expect(nav.locator('.nav-item')).toHaveCount(8);
+ await expect(nav.locator('.nav-item')).toHaveCount(9);
  await expect(nav.locator('.nav-item').nth(1)).toHaveAttribute('data-go','lunar');
  await expect(nav.locator('.nav-item').nth(1)).toContainText('القمر');
+  await expect(nav.locator('.nav-item').nth(2)).toHaveAttribute('data-go','now');
  await expect(page.locator('.mx-section-tabs')).toHaveCount(0);
  await nav.locator('[data-go="lunar"]').click();
  await expect(page).toHaveURL(/#lunar$/);
@@ -312,12 +314,12 @@ test('Qwen3 automatically displays only one read-only text panel',async({page})=
  await expect(page.locator('#ask-ai')).toHaveCount(0);
  await expect(page.locator('#copy-prompt')).toHaveCount(0);
  await expect(page.locator('.ai-intro')).toHaveCount(0);
- await expect(page.locator('.sidebar [data-go="intel"]')).toHaveAttribute('aria-current','page');
+ await expect(page.locator('.sidebar [data-go="more"]')).toHaveAttribute('aria-current','page');
 });
 
 test('calendar shows twelve ordered month cards and dates on Monday-first LTR columns',async({page})=>{
  await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
- await expect(page.locator('.astro-cal-toolbar')).toBeVisible({timeout:75000});
+ await expect(page.locator('.astro-cal-months')).toBeVisible({timeout:75000});
  await expect(page.locator('.astro-cal-month')).toHaveCount(12);
  await expect(page.locator('#astro-calendar-detail')).toHaveCount(0);
  await expect(page.locator('#calendar-expand')).toHaveCount(0);
@@ -345,7 +347,7 @@ test('calendar shows twelve ordered month cards and dates on Monday-first LTR co
 });
 test('MX Ai has new indicators and useful moon explanations',async({page})=>{
  await page.goto('/#intel',{waitUntil:'domcontentloaded'});
- await expect(page.locator('.metric-card')).toHaveCount(29,{timeout:75000});
+ await expect(page.locator('.mx-go-mode-indicators .metric-card')).toHaveCount(33,{timeout:75000});
  await page.goto('/#lunar',{waitUntil:'domcontentloaded'});
  await expect(page.locator('.mx-lunar-explained')).toBeVisible({timeout:75000});
  const count=await page.locator('.timeline-entry').count();
@@ -418,15 +420,15 @@ test('all major text areas request Tahoma with readable mobile labels',async({pa
 
 test('calendar uses strict red-yellow-green bands and hides methodology',async({page})=>{
  await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
- await expect(page.locator('.astro-cal-toolbar')).toBeVisible({timeout:75000});
- await expect(page.locator('.astro-legend-item')).toHaveCount(3);
- await expect(page.locator('.astro-legend-item').first()).toContainText('71');
+ await expect(page.locator('.astro-cal-months')).toBeVisible({timeout:75000});
+ await expect(page.locator('.astro-legend-item')).toHaveCount(0);
+ await expect(page.locator('.astro-cal-month')).toHaveCount(12);
  await expect(page.getByText('شلون تحدد لون الحظ؟')).toHaveCount(0);
  await expect(page.locator('.astro-cal-day.astro-orange')).toHaveCount(0);
  const computed=page.locator('.astro-cal-day.astro-green, .astro-cal-day.astro-yellow, .astro-cal-day.astro-red');
  await expect(computed.first()).toBeVisible({timeout:75000});
  const grades=await computed.evaluateAll(nodes=>nodes.map(el=>({score:Number(el.querySelector('.astro-cal-index')?.textContent),color:el.classList.contains('astro-green')?'green':el.classList.contains('astro-yellow')?'yellow':'red'})));
- for(const day of grades)expect(day.color).toBe(day.score<=30?'red':day.score<=70?'yellow':'green');
+ for(const day of grades)expect(day.color).toBe(day.score<30?'red':day.score<=70?'yellow':'green');
 });
 
 test('selected calendar day stays compact, precise and readable on iPhone',async({page})=>{
