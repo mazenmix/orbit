@@ -70,7 +70,7 @@ import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
 import {derivedMetrics,goModes,reviewContextGoMode,contextGoScoreBasis,type GoDomain,type ContextGoReview,type MetricResult} from './metrics.ts';
 import {skyContext,contextGaugeNarrative,contextGaugeContactKey,type SkyContext} from './skyContext.ts';
-import {skyAspectExplanation,moonSignExplanation,type SkyNote} from './skyAtmosphere.ts';
+import {skyAspectExplanation,moonSignExplanation,sameSkyContact,type SkyNote} from './skyAtmosphere.ts';
 import {travelMetricsByGroup,travelMetricReading} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
 import {goLifeGauges} from './lifeGauges.ts';
@@ -279,16 +279,12 @@ function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,
 }
 
 /** Brief, calculated explanations of the current sky, shared by Today and Now. */
-function skyWeatherPanel(compact=false,heroTitle?:string,explainedAspects?:Set<string>){
+function skyWeatherPanel(compact=false,heroEvent?:WholeSkyOccurrence,explainedAspects?:Set<string>){
  const climate=liveGaugeSky().climate;
- // Do not restate the central Today event in the current-sky explanations.
- // Matching includes both bodies AND angle; the Now panel still lists all contacts.
- const isCentral=(note:SkyNote)=>{
-  if(!heroTitle||note.kind!=='aspect')return false;
-  const [first,angle,second]=t(note.arTitle,note.enTitle).split(' ');
-  return Boolean(first&&second&&angle&&heroTitle.includes(first)&&heroTitle.includes(second)&&heroTitle.includes(angle));
- };
- const visibleNotes=climate.notes.filter(n=>!isCentral(n));
+ // Match the actual two bodies and aspect, independent of localized prose.
+ // A translated or editorially rewritten hero headline must not duplicate
+ // its astronomical claim among the current-sky explanation cards.
+ const visibleNotes=climate.notes.filter(n=>!sameSkyContact(n,heroEvent));
  // Current contacts replace older ones as their orbs widen or new aspects form.
  // Reserve room for exact sky aspects, the live Moon sign and an active retrograde.
  const ordered=(kind:SkyNote['kind'])=>visibleNotes.filter(n=>n.kind===kind)
@@ -399,7 +395,7 @@ function mainPersonalEvent(brief:WholeSkyBroadcast):PersonalSkyStory|null{
     second:brief.contacts[0].second as WholeSkyOccurrence['second'],angle:brief.contacts[0].angle
    }:null);
  if(!event)return null;
- try{return personalEventStory(event,event.at.valueOf()===selected.valueOf()?data!.current.points:undefined)}
+ try{return {...personalEventStory(event,event.at.valueOf()===selected.valueOf()?data!.current.points:undefined),sourceEvent:event}}
  catch(err){console.warn('Personal sky context unavailable',err);return null}
 }
 function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,compact=false,heroTitle?:string,explainedAspects?:Set<string>){
@@ -547,7 +543,7 @@ function focusedToday(){
  activity+'<small class="mx-sky-live-checked" aria-label="'+t('وقت آخر حساب','Last calculation')+'">'+esc(clock)+'</small>'+
  '</section>'+
  (brief?planetLiveStatus(brief):'<p role="status">'+esc(skyFailure)+'</p>')+
- newRelationshipGauges()+skyWeatherPanel(false,personalized?.title,explainedAspects)+
+ newRelationshipGauges()+skyWeatherPanel(false,personalized?.sourceEvent,explainedAspects)+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('الأحداث الفلكية القادمة · كل الكواكب','Upcoming events · all planets')+'</h2><button type="button" class="secondary mx-events-lunar-link" data-go="lunar">'+t('اتصالات القمر بالتفصيل','Detailed Moon aspects')+'</button>'+
  '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-upcoming">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.'),true,personalized?.title,explainedAspects):'')+'</div></section>'+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('آخر ما تغير بالسماء','Recent sky changes')+'</h2>'+

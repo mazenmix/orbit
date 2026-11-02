@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {skyClimate,moonSignExplanation,skyAspectExplanation,skyAspectScene} from '../src/skyAtmosphere.ts';
+import {skyClimate,moonSignExplanation,skyAspectExplanation,skyAspectScene,sameSkyContact} from '../src/skyAtmosphere.ts';
 import {skyContext,contextScore} from '../src/skyContext.ts';
 import {derivedMetrics} from '../src/metrics.ts';
 import type {Chart} from '../src/engine.ts';
@@ -179,4 +179,14 @@ test('current sky rejects partial, duplicated or invalid planetary vectors inste
  assert.throws(()=>skyClimate({...all,points:all.points.slice(1)}),/Insufficient sky/);
  assert.throws(()=>skyClimate({...all,points:[...all.points,all.points[0]]}),/Duplicate sky body/);
  assert.throws(()=>skyClimate({...all,points:all.points.map(p=>p.id==='Mars'?{...p,speed:NaN}:p)}),/Invalid sky body/);
+});
+
+test('Today removes the duplicate sky-note by astronomical identity, not Arabic/English headline text',()=>{
+ const note={kind:'aspect' as const,id:'aspect:Moon:Venus:60'};
+ const hero={kind:'aspect',first:'Venus',second:'Moon',angle:60};
+ assert.equal(sameSkyContact(note,hero),true);
+ assert.equal(sameSkyContact(note,{...hero,angle:90}),false);
+ assert.equal(sameSkyContact(note,{...hero,first:'Jupiter'}),false);
+ assert.equal(sameSkyContact(note,{...hero,kind:'ingress'}),false);
+ assert.equal(sameSkyContact({kind:'moon-sign',id:'moon:sign'},hero),false);
 });

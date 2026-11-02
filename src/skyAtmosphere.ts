@@ -335,3 +335,14 @@ export function skyClimate(current:Pick<Chart,'points'>):SkyClimate{
  notes.sort((a,b)=>b.strength-a.strength||a.id.localeCompare(b.id));
  return {adjustments,notes};
 }
+
+/** A source identity, not translated wording, determines whether the headline
+ * and a supporting card describe the SAME calculated astronomical aspect. */
+export function sameSkyContact(note:Pick<SkyNote,'kind'|'id'>,
+ event:{kind:string;first:string;second?:string;angle?:number}|null|undefined):boolean{
+ if(!event||event.kind!=='aspect'||note.kind!=='aspect'||!event.second||event.angle===undefined)
+  return false;
+ const [prefix,first,second,angle]=note.id.split(':');
+ return prefix==='aspect'&&Boolean(first&&second)&&Number(angle)===event.angle&&
+  [first,second].sort().join('|')===[event.first,event.second].sort().join('|');
+}
