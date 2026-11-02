@@ -182,10 +182,14 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
   const categoryName=sourceLabels[active.category][english?1:0];
   evidence=english?
    'Leading calculated contact in '+categoryName+': '+body+' '+relation+' natal '+natal+' (orb '+contact.orb.toFixed(1)+'°).':
-   'أبرز اتصال محسوب بمجال '+categoryName+': '+body+' '+relation+' '+natal+' (فارق '+contact.orb.toFixed(1)+'°).';
+   'أبرز اتصال محسوب بمجال '+categoryName+': '+body+' '+relation+' '+natal+' الميلادية (فارق '+contact.orb.toFixed(1)+'°).';
  }else{
-  evidence=english?'No contributing aspect within the 8° scope; neutral 50 values are not forecasts.':
-   'ماكو اتصال مؤثر ضمن نطاق 8°؛ قيمة 50 حيادية وما تعتبر توقع.';
+  const skyShift=entries.some(entry=>sky.domains[entry.category].skyAdjustment!==0);
+  evidence=skyShift?(english?
+   'No close natal contact contributed within 8°; current-sky conditions still changed one or more source indices.':
+   'ماكو اتصال ميلادي مؤثر ضمن 8°؛ لكن حركة السماء الحالية غيّرت درجة مجال واحد أو أكثر.'):
+   (english?'No close natal contact contributed within 8°; the source indices remain at their neutral baseline.':
+   'ماكو اتصال ميلادي مؤثر ضمن 8°؛ درجات المجالات باقية على خط الأساس المحايد.');
  }
  const riskNote=metric.id==='risk'?(english?
   'This is a timing-readiness score, not a real-world safety or crime-risk assessment.':
