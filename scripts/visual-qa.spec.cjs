@@ -386,15 +386,20 @@ test('natal details hide face logo and DNA wording',async({page})=>{
  await expect(page.locator('.soul-art')).toHaveCount(0);
  await expect(page.locator('.soul-hero')).not.toContainText('MX SOUL DNA');
 });
-test('calendar fortune evidence exposes actual planetary angle weights',async({page})=>{
+// The compact 12-month calendar deliberately does not duplicate a day-detail
+// panel. Tests for actual contact weights run in astroCalendar unit tests.
+// Browser coverage verifies that exact computed scores and source-day ranges
+// are exposed on the active calendar cells.
+test('calendar shows verified day scores and the computed intraday range',async({page})=>{
  await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
- await page.locator('[data-calendar-date]').first().waitFor({state:'visible',timeout:75000});
- await expect(page.locator('.astro-cal-day.astro-pending').first()).toHaveCount(0,{timeout:90000}).catch(()=>{});
- const n=await page.locator('[data-calendar-date]').count();
- expect(n).toBeGreaterThanOrEqual(365);
- await expect(page.locator('.astro-cal-day.astro-green, .astro-cal-day.astro-yellow, .astro-cal-day.astro-red').first()).toBeVisible({timeout:75000});
- await expect(page.locator('.astro-day-compact-head')).toBeVisible({timeout:75000});
- await expect(page.locator('#astro-calendar-progress')).toContainText(/verified|محسوب فعلياً/);
+ await expect(page.locator('.astro-cal-month')).toHaveCount(12,{timeout:75000});
+ expect(await page.locator('[data-calendar-date]').count()).toBeGreaterThanOrEqual(365);
+ const usable=page.locator('.astro-cal-day.astro-green, .astro-cal-day.astro-yellow, .astro-cal-day.astro-red').first();
+ await usable.waitFor({state:'visible',timeout:90000});
+ const score=Number(await usable.locator('.astro-cal-index').textContent());
+ expect(Number.isInteger(score)&&score>=1&&score<=99).toBe(true);
+ await expect(usable).toHaveAttribute('aria-label',/day range|المدى اليومي/);
+ await expect(page.locator('#astro-calendar-detail')).toHaveCount(0);
 });
 
 test('MX Ai has no WHY NOW callout and explanation is labeled Ai',async({page})=>{
@@ -431,29 +436,32 @@ test('calendar uses strict red-yellow-green bands and hides methodology',async({
  for(const day of grades)expect(day.color).toBe(day.score<30?'red':day.score<=70?'yellow':'green');
 });
 
-test('selected calendar day stays compact, precise and readable on iPhone',async({page})=>{
+test('iPhone calendar preserves all twelve months and navigates selected day to Time Machine',async({page})=>{
  await page.setViewportSize({width:390,height:844});
  await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
- await expect(page.locator('.astro-day-compact-head')).toBeVisible({timeout:75000});
- await expect(page.locator('.astro-day-compact-title')).toBeVisible();
- await expect(page.locator('.astro-fortune-proof')).toHaveCount(0);
- await expect(page.locator('.astro-day-summary')).toHaveCount(0);
- const style=await page.locator('#astro-calendar-detail').evaluate(el=>({padding:getComputedStyle(el).paddingTop,rect:el.getBoundingClientRect().width}));
- expect(parseFloat(style.padding)).toBeLessThanOrEqual(14);
- expect(style.rect).toBeLessThanOrEqual(390);
- await expect(page.locator('.astro-day-open-time')).toBeVisible({timeout:75000});
+ await expect(page.locator('.astro-cal-month')).toHaveCount(12,{timeout:75000});
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+ expect(overflow,'12-month calendar must not overflow iPhone width').toBeLessThan(9);
+ const cell=page.locator('[data-calendar-date]').first();
+ const iso=await cell.getAttribute('data-calendar-date');
+ expect(iso).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+ await cell.click();
+ await expect(page).toHaveURL(/#time$/);
+ await expect(page.locator('.mx-time-compact #time-input')).toHaveValue(iso+'T12:00');
 });
 
-test('intraday calendar uses verified three-checkpoint score and exposes range',async({page})=>{
+test('calendar cell exposes three-sample daily range consistent with displayed score',async({page})=>{
  await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
- const button=page.locator('.astro-cal-day:not(.astro-pending):not(.astro-unavailable)').first();
- await button.waitFor({state:'visible',timeout:90000});
- await expect(page.locator('.astro-day-kicker')).toContainText(/3 أوقات|3 checkpoints/,{timeout:90000});
- await expect(page.locator('.astro-day-compact-footer')).toContainText(/04 \/ 12 \/ 20/);
- const attrs=await button.getAttribute('aria-label');
- expect(attrs).toMatch(/day range|المدى اليومي/);
- const marker=await button.locator('.astro-cal-index').textContent();
- expect(marker).toMatch(/^\d+$/);
+ const cell=page.locator('.astro-cal-day.astro-green, .astro-cal-day.astro-yellow, .astro-cal-day.astro-red').first();
+ await cell.waitFor({state:'visible',timeout:90000});
+ const label=await cell.getAttribute('aria-label');
+ expect(label).toMatch(/day range|المدى اليومي/);
+ const span=label.match(/(\d{1,2})[–-](\d{1,2})/);
+ expect(span,'computed intraday minimum–maximum must be present').not.toBeNull();
+ const min=Number(span[1]),max=Number(span[2]);
+ const score=Number(await cell.locator('.astro-cal-index').textContent());
+ expect(min).toBeLessThanOrEqual(score);
+ expect(score).toBeLessThanOrEqual(max);
 });
 
 test('Today and Time Machine use compact cards without losing navigation on iPhone',async({page})=>{
