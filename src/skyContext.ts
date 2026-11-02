@@ -101,7 +101,7 @@ export function contextGaugeBasis(context:SkyContext,sources:readonly Category[]
   (english?'Close aspect':'اتصال قريب'):
   row.scope==='wide'?(english?'Wide context':'اتصال واسع'):
    (row.skyAdjustment!==0?(english?'Distant natal geometry; active current sky':'زاوية ميلادية بعيدة · السماء الحالية مؤثرة'):(english?'Distant geometry, neutral baseline':'أقرب زاوية بعيدة · مؤشر محايد'));
- return prefix+' · '+name+' '+relation+' '+(english?'natal '+target:target+' الميلادية')+' · '+p.orb.toFixed(1)+'°';
+ return prefix+' · '+name+' '+relation+' '+(english?'natal '+target:target+' بخارطة ميلادك')+' · '+p.orb.toFixed(1)+'°';
 }
 
 /** Stable content identity: unlike score-label or orb, this identifies the
@@ -149,5 +149,5 @@ export function contextGaugeNarrative(context:SkyContext,sources:readonly Catego
  // and repeating a general Moon note on four unrelated gauges is misleading.
  return english?
   name+' '+aspectName+' natal '+target+' ('+p.orb.toFixed(1)+'°): '+specific:
-  name+' '+aspectName+' '+target+' الميلادية (فارق '+p.orb.toFixed(1)+'°): '+specific;
+  name+' '+aspectName+' '+target+' بخارطة ميلادك (فارق '+p.orb.toFixed(1)+'°): '+specific;
 }
