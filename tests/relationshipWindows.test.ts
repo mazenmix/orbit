@@ -20,3 +20,16 @@ test('local calendar days sample noon in historical timezone even through DST',(
  assert.equal(rows[0].source.communication,55);
  assert.equal(rows[0].source.energy,55);
 });
+
+test('relationship windows reject invalid compatibility inputs before suggesting a date',()=>{
+ const input=()=>Object.fromEntries(categories.map(c=>[c,50])) as any;
+ const date=new Date('2026-11-02T12:00:00Z');
+ for(const [key,value] of [['communication',NaN],['stability',Infinity],['attraction',-1],['conflict',120],['sexual',undefined]] as const)
+  assert.throws(()=>relationshipWindows(date,{...d,[key]:value} as any,input,2),/Invalid relationship compatibility/);
+ assert.throws(()=>relationshipWindows(date,d,()=>({...input(),love:NaN}),1),/invalid symbolic/);
+ assert.throws(()=>relationshipWindows(date,d,()=>({...input(),energy:120}),1),/invalid symbolic/);
+ const valid=relationshipWindows(date,d,input,2);
+ assert.ok(valid.every(x=>[x.message,x.date,x.steadiness].every(v=>Number.isFinite(v)&&v>=1&&v<=99)));
+ assert.throws(()=>bestWindows([{...valid[0],message:NaN}], 'message'),/Invalid relationship ranking/);
+ assert.throws(()=>bestWindows(valid,'bogus' as any),/Invalid relationship ranking/);
+});
