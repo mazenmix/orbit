@@ -908,3 +908,39 @@ for(const [viewportName,width,height] of [['desktop',1440,900],['iphone',390,844
   expect(exceptions,'Unhandled browser exceptions across '+viewportName+': '+exceptions.join(' ; ')).toEqual([]);
  });
 }
+
+/** End-to-end invariants for navigation: time pinning is a user choice,
+ * and changing language cannot alter the underlying instant or score. */
+for(const [viewportName,width,height] of [['desktop',1440,900],['iphone',390,844]]){
+ test('OMEGA Now time travel / LIVE reset / Iraqi-English score parity · '+viewportName,async({page})=>{
+  test.setTimeout(160000);
+  await page.setViewportSize({width,height});
+  await page.goto('/#now',{waitUntil:'domcontentloaded'});
+  const state=page.locator('.mx-now-time-state'),clock=page.locator('.mx-now-time-readout time');
+  await expect(state).toHaveClass(/is-live/,{timeout:80000});
+  const original=new Date(await clock.getAttribute('datetime')).valueOf();
+  const baseline=await page.locator('[data-now-gauge="today-overview"] .mx-now-head b').innerText();
+  await page.locator('[data-go-time-shift="-hour"]').click();
+  await expect(state).toHaveClass(/is-selected/);
+  const earlier=new Date(await clock.getAttribute('datetime')).valueOf();
+  expect(earlier-original,'Earlier time should be exactly one local hour in the selected zone').toBe(-3600000);
+  await page.locator('[data-go-time-shift="+hour"]').click();
+  const returned=new Date(await clock.getAttribute('datetime')).valueOf();
+  expect(returned).toBe(original);
+  expect(await page.locator('[data-now-gauge="today-overview"] .mx-now-head b').innerText())
+   .toBe(baseline);
+  await page.goto('/#settings',{waitUntil:'domcontentloaded'});
+  await page.locator('#settings-language').waitFor({state:'visible'});
+  await page.locator('#settings-language').click();
+  await page.goto('/#now',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('.mx-now-time-state')).toHaveClass(/is-selected/);
+  expect(new Date(await page.locator('.mx-now-time-readout time').getAttribute('datetime')).valueOf()).toBe(original);
+  expect(await page.locator('[data-now-gauge="today-overview"] .mx-now-head b').innerText()).toBe(baseline);
+  await expect(page.locator('[data-now-gauge="today-overview"] .mx-now-head strong')).toContainText('Overview');
+  await page.locator('.mx-now-live').click();
+  await expect(page.locator('.mx-now-time-state')).toHaveClass(/is-live/);
+  const current=Date.parse(await page.locator('.mx-now-time-readout time').getAttribute('datetime'));
+  expect(Math.abs(current-Date.now())).toBeLessThan(120000);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBeLessThan(10);
+ });
+}
