@@ -161,9 +161,28 @@ export function signalStory(s:Signal,natal:Chart|undefined,known:boolean,languag
  const place=home?(language==='ar'?' أقرب مجال حتى تراجع هذا الموضوع هو '+home+'.':' The area to reflect on is '+home+'.'):'';
  const balance=contrast?(language==='ar'?' ويقابله '+name(contrast.transit.id,language)+' '+(aspects[contrast.angle]?.[p]??'اتصال')+' '+name(contrast.natal.id,language)+' داخل نفس المجال.':' Another calculated contact is '+name(contrast.transit.id,language)+' '+(aspects[contrast.angle]?.[p]??'aspect')+' '+name(contrast.natal.id,language)+'.'):'';
  const good=(language==='ar'?'على صعيد '+area+'، ':'In '+area+', ')+specific+place+balance;
+ // A single category-level example made every card in that category recite
+ // the same warning regardless of which planet and angular pattern drove it.
+ // Keep the category's real-life setting, but tie the scenario to the
+ // selected calculated natal factor and its aspect without orbital jargon.
+ const issue=focus(e.natal.id,language);
+ const arPattern:Record<number,string>={
+  0:'إذا كل تركيزك منصب على '+issue+'، تأكد ما أهملت أولوية ثانية قبل أي وعد.',
+  60:'إذا ظهر خيار بسيط يخص '+issue+'، اختبره بخطوة صغيرة بدل انتظار الظروف المثالية.',
+  90:'إذا تضاربت خطتك ويا '+issue+'، حدد شنو ينحل أولاً ولا تحسم وأنت مستعجل.',
+  120:'حتى إذا الأمور تمشي بسلاسة بموضوع '+issue+'، تأكد من النتيجة الفعلية قبل التوسع.',
+  180:'إذا اختلف رأيان بخصوص '+issue+'، اسمع المقصود من كل جهة وحدد نقطة اتفاق واضحة.'
+ };
+ const enPattern:Record<number,string>={
+  0:'If '+issue+' absorbs your attention, check what else you might overlook before committing.',
+  60:'If a small opening involves '+issue+', test one practical step instead of awaiting ideal conditions.',
+  90:'If your plan conflicts with '+issue+', choose which issue needs attention first rather than rushing.',
+  120:'Even when '+issue+' seems to run smoothly, verify an actual result before expanding.',
+  180:'If two perspectives differ around '+issue+', clarify both positions before seeking an agreement.'
+ };
  const caution=language==='ar'?
-  'مثال عملي: '+everydayCases[s.category][0] :
-  'A practical example: '+everydayCases[s.category][1];
+  'مثال عملي: '+everydayCases[s.category][0]+' '+arPattern[e.angle]:
+  'A practical example: '+everydayCases[s.category][1]+' '+enPattern[e.angle];
  const practical=action(e,s.category,language);
  const basis=first+' '+angle+' '+second+' · '+e.orb.toFixed(2)+'°';
  return {title,good,careful:caution,action:practical,basis};

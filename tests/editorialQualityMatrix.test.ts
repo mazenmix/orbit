@@ -153,3 +153,17 @@ test('professional QA: calculated natal planet stories change with the placement
  assert.ok(changed.length>=5,'At least five natal sections should change between distinct charts');
  for(const x of a){clean(humanPlanet(x).summary.ar);}
 });
+
+test('editorial daily cases change with natal target and aspect instead of repeating category warnings',()=>{
+ const natal=chart(24);
+ for(const language of ['ar','en'] as const)for(const category of areas){
+  const stories=[] as string[];
+  for(const target of names.slice(0,10))for(const angle of [0,60,90,120,180]){
+   const row=signalStory(signal(category,factor('Venus',target,angle)),natal as any,true,language)!;
+   clean(row.careful);
+   stories.push(row.careful);
+  }
+  assert.equal(new Set(stories).size,50,
+   category+'/'+language+': every factor/aspect must produce a different practical example');
+ }
+});
