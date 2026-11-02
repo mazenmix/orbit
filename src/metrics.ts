@@ -96,6 +96,22 @@ export function reviewGoMode(mode:GoDecision,metrics:readonly MetricResult[],dec
  const state=!active.length?'check':mode.state==='go'&&(!complete||mixed||sensitive||active.some(d=>d.resolution==='caution'))?'check':mode.state;
  return {state,sourceCategories,complete,mixed,sensitive,strongest:strongest('strongest'),supportFactor,challengeFactor};
 }
+/** A transparent source breakdown, not a second scoring algorithm.
+ * The composite remains the rounded, equal-weight average of unique source
+ * domains. A decision card can be concise without hiding its arithmetic. */
+export function contextGoScoreBasis(mode:GoDecision,metrics:readonly MetricResult[],context:SkyContext,english=false):string{
+ const reviewed=reviewContextGoMode(mode,metrics,context);
+ const names:Record<Category,readonly [string,string]>={
+  overview:['الصورة العامة','Overview'],career:['العمل','Career'],
+  love:['العلاقات','Relationships'],communication:['التواصل','Communication'],
+  energy:['النشاط','Energy'],emotions:['المزاج','Emotions'],
+  recovery:['الاستعادة','Recovery'],timing:['التوقيت','Timing']
+ };
+ const parts=reviewed.sourceCategories.map(key=>names[key][english?1:0]+' '+context.scores[key]);
+ return english?
+  'Source domains: '+parts.join(' · ')+'. Equal-weight average of '+parts.length+' distinct domains: '+mode.value+'/100.':
+  'المجالات الداخلة بالحساب: '+parts.join(' · ')+'. متوسط '+parts.length+' مجالات مختلفة: '+mode.value+'/100.';
+}
 export type ContextGoReview={state:GoDecision['state'];sourceCategories:Category[];complete:boolean;mixed:boolean;sensitive:boolean;
  coverage:{present:number;total:number;missing:Category[]};strongest:SkyContact|null;supportFactor:SkyContact|null;challengeFactor:SkyContact|null};
 /** Contextual GO values must be reviewed against the very same contributors.

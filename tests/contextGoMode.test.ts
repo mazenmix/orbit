@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {skyContext} from '../src/skyContext.ts';
-import {derivedMetrics,goModes,reviewContextGoMode,reviewGoMode} from '../src/metrics.ts';
+import {derivedMetrics,goModes,reviewContextGoMode,reviewGoMode,contextGoScoreBasis} from '../src/metrics.ts';
 import {aspects,signals} from '../src/math.ts';
 import {resolveDecisions} from '../src/decisionUltra.ts';
 import {targets,type Chart} from '../src/engine.ts';
@@ -68,4 +68,22 @@ test('GO review rejects mismatched numeric sources and tampered contextual contr
  assert.throws(()=>reviewContextGoMode({...mode,value:mode.value-1},metrics,context),/does not match/);
  const changed={...context,domains:{...context.domains,career:{...context.domains.career,contributors:context.domains.career.contributors.slice(0,1)}}};
  assert.throws(()=>reviewContextGoMode(mode,metrics,changed),/contributors/);
+});
+
+test('GO decision exposes exact distinct source scores and a rounded composite without repeating categories',()=>{
+ const context=skyContext(natal,chart({Venus:120,Jupiter:120},15),true);
+ const metrics=derivedMetrics(context.scores);
+ const work=goModes(metrics).find(x=>x.domain==='work')!;
+ const basis=contextGoScoreBasis(work,metrics,context);
+ const review=reviewContextGoMode(work,metrics,context);
+ assert.equal(review.sourceCategories.length,4);
+ assert.match(basis,/المجالات الداخلة بالحساب:/);
+ assert.match(basis,/العمل [0-9]+/);
+ assert.match(basis,/التواصل [0-9]+/);
+ assert.match(basis,/الاستعادة [0-9]+/);
+ assert.match(basis,/التوقيت [0-9]+/);
+ assert.match(basis,new RegExp('متوسط 4 مجالات مختلفة: '+work.value+'/100'));
+ assert.equal((basis.match(/العمل /g)||[]).length,1);
+ assert.match(contextGoScoreBasis(work,metrics,context,true),/Equal-weight average of 4 distinct domains:/);
+ assert.throws(()=>contextGoScoreBasis({...work,value:work.value-1},metrics,context),/does not match/);
 });

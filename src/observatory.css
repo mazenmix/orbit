@@ -276,3 +276,8 @@
  .eclipse-live-unit span{font-size:clamp(20px,6vw,26px)}
  .eclipse-live-unit small{font-size:9px;margin-top:4px}
 }
+
+/* GO: one concise action by default; evidence and full calculation on demand. */
+.mx-go-mode-page .go-card .go-evidence{margin-top:9px;min-width:0}
+.mx-go-mode-page .go-card .go-evidence summary{cursor:pointer;font-size:11px;line-height:1.5;color:#c6d6ef;overflow-wrap:anywhere}
+.mx-go-mode-page .go-card .go-evidence p{margin:7px 0 0;font-size:11px;line-height:1.7;color:#b9c6de;overflow-wrap:anywhere}
