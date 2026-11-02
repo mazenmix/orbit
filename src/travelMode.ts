@@ -182,7 +182,7 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
   const categoryName=sourceLabels[active.category][english?1:0];
   evidence=english?
    'Leading calculated contact in '+categoryName+': '+body+' '+relation+' natal '+natal+' (orb '+contact.orb.toFixed(1)+'°).':
-   'أبرز اتصال محسوب بمجال '+categoryName+': '+body+' '+relation+' '+natal+' الميلادية (فارق '+contact.orb.toFixed(1)+'°).';
+   'أبرز اتصال محسوب بمجال '+categoryName+': '+body+' '+relation+' '+natal+' بخارطة ميلادك (فارق '+contact.orb.toFixed(1)+'°).';
  }else{
   const skyShift=entries.some(entry=>sky.domains[entry.category].skyAdjustment!==0);
   evidence=skyShift?(english?
