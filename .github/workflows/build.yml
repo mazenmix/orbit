@@ -39,12 +39,11 @@ jobs:
           name: mx-astro-omega-static-inventory
           path: artifacts/omega-inventory.json
           if-no-files-found: error
-      - name: Live Swiss asteroid smoke (informational)
-        continue-on-error: true
+      - name: Verify all 56 live Swiss asteroid ephemerides (required)
         env:
           MX_ORBIT_LIVE_TEST: '1'
           MX_ORBIT_LIVE_FULL: '1'
-        run: node --experimental-strip-types --test tests/asteroidLive.test.ts
+        run: node --experimental-strip-types --test scripts/asteroid-live.test.ts
       - uses: actions/upload-artifact@v4
         with:
           name: mx-orbit-web-build

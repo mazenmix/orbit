@@ -1,8 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import SwissEph from 'swisseph-wasm';
 import {mountAsteroid,namedAsteroidPositions,type AsteroidSwiss} from '../src/asteroidRuntime.ts';
 import {namedAsteroids} from '../src/asteroids.ts';
-const run=process.env.MX_ORBIT_LIVE_TEST==='1'?test:test.skip;
-run('live MX Orbit SE1 proxy and Swiss WASM perform actual asteroid calculations',async()=>{
+test('live MX Orbit SE1 proxy and Swiss WASM perform actual asteroid calculations',async()=>{
  const swe=new SwissEph();await swe.initSwissEph();const runtime=swe as unknown as AsteroidSwiss;
  const samples=process.env.MX_ORBIT_LIVE_FULL==='1'?namedAsteroids:namedAsteroids.filter(x=>[433,16].includes(x.number));
  const failed:string[]=[];
