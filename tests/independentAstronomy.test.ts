@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import SwissEph from 'swisseph-wasm';
 import {chart,defaultProfile,setEngineForTests,birthInstant,zonedInstant} from '../src/engine.ts';
+import {lunarWindow} from '../src/timing.ts';
 
 /** Independent numerical fixture:
  * Values were computed outside this repository with PySwissEph 2.10.03,
@@ -46,4 +47,22 @@ test('Baghdad historical local time is converted to the appropriate UTC instant'
  assert.equal(birthInstant(profile).toISOString(),'1985-03-29T16:20:00.000Z');
  const nearMidnight=zonedInstant('2024-02-29T23:55','Etc/UTC');
  assert.equal(nearMidnight.toISOString(),'2024-02-29T23:55:00.000Z');
+});
+
+test('independent PySwissEph Moon roots match the displayed November 2026 ingress and final aspect',()=>{
+ const at=new Date('2026-11-02T20:45:00Z');
+ const lunar=lunarWindow(at,d=>chart(d,defaultProfile,false,false).points);
+ // Independently root-solved using PySwissEph 2.10.03 Moshier,
+ // Brent's method over the continuous Moon ecliptic longitude:
+ // Moon enters Virgo at 08:27:45.061 UTC; Moon sextile Venus at
+ // 00:10:29.891 UTC. Native Swiss/WASM should differ by seconds, not hours.
+ const ingress=Date.parse('2026-11-03T08:27:45.061Z');
+ const last=Date.parse('2026-11-03T00:10:29.891Z');
+ assert.equal(lunar.sign,4,'Moon is in Leo before crossing into Virgo');
+ assert.ok(Math.abs(+lunar.ingressAt-ingress)<45_000,
+  'Moon ingress outside independent root tolerance: '+lunar.ingressAt.toISOString());
+ assert.ok(Math.abs(+lunar.vocStartsAt-last)<45_000,
+  'VOC last classical aspect outside independent root tolerance: '+lunar.vocStartsAt.toISOString());
+ assert.equal(lunar.lastAspect?.target,'Venus');
+ assert.equal(lunar.lastAspect?.angle,60);
 });
