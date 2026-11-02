@@ -28,3 +28,13 @@ test('AI Arabic repetition is normalized across hamzas, alif maqsurah and diacri
  assert.equal(distinctParagraphs(first+'\n\n'+same+'\n\n'+opposite),first+'\n\n'+opposite);
  assert.equal(paragraphFingerprint('رقم ١٢:٤٥'),paragraphFingerprint('رقم 12:45'));
 });
+
+test('editorial dedup preserves distinct orbital decimals, times, signs and ranges',()=>{
+ assert.notEqual(paragraphFingerprint('فارق 1.2°'),paragraphFingerprint('فارق 12°'));
+ assert.notEqual(paragraphFingerprint('وقت 10:30'),paragraphFingerprint('وقت 1030'));
+ assert.notEqual(paragraphFingerprint('انخفاض −5 نقاط'),paragraphFingerprint('انخفاض 5 نقاط'));
+ assert.notEqual(paragraphFingerprint('من 1–2'),paragraphFingerprint('من 12'));
+ assert.equal(paragraphFingerprint('الزاوية ١٫٢°'),paragraphFingerprint('الزاوية 1.2°'));
+ const distinct='فارق 1.2°\n\nفارق 12°';
+ assert.equal(distinctParagraphs(distinct),distinct,'different exact angles must not collapse as repeated explanation');
+});

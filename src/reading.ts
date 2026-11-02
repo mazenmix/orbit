@@ -46,6 +46,15 @@ export function paragraphFingerprint(text:string):string{
    const arabic='٠١٢٣٤٥٦٧٨٩',persian='۰۱۲۳۴۵۶۷۸۹';
    return String(Math.max(arabic.indexOf(value),persian.indexOf(value)));
   })
+  // Preserve quantitative meaning. Erasing "." ":" and signs used to
+  // collapse 1.2° into 12° or 10:30 into 1030, silently hiding different
+  // source evidence as a supposed duplicate paragraph.
+  .replace(/(\d)[.٫](?=\d)/gu,'$1decimal')
+  .replace(/(\d)[:,：](?=\d)/gu,'$1time')
+  .replace(/(\d)[–—-](?=\d)/gu,'$1range')
+  .replace(/(?<![\d\p{L}])−(?=\d)/gu,'negative')
+  .replace(/(?<![\d\p{L}])-(?=\d)/gu,'negative')
+  .replace(/(?<![\d\p{L}])\+(?=\d)/gu,'positive')
   .replace(/[\s\p{P}\p{S}]+/gu,'');
 }
 export function distinctParagraphs(text:string){
