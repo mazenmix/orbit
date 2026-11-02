@@ -127,3 +127,14 @@ test('context scoring refuses incomplete major natal planets even if a category 
  assert.throws(()=>skyContext(moonMissing,current,true),/Incomplete principal natal ephemeris/);
  assert.equal(Object.keys(skyContext(moonMissing,current,false).domains).length,8);
 });
+
+test('contextual score rejects duplicated aspects and impossible geometry before generating a plausible index',()=>{
+ const valid={transit:'Venus',natal:'Moon',angle:120,orb:1,strength:.75,tone:1};
+ assert.ok(Number.isFinite(contextScore([valid])));
+ assert.throws(()=>contextScore([valid,valid]),/Repeated contextual contribution/);
+ assert.throws(()=>contextScore([valid,valid,{...valid,transit:'Mars'}]),/Too many contextual contributors/);
+ assert.throws(()=>contextScore([{...valid,angle:45}]),/Invalid contextual contribution/);
+ assert.throws(()=>contextScore([{...valid,orb:9}]),/Invalid contextual contribution/);
+ assert.throws(()=>contextScore([{...valid,transit:'Foo'}]),/Invalid contextual contribution/);
+ assert.throws(()=>contextScore([{...valid,orb:NaN}]),/Invalid contextual contribution/);
+});

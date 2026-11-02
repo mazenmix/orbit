@@ -36,7 +36,21 @@ function tonalValue(planet:string,angle:number){
 /** Shared calculation for a contextual value and its decision review. */
 export function contextScore(contacts:readonly SkyContact[],skyAdjustment=0):number{
  if(!Number.isFinite(skyAdjustment)||Math.abs(skyAdjustment)>16)throw Error('Invalid current-sky adjustment');
- if(contacts.some(c=>!Number.isFinite(c.strength)||c.strength<0||c.strength>1||!Number.isFinite(c.tone)||c.tone< -1||c.tone>1))throw Error('Invalid contextual contribution');
+ // Contextual weights belong to actual supported aspects within eight degrees,
+ // never invented or repeated inputs. A duplicated record otherwise pushes a
+ // plausible 50-point baseline toward an unsupported extreme.
+ if(contacts.length>2)throw Error('Too many contextual contributors');
+ const ids=new Set<string>();
+ for(const c of contacts){
+  if(!major.has(c.transit)||!c.natal||!angles.includes(c.angle)||
+   !Number.isFinite(c.orb)||c.orb<0||c.orb>=8||
+   !Number.isFinite(c.strength)||c.strength<0||c.strength>1||
+   !Number.isFinite(c.tone)||c.tone< -1||c.tone>1)
+   throw Error('Invalid contextual contribution');
+  const id=c.transit+':'+c.natal+':'+c.angle;
+  if(ids.has(id))throw Error('Repeated contextual contribution '+id);
+  ids.add(id);
+ }
  return Math.round(clamp(50+contacts.reduce((value,c)=>value+c.tone*c.strength*20,0)+skyAdjustment));
 }
 function targetPoints(natal:Chart,known:boolean):Point[]{
