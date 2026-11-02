@@ -385,7 +385,7 @@ function personalEventStory(event:WholeSkyOccurrence,precomputed?:Chart['points'
   event,at:selected,natal:data!.natal,skyAtEvent:points,knownBirthTime:active.known,lang
  });
 }
-function mainPersonalEvent(brief:WholeSkyBroadcast):PersonalSkyStory|null{
+function mainPersonalEvent(brief:WholeSkyBroadcast):(PersonalSkyStory & {sourceEvent:WholeSkyOccurrence})|null{
  const now=+selected,earlier=brief.recent,later=brief.next;
  const past=earlier&&now-+earlier.at<=6*3600000?earlier:null;
  const next=later&&+later.at-now<=6*3600000?later:null;
