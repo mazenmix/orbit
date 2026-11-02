@@ -237,20 +237,20 @@ export function skyAspectExplanation(first:string,second:string,angle:number,eng
   if(first!==second)return describe(first,second,angle)[english?1:0];
   const role=planetTopics[first][english?1:0],step=practicalStep[first][english?1:0];
   if(angle===90)return english?
-   'A square puts pressure on competing priorities around '+role+'. '+step:
-   'التربيع يبرز ضغط وتعارض أولويات بموضوع '+role+'؛ لا تستعجل الحسم. '+step;
+   'Competing priorities around '+role+' can create avoidable pressure when both demand attention. '+step:
+   'لما تتزاحم أولويتين بموضوع '+role+'، ممكن يصير ضغط يخليك تستعجل القرار. رتب شنو يحتاج جواب أولاً. '+step;
   if(angle===180)return english?
-   'An opposition highlights two different demands around '+role+'; consider both before choosing a side. '+step:
-   'المقابلة تبرز موقفين متعاكسين بموضوع '+role+'؛ اسمع الطرفين قبل ما تحسم. '+step;
+   'Two different demands around '+role+' may pull you toward opposite responses; hear both before choosing. '+step:
+   'إذا موضوع '+role+' إله وجهتين مختلفتين، لا تخلي اختلاف الطلبات يتحول إلى شدّ بين الطرفين. اسمع الصورة كاملة. '+step;
   if(angle===0)return english?
-   'A conjunction concentrates attention around '+role+' without guaranteeing a result. '+step:
-   'الاقتران يركز الانتباه على '+role+'؛ لا تعتبر التركيز وحده ضمان نتيجة. '+step;
+   'Attention is concentrated around '+role+'; that can sharpen focus but does not establish an outcome. '+step:
+   'الانتباه هسه مركز على '+role+'؛ هذا ممكن يوضح الأولوية أو يخليك تبالغ بالتفكير بيها. قارنها بالواقع. '+step;
   if(angle===60)return english?
-   'A sextile suggests a practical opening around '+role+' that still needs your initiative. '+step:
-   'التسديس يفتح فرصة صغيرة بموضوع '+role+'، بس تحتاج مبادرة منك حتى تستفاد منها. '+step;
+   'An opening around '+role+' becomes useful when you take an intentional and measured first step. '+step:
+   'أكو فرصة بسيطة بموضوع '+role+'، بس تحتاج منك مبادرة واضحة حتى تتحول لفعل ملموس. '+step;
   return english?
-   'A trine describes relative ease coordinating different sides of '+role+'; use it without assuming success. '+step:
-   'التثليث يرمز لسهولة نسبية بموضوع '+role+'؛ استفاد منها بخطوة محسوبة مو بتوقعات مضمونة. '+step;
+   'It may be easier to coordinate different sides of '+role+'; use that relative ease without assuming success. '+step:
+   'التعامل ويا جوانب '+role+' ممكن يصير أسلس نسبياً؛ استفاد من هالمجال بخطوة محسوبة بدون افتراض نتيجة مضمونة. '+step;
  }
  return supplementalAspect(first,second,angle,english);
 }
