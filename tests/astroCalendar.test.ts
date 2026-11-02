@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {astroCalendarDays,astroCalendarFullMonths,firstTwelveCalendarMonths,astroCalendarGridPosition,colorizeAstroDay,calendarColorForScore,fortuneContactWeight,fortuneContactTone} from '../src/astroCalendar.ts';
+import {astroCalendarDays,astroCalendarFullMonths,shouldAdvanceCalendarAnchor,firstTwelveCalendarMonths,astroCalendarGridPosition,colorizeAstroDay,calendarColorForScore,fortuneContactWeight,fortuneContactTone} from '../src/astroCalendar.ts';
 const aspect=(angle:number,transit='Venus',orb=.1,weight=.9)=>({
  id:transit+'-'+angle+'-Sun',transit:{id:transit,symbol:'✦',longitude:100,speed:1},
  natal:{id:'Sun',symbol:'☉',longitude:100,speed:0},angle,orb,maximumOrb:2,applying:true,weight,exact:null
@@ -97,4 +97,11 @@ test('visible year includes the complete current month and the eleven complete f
  assert.equal(leap.at(-1)?.iso,'2029-01-31');
  assert.ok(leap.some(x=>x.iso==='2028-02-29'));
  assert.throws(()=>astroCalendarFullMonths('2026-02-31'));
+});
+
+test('calendar midnight never resets a historical or future selected instant',()=>{
+ assert.equal(shouldAdvanceCalendarAnchor('2026-11-02','2026-11-03',true),false);
+ assert.equal(shouldAdvanceCalendarAnchor('2026-11-02','2026-11-03',false),true);
+ assert.equal(shouldAdvanceCalendarAnchor('2026-11-03','2026-11-03',false),false);
+ assert.throws(()=>shouldAdvanceCalendarAnchor('bad','2026-11-03',false));
 });

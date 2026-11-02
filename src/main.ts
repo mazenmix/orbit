@@ -22,7 +22,7 @@ import './now.css';
 import './moonMansions.css';
 import './navAlignment.css';
 import {lunarMansionWindow,type LunarMansionWindow} from './moonMansions.ts';
-import {astroCalendarFullMonths,astroCalendarGridPosition,calendarDaySynthesis,calendarMomentEvidence,CALENDAR_SAMPLE_HOURS,type AstroCalendarDay,type AstroCalendarRating,type CalendarDayRating} from './astroCalendar.ts';
+import {astroCalendarFullMonths,astroCalendarGridPosition,shouldAdvanceCalendarAnchor,calendarDaySynthesis,calendarMomentEvidence,CALENDAR_SAMPLE_HOURS,type AstroCalendarDay,type AstroCalendarRating,type CalendarDayRating} from './astroCalendar.ts';
 import {optionalComparison,distinctParagraphs} from './reading.ts';
 import {narrativeEvidence} from './narrativeEvidence.ts';
 import {CALCULATION_VERSION} from './engine.ts';
@@ -1940,7 +1940,7 @@ function refreshLiveView(force=false){
  if(screen==='today')tickPlanetMotionGauges(liveTimePinned?+selected:now);
  liveMinute=minute;
  if(screen==='calendar'){
-  if(astroCalendarToday()!==calendarAnchor){
+  if(shouldAdvanceCalendarAnchor(calendarAnchor,astroCalendarToday(),liveTimePinned)){
    selected=new Date(now);recalculate();render();return;
   }
   if(!calendarRunning&&calendarCursor<calendarTargetDays())startCalendarWork();

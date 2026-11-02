@@ -197,3 +197,11 @@ export function astroCalendarGridPosition(firstWeekday:number,dayOffset:number):
  const index=firstWeekday+dayOffset;
  return {column:index%7+1,row:Math.floor(index/7)+1};
 }
+
+/** A rolling calendar can advance at midnight only in live mode.
+ * Never replace an explicitly pinned historical or future calculation date. */
+export function shouldAdvanceCalendarAnchor(anchor:string,today:string,pinned:boolean):boolean{
+ if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(anchor)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(today))
+  throw Error('Invalid calendar anchor date');
+ return !pinned&&anchor!==today;
+}
