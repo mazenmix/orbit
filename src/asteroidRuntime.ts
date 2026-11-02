@@ -6,7 +6,8 @@ import type {Point} from './math.ts';
  */
 export type AsteroidSwiss={
  SweModule:{FS_createPath?:(base:string,name:string,canRead:boolean,canWrite:boolean)=>void;
- FS_createDataFile?:(parent:string,name:string,data:Uint8Array,canRead:boolean,canWrite:boolean,canOwn:boolean)=>void};
+ FS_createDataFile?:(parent:string,name:string,data:Uint8Array,canRead:boolean,canWrite:boolean,canOwn:boolean)=>void;
+ FS_unlink?:(path:string)=>void};
  set_ephe_path:(path:string)=>unknown;
  calc_ut:(jd:number,id:number,flags:number)=>Float64Array|null;
  getLastError?:()=>string;
@@ -63,7 +64,16 @@ export async function loadNamedAsteroids(swe:AsteroidSwiss,onProgress?:(progress
     if(!value||!Number.isFinite(value[0])||!Number.isFinite(value[3]))throw Error('Swiss failed to calculate a valid position');
     ready++;
    }catch(e){
+    // A bad upstream SE1 can be cached before Swiss validates its contents.
+    // Without eviction every retry reads the same bad binary. Also unlink a
+    // failed Emscripten FS file or FS_createDataFile rejects the next attempt.
     mounted.delete(item.number);
+    const file='/sweph/'+asteroidSourcePath(item.number);
+    try{swe.SweModule.FS_unlink?.(file)}catch{}
+    if(typeof caches!=='undefined')try{
+     const store=await caches.open('mx-asteroid-se1-v1');
+     await store.delete('/api/asteroid?number='+item.number);
+    }catch{}
     failed.push({name:item.name,reason:String(e)});
    }
    onProgress?.({ready,total:namedAsteroids.length,failed:failed.length,current:item.name});
