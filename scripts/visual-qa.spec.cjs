@@ -358,9 +358,9 @@ test('live Moon sign and refined chart reading remain visible',async({page})=>{
  await page.goto('/#lunar',{waitUntil:'domcontentloaded'});
  await expect(page.locator('#mx-moon-sign-reading p')).toHaveCount(5,{timeout:75000});
  await page.goto('/#chart',{waitUntil:'domcontentloaded'});
- await expect(page.locator('.chart-story')).toHaveCount(14,{timeout:75000}).catch(async()=>{
-  expect(await page.locator('.chart-story').count()).toBeGreaterThanOrEqual(10);
- });
+ await expect(page.locator('.chart-layout.chart-expanded')).toBeVisible({timeout:75000});
+ await expect(page.locator('.mx-person-natal-portrait [data-portrait-line]')).toHaveCount(14);
+ await expect(page.locator('.chart-math')).toHaveCount(1);
  await expect(page.locator('.mx-reading-help')).toHaveCount(0);
 });
 test('calendar month labels stay in English even when app language is Arabic',async({page})=>{
@@ -404,7 +404,7 @@ test('calendar shows verified day scores and the computed intraday range',async(
 
 test('MX Ai has no WHY NOW callout and explanation is labeled Ai',async({page})=>{
  await page.goto('/#intel',{waitUntil:'domcontentloaded'});
- await page.locator('.metrics-grid').waitFor({state:'visible',timeout:75000});
+ await page.locator('.mx-go-life-grid').waitFor({state:'visible',timeout:75000});
  await expect(page.getByText('WHY NOW',{exact:false})).toHaveCount(0);
  await expect(page.locator('.intel-audit')).toHaveCount(0);
  await page.goto('/#ai',{waitUntil:'domcontentloaded'});
@@ -456,7 +456,7 @@ test('calendar cell exposes three-sample daily range consistent with displayed s
  await cell.waitFor({state:'visible',timeout:90000});
  const label=await cell.getAttribute('aria-label');
  expect(label).toMatch(/day range|المدى اليومي/);
- const span=label.match(/(\d{1,2})[–-](\d{1,2})/);
+ const span=label.match(/(?:day range|المدى اليومي)\s+(\d{1,2})[–-](\d{1,2})/);
  expect(span,'computed intraday minimum–maximum must be present').not.toBeNull();
  const min=Number(span[1]),max=Number(span[2]);
  const score=Number(await cell.locator('.astro-cal-index').textContent());
