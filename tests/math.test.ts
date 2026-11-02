@@ -55,3 +55,15 @@ test('synastry never creates fabricated contacts or double-counts duplicated nat
  assert.throws(()=>compatibilityScore('attraction',evidence,Infinity),/Invalid compatibility scoring/);
  assert.throws(()=>compatibilityScore('attraction',evidence,1,NaN),/Invalid compatibility scoring/);
 });
+
+test('compatibility contributions are unique and geometrically supported',()=>{
+ const venus=point('Venus',0),mars=point('Mars',120);
+ const evidence=synastry([venus],[mars]);
+ const original=compatibilityScore('sexual',evidence);
+ assert.ok(original>50);
+ assert.throws(()=>compatibilityScore('sexual',[...evidence,evidence[0]]),/Repeated calculated synastry evidence/);
+ assert.throws(()=>compatibilityHasEvidence('sexual',[...evidence,evidence[0]]),/Repeated calculated synastry evidence/);
+ assert.throws(()=>compatibilityScore('sexual',[{...evidence[0],angle:90}]),/Invalid calculated synastry evidence/);
+ assert.throws(()=>compatibilityScore('sexual',[{...evidence[0],orb:3.2}]),/Invalid calculated synastry evidence/);
+ assert.equal(compatibilityScore('sexual',evidence),original);
+});

@@ -152,11 +152,19 @@ const relevance:Record<Dimension,Record<string,number>>={
  * aspect that contributes to its rubric. The neutral 50 score alone is not
  * evidence of attraction, intimacy, communication or mutual intent. */
 function validatedSynastryEvidence(evidence:readonly SynastryEvidence[]){
- for(const e of evidence)if(![0,60,90,120,180].includes(e.angle)||
-  !Number.isFinite(e.orb)||e.orb<0||e.orb>6||!Number.isFinite(e.influence)||
-  e.influence<=0||e.influence>1||!Number.isFinite(e.first.longitude)||
-  !Number.isFinite(e.second.longitude))
-  throw Error('Invalid calculated synastry evidence');
+ const seen=new Set<string>();
+ for(const e of evidence){
+  if(![0,60,90,120,180].includes(e.angle)||
+   !Number.isFinite(e.orb)||e.orb<0||e.orb>6||!Number.isFinite(e.influence)||
+   e.influence<=0||e.influence>1||
+   !e.first?.id||!e.second?.id||
+   ![e.first.longitude,e.second.longitude].every(x=>Number.isFinite(x)&&x>=0&&x<360)||
+   Math.abs(e.orb-Math.abs(distance(e.first.longitude,e.second.longitude)-e.angle))>1e-6)
+   throw Error('Invalid calculated synastry evidence');
+  const key=e.first.id+':'+e.second.id+':'+e.angle;
+  if(seen.has(key))throw Error('Repeated calculated synastry evidence: '+key);
+  seen.add(key);
+ }
 }
 export function compatibilityHasEvidence(dim:Dimension,evidence:readonly SynastryEvidence[]):boolean{
  validatedSynastryEvidence(evidence);
