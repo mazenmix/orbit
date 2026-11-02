@@ -173,3 +173,10 @@ test('conjunction, sextile and opposition use pair-specific Iraqi copy rather th
  }
  assert.notEqual(skyAspectExplanation('Moon','Mars',0),skyAspectExplanation('Moon','Jupiter',0));
 });
+
+test('current sky rejects partial, duplicated or invalid planetary vectors instead of publishing plausible prose',()=>{
+ const all=chart({Sun:12,Moon:32,Mercury:52,Venus:72,Mars:92,Jupiter:112,Saturn:132,Uranus:152,Neptune:172,Pluto:192});
+ assert.throws(()=>skyClimate({...all,points:all.points.slice(1)}),/Insufficient sky/);
+ assert.throws(()=>skyClimate({...all,points:[...all.points,all.points[0]]}),/Duplicate sky body/);
+ assert.throws(()=>skyClimate({...all,points:all.points.map(p=>p.id==='Mars'?{...p,speed:NaN}:p)}),/Invalid sky body/);
+});

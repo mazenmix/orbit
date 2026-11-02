@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {skyContext,contextGaugeBasis,contextGaugeContactKey,contextScore} from '../src/skyContext.ts';
+import {skyContext,contextGaugeBasis,contextGaugeContactKey,contextGaugeNarrative,contextScore} from '../src/skyContext.ts';
 import {derivedMetrics,goModes} from '../src/metrics.ts';
 import type {Chart} from '../src/engine.ts';
 const base=(degrees:Record<string,number>,at='2026-11-01T11:32:00Z'):Chart=>({
@@ -61,6 +61,30 @@ test('GO repetition control tracks exact planetary aspect identity instead of so
  const sky=skyContext(natal,current,true);
  const candidate=Object.values(sky.domains).find(d=>d.scope!=='background');
  assert.ok(candidate);
- assert.equal(contextGaugeContactKey(sky,[candidate!.category]),candidate!.primary.transit+':'+candidate!.primary.natal+':'+candidate!.primary.angle);
+ const contributors=candidate!.contributors.filter(p=>p.strength>0&&p.tone!==0).sort((a,b)=>Math.abs(b.tone*b.strength)-Math.abs(a.tone*a.strength)||a.orb-b.orb);
+ assert.equal(contextGaugeContactKey(sky,[candidate!.category]),contributors[0]?.transit+':'+contributors[0]?.natal+':'+contributors[0]?.angle);
  assert.equal(contextGaugeContactKey(sky,[candidate!.category,candidate!.category]),contextGaugeContactKey(sky,[candidate!.category]));
+});
+
+test('GO narrative and duplicate key use an actual positive-weight contributor, never a zero-weight nearest label',()=>{
+ const current=base({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334});
+ const sky=skyContext(natal,current,true),original=sky.domains.love;
+ assert.ok(original.contributors.length>0);
+ const ignored={transit:'Mercury',natal:'Venus',angle:90,orb:8,strength:0,tone:-1};
+ const changed={...original,primary:ignored,scope:'wide' as const};
+ const context={...sky,domains:{...sky.domains,love:changed}};
+ const main=[...original.contributors].sort((a,b)=>Math.abs(b.tone*b.strength)-Math.abs(a.tone*a.strength)||a.orb-b.orb)[0];
+ assert.equal(contextGaugeContactKey(context,['love']),main.transit+':'+main.natal+':'+main.angle);
+ assert.ok(contextGaugeBasis(context,['love']).includes(main.orb.toFixed(1)+'°'));
+ const empty={...changed,contributors:[],contacts:0,skyAdjustment:0,score:50};
+ const neutral={...context,domains:{...context.domains,love:empty},scores:{...context.scores,love:50}};
+ assert.equal(contextGaugeContactKey(neutral,['love']),null);
+ assert.match(contextGaugeBasis(neutral,['love']),/محايد/);
+ assert.match(contextGaugeNarrative(neutral,['love']),/ماكو اتصال ميلادي مؤثر/);
+});
+test('GO context refuses missing, repeated or nonfinite principal planets',()=>{
+ const current=base({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334});
+ assert.throws(()=>skyContext(natal,{...current,points:current.points.slice(1)},true),/Insufficient/);
+ assert.throws(()=>skyContext(natal,{...current,points:[...current.points,current.points[0]]},true),/Insufficient/);
+ assert.throws(()=>skyContext(natal,{...current,points:current.points.map(p=>p.id==='Venus'?{...p,longitude:NaN}:p)},true),/invalid/);
 });

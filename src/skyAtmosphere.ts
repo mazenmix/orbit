@@ -267,9 +267,13 @@ function aspectTone(a:string,b:string,angle:number){
 export function skyClimate(current:Pick<Chart,'points'>):SkyClimate{
  const byId=new Map<string,Point>();
  for(const p of current.points){
-  if(names[p.id]&&Number.isFinite(p.longitude)&&Number.isFinite(p.speed))byId.set(p.id,p);
+  if(!names[p.id])continue;
+  if(byId.has(p.id))throw Error('Duplicate sky body for atmosphere calculation: '+p.id);
+  if(!Number.isFinite(p.longitude)||p.longitude<0||p.longitude>=360||!Number.isFinite(p.speed))
+   throw Error('Invalid sky body for atmosphere calculation: '+p.id);
+  byId.set(p.id,p);
  }
- if(byId.size<8)throw Error('Insufficient sky bodies for atmosphere calculation');
+ if(byId.size!==Object.keys(names).length)throw Error('Insufficient sky bodies for atmosphere calculation');
  const bodies=[...byId.values()],notes:SkyNote[]=[];
  const weights=Object.fromEntries(keys.map(k=>[k,[] as number[]])) as Record<Category,number[]>;
  for(let i=0;i<bodies.length;i++)for(let j=i+1;j<bodies.length;j++){

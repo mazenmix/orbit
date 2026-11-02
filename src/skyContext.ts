@@ -52,7 +52,9 @@ function targetPoints(natal:Chart,known:boolean):Point[]{
 export function skyContext(natal:Chart,current:Chart,known:boolean):SkyContext{
  const targets=targetPoints(natal,known);
  const transits=current.points.filter(p=>major.has(p.id));
- if(transits.length<8)throw Error('Insufficient principal ephemeris positions for contextual gauges');
+ if(transits.length!==major.size||new Set(transits.map(p=>p.id)).size!==major.size||
+  transits.some(p=>!Number.isFinite(p.longitude)||p.longitude<0||p.longitude>=360||!Number.isFinite(p.speed)))
+  throw Error('Insufficient or invalid principal ephemeris positions for contextual gauges');
  const climate=skyClimate(current);
  const domains={} as Record<Category,SkyDomain>;
  const scores={} as Record<Category,number>;
@@ -87,67 +89,62 @@ export function skyContext(natal:Chart,current:Chart,known:boolean):SkyContext{
 const arNames:Record<string,string>={Sun:'الشمس',Moon:'القمر',Mercury:'عطارد',Venus:'الزهرة',Mars:'المريخ',Jupiter:'المشتري',Saturn:'زحل',Uranus:'أورانوس',Neptune:'نبتون',Pluto:'بلوتو',Ascendant:'الطالع',MC:'وسط السماء'};
 const arAngles:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
 const enAngles:Record<number,string>={0:'conjunct',60:'sextile',90:'square',120:'trine',180:'opposite'};
-/** A brief audit trail for a derived multi-topic gauge. Never call a wide
- * background aspect an exact personal prediction. */
+/** Select only a contact actually used by the contextual score, never a
+ * nearby-but-zero-weight primary or a contact from an unrelated category.
+ * The same selection drives the explanation and its duplicate identity. */
+function gaugeContribution(context:SkyContext,sources:readonly Category[]){
+ const rows=[...new Set(sources)].map(c=>context.domains[c]).filter((x):x is SkyDomain=>Boolean(x));
+ const ranked=rows.flatMap(row=>row.contributors
+  .filter(p=>Number.isFinite(p.strength)&&p.strength>0&&Number.isFinite(p.tone)&&p.tone!==0)
+  .map(p=>({row,p,impact:Math.abs(p.tone*p.strength)})))
+  .sort((a,b)=>b.impact-a.impact||a.p.orb-b.p.orb||a.row.category.localeCompare(b.row.category)||
+   a.p.transit.localeCompare(b.p.transit)||a.p.natal.localeCompare(b.p.natal));
+ return {rows,leading:ranked[0]??null};
+}
+/** A brief audit trail showing a genuine contributor to a computed index. */
 export function contextGaugeBasis(context:SkyContext,sources:readonly Category[],english=false):string{
- const rows=[...new Set(sources)].map(c=>context.domains[c]).filter(Boolean);
+ const {rows,leading}=gaugeContribution(context,sources);
  if(!rows.length)return english?'No calculated sky context':'ماكو سياق سماوي محسوب';
- rows.sort((a,b)=>a.primary.orb-b.primary.orb||a.category.localeCompare(b.category));
- const row=rows[0],p=row.primary;
+ if(!leading){
+  const shifted=rows.some(row=>row.skyAdjustment!==0);
+  return shifted?(english?'No contributing natal contact within 8° · current-sky adjustment':'ماكو اتصال ميلادي مؤثر ضمن 8° · تعديل من السماء الحالية'):
+   (english?'No contributing natal contact within 8° · neutral baseline':'ماكو اتصال ميلادي مؤثر ضمن 8° · مؤشر محايد');
+ }
+ const {p}=leading;
  const name=english?p.transit:(arNames[p.transit]??p.transit);
  const target=english?p.natal:(arNames[p.natal]??p.natal);
  const relation=english?enAngles[p.angle]:arAngles[p.angle];
- const prefix=row.scope==='tight'?
-  (english?'Close aspect':'اتصال قريب'):
-  row.scope==='wide'?(english?'Wide context':'اتصال واسع'):
-   (row.skyAdjustment!==0?(english?'Distant natal geometry; active current sky':'زاوية ميلادية بعيدة · السماء الحالية مؤثرة'):(english?'Distant geometry, neutral baseline':'أقرب زاوية بعيدة · مؤشر محايد'));
+ const prefix=p.orb<=2.2?(english?'Close contributing aspect':'اتصال قريب مؤثر'):(english?'Wide contributing aspect':'اتصال واسع مؤثر');
  return prefix+' · '+name+' '+relation+' '+(english?'natal '+target:target+' بخارطة ميلادك')+' · '+p.orb.toFixed(1)+'°';
 }
-
-/** Stable content identity: unlike score-label or orb, this identifies the
- * exact transit-to-natal aspect shared by several derived GO gauges. */
+/** The identity belongs to the same contributor described by the reading. */
 export function contextGaugeContactKey(context:SkyContext,sources:readonly Category[]):string|null{
- const rows=[...new Set(sources)].map(category=>context.domains[category]).filter(Boolean);
- rows.sort((x,y)=>x.primary.orb-y.primary.orb||x.category.localeCompare(y.category));
- const row=rows[0];
- if(!row||row.scope==='background')return null;
- const p=row.primary;
+ const {leading}=gaugeContribution(context,sources);
+ if(!leading)return null;
+ const {p}=leading;
  return p.transit+':'+p.natal+':'+p.angle;
 }
-/** Concise interpretation based on an actual calculated contact.
- * This is a traditional astrological reading, not an observed life event. */
+/** An interpretation of a real score contributor, not the nearest irrelevant
+ * angular distance. The sky adjustment remains a distinct calculation layer. */
 export function contextGaugeNarrative(context:SkyContext,sources:readonly Category[],english=false):string{
- const rows=[...new Set(sources)].map(c=>context.domains[c]).filter(Boolean);
+ const {rows,leading}=gaugeContribution(context,sources);
  if(!rows.length)return english?'No usable planetary positions.':'ماكو مواقع كوكبية كافية.';
- rows.sort((a,b)=>a.primary.orb-b.primary.orb);
- const row=rows[0],p=row.primary;
+ if(!leading){
+  return rows.some(row=>row.skyAdjustment!==0)?
+   (english?'No contributing natal aspect within 8°. Current-sky contacts account for the adjustment to these categories.':
+    'ماكو اتصال ميلادي مؤثر ضمن 8°. اتصالات السماء الحالية داخلة بتعديل درجة واحد أو أكثر من هالمجالات.'):
+   (english?'No contributing natal aspect within 8°. These categories use a neutral baseline, not a forecast.':
+    'ماكو اتصال ميلادي مؤثر ضمن 8°. هالمجالات على خط الأساس المحايد، مو توقع لنتيجة.');
+ }
+ const {row,p}=leading;
  const name=english?p.transit:(arNames[p.transit]??p.transit);
  const target=english?p.natal:(arNames[p.natal]??p.natal);
  const aspectName=english?enAngles[p.angle]:arAngles[p.angle];
- const subjects:Record<string,[string,string]>={
-  Sun:['أولوياتك وثقتك بالقرار','decisions and personal priorities'],
-  Moon:['مزاجك واحتياجك للراحة','emotional responses and comfort'],
-  Mercury:['المعلومات وطريقة التواصل','information and communication'],
-  Venus:['التقارب والقيم الشخصية','affection and personal values'],
-  Mars:['المبادرة وحدود الاندفاع','initiative and impulse control'],
-  Jupiter:['التوسع وموازنة الخيارات','growth and weighing options'],
-  Saturn:['المسؤوليات وحدود الوقت والجهد','responsibility, time and effort limits'],
-  Uranus:['التغيير والتكيف','change and flexibility'],
-  Neptune:['التوقعات وما هو واضح فعلاً','expectations versus facts'],
-  Ascendant:['الانطباع الأول والحضور','presence and first impressions'],
-  MC:['العمل والمسؤوليات العامة','career and public roles']
- };
- if(row.scope==='background'&&row.skyAdjustment!==0)return english?
-  'No close natal transit; current sky contacts shift this index by '+row.skyAdjustment+' points.':
-  'ماكو اتصال قريب مع خارطة الميلاد؛ اتصالات الكواكب الحالية غيّرت المؤشر بمقدار '+row.skyAdjustment+' نقطة.';
- if(row.scope==='background')return english?
-  'The nearest '+name+'–'+target+' aspect is '+p.orb.toFixed(1)+'° away. No close aspect was calculated; the 50-point reading is a neutral context marker, not a forecast.':
-  'أقرب زاوية بين '+name+' و'+target+' فارقها '+p.orb.toFixed(1)+'°. ماكو اتصال ضمن 8°؛ الدرجة حيادية مو توقع.';
- const subject=subjects[p.natal]?.[english?1:0]??(english?'your priorities':'أولوياتك');
  const specific=skyAspectExplanation(p.transit,p.natal,p.angle,english);
- // The pair already supplies one precise action; GO / Travel append their own,
- // and repeating a general Moon note on four unrelated gauges is misleading.
+ const extra=row.skyAdjustment!==0?(english?
+  ' The current-sky adjustment is a separate '+(row.skyAdjustment>0?'+':'')+row.skyAdjustment+'-point term in this category.':
+  ' تعديل السماء الحالية بهالمجال مكوّن منفصل: '+(row.skyAdjustment>0?'+':'')+row.skyAdjustment+' نقطة.'):'';
  return english?
-  name+' '+aspectName+' natal '+target+' ('+p.orb.toFixed(1)+'°): '+specific:
-  name+' '+aspectName+' '+target+' بخارطة ميلادك (فارق '+p.orb.toFixed(1)+'°): '+specific;
+  name+' '+aspectName+' natal '+target+' ('+p.orb.toFixed(1)+'°): '+specific+extra:
+  name+' '+aspectName+' '+target+' بخارطة ميلادك (فارق '+p.orb.toFixed(1)+'°): '+specific+extra;
 }
