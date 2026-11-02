@@ -6,9 +6,19 @@ export type NamedContact=Evidence;
  * do not fabricate angles or merge into the original scoring algorithm.
  */
 export function namedAsteroidContacts(transits:readonly Point[],natal:readonly Point[],at:Date):NamedContact[]{
+ if(!Number.isFinite(+at))throw Error('Invalid asteroid contact instant');
+ const valid=(p:Point)=>Number.isFinite(p.longitude)&&p.longitude>=0&&p.longitude<360&&Number.isFinite(p.speed);
+ const natalIds=new Set<string>();
+ for(const p of natal){
+  if(!valid(p)||natalIds.has(p.id))throw Error('Invalid or repeated natal asteroid target: '+p.id);
+  natalIds.add(p.id);
+ }
  const out:NamedContact[]=[];
+ const namedTransitIds=new Set<string>();
  for(const t of transits){
   const asteroid=namedAsteroids.find(a=>a.name===t.id);if(!asteroid)continue;
+  if(!valid(t)||namedTransitIds.has(t.id))throw Error('Invalid or repeated asteroid ephemeris: '+t.id);
+  namedTransitIds.add(t.id);
   for(const n of natal)for(const angle of angles){
    const orb=Math.abs(distance(t.longitude,n.longitude)-angle),limit=1.5;
    if(orb>limit)continue;

@@ -60,3 +60,15 @@ test('asteroid contacts display only precise unique evidence, never repeated gen
  assert.doesNotMatch(row.emphasis,/تعاون أسهل بين|جرّب خطوة محددة|هالمعنى يرتبط بموضوع/);
  assert.ok(row.action.length>20);
 });
+
+test('named asteroid contact scanner rejects corrupted and duplicated coordinates instead of fabricating an aspect',()=>{
+ const at=new Date('2026-11-02T18:00:00Z');
+ const asteroid={id:'Eros',symbol:'✧',longitude:120,speed:.1};
+ const natal={id:'Venus',symbol:'♀',longitude:120,speed:0};
+ assert.throws(()=>namedAsteroidContacts([{...asteroid,longitude:NaN}],[natal],at),/Invalid or repeated asteroid/);
+ assert.throws(()=>namedAsteroidContacts([asteroid],[{...natal,longitude:NaN}],at),/Invalid or repeated natal/);
+ assert.throws(()=>namedAsteroidContacts([asteroid,asteroid],[natal],at),/repeated asteroid/);
+ assert.throws(()=>namedAsteroidContacts([asteroid],[natal,natal],at),/repeated natal/);
+ assert.throws(()=>namedAsteroidContacts([asteroid],[natal],new Date(NaN)),/Invalid asteroid contact instant/);
+ assert.ok(namedAsteroidContacts([asteroid],[natal],at).some(e=>e.angle===0&&e.orb===0));
+});
