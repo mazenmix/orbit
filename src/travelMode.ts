@@ -163,12 +163,19 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
  const pair=travelStories[metric.id as TravelCardId][band];
  const basis=entries.map(e=>sourceLabels[e.category][english?1:0]+' '+e.score).join(' · ');
  const ranked=[...entries].sort((a,b)=>Math.abs(b.score-50)-Math.abs(a.score-50)||source.indexOf(a.category)-source.indexOf(b.category));
- const preferred=entries.find(e=>e.category===activityFocus[metric.id as TravelCardId]);
- const active=(preferred?.contacts.some(c=>c.strength>0&&c.tone!==0)?preferred:undefined)??
-  ranked.find(e=>e.contacts.some(c=>c.strength>0&&c.tone!==0));
+ // The displayed score is an AVERAGE of source domains. A high overall
+ // New People score must not cite a negative communication square merely
+ // because communication is the preferred editorial topic.
+ const direction=Math.sign(metric.value-50);
+ const hasContact=(entry:typeof entries[number])=>entry.contacts.some(c=>c.strength>0&&c.tone!==0);
+ const hasAligned=(entry:typeof entries[number])=>entry.contacts.some(c=>c.strength>0&&c.tone!==0&&
+  direction!==0&&Math.sign(c.tone)===direction);
+ const aligned=ranked.filter(hasAligned);
+ const pool=aligned.length?aligned:ranked.filter(hasContact);
+ const active=pool.find(e=>e.category===activityFocus[metric.id as TravelCardId])??pool[0];
  let evidence='',contactKey:string|null=null;
  if(active){
-  const sign=Math.sign(active.score-50);
+  const sign=aligned.length?direction:Math.sign(active.score-50);
   const contributions=[...active.contacts].filter(c=>c.strength>0&&c.tone!==0).sort((a,b)=>
    Number(Math.sign(b.tone)===sign)-Number(Math.sign(a.tone)===sign)||
    Math.abs(b.tone*b.strength)-Math.abs(a.tone*a.strength)||a.orb-b.orb);
@@ -181,6 +188,11 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
   evidence=english?
    'Leading calculated contact in '+categoryName+': '+body+' '+relation+' natal '+natal+' (orb '+contact.orb.toFixed(1)+'°).':
    'أبرز اتصال محسوب بمجال '+categoryName+': '+body+' '+relation+' '+natal+' بخارطة ميلادك (فارق '+contact.orb.toFixed(1)+'°).';
+  if(direction!==0&&Math.sign(contact.tone)!==direction){
+   evidence+=' '+(english?
+    'This contact alone does not explain the composite direction; the other source domains determine the final score.':
+    'هذا الاتصال وحده ما يفسّر اتجاه المحصلة؛ بقية المجالات رجّحت الدرجة النهائية.');
+  }
  }else{
   const skyShift=entries.some(entry=>sky.domains[entry.category].skyAdjustment!==0);
   evidence=skyShift?(english?

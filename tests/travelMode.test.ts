@@ -210,3 +210,23 @@ test('Travel Mode presents shared consent context at group level, not as repeate
   assert.doesNotMatch(reading.detail,/الدرجة ما تقيس انجذاب أو موافقة شخص ثاني/);
  }
 });
+
+test('Travel evidence follows the composite score direction instead of automatically choosing a contradicting domain',()=>{
+ const chart=(positions:Record<string,number>):Chart=>({date:new Date('2026-11-02T18:00:00Z'),
+  points:Object.entries(positions).map(([id,longitude])=>({id,symbol:'*',longitude,speed:1})),
+  cusps:[],asc:null,mc:null,missing:[]});
+ const natal=chart({Sun:8,Moon:20,Mercury:45,Venus:72,Mars:130,Jupiter:152,Saturn:204,Uranus:260,Neptune:298,Pluto:335});
+ const current=chart({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334});
+ const original=skyContext(natal,current,true);
+ const communication={...original.domains.communication,score:20,contributors:[{transit:'Neptune',natal:'Mercury',angle:90,orb:0,strength:1,tone:-1}]};
+ const love={...original.domains.love,score:90,contributors:[{transit:'Venus',natal:'Venus',angle:120,orb:0,strength:1,tone:1}]};
+ const energy={...original.domains.energy,score:80,contributors:[{transit:'Sun',natal:'Sun',angle:60,orb:0,strength:1,tone:1}]};
+ const sky={...original,scores:{...original.scores,communication:20,love:90,energy:80},
+  domains:{...original.domains,communication,love,energy}};
+ const metric=derivedMetrics(sky.scores).find(m=>m.id==='newpeople')!;
+ assert.equal(metric.value,63);
+ const reading=travelMetricReading(metric,sky);
+ assert.notEqual(reading.contactKey,'Neptune:Mercury:90');
+ assert.match(reading.detail,/تثليث الزهرة|تسديس الشمس/);
+ assert.doesNotMatch(reading.detail,/نبتون تربيع عطارد/);
+});
