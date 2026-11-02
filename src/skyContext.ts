@@ -42,7 +42,7 @@ export function contextScore(contacts:readonly SkyContact[],skyAdjustment=0):num
  if(contacts.length>2)throw Error('Too many contextual contributors');
  const ids=new Set<string>();
  for(const c of contacts){
-  if(!major.has(c.transit)||!c.natal||!angles.includes(c.angle)||
+  if(!major.has(c.transit)||!c.natal||![0,60,90,120,180].includes(c.angle)||
    !Number.isFinite(c.orb)||c.orb<0||c.orb>=8||
    !Number.isFinite(c.strength)||c.strength<0||c.strength>1||
    !Number.isFinite(c.tone)||c.tone< -1||c.tone>1)
