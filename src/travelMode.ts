@@ -170,12 +170,16 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
  const hasContact=(entry:typeof entries[number])=>entry.contacts.some(c=>c.strength>0&&c.tone!==0);
  const hasAligned=(entry:typeof entries[number])=>entry.contacts.some(c=>c.strength>0&&c.tone!==0&&
   direction!==0&&Math.sign(c.tone)===direction);
- const aligned=ranked.filter(hasAligned);
- const pool=aligned.length?aligned:ranked.filter(hasContact);
+ const aligned=ranked.filter(e=>Math.sign(e.score-50)===direction&&hasAligned(e));
+ const partiallyAligned=ranked.filter(hasAligned);
+ // The category explaining a positive composite should itself be positive
+ // where that category has a matching supporting aspect. Only fall back to
+ // opposing-category evidence if no directionally coherent source exists.
+ const pool=aligned.length?aligned:partiallyAligned.length?partiallyAligned:ranked.filter(hasContact);
  const active=pool.find(e=>e.category===activityFocus[metric.id as TravelCardId])??pool[0];
  let evidence='',contactKey:string|null=null;
  if(active){
-  const sign=aligned.length?direction:Math.sign(active.score-50);
+  const sign=(aligned.length||partiallyAligned.length)?direction:Math.sign(active.score-50);
   const contributions=[...active.contacts].filter(c=>c.strength>0&&c.tone!==0).sort((a,b)=>
    Number(Math.sign(b.tone)===sign)-Number(Math.sign(a.tone)===sign)||
    Math.abs(b.tone*b.strength)-Math.abs(a.tone*a.strength)||a.orb-b.orb);
