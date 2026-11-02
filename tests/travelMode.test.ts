@@ -153,7 +153,7 @@ test('Travel shares one sky contact narration per page and never repeats the glo
  const view=readFileSync(new URL('../src/main.ts',import.meta.url),'utf8');
  const source=readFileSync(new URL('../src/travelMode.ts',import.meta.url),'utf8');
  assert.match(view,/seenTravelContacts=new Set<string>\(\)/);
- assert.match(view,/repeated\?travel\.scene:travel\.summary/);
+ assert.match(view,/repeated\?travel\.conciseDetail:travel\.detail/);
  assert.doesNotMatch(source,/skyText\?' '\+skyText/);
 });
 
@@ -174,4 +174,23 @@ test('Travel explanation acknowledges current-sky adjustments without natal cont
  assert.match(ar.detail,/السماء الحالية غيّرت/);
  assert.match(en.detail,/current-sky conditions still changed/);
  assert.doesNotMatch(ar.detail,/درجات المجالات باقية على خط الأساس/);
+});
+
+test('repeated source contact is shown once per Travel view while each card keeps its own numerical basis',()=>{
+ const chart=(points:Record<string,number>):Chart=>({date:new Date('2026-11-02T18:00:00Z'),
+  points:Object.entries(points).map(([id,longitude])=>({id,symbol:'*',longitude,speed:1})),
+  cusps:[],asc:null,mc:null,missing:[]});
+ const natal=chart({Sun:8,Moon:20,Mercury:45,Venus:72,Mars:130,Jupiter:152,Saturn:204,Uranus:260,Neptune:298,Pluto:335});
+ const current=chart({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334});
+ const sky=skyContext(natal,current,true);
+ const readings=travelMetricsByGroup(derivedMetrics(sky.scores))
+  .flatMap(group=>group.rows.map(row=>travelMetricReading(row.metric,sky)));
+ const duplicates=readings.filter(r=>r.contactKey&&readings.filter(other=>other.contactKey===r.contactKey).length>1);
+ assert.ok(duplicates.length>=2,'Fixture should contain reused source contacts');
+ for(const reading of duplicates){
+  assert.ok(reading.detail.includes(reading.basis));
+  assert.ok(reading.conciseDetail.includes(reading.basis));
+  assert.doesNotMatch(reading.conciseDetail,/أبرز اتصال محسوب/);
+ }
+ assert.match(src,/repeated\?travel\.conciseDetail:travel\.detail/);
 });

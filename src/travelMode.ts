@@ -141,7 +141,7 @@ const nameAr:Record<string,string>={
 };
 const angleAr:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
 const angleEn:Record<number,string>={0:'conjunction',60:'sextile',90:'square',120:'trine',180:'opposition'};
-export type TravelCardReading={summary:string;basis:string;detail:string;scene:string;contactKey:string|null};
+export type TravelCardReading={summary:string;basis:string;detail:string;conciseDetail:string;scene:string;contactKey:string|null};
 
 /** A transparent, testable explanation for the exact sources of each card.
  * The leading contact is restricted to that card's source categories, not
@@ -197,11 +197,13 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
   metric.id==='sexuality'||metric.id==='chemistry'?(english?'It never measures another person’s attraction or consent.':
    'الدرجة ما تقيس انجذاب أو موافقة شخص ثاني.'):'';
  // Sky weather is counted in the index; do not repeat its paragraph on every card.
- const detail=(english?'Source indices: ':'المجالات الداخلة بالحساب: ')+basis+'. '+evidence+(riskNote?' '+riskNote:'');
+ const sourceLine=(english?'Source indices: ':'المجالات الداخلة بالحساب: ')+basis+'.';
+ const conciseDetail=sourceLine+(riskNote?' '+riskNote:'');
+ const detail=sourceLine+' '+evidence+(riskNote?' '+riskNote:'');
  const scene=pair[english?1:0];
  // A travel activity should be described in its own domain. Repeating an
  // unrestricted natal pair scene in the compact body produced irrelevant
  // relationship/sales advice under transport, rest and risk gauges. Keep
  // exact contacts auditable within the expanded "Why this score" section.
- return {summary:scene,scene,contactKey,basis,detail};
+ return {summary:scene,scene,contactKey,basis,detail,conciseDetail};
 }

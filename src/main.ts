@@ -265,7 +265,8 @@ function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,
  const travel=travelId?travelMetricReading(m,liveGaugeSky(),lang==='en'):null;
  const repeated=Boolean(travel?.contactKey&&seenTravelContacts?.has(travel.contactKey));
  if(travel?.contactKey)seenTravelContacts?.add(travel.contactKey);
- const travelSummary=travel?(repeated?travel.scene:travel.summary):'';
+ const travelSummary=travel?.summary??'';
+ const travelDetail=travel?(repeated?travel.conciseDetail:travel.detail):'';
  return '<article class="mx-focus-metric '+gaugeLevel(amount)+'"'+
   (travelId?' data-travel-metric="'+travelId+'"':' data-today-gauge="'+m.id+'"')+
   ' data-indicator-id="'+m.id+'">'+
@@ -273,7 +274,7 @@ function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,
   '<strong>'+amount+'<small>/100</small></strong>'+
   '<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
   (travel?'<p class="mx-travel-gauge-summary">'+esc(travelSummary)+'</p>'+
-   '<details class="mx-travel-gauge-detail"><summary>'+t('سبب الدرجة','Why this score')+'</summary><p>'+esc(travel.detail)+'</p></details>':'')+
+   '<details class="mx-travel-gauge-detail"><summary>'+t('سبب الدرجة','Why this score')+'</summary><p>'+esc(travelDetail)+'</p></details>':'')+
   '</article>';
 }
 
