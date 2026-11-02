@@ -82,26 +82,16 @@ export function asteroidReading(item:NamedAsteroid,contact:NamedContact|undefine
  const theme=english?c.enTheme:c.arTheme;
  const action=contact?(english?c.enAction:c.arAction):'';
  const natalName=contact?(({Sun:'شمسك',Moon:'قمرك',Mercury:'عطاردك',Venus:'زهرتك',Mars:'مريخك',Jupiter:'مشتريك',Saturn:'زحلك',Uranus:'أورانوسك',Neptune:'نبتونك',Pluto:'بلوتوك',Ascendant:'طالعك',MC:'مهنتك',Chiron:'كيرونك',Ceres:'سيريسك',Pallas:'بالاسك',Juno:'جونوك',Vesta:'فيستاك',Pholus:'فولوسك'} as Record<string,string>)[contact.natal.id]??contact.natal.id):'';
- const natalArea:Record<string,[string,string]>={
-  Sun:['قراراتك وثقتك بنفسك','decisions and identity'],Moon:['حاجتك للراحة وردّ الفعل','emotional comfort'],Mercury:['طريقة حچيك وفهمك للآخر','communication and understanding'],
-  Venus:['التقارب والتقدير','affection and values'],Mars:['المبادرة وحدود الاندفاع','initiative and boundaries'],Jupiter:['التوسع واختيار الفرص','growth and opportunity'],
-  Saturn:['الالتزام والمسؤولية','commitment and responsibility'],Uranus:['الاستقلال والتغيير','autonomy and change'],
-  Neptune:['التوقعات والخيال','expectations and imagination'],Pluto:['العمق والسيطرة','intensity and control'],
-  Ascendant:['حضورك والانطباع الأول','presence and first impressions'],MC:['العمل ودورك العام','career and public role']
- };
+ // The card already names the asteroid's unique theme and, when contact
+ // exists, its specific practical action. Repeat neither in the orbital
+ // evidence line: an orb + aspect + correct natal body is the new information.
+ // Previous generic "easier cooperation / reversible step" text was repeated
+ // across dozens of unrelated bodies and did not add a justified claim.
  const aspectAr:Record<number,string>={0:'اقتران',60:'تسديس',90:'تربيع',120:'تثليث',180:'مقابلة'};
  const aspectEn:Record<number,string>={0:'conjunction',60:'sextile',90:'square',120:'trine',180:'opposition'};
- const targetArea=contact?(natalArea[contact.natal.id]??['أولوياتك','your priorities']):null;
- const angleMeaning=contact?(
-   contact.angle===90||contact.angle===180?
-    (english?'Tension between '+theme+' and '+targetArea![1]+'; resolve the competing priority before acting.':'شدّ بين '+theme+' وبين '+targetArea![0]+'؛ وضّح الأولوية والحدود قبل القرار.'):
-   contact.angle===0?
-    (english?'Strong focus combines '+theme+' with '+targetArea![1]+'; avoid making one need override the other.':'تركيز يجمع '+theme+' ويا '+targetArea![0]+'؛ لا تخلي حاجة تطغى على الثانية.'):
-    (english?'A supportive link between '+theme+' and '+targetArea![1]+'; use one concrete, reversible step.':'تعاون أسهل بين '+theme+' ويا '+targetArea![0]+'؛ جرّب خطوة محددة قابلة للتعديل.')
-  ):'';
  const emphasis=!contact?(english?'No tight natal contact at this selected moment.':'ماكو اتصال ولادي قريب بهاللحظة.'):english?
-  (item.name+' '+aspectEn[contact.angle]+' natal '+contact.natal.id+' (orb '+contact.orb.toFixed(2)+'°). The symbolic theme meets '+(natalArea[contact.natal.id]?.[1]??'a natal priority')+'. '+angleMeaning):
-  (item.name+' '+aspectAr[contact.angle]+' ويا '+natalName+' (فارق '+contact.orb.toFixed(2)+'°). هالمعنى يرتبط بموضوع '+(natalArea[contact.natal.id]?.[0]??'أولوياتك')+'. '+angleMeaning);
+  item.name+' '+aspectEn[contact.angle]+' natal '+contact.natal.id+' (orb '+contact.orb.toFixed(2)+'°).':
+  item.name+' '+aspectAr[contact.angle]+' ويا '+natalName+' (فارق '+contact.orb.toFixed(2)+'°).';
  return {theme,action,emphasis};
 }
 

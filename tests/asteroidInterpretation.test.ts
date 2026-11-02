@@ -46,3 +46,17 @@ test('asteroid zodiac wording is natural Iraqi Arabic without duplicated article
  assert.match(ar.theme,/بالقوس/);
  assert.doesNotMatch(ar.theme,/بالـالقوس/);
 });
+
+test('asteroid contacts display only precise unique evidence, never repeated generic analysis',()=>{
+ const date=new Date('2026-11-02T18:00:00Z');
+ const a=namedAsteroids.find(item=>item.name==='Psyche')!;
+ const contact=namedAsteroidContacts([{id:a.name,symbol:'✧',longitude:120.1,speed:.12}],
+  [{id:'MC',symbol:'MC',longitude:120,speed:0}],date)[0];
+ assert.ok(contact);
+ const row=asteroidReading(a,contact);
+ assert.match(row.emphasis,/Psyche/);
+ assert.match(row.emphasis,/مهنتك/);
+ assert.match(row.emphasis,/فارق 0.10°/);
+ assert.doesNotMatch(row.emphasis,/تعاون أسهل بين|جرّب خطوة محددة|هالمعنى يرتبط بموضوع/);
+ assert.ok(row.action.length>20);
+});
