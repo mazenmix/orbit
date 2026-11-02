@@ -47,9 +47,11 @@ export function contextScore(contacts:readonly SkyContact[],skyAdjustment=0):num
    !Number.isFinite(c.strength)||c.strength<0||c.strength>1||
    !Number.isFinite(c.tone)||c.tone< -1||c.tone>1)
    throw Error('Invalid contextual contribution');
-  const id=c.transit+':'+c.natal+':'+c.angle;
-  if(ids.has(id))throw Error('Repeated contextual contribution '+id);
-  ids.add(id);
+  // Two different targets of the same moving planet are correlated, not
+  // independent transit sources. Context domains explicitly allow one
+  // contribution per moving body, so enforce the invariant here too.
+  if(ids.has(c.transit))throw Error('Repeated contextual contribution from '+c.transit);
+  ids.add(c.transit);
  }
  return Math.round(clamp(50+contacts.reduce((value,c)=>value+c.tone*c.strength*20,0)+skyAdjustment));
 }

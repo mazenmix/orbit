@@ -132,6 +132,7 @@ test('contextual score rejects duplicated aspects and impossible geometry before
  const valid={transit:'Venus',natal:'Moon',angle:120,orb:1,strength:.75,tone:1};
  assert.ok(Number.isFinite(contextScore([valid])));
  assert.throws(()=>contextScore([valid,valid]),/Repeated contextual contribution/);
+ assert.throws(()=>contextScore([valid,{...valid,natal:'Sun',angle:60}]),/Repeated contextual contribution/);
  assert.throws(()=>contextScore([valid,valid,{...valid,transit:'Mars'}]),/Too many contextual contributors/);
  assert.throws(()=>contextScore([{...valid,angle:45}]),/Invalid contextual contribution/);
  assert.throws(()=>contextScore([{...valid,orb:9}]),/Invalid contextual contribution/);
