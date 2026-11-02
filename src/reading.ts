@@ -35,7 +35,24 @@ export function boundedComparison(current:Contact[],previous:Contact[],limit=12)
 export function optionalComparison(current:Contact[],readPrevious:()=>Contact[]){
  try{return boundedComparison(current,readPrevious())}catch{return null}
 }
+/** Exact semantic-unit fingerprint for Arabic orthography, not a synonym
+ * generator. Avoid showing the same explanation twice merely because an
+ * Arabic hamza, alif maqsurah or diacritic was typed differently. */
+export function paragraphFingerprint(text:string):string{
+ return text.normalize('NFKC').toLocaleLowerCase()
+  .replace(/[\u064B-\u065F\u0670\u0640]/gu,'')
+  .replace(/[أإآٱ]/gu,'ا').replace(/ى/gu,'ي')
+  .replace(/[٠-٩۰-۹]/gu,value=>{
+   const arabic='٠١٢٣٤٥٦٧٨٩',persian='۰۱۲۳۴۵۶۷۸۹';
+   return String(Math.max(arabic.indexOf(value),persian.indexOf(value)));
+  })
+  .replace(/[\s\p{P}\p{S}]+/gu,'');
+}
 export function distinctParagraphs(text:string){
  const seen=new Set<string>();
- return text.split(/\n\s*\n/).filter(p=>{const key=p.toLocaleLowerCase().replace(/[\s\p{P}\p{S}]+/gu,'');if(!key||seen.has(key))return false;seen.add(key);return true}).join('\n\n');
+ return text.split(/\n\s*\n/).filter(p=>{
+  const key=paragraphFingerprint(p);
+  if(!key||seen.has(key))return false;
+  seen.add(key);return true;
+ }).join('\n\n');
 }
