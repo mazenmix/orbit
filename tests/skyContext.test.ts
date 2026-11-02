@@ -117,3 +117,13 @@ test('GO refuses corrupted natal coordinates and duplicate bodies before scoring
  assert.throws(()=>skyContext({...natal,asc:Infinity},current,true),/Ascendant/);
  assert.throws(()=>skyContext({...natal,mc:-10},current,true),/Midheaven/);
 });
+
+test('context scoring refuses incomplete major natal planets even if a category has another anchor',()=>{
+ const current=base({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334});
+ const incomplete={...natal,points:natal.points.filter(p=>p.id!=='Jupiter')};
+ assert.throws(()=>skyContext(incomplete,current,true),/Incomplete principal natal ephemeris/);
+ assert.throws(()=>skyContext(incomplete,current,false),/Incomplete principal natal ephemeris/);
+ const moonMissing={...natal,points:natal.points.filter(p=>p.id!=='Moon')};
+ assert.throws(()=>skyContext(moonMissing,current,true),/Incomplete principal natal ephemeris/);
+ assert.equal(Object.keys(skyContext(moonMissing,current,false).domains).length,8);
+});

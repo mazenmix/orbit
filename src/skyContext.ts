@@ -53,6 +53,11 @@ function targetPoints(natal:Chart,known:boolean):Point[]{
   throw Error('Invalid natal Ascendant longitude');
  if(natal.mc!==null&&(!Number.isFinite(natal.mc)||natal.mc<0||natal.mc>=360))
   throw Error('Invalid natal Midheaven longitude');
+ // Any missing core natal planet changes the very sources and ranking of
+ // eight contextual domains, even when a fallback anchor still exists.
+ // Unknown birth time intentionally excludes the natal Moon.
+ const required=[...major].filter(id=>known||id!=='Moon');
+ if(required.some(id=>!seen.has(id)))throw Error('Incomplete principal natal ephemeris for contextual gauges');
  const list=natal.points.filter(p=>known||p.id!=='Moon').slice();
  if(known&&natal.asc!==null)list.push({id:'Ascendant',symbol:'ASC',longitude:natal.asc,speed:0});
  if(known&&natal.mc!==null)list.push({id:'MC',symbol:'MC',longitude:natal.mc,speed:0});

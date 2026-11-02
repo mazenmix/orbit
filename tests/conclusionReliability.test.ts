@@ -162,3 +162,14 @@ test('missing historical ephemeris stays unavailable instead of becoming an inve
  assert.equal(comparison,null);
  assert.equal(optionalComparison(contacts,()=>contacts)?.stable,true);
 });
+
+test('contact comparison refuses NaN and conflicting repeated identities instead of claiming stability',()=>{
+ const now=[{transit:'Mars',natal:'Sun',angle:90,orb:.3,applying:true}];
+ assert.equal(compareContacts(now,now).stable,true);
+ assert.throws(()=>compareContacts([{...now[0],orb:NaN}],now),/Invalid current astronomical contact/);
+ assert.throws(()=>compareContacts(now,[{...now[0],orb:Infinity}]),/Invalid previous astronomical contact/);
+ assert.throws(()=>compareContacts([...now,now[0]],now),/Repeated current astronomical contact/);
+ assert.throws(()=>compareContacts(now,[...now,now[0]]),/Repeated previous astronomical contact/);
+ assert.throws(()=>compareContacts([{...now[0],angle:45}],now),/Invalid current astronomical contact/);
+ assert.equal(optionalComparison(now,()=>[{...now[0],orb:NaN}]),null);
+});

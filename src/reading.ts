@@ -1,6 +1,21 @@
 export type Contact={transit:string;natal:string;angle:number;orb:number;applying:boolean};
 export function compareContacts(current:Contact[],previous:Contact[]){
  const key=(e:Contact)=>[e.transit,e.natal,e.angle].join(':');
+ // Invalid or repeated identities otherwise produce false "stable" results:
+ // Math.abs(NaN - orb) is NaN, which never passes the change threshold.
+ const validate=(rows:readonly Contact[],label:string)=>{
+  const ids=new Set<string>();
+  for(const e of rows){
+   if(typeof e.transit!=='string'||!e.transit.trim()||typeof e.natal!=='string'||!e.natal.trim()||
+    ![0,60,90,120,180].includes(e.angle)||!Number.isFinite(e.orb)||e.orb<0||
+    typeof e.applying!=='boolean')throw Error('Invalid '+label+' astronomical contact');
+   const id=key(e);
+   if(ids.has(id))throw Error('Repeated '+label+' astronomical contact: '+id);
+   ids.add(id);
+  }
+ };
+ validate(current,'current');
+ validate(previous,'previous');
  const old=new Map(previous.map(e=>[key(e),e]));
  const now=new Set(current.map(key));
  const entered=current.filter(e=>!old.has(key(e))).map(key);
