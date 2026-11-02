@@ -154,3 +154,22 @@ test('Travel shares one sky contact narration per page and never repeats the glo
  assert.match(view,/repeated\?travel\.scene:travel\.summary/);
  assert.doesNotMatch(source,/skyText\?' '\+skyText/);
 });
+
+test('Travel explanation acknowledges current-sky adjustments without natal contributors',()=>{
+ const names=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+ const make=(offset:number):Chart=>({date:new Date('2026-11-02T18:00:00Z'),
+  points:names.map((id,i)=>({id,symbol:id,longitude:(i*31+offset)%360,speed:1})),
+  cusps:[],asc:null,mc:null,missing:[]});
+ const original=skyContext(make(0),make(15),true);
+ const scores={...original.scores,love:54,communication:50,timing:50};
+ const domains={...original.domains};
+ for(const category of ['love','communication','timing'] as const){
+  domains[category]={...domains[category],score:scores[category],contributors:[],contacts:0,skyAdjustment:scores[category]-50};
+ }
+ const sky={...original,scores,domains};
+ const metric=derivedMetrics(scores).find(item=>item.id==='dating')!;
+ const ar=travelMetricReading(metric,sky),en=travelMetricReading(metric,sky,true);
+ assert.match(ar.detail,/السماء الحالية غيّرت/);
+ assert.match(en.detail,/current-sky conditions still changed/);
+ assert.doesNotMatch(ar.detail,/درجات المجالات باقية على خط الأساس/);
+});
