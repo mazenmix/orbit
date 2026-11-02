@@ -194,8 +194,9 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
   'هذا تقييم ملاءمة توقيت، مو قياس لخطر فعلي أو أمان منطقة.'):
   metric.id==='sleep'?(english?'Sleep need is decided by your body and schedule, not this score.':
    'حاجة جسمك للنوم أهم من هذا التقييم.'):
-  metric.id==='sexuality'||metric.id==='chemistry'?(english?'It never measures another person’s attraction or consent.':
-   'الدرجة ما تقيس انجذاب أو موافقة شخص ثاني.'):'';
+  // This boundary is already stated once in the visible Nightlife & Intimacy
+  // group heading, so avoid repeating an identical disclaimer on two gauges.
+  '';
  // Sky weather is counted in the index; do not repeat its paragraph on every card.
  const sourceLine=(english?'Source indices: ':'المجالات الداخلة بالحساب: ')+basis+'.';
  const conciseDetail=sourceLine+(riskNote?' '+riskNote:'');

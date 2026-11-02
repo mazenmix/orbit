@@ -194,3 +194,19 @@ test('repeated source contact is shown once per Travel view while each card keep
  }
  assert.match(src,/repeated\?travel\.conciseDetail:travel\.detail/);
 });
+
+test('Travel Mode presents shared consent context at group level, not as repeated gauge details',()=>{
+ const section=travelMetricGroups.find(group=>group.id==='night')!;
+ assert.match(section.descriptionAr,/ما تقيس رغبة الطرف الثاني أو موافقته/);
+ const chart=(positions:Record<string,number>):Chart=>({date:new Date('2026-11-02T18:00:00Z'),
+  points:Object.entries(positions).map(([id,longitude])=>({id,symbol:'*',longitude,speed:1})),
+  cusps:[],asc:null,mc:null,missing:[]});
+ const natal=chart({Sun:8,Moon:20,Mercury:45,Venus:72,Mars:130,Jupiter:152,Saturn:204,Uranus:260,Neptune:298,Pluto:335});
+ const current=chart({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334});
+ const sky=skyContext(natal,current,true),all=derivedMetrics(sky.scores);
+ for(const id of ['chemistry','sexuality']){
+  const reading=travelMetricReading(all.find(metric=>metric.id===id)!,sky);
+  assert.match(reading.detail,/المجالات الداخلة بالحساب/);
+  assert.doesNotMatch(reading.detail,/الدرجة ما تقيس انجذاب أو موافقة شخص ثاني/);
+ }
+});
