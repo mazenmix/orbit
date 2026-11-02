@@ -60,6 +60,31 @@ test('Station direction is refined from signed real ephemeris velocity',()=>{
  assert.equal(changed!.retrograde,false);
  assert.ok(Math.abs(+changed!.at-station)<60000);
 });
+test('Exactly zero station velocity at a sampling boundary is a verified single station',()=>{
+ const station=BASE+2*HOUR;
+ const read=(date:Date):Point[]=>sample(date).map(p=>p.id==='Mars'?{
+  ...p,longitude:160+Math.pow((+date-station)/HOUR,2)*.003,
+  speed:((+date-station)/HOUR)*.144
+ }:p);
+ const events=scanWholeSky(new Date(station),read,2,2)
+  .filter(e=>e.kind==='station'&&e.first==='Mars');
+ assert.equal(events.length,1,'A sample-boundary station must not appear twice');
+ assert.ok(Math.abs(+events[0].at-station)<60000);
+ assert.equal(events[0].retrograde,false);
+});
+test('A velocity touching zero without reversing does not create a fictional station',()=>{
+ const touch=BASE+2*HOUR;
+ const read=(date:Date):Point[]=>sample(date).map(p=>p.id==='Mars'?{
+  ...p,speed:Math.pow((+date-touch)/HOUR,2)
+ }:p);
+ assert.equal(scanWholeSky(new Date(touch),read,2,2).filter(e=>e.kind==='station'&&e.first==='Mars').length,0);
+});
+test('Invalid finite-scan windows fail instead of silently reporting no events',()=>{
+ for(const value of [NaN,Infinity,-Infinity]){
+  assert.throws(()=>scanWholeSky(new Date(BASE),sample,value,1),/Invalid whole-sky/);
+  assert.throws(()=>scanWholeSky(new Date(BASE),sample,0,value),/Invalid whole-sky/);
+ }
+});
 test('An actual nonlunar event can drive the headline while all planets remain visible',()=>{
  const at=new Date(BASE+3*HOUR);
  const events:WholeSkyOccurrence[]=[{kind:'aspect',at:new Date(+at+HOUR),first:'Mercury',second:'Venus',angle:60}];

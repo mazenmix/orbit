@@ -549,6 +549,9 @@ for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
   const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,isMobile:device==='iphone',hasTouch:device==='iphone'});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
+  // Compare both views for the same astronomical instant. A real-time
+  // score can legitimately cross a rounding boundary during navigation.
+  await page.clock.setFixedTime(new Date('2026-11-02T17:00:00.000Z'));
   await page.goto('/#go',{waitUntil:'domcontentloaded'});
   await expect(page.locator('[data-section="go"]')).toBeVisible({timeout:75000});
   // The reference is the four compact Sex/Love/Emotions/Work gauges above

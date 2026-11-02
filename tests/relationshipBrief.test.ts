@@ -12,6 +12,8 @@ test('Venus-Mars trine produces direct attraction and sexual-chemistry statement
  assert.match(item.sexual.en,/sexual chemistry/);
  assert.doesNotMatch(item.sexual.ar,/\d+%|مؤكد|حتصير/);
  assert.ok(item.sexualContact);
+ assert.match(item.attraction.ar,/^الجاذبية · الزهرة والمريخ بتثليث؛/);
+ assert.doesNotMatch(item.attraction.ar,/الجاذبية هنا تتعلق بطبيعة التفاعل/);
 });
 test('sexual square is described as potentially intense but conflicting, not a guaranteed result',()=>{
  const item=relationshipBrief([aspect('Mars','Venus',90)]);

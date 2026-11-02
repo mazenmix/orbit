@@ -47,7 +47,7 @@ const signText=(n:number,lang:SkyLanguage)=>lang==='ar'?ZODIAC[n]:EN_SIGNS[n];
 const planet=(id:SkyBodyId,lang:SkyLanguage)=>dictionary[id][lang];
 const pair=(a:SkyBodyId,b:SkyBodyId,lang:SkyLanguage)=>planet(a,lang)+(lang==='ar'?' ويّه ':' with ')+planet(b,lang);
 export function scanWholeSky(at:Date,read:WholeSkyReader,hoursBack=18,hoursAhead=48):WholeSkyOccurrence[]{
- if(!Number.isFinite(+at)||hoursBack<0||hoursAhead<=0||hoursBack>168||hoursAhead>168)throw Error('Invalid whole-sky scan window');
+ if(!Number.isFinite(+at)||!Number.isFinite(hoursBack)||!Number.isFinite(hoursAhead)||hoursBack<0||hoursAhead<=0||hoursBack>168||hoursAhead>168)throw Error('Invalid whole-sky scan window');
  const HOUR=3600000,start=+at-hoursBack*HOUR,end=+at+hoursAhead*HOUR,step=2*HOUR;
  const cache=new Map<number,Map<SkyBodyId,Point>>();
  const snapshot=(t:number)=>{let p=cache.get(t);if(!p){p=valid(read(new Date(t)));cache.set(t,p)}return p};
@@ -65,12 +65,18 @@ export function scanWholeSky(at:Date,read:WholeSkyReader,hoursBack=18,hoursAhead
     const root=bisectAngle(func,a,b,.1);
     if(root&&Math.abs(func(+root))<.03){const after=point(Math.min(end,+root+60000),id);emit({kind:'ingress',at:root,first:id,sign:signAt(after),retrograde:after.speed<0});}
    }
-   if(first.speed*last.speed<0){
+   // At a 2-hour sample boundary the station speed can equal zero,
+   // so a strict sign-product test would omit a real astronomical event.
+   // Verify a directional reversal on both sides to exclude mere touches.
+   const crosses=first.speed*last.speed<0||
+    (first.speed===0&&last.speed!==0)||(last.speed===0&&first.speed!==0);
+   if(crosses){
     const func=(t:number)=>point(t,id).speed;
     const root=bisectAngle(func,a,b,.1);
     if(root&&Math.abs(func(+root))<.02){
-     const after=point(Math.min(end,+root+600000),id);
-     emit({kind:'station',at:root,first:id,retrograde:after.speed<0});
+     const before=point(+root-600000,id).speed;
+     const after=point(+root+600000,id).speed;
+     if(before*after<0)emit({kind:'station',at:root,first:id,retrograde:after<0});
     }
    }
   }
