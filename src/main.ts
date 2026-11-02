@@ -259,20 +259,20 @@ function liveGaugeSky():SkyContext{
  if(!lastSkyContext||lastSkyContext.key!==key)lastSkyContext={key,value:skyContext(r.natal,r.current,active.known)};
  return lastSkyContext.value;
 }
-function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,string],travelId?:string,seenTravelContacts?:Set<string>){
+function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,string],travelId?:string,seenTravelContacts?:Set<string>,showBasis=true){
  const label=override?t(override[0],override[1]):t(m.ar,m.en),amount=m.value;
  const travel=travelId?travelMetricReading(m,liveGaugeSky(),lang==='en'):null;
  const repeated=Boolean(travel?.contactKey&&seenTravelContacts?.has(travel.contactKey));
  if(travel?.contactKey)seenTravelContacts?.add(travel.contactKey);
  const travelSummary=travel?(repeated?travel.scene:travel.summary):'';
- const basis=travel?.basis??contextGaugeBasis(liveGaugeSky(),m.source,lang==='en');
+ const basis=showBasis?(travel?.basis??contextGaugeBasis(liveGaugeSky(),m.source,lang==='en')):'';
  return '<article class="mx-focus-metric '+gaugeLevel(amount)+'"'+
   (travelId?' data-travel-metric="'+travelId+'"':' data-today-gauge="'+m.id+'"')+
   ' data-indicator-id="'+m.id+'">'+
   '<span class="mx-today-gauge-icon" aria-hidden="true">'+symbol+'</span><b>'+label+'</b>'+
   '<strong>'+amount+'<small>/100</small></strong>'+
   '<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
-  '<small class="mx-metric-coverage" title="'+esc(basis)+'">'+esc(basis)+'</small>'+
+  (showBasis?'<small class="mx-metric-coverage" title="'+esc(basis)+'">'+esc(basis)+'</small>':'')+
   (travel?'<p class="mx-travel-gauge-summary">'+esc(travelSummary)+'</p>'+
    '<details class="mx-travel-gauge-detail"><summary>'+t('سبب الدرجة','Why this score')+'</summary><p>'+esc(travel.detail)+'</p></details>':'')+
   '</article>';
@@ -324,7 +324,7 @@ function newRelationshipGauges(){
  const cards=selectedIds.map(id=>{
   const metric=rows.find(x=>x.id===id);
   if(!metric)throw Error('Missing specialist atmosphere indicator: '+id);
-  return quickGaugeCard(metric,'✦');
+  return quickGaugeCard(metric,'✦',undefined,undefined,undefined,false);
  }).join('');
  return '<section class="panel mx-today-gauges mx-quick-gauges mx-sky-new-indicators">'+
   '<div class="mx-today-gauge-header"><h2>'+t('التفاهم وردود الفعل','Understanding & reactions')+'</h2></div>'+
