@@ -69,7 +69,7 @@ import {subscribeBackgroundPush,unsubscribeBackgroundPush,sendBackgroundPushTest
 import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear} from './progressions.ts';
 import {loadEyeSettings,saveEyeSettings,dueEyeEvents,type EyeClock,type EyeEvent} from './eye.ts';
 import {derivedMetrics,goModes,reviewContextGoMode,type GoDomain,type ContextGoReview,type MetricResult} from './metrics.ts';
-import {skyContext,contextGaugeBasis,contextGaugeNarrative,contextGaugeContactKey,type SkyContext} from './skyContext.ts';
+import {skyContext,contextGaugeNarrative,contextGaugeContactKey,type SkyContext} from './skyContext.ts';
 import {skyAspectExplanation,moonSignExplanation,type SkyNote} from './skyAtmosphere.ts';
 import {travelMetricsByGroup,travelMetricReading} from './travelMode.ts';
 import {renderGoLifeGauges} from './lifeGaugesUI.ts';
@@ -266,14 +266,12 @@ function quickGaugeCard(m:MetricResult,symbol:string,override?:readonly [string,
  const repeated=Boolean(travel?.contactKey&&seenTravelContacts?.has(travel.contactKey));
  if(travel?.contactKey)seenTravelContacts?.add(travel.contactKey);
  const travelSummary=travel?(repeated?travel.scene:travel.summary):'';
- const basis=showBasis?(travel?.basis??contextGaugeBasis(liveGaugeSky(),m.source,lang==='en')):'';
  return '<article class="mx-focus-metric '+gaugeLevel(amount)+'"'+
   (travelId?' data-travel-metric="'+travelId+'"':' data-today-gauge="'+m.id+'"')+
   ' data-indicator-id="'+m.id+'">'+
   '<span class="mx-today-gauge-icon" aria-hidden="true">'+symbol+'</span><b>'+label+'</b>'+
   '<strong>'+amount+'<small>/100</small></strong>'+
   '<div class="mx-today-gauge-track" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
-  (showBasis?'<small class="mx-metric-coverage" title="'+esc(basis)+'">'+esc(basis)+'</small>':'')+
   (travel?'<p class="mx-travel-gauge-summary">'+esc(travelSummary)+'</p>'+
    '<details class="mx-travel-gauge-detail"><summary>'+t('سبب الدرجة','Why this score')+'</summary><p>'+esc(travel.detail)+'</p></details>':'')+
   '</article>';
@@ -893,12 +891,10 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:ContextGoR
 /** Compact Go Mode indicator gauge: label, score and progress bar only. */
 function indicatorGaugeCard(m:MetricResult,travelId?:string){
  const label=t(m.ar,m.en),amount=m.value;
- const basis=contextGaugeBasis(liveGaugeSky(),m.source,lang==='en');
  return '<div class="metric-card '+(travelId?'mx-travel-metric ':'')+gaugeLevel(amount)+'" data-indicator-id="'+m.id+'"'+
    (travelId?' data-travel-metric="'+travelId+'"':'')+'>'+
    '<small>'+label+'</small><b>'+amount+'<em>/100</em></b>'+
-   '<div class="meter" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div>'+
-   '<small class="mx-metric-coverage" title="'+esc(basis)+'">'+esc(basis)+'</small></div>';
+   '<div class="meter" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="1" aria-valuemax="99" aria-valuenow="'+amount+'"><i style="width:'+amount+'%"></i></div></div>';
 }
 /** Both Go Mode and Travel Mode share one date/time selector, the same calculation engine, and the same actions. */
 function sharedModeTimeNavigation(){
@@ -984,8 +980,8 @@ function nowPage(){
  ];
  try{
   const moon=moonWindow(),at=+selected;
-  rows.push({id:'moon-sign',label:t('القمر','Moon')+' · '+signName(moon.sign*30),value:Math.round(elapsedPercent(+moon.enteredAt,+moon.ingressAt,at)),tone:'mx-now-moon'});
-  rows.push({id:'moon-voc',label:t('خلو المسار','Void of Course'),value:Math.round(elapsedPercent(+moon.vocStartsAt,+moon.ingressAt,at)),tone:'mx-now-void '+(moon.isVoid?'is-voc':'is-clear')});
+  rows.push({id:'moon-sign',label:t('تقدّم القمر بالبرج','Moon sign progress')+' · '+signName(moon.sign*30),value:Math.round(elapsedPercent(+moon.enteredAt,+moon.ingressAt,at)),tone:'mx-now-moon'});
+  rows.push({id:'moon-voc',label:moon.isVoid?t('تقدّم خلو المسار · فعّال','VOC progress · active'):t('خلو المسار · لم يبدأ','Void of course · not started'),value:Math.round(elapsedPercent(+moon.vocStartsAt,+moon.ingressAt,at)),tone:'mx-now-void '+(moon.isVoid?'is-voc':'is-clear')});
  }catch(e){console.warn('Now Moon timing unavailable',e)}
  return '<section class="mx-now-page" data-section="now" aria-label="Now">'+nowTimeNavigation()+'<div class="mx-now-list">'+
   rows.map(({id,label,value,tone})=>{
@@ -993,7 +989,7 @@ function nowPage(){
    const percent=available?Math.max(0,Math.min(100,Math.round(value))):0,style=available?(tone??gaugeLevel(percent)):'mx-unavailable';
    const safeLabel=esc(label);
    return '<article class="metric-card mx-now-row '+style+'" data-now-gauge="'+esc(id)+'">'+
-    '<div class="mx-now-head"><strong>'+safeLabel+'</strong><b>'+(available?percent+'<em>/100</em>':'—')+'</b></div>'+
+    '<div class="mx-now-head"><strong>'+safeLabel+'</strong><b>'+(available?percent+'<em>'+(id.startsWith('moon-')?'%':'/100')+'</em>':'—')+'</b></div>'+
     '<div class="meter"'+(available?' role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"':'')+' aria-label="'+safeLabel+'"><i style="width:'+percent+'%"></i></div>'+
     '</article>';
   }).join('')+'</div></section>'+skyWeatherPanel(true);
@@ -1007,7 +1003,6 @@ function goModePage(){
  const goCards='<section class="panel mx-go-mode-decisions">'+
   '<div class="go-grid">'+go.map(d=>{
    const memo=reviewContextGoMode(d,indicators,sky),state=memo.state;
-   const basis=contextGaugeBasis(sky,memo.sourceCategories,lang==='en');
    // The broad-sky index is available even when there is no tight GO verdict.
    const contextualAdvice:Record<GoDomain,[string,string]>={
     work:['حدد مهمة العمل الأهم وخلي قرارك مرتبط بنتيجتها الفعلية.','Prioritize a concrete work task and judge its actual outcome.'],
@@ -1021,7 +1016,7 @@ function goModePage(){
    if(key)seenGoContacts.add(key);
    const context=contextGaugeNarrative(sky,memo.sourceCategories,lang==='en');
    const narrative=(alreadySeen?'':context+' ')+advice;
-   return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><small class="mx-metric-coverage">'+esc(basis)+'</small><p class="go-decision">'+narrative+'</p></div>'
+   return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><p class="go-decision">'+narrative+'</p></div>'
   }).join('')+'</div>'
   '</section>';
  const allIndicators='<section class="panel mx-go-mode-indicators"><div class="metrics-grid">'+
