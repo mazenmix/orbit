@@ -1090,3 +1090,33 @@
  margin:0 0 9px!important;color:#b6b8d4;
  font-size:.72rem;line-height:1.55;
 }
+
+/* Editorial source for each distinct synastry claim. */
+#live-view-body .mx-relationship-brief .mx-brief-fact{
+ min-width:0;
+ padding-block:10px 3px;
+}
+#live-view-body .mx-relationship-brief .mx-brief-card h3{
+ overflow-wrap:anywhere;
+}
+#live-view-body .mx-relationship-brief .mx-brief-evidence{
+ box-sizing:border-box;
+ display:block;
+ width:fit-content;
+ max-width:100%;
+ margin-top:9px;
+ padding:5px 8px;
+ font-size:11px;
+ line-height:1.5;
+ color:#c6b5e9;
+ background:rgba(154,124,206,.09);
+ border:1px solid rgba(174,147,225,.20);
+ border-radius:8px;
+ overflow-wrap:anywhere;
+ white-space:normal;
+ unicode-bidi:plaintext;
+}
+#live-view-body .mx-relationship-brief .mx-brief-card p{
+ overflow-wrap:break-word;
+ text-wrap:pretty;
+}
