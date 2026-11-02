@@ -126,7 +126,7 @@ export function currentAsteroidReading(item:NamedAsteroid,position:Point|undefin
   position.speed>.00001?(english?'direct':'مباشر'):(english?'stationary':'شبه ثابت');
  const sky=english?
   item.name+' is at '+degree+'° '+namesEn[sign]+' ('+movement+').':
-  item.name+' هسه بالـ'+namesAr[sign]+' عند '+degree+'° وحركته '+movement+'.';
+  item.name+' هسه ب'+namesAr[sign]+' عند '+degree+'° وحركته '+movement+'.';
  return {
   theme:sky+' '+(english?'Its traditional theme is ':'موضوعه بالتأويل التنجيمي: ')+base.theme+'.',
   emphasis:base.emphasis,

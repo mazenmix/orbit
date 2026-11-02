@@ -39,3 +39,10 @@ test('current asteroid cards distinguish verified positions, natal aspects and m
  assert.equal(noFile.action,'');
  assert.match(currentAsteroidReading(item,position,closest,true).theme,/Leo/);
 });
+
+test('asteroid zodiac wording is natural Iraqi Arabic without duplicated article',()=>{
+ const asteroid=namedAsteroids.find(item=>item.name==='Eros')!;
+ const ar=currentAsteroidReading(asteroid,{id:'Eros',symbol:'✧',longitude:259.44,speed:.1},undefined);
+ assert.match(ar.theme,/بالقوس/);
+ assert.doesNotMatch(ar.theme,/بالـالقوس/);
+});

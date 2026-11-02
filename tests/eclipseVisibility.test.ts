@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {eclipseEventPhase,eclipseEventBounds,eclipseEndHms,lunarSubpoint,lunarViewingCountries} from '../src/eclipseVisibility.ts';
+import {eclipseEventPhase,eclipseEventBounds,eclipseEndHms,eclipseLiveCountdown,lunarSubpoint,lunarViewingCountries} from '../src/eclipseVisibility.ts';
 const maximum=new Date('2027-02-06T16:00:00Z');
 const event={maximum,contacts:{first:new Date('2027-02-06T13:00:00Z'),fourth:new Date('2027-02-06T19:00:00Z'),second:null,third:null}};
 const start=+event.contacts.first,end=+event.contacts.fourth;
@@ -25,4 +25,12 @@ test('Moon overhead point is finite and lunar viewing countries are bounded to v
  assert.ok(countries.length>0&&countries.length<=5);
  assert.ok(countries.every(c=>c.elevation>=25));
  assert.equal(new Set(countries.map(c=>c.region)).size,countries.length);
+});
+
+test('LIVE eclipse countdown only exists between first and last contact',()=>{
+ assert.equal(eclipseLiveCountdown(start-1000,start,end),null);
+ assert.equal(eclipseLiveCountdown(end,start,end),null);
+ assert.deepEqual(eclipseLiveCountdown(start,start,end),eclipseEndHms(start,end));
+ assert.deepEqual(eclipseLiveCountdown(end-1000,start,end),{hours:0,minutes:0,seconds:1});
+ assert.throws(()=>eclipseLiveCountdown(Date.now(),NaN,end),/Invalid live/);
 });

@@ -18,6 +18,14 @@ export function eclipseEndHms(now:number,end:number){
  const total=Math.max(0,Math.ceil((end-now)/1000));
  return {hours:Math.floor(total/3600),minutes:Math.floor(total%3600/60),seconds:total%60};
 }
+/** The live countdown must not report months until an event as though the
+ * eclipse were already underway. Null means the live phase has not begun or
+ * is finished; the separate maximum countdown handles future eclipses. */
+export function eclipseLiveCountdown(now:number,start:number,end:number){
+ if(!Number.isFinite(now)||!Number.isFinite(start)||!Number.isFinite(end)||end<start)
+  throw Error('Invalid live eclipse interval');
+ return now>=start&&now<end?eclipseEndHms(now,end):null;
+}
 const rad=(value:number)=>value*Math.PI/180;
 const deg=(value:number)=>value*180/Math.PI;
 const normalize=(value:number)=>((value%360)+360)%360;
