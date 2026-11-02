@@ -66,3 +66,12 @@ test('station countdown never prints 60 minutes or 60 hours at a rounding bounda
  assert.equal(motionTimeRemaining(start,start+23*3600000+59*60000+59000,'en',true),'1d');
  assert.equal(motionTimeRemaining(start,start+61*60000,'en',true),'1h · 1m');
 });
+
+test('motion scanner never reports a touch-only zero speed as a retrograde station',async()=>{
+ const tangent=START+20*DAY;
+ const read=(d:Date)=>[{id:'Mercury',speed:-Math.pow((+d-tangent)/DAY,2)}];
+ const [row]=await scanMotionCycles(new Date(START+10*DAY),read,undefined,['Mercury']);
+ assert.equal(row.retrograde,true);
+ assert.equal(row.startedAt,null);
+ assert.equal(row.endsAt,null);
+});

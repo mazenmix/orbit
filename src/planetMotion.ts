@@ -76,6 +76,10 @@ export async function scanMotionCycles(
   }
   return found;
  };
+ const confirmedReversal=(ms:number,id:StationBody)=>{
+  const before=sample(ms-60000).get(id)!,after=sample(ms+60000).get(id)!;
+  return before*after<0;
+ };
  const nowSpeed=sample(now);
  const result=ids.map(id=>({id,retrograde:nowSpeed.get(id)!<0,startedAt:null,endsAt:null} as MotionCycle));
  let nearPast=nowSpeed,nearFuture=nowSpeed;
@@ -87,11 +91,11 @@ export async function scanMotionCycles(
    const id=period.id;
    if(!period.startedAt&&((past.get(id)!<0)!==(nearPast.get(id)!<0))){
     const root=bisectAngle(ms=>sample(ms).get(id)!,oldTime,nearPastAt,1);
-    if(root)period.startedAt=root;
+    if(root&&confirmedReversal(+root,id))period.startedAt=root;
    }
    if(!period.endsAt&&((future.get(id)!<0)!==(nearFuture.get(id)!<0))){
     const root=bisectAngle(ms=>sample(ms).get(id)!,nearFutureAt,newTime,1);
-    if(root)period.endsAt=root;
+    if(root&&confirmedReversal(+root,id))period.endsAt=root;
    }
   }
   if(result.every(p=>p.startedAt&&p.endsAt))break;
