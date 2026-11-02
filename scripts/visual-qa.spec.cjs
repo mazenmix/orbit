@@ -470,7 +470,11 @@ test('Today and Time Machine use compact cards without losing navigation on iPho
  await expect(page.locator('.mx-today-compact')).toBeVisible({timeout:75000});
  await expect(page.locator('#expand-sky-wheel')).toBeVisible();
  const height=await page.locator('.mx-today-compact .score-card').first().evaluate(el=>el.getBoundingClientRect().height);
- expect(height).toBeLessThan(155);
+ expect(height,'mobile Today score stays compact, no tall paragraph wrapping').toBeLessThan(155);
+ // The concise card must retain actual accessible evidence via its existing
+ // category-filtered Signals link. Never achieve compactness by deleting data.
+ await page.locator('.mx-today-compact .score-card').first().click();
+ await expect(page).toHaveURL(/#signals$/);
  await page.goto('/#time',{waitUntil:'domcontentloaded'});
  await expect(page.locator('.mx-time-compact')).toBeVisible({timeout:75000});
  await expect(page.locator('#time-input')).toBeVisible();

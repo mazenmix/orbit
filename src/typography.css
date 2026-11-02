@@ -207,3 +207,32 @@ small,.eyebrow,.subtle,.tag,.nav-caption,.page-heading p,.location,.signal-meta,
  .lunar-premium-grid .lunar-card-heading{flex-wrap:wrap}
  .lunar-premium-grid .lunar-state{margin-inline-start:auto}
 }
+
+/* Compact Today score buttons on phones: the full evidence is available
+   by tapping the card (the existing category-filtered Signals screen).
+   Avoid tall 200-300px score tiles produced by paragraph wrapping. */
+@media(max-width:760px){
+ #live-view-body .mx-today-compact .rich-scores .score-card{
+  display:grid;min-width:0;min-height:0!important;
+  grid-template-columns:24px minmax(0,1fr);
+  grid-template-rows:auto auto 4px;
+  align-items:center;align-content:center;
+  gap:5px 5px!important;padding:9px!important;
+ }
+ #live-view-body .mx-today-compact .rich-scores .score-card .score-symbol{
+  grid-column:1;grid-row:1;min-width:0;
+ }
+ #live-view-body .mx-today-compact .rich-scores .score-card .score-number{
+  grid-column:2;grid-row:1;min-width:0;
+  justify-self:end;white-space:nowrap;font-size:23px!important;
+ }
+ #live-view-body .mx-today-compact .rich-scores .score-card>b{
+  grid-column:1/-1;grid-row:2;margin:0!important;
+  font-size:12px!important;line-height:1.45;
+  min-width:0;overflow-wrap:anywhere;
+ }
+ #live-view-body .mx-today-compact .rich-scores .score-card>p{display:none!important}
+ #live-view-body .mx-today-compact .rich-scores .score-card>.meter{
+  grid-column:1/-1;grid-row:3;margin:2px 0 0!important;width:100%;
+ }
+}
