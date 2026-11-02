@@ -39,3 +39,26 @@
 **Semantic/editorial preference:** Retain clear modern Iraqi voice without random synonym substitution or unsupported factual conclusions.
 
 > Note: Astronomical coordinates and timestamps can be independently checked. Astrology-based narrative and symbolic scores cannot be certified as scientifically predictive probabilities.
+
+
+## Continuation: 2026-11-03 verified fixes
+
+Additional root-cause work was committed to `main` and run through GitHub CI. The current source revision at this entry is `76cb5c30bd6ebc74dff1ac111ea71c49410e417d`.
+
+| ID | Section / component | Severity | Reproducible defect | Root cause | Actual correction | Test | Commit | CI | Deployment | Live behavior |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| OMEGA-006 | Calendar / automatic refresh | High | On local midnight, live calendar refresh could reset a deliberately pinned historical or future instant. | Midnight branch ran before the `liveTimePinned` check. | `shouldAdvanceCalendarAnchor` guards the midnight reset. | `tests/astroCalendar.test.ts` pinned-calendar rollover case | `9c6201b` + regex correction `bfc4366` | **PASS** at head `76cb5c3` | Cloudflare mxastro provider check success for `76cb5c3` | Specific midnight transition in production unverified |
+| OMEGA-007 | Whole sky / exact planetary aspects | High | When a sampled angular difference touched zero and reversed, `scanWholeSky` could emit an exact planetary contact without a real crossing. | Endpoint-zero bisection lacked confirmation of the sign change around the refined root. | Compare signed angular error one minute on both sides before emitting the event. | `tests/wholeSkyBroadcast.test.ts` tangent-versus-crossing regression | `55b8c7e` | **PASS** at head `76cb5c3` | Provider check success | Tangent boundary not reproducible by static live-page fetch |
+| OMEGA-008 | Planet motion / stations | High | A speed curve touching zero at a scan boundary could create a false retrograde/direct station date. | Station bisection accepted a zero endpoint without requiring an actual sign reversal around the station. | Verify geocentric longitude velocity sign on both sides of the root. | `tests/planetMotion.test.ts` touch-only zero-speed regression | `8a735e9` | **PASS** at head `76cb5c3` | Provider check success | Exact tangent fixture not tested in production browser |
+| OMEGA-009 | Today / same-aspect duplicate narration | Medium | Current-sky note could repeat the hero's astronomical claim when the localized or editorial headline changed. | Filtering used three words parsed from a language-specific headline instead of the actual aspect identity. | `sameSkyContact` matches the unordered planetary pair plus angle; hero returns its calculated `sourceEvent`. | `tests/skyAtmosphere.test.ts` same-source identity case | `4972880` + type fix `76cb5c3` | **PASS** at head `76cb5c3` | Provider check success | Default production demo loads; specific duplicate pair not yet live asserted |
+
+### Continuation acceptance evidence
+
+- Build/Test: https://github.com/mazenmix/orbit/actions/runs/41535675910 — **success** at source revision `76cb5c3`.
+- Today live-wheel QA: https://github.com/mazenmix/orbit/actions/runs/41535676023 — **success** at `76cb5c3`.
+- Screenshot-specific profile QA: https://github.com/mazenmix/orbit/actions/runs/41535675906 — **success** at `76cb5c3`.
+- Chromium and WebKit visual QA: https://github.com/mazenmix/orbit/actions/runs/41535675833 — check latest run conclusion independently.
+- GitHub Check Runs for `76cb5c3` show **Cloudflare Pages: mxastro = success**. The separate orbit check may have different status; do not conflate sites.
+- `https://mxastro.pages.dev/` loaded with fresh rendered Greenwich demo and calculated-sky content after the provider deployment check. A successful live page load alone does not prove the four corrected edge cases were hit in production.
+
+**Remaining acceptance work:** Dynamic browser interaction for the entire route/profile/time matrix, fully source-grounded bilingual semantic-claim audit, independently root-solved numerical vectors across the full ephemeris and historical range, and a production-version check coupled to the actual edge-case behavior. No “100% complete” claim is warranted.
