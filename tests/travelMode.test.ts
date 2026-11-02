@@ -100,6 +100,8 @@ test('all twelve Travel Mode indicators explain their own activity and show thei
   const en=travelMetricReading(metric,context,true);
   assert.ok(ar.summary.length>30,metric.id+' needs an activity-specific Arabic explanation');
   assert.ok(en.summary.length>30,metric.id+' needs an English explanation');
+  assert.equal(ar.summary,ar.scene,'Compact Travel advice must stay activity-specific');
+  assert.doesNotMatch(ar.summary,/بخارطة ميلادك|فارق [0-9]|\b(?:اقتران|تثليث|تسديس|تربيع|مقابلة)\b/u,'Technical astrology belongs inside Why this score');
   assert.equal(ar.basis.split(' · ').length,metric.source.length,'Must disclose all contributing category scores');
   assert.ok(ar.detail.includes(ar.basis));
   assert.match(ar.detail,/اتصال محسوب|ماكو اتصال/);

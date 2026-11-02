@@ -1,4 +1,3 @@
-import {skyAspectExplanation} from './skyAtmosphere.ts';
 import type {MetricName,MetricResult} from './metrics.ts';
 
 /** The twelve indicators chosen for travel in the Philippines.
@@ -167,7 +166,7 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
  const preferred=entries.find(e=>e.category===activityFocus[metric.id as TravelCardId]);
  const active=(preferred?.contacts.some(c=>c.strength>0&&c.tone!==0)?preferred:undefined)??
   ranked.find(e=>e.contacts.some(c=>c.strength>0&&c.tone!==0));
- let evidence='',specific='',contactKey:string|null=null;
+ let evidence='',contactKey:string|null=null;
  if(active){
   const sign=Math.sign(active.score-50);
   const contributions=[...active.contacts].filter(c=>c.strength>0&&c.tone!==0).sort((a,b)=>
@@ -175,7 +174,6 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
    Math.abs(b.tone*b.strength)-Math.abs(a.tone*a.strength)||a.orb-b.orb);
   const contact=contributions[0] as SkyContact;
   contactKey=contact.transit+':'+contact.natal+':'+contact.angle;
-  specific=skyAspectExplanation(contact.transit,contact.natal,contact.angle,english);
   const body=english?contact.transit:(nameAr[contact.transit]??contact.transit);
   const natal=english?contact.natal:(nameAr[contact.natal]??contact.natal);
   const relation=english?angleEn[contact.angle]:angleAr[contact.angle];
@@ -201,5 +199,9 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
  // Sky weather is counted in the index; do not repeat its paragraph on every card.
  const detail=(english?'Source indices: ':'المجالات الداخلة بالحساب: ')+basis+'. '+evidence+(riskNote?' '+riskNote:'');
  const scene=pair[english?1:0];
- return {summary:scene+(specific?' '+specific:''),scene,contactKey,basis,detail};
+ // A travel activity should be described in its own domain. Repeating an
+ // unrestricted natal pair scene in the compact body produced irrelevant
+ // relationship/sales advice under transport, rest and risk gauges. Keep
+ // exact contacts auditable within the expanded "Why this score" section.
+ return {summary:scene,scene,contactKey,basis,detail};
 }
