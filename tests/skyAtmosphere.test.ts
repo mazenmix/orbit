@@ -160,3 +160,16 @@ test('every one of 225 major aspects has pair-sensitive Iraqi narrative with a c
  assert.equal(stories.length,225);
  assert.equal(new Set(stories).size,225);
 });
+
+
+test('conjunction, sextile and opposition use pair-specific Iraqi copy rather than global repeated openers',()=>{
+ const pairs:[string,string][]=[['Moon','Mars'],['Moon','Jupiter'],['Sun','Venus'],['Mercury','Saturn'],['Uranus','Pluto']];
+ const oldOpeners=/الانتباه ينشد لهالموضوع|تگدر تستثمر فرصة بسيطة|إذا انقسم موقفك بين رغبتين|The focus is concentrated here|A small opportunity|When two priorities pull in opposite directions/;
+ for(const [first,second] of pairs)for(const angle of [0,60,180]){
+  const ar=skyAspectExplanation(first,second,angle);
+  const en=skyAspectExplanation(first,second,angle,true);
+  assert.doesNotMatch(ar+en,oldOpeners);
+  assert.ok(ar.length>65&&en.length>65,first+' '+second+' '+angle);
+ }
+ assert.notEqual(skyAspectExplanation('Moon','Mars',0),skyAspectExplanation('Moon','Jupiter',0));
+});

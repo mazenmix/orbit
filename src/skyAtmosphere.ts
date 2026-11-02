@@ -157,13 +157,14 @@ function describe(a:string,b:string,angle:number):[string,string]{
  const scene=pairScenes[[a,b].sort().join('|')];
  if(!scene)throw Error('Missing editorial pair scene: '+a+' '+b);
  const [risk,ease,step,riskEn,easeEn,stepEn]=scene;
+ // Lead with the pair-specific real-world situation, not an interchangeable
+ // aspect-wide opener. The five angles keep different emphases and ordering.
  if(angle===90)return [risk+' '+step,riskEn+' '+stepEn];
- if(angle===180)return ['إذا انقسم موقفك بين رغبتين، '+risk+' '+step,
-  'When two priorities pull in opposite directions, '+riskEn+' '+stepEn];
- if(angle===60)return ['تگدر تستثمر فرصة بسيطة: '+ease+' '+step,
-  'A small opportunity: '+easeEn+' '+stepEn];
+ if(angle===180)return [risk+' '+step+' '+ease,riskEn+' '+stepEn+' '+easeEn];
+ if(angle===60)return [step+' '+ease,stepEn+' '+easeEn];
  if(angle===120)return [ease+' '+step,easeEn+' '+stepEn];
- return ['الانتباه ينشد لهالموضوع: '+ease+' '+step,'The focus is concentrated here: '+easeEn+' '+stepEn];
+ // A conjunction concentrates both the opportunity and its paired caution.
+ return [ease+' '+risk+' '+step,easeEn+' '+riskEn+' '+stepEn];
 }
 /** Current and progressed Moon use the same sign vocabulary but different source dates. */
 export function moonSignExplanation(longitude:number,english=false):string{
