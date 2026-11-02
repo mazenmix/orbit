@@ -929,10 +929,9 @@ for(const [viewportName,width,height] of [['desktop',1440,900],['iphone',390,844
   expect(returned).toBe(original);
   expect(await page.locator('[data-now-gauge="today-overview"] .mx-now-head b').innerText())
    .toBe(baseline);
-  await page.goto('/#settings',{waitUntil:'domcontentloaded'});
-  await page.locator('#settings-language').waitFor({state:'visible'});
-  await page.locator('#settings-language').click();
-  await page.goto('/#now',{waitUntil:'domcontentloaded'});
+  // Changing the language IN PLACE must preserve a pinned source instant.
+  // Re-entering Now from another section intentionally resets to LIVE.
+  await page.locator('#language').click();
   await expect(page.locator('.mx-now-time-state')).toHaveClass(/is-selected/);
   expect(new Date(await page.locator('.mx-now-time-readout time').getAttribute('datetime')).valueOf()).toBe(original);
   expect(await page.locator('[data-now-gauge="today-overview"] .mx-now-head b').innerText()).toBe(baseline);
@@ -941,6 +940,12 @@ for(const [viewportName,width,height] of [['desktop',1440,900],['iphone',390,844
   await expect(page.locator('.mx-now-time-state')).toHaveClass(/is-live/);
   const current=Date.parse(await page.locator('.mx-now-time-readout time').getAttribute('datetime'));
   expect(Math.abs(current-Date.now())).toBeLessThan(120000);
+  // No stale Time Machine state may leak into a newly navigated Now page.
+  await page.locator('[data-go-time-shift="-hour"]').click();
+  await expect(page.locator('.mx-now-time-state')).toHaveClass(/is-selected/);
+  await page.goto('/#settings',{waitUntil:'domcontentloaded'});
+  await page.goto('/#now',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('.mx-now-time-state')).toHaveClass(/is-live/);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBeLessThan(10);
  });
 }
