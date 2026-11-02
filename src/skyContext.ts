@@ -54,7 +54,7 @@ export function skyContext(natal:Chart,current:Chart,known:boolean):SkyContext{
  const transits=current.points.filter(p=>major.has(p.id));
  if(transits.length!==major.size||new Set(transits.map(p=>p.id)).size!==major.size||
   transits.some(p=>!Number.isFinite(p.longitude)||p.longitude<0||p.longitude>=360||!Number.isFinite(p.speed)))
-  throw Error('Insufficient or invalid principal ephemeris positions for contextual gauges');
+  throw Error('Insufficient principal ephemeris positions or invalid coordinates for contextual gauges');
  const climate=skyClimate(current);
  const domains={} as Record<Category,SkyDomain>;
  const scores={} as Record<Category,number>;

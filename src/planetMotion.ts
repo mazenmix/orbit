@@ -32,7 +32,10 @@ export function motionTimeRemaining(now:number,end:number,language:'ar'|'en',com
  while(months<120&&+addMonthsUTC(base,months+1)<=end)months++;
  const years=Math.floor(months/12),calendarMonths=months%12;
  const rest=end-(+addMonthsUTC(base,months));
- const days=Math.floor(rest/DAY),hours=Math.floor(rest%DAY/3600000),minutes=Math.ceil(rest%3600000/60000);
+ // Round the remainder UP to the next full minute before splitting it;
+ // otherwise 59m59s incorrectly displays as "60 minutes" next to 0 hours.
+ const wholeMinutes=Math.ceil(rest/60000);
+ const days=Math.floor(wholeMinutes/1440),hours=Math.floor(wholeMinutes%1440/60),minutes=wholeMinutes%60;
  const words=language==='ar'
   ?[[years,'سنة'],[calendarMonths,'شهر'],[days,'يوم'],[hours,'ساعة'],[minutes,'دقيقة']] as const
   :[[years,'y'],[calendarMonths,'mo'],[days,'d'],[hours,'h'],[minutes,'min']] as const;

@@ -29,7 +29,7 @@ test('distant geometry is neutral context, not invented exact strength',()=>{
  const result=skyContext(nadir,sky,false);
  assert.ok(Object.values(result.domains).every(x=>x.scope==='background'&&x.score===contextScore([],x.skyAdjustment)&&x.contacts===0));
  assert.ok(Object.values(result.domains).every(x=>x.contributors.length===0));
- assert.match(contextGaugeBasis(result,['career']),/بعيدة|محايد/);
+ assert.match(contextGaugeBasis(result,['career']),/تعديل من السماء الحالية|محايد/);
 });
 test('time-varying transits change contextual values, while a fixed instant is deterministic',()=>{
  const t1=base({Sun:10,Moon:42,Mercury:20,Venus:80,Mars:130,Jupiter:260,Saturn:210,Uranus:290,Neptune:310,Pluto:340});

@@ -57,3 +57,12 @@ test('Countdown uses calendar months rather than 30-day approximations',()=>{
  assert.match(motionTimeRemaining(START,START+80*DAY,'ar'),/شهر/);
  assert.equal(motionTimeRemaining(START+100,START,'ar'),'انتهت الفترة');
 });
+
+
+test('station countdown never prints 60 minutes or 60 hours at a rounding boundary',()=>{
+ const start=Date.parse('2026-01-01T00:00:00Z');
+ assert.equal(motionTimeRemaining(start,start+59*60000+59000,'en',true),'1h');
+ assert.equal(motionTimeRemaining(start,start+3600000+59*60000+59000,'en',true),'2h');
+ assert.equal(motionTimeRemaining(start,start+23*3600000+59*60000+59000,'en',true),'1d');
+ assert.equal(motionTimeRemaining(start,start+61*60000,'en',true),'1h · 1m');
+});
