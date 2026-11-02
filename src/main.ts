@@ -46,8 +46,9 @@ import {partnerInsights,gaugeLevel} from './peopleInsights.ts';
 import {partnerCardStory} from './partnerCardStory.ts';
 import {personalTransitPlainReading} from './relationshipPlain.ts';
 import {relationshipBrief} from './relationshipBrief.ts';
+import {relationshipEditorial} from './relationshipEditorial.ts';
 import {signalStory} from './readingNarrative.ts';
-import {humanPlanet,humanSoul,humanPartner} from './humanReading.ts';
+import {humanPlanet,humanSoul} from './humanReading.ts';
 import {decodePrivateSetup} from './privateSetup.ts';
 import {readJournal,writeJournal,parseJournalBackup} from './journal.ts';
 import {reviewEvidence,reviewSignal} from './decision.ts';
@@ -1384,18 +1385,24 @@ function relationshipWindowUI(person:Profile){
 }
 function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
  const brief=relationshipBrief(c.evidence);
- const peopleMeaning={attraction:humanPartner(brief.attractionContact,'attraction'),sexual:humanPartner(brief.sexualContact,'sexual'),harmony:humanPartner(brief.harmonyContact,'harmony'),challenge:humanPartner(brief.challengeContact,'challenge')};
+ const reading=relationshipEditorial(brief);
  const text=(v:{ar:string;en:string})=>esc(t(v.ar,v.en));
  const romantic=c.romantic;
- const card=(icon:string,labelAr:string,labelEn:string,title:string,meaning:string,advice:string)=>
-  '<article class="mx-brief-card metric-card"><small>'+icon+' '+t(labelAr,labelEn)+'</small><h3>'+title+'</h3><p>'+meaning+'</p>'+(advice?'<p class="mx-brief-advice">'+advice+'</p>':'')+'</article>';
+ const evidence=(note:typeof reading.attraction)=>
+  note.source?'<small class="mx-brief-evidence">'+
+   (note.sharedSource?t('نفس الزاوية الفلكية أعلاه','Same chart aspect as above')+': ':'')+
+   (note.sharedSource?'':t('الاتصال المحسوب','Calculated contact')+': ')+text(note.source)+'</small>':'';
+ const card=(icon:string,labelAr:string,labelEn:string,note:NonNullable<typeof reading.harmony>)=>
+  '<article class="mx-brief-card metric-card"><small>'+icon+' '+t(labelAr,labelEn)+'</small><h3>'+text(note.title)+'</h3>'+
+  '<p>'+text(note.body)+'</p>'+evidence(note)+
+  (note.step.ar?'<p class="mx-brief-advice">'+text(note.step)+'</p>':'')+'</article>';
  const attraction=romantic?
-  '<article class="mx-brief-card mx-brief-sexual metric-card"><small>♥ '+t('الجاذبية والجنس','ATTRACTION & SEX')+'</small>'+
+  '<article class="mx-brief-card mx-brief-sexual metric-card"><small>♥ '+t('الجاذبية والجنس','ATTRACTION & INTIMACY')+'</small>'+
    '<h3>'+t('الانجذاب والكيمياء الجنسية','Attraction & sexual chemistry')+'</h3>'+
-   '<div class="mx-brief-fact"><b>'+t('الجاذبية','Attraction')+'</b><p>'+text(peopleMeaning.attraction)+'</p></div>'+
-   '<div class="mx-brief-fact"><b>'+t('الجنس','Sexual chemistry')+'</b><p>'+text(peopleMeaning.sexual)+'</p></div></article>':'';
- const harmony=card('✦','أقوى انسجام','MAIN HARMONY',text(brief.harmonyTitle),text(peopleMeaning.harmony),text(brief.harmonyAction));
- const challenge=card('◇','أبرز تحدّي','MAIN CHALLENGE',text(brief.challengeTitle),text(peopleMeaning.challenge),text(brief.challengeAction));
+   '<div class="mx-brief-fact"><b>'+t('الجاذبية','Attraction')+'</b><p>'+text(reading.attraction.body)+'</p>'+evidence(reading.attraction)+'</div>'+
+   '<div class="mx-brief-fact"><b>'+t('الجنس','Sexual chemistry')+'</b><p>'+text(reading.sexual.body)+'</p>'+evidence(reading.sexual)+'</div></article>':'';
+ const harmony=reading.harmony?card('✦','أقوى انسجام','MAIN HARMONY',reading.harmony):'';
+ const challenge=reading.challenge?card('◇','أبرز تحدّي','MAIN CHALLENGE',reading.challenge):'';
  return '<section class="panel mx-partner-focus mx-relationship-brief"><div class="mx-brief-head"><h2>'+t('خلاصة العلاقة','Relationship snapshot')+'</h2>'+
   '<small>'+esc(active.name)+' × '+esc(person.name)+'</small></div>'+
   '<div class="mx-brief-grid'+(romantic?'':' mx-brief-nonromantic')+'">'+attraction+harmony+challenge+'</div>'+
