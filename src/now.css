@@ -69,3 +69,65 @@
 #live-view-body .mx-weather-disclosure summary{cursor:pointer;color:#ceb9ff;font-weight:700;font-size:13px;padding:2px 0 10px}
 #live-view-body .mx-sky-new-indicators{margin:12px 0;max-width:980px}
 @media(max-width:640px){#live-view-body .mx-sky-weather-list{grid-template-columns:1fr}#live-view-body .mx-sky-weather{padding:12px}}
+
+/* Four Today relationship gauges: wrap labels and contain scores on narrow phones. */
+#live-view-body .mx-sky-new-indicators .mx-focus-metric{
+  box-sizing:border-box;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 24px;
+  grid-template-rows:auto auto auto;
+  gap:8px 5px;
+  align-content:start;
+  align-items:start;
+  min-width:0;
+  padding:12px;
+  overflow:hidden;
+}
+#live-view-body .mx-sky-new-indicators .mx-focus-metric .mx-today-gauge-icon{
+  grid-column:2;
+  grid-row:1;
+  min-width:0;
+  text-align:center;
+  margin:0;
+}
+#live-view-body .mx-sky-new-indicators .mx-focus-metric>b{
+  grid-column:1;
+  grid-row:1;
+  min-width:0;
+  max-width:100%;
+  margin:0;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.5;
+}
+#live-view-body .mx-sky-new-indicators .mx-focus-metric>strong{
+  grid-column:1/-1;
+  grid-row:2;
+  justify-self:start;
+  min-width:0;
+  max-width:100%;
+  white-space:nowrap;
+  direction:ltr;
+  unicode-bidi:isolate;
+  line-height:1.3;
+}
+#live-view-body .mx-sky-new-indicators .mx-focus-metric>.mx-today-gauge-track{
+  grid-column:1/-1;
+  grid-row:3;
+  width:100%;
+  min-width:0;
+  margin:2px 0 0;
+}
+@media(max-width:420px){
+  #live-view-body .mx-sky-new-indicators .mx-focus-metric{
+    grid-template-columns:minmax(0,1fr) 21px;
+    padding:10px 9px;
+    gap:7px 4px;
+  }
+  #live-view-body .mx-sky-new-indicators .mx-focus-metric>b{
+    font-size:clamp(11px,3.3vw,13px);
+  }
+  #live-view-body .mx-sky-new-indicators .mx-focus-metric>strong{
+    font-size:clamp(17px,5vw,20px);
+  }
+}
