@@ -33,6 +33,7 @@ import {shiftGoTime,type GoTimeStep} from './goTimeNavigation.ts';
 
 import {todaySkyBrief,todayEventPlain,type TodaySkyBrief} from './todaySkyBrief.ts';
 import {scanWholeSky,wholeSkyBroadcast,occurrenceLanguage,type WholeSkyOccurrence,type WholeSkyBroadcast} from './wholeSkyBroadcast.ts';
+import {sameSkyOccurrence,isLunarOccurrence} from './skyEventIdentity.ts';
 import {scanMotionCycles,remainingMotionPercent,type MotionCycle} from './planetMotion.ts';
 import {personalSkyStory,type PersonalSkyStory} from './personalSkyNarrative.ts';
 import type {FocusReadingInput} from './focusEventReading.ts';
@@ -398,19 +399,19 @@ function mainPersonalEvent(brief:WholeSkyBroadcast):(PersonalSkyStory & {sourceE
  try{return {...personalEventStory(event,event.at.valueOf()===selected.valueOf()?data!.current.points:undefined),sourceEvent:event}}
  catch(err){console.warn('Personal sky context unavailable',err);return null}
 }
-function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,compact=false,heroTitle?:string,explainedAspects?:Set<string>){
+function wholeSkyEventItems(events:readonly WholeSkyOccurrence[],empty:string,compact=false,heroEvent?:WholeSkyOccurrence,explainedAspects?:Set<string>){
  if(!events.length)return '<p class="mx-focus-note">'+empty+'</p>';
  return events.map(e=>{
   const story=personalEventStory(e);
   const time=dateText(e.at,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
   // Moon windows are hours long; do not repeat an unrelated canned "next stage" paragraph.
-  const lunarAspect=e.kind==='aspect'&&(e.first==='Moon'||e.second==='Moon');
+  const lunarAspect=e.kind==='aspect'&&isLunarOccurrence(e);
   // Keep the event and timestamp; the hero owns this event's full narrative.
   const aspectId=e.kind==='aspect'&&e.second&&e.angle!==undefined?[e.first,e.second].sort().join('|')+':'+e.angle:'';
   // Moon events have a dedicated exhaustive Lunar timeline and are often listed
   // simultaneously as current-sky notes. Keep their exact timestamps here, not
   // duplicate their paragraphs and calls-to-action across Today.
-  const shownInHero=Boolean(heroTitle&&story.title===heroTitle);
+  const shownInHero=sameSkyOccurrence(e,heroEvent);
   const shownInWeather=Boolean(aspectId&&explainedAspects?.has(aspectId));
   const lunarTimelineOnly=Boolean(compact&&lunarAspect&&!shownInHero&&!shownInWeather);
   const alreadyExplained=Boolean((compact&&lunarAspect)||shownInHero||shownInWeather);
@@ -538,16 +539,16 @@ function focusedToday(){
  '<h2>'+esc(brief?.title??t('رصد السماء غير متاح','Sky report unavailable'))+'</h2>'+
  ''+
  '<p class="mx-sky-meaning"><b>'+t('هسه: ','Now: ')+'</b>'+esc(message)+'</p>'+
- (personalized&&!personalized.title.includes(t('القمر','Moon'))&&personalized.next?'<p class="mx-sky-reading-next"><b>'+t('المرحلة الجاية: ','Next: ')+'</b>'+esc(personalized.next)+'</p>':'')+
+ (personalized&&!isLunarOccurrence(personalized.sourceEvent)&&personalized.next?'<p class="mx-sky-reading-next"><b>'+t('المرحلة الجاية: ','Next: ')+'</b>'+esc(personalized.next)+'</p>':'')+
  (brief?'<p class="mx-focus-story-action"><strong>'+t('شنو تسوي؟ ','What to do: ')+'</strong>'+esc(personalized?.action??brief.action)+'</p>':'')+
  activity+'<small class="mx-sky-live-checked" aria-label="'+t('وقت آخر حساب','Last calculation')+'">'+esc(clock)+'</small>'+
  '</section>'+
  (brief?planetLiveStatus(brief):'<p role="status">'+esc(skyFailure)+'</p>')+
  newRelationshipGauges()+skyWeatherPanel(false,personalized?.sourceEvent,explainedAspects)+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('الأحداث الفلكية القادمة · كل الكواكب','Upcoming events · all planets')+'</h2><button type="button" class="secondary mx-events-lunar-link" data-go="lunar">'+t('اتصالات القمر بالتفصيل','Detailed Moon aspects')+'</button>'+
- '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-upcoming">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.'),true,personalized?.title,explainedAspects):'')+'</div></section>'+
+ '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-upcoming">'+(brief?wholeSkyEventItems(brief.upcoming,t('لا توجد أحداث دقيقة قريبة.','No nearby exact events.'),true,personalized?.sourceEvent,explainedAspects):'')+'</div></section>'+
  '<section class="panel mx-focus-panel mx-sky-events-panel"><h2>'+t('آخر ما تغير بالسماء','Recent sky changes')+'</h2>'+
- '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-recent">'+(brief?wholeSkyEventItems(brief.latest,t('ماكو حدث دقيق مسجل بالفترة الحالية.','No recent exact event.'),true,personalized?.title,explainedAspects):'')+'</div></section>'+
+ '<div class="mx-sky-feed mx-sky-feed-grid mx-sky-feed-recent">'+(brief?wholeSkyEventItems(brief.latest,t('ماكو حدث دقيق مسجل بالفترة الحالية.','No recent exact event.'),true,personalized?.sourceEvent,explainedAspects):'')+'</div></section>'+
  '</div><aside class="mx-focus-aside">'+todaySkyWheel(r)+
  '<button type="button" class="panel time-shortcut mx-today-time-shortcut" data-go="time"><span>◷</span><div><b>'+t('آلة الزمن','Time Machine')+'</b><p>'+t('أي تاريخ. منظور جديد.','Another date. A new perspective.')+'</p></div><b>↗</b></button>'+
  '<section class="panel mx-focus-panel mx-focus-lunar-status '+(moonIsVoid?'is-voc':'is-clear')+'" data-voc-start="'+moonVocStart+'" data-voc-end="'+moonVocEnd+'"><h2>☾ '+t('القمر وخلو المسار','Moon & Void of Course')+'</h2>'+moon+
