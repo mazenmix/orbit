@@ -993,7 +993,7 @@ function nowPage(){
     '<div class="mx-now-head"><strong>'+safeLabel+'</strong><b>'+(available?percent+'<em>'+(id.startsWith('moon-')?'%':'/100')+'</em>':'—')+'</b></div>'+
     '<div class="meter"'+(available?' role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"':'')+' aria-label="'+safeLabel+'"><i style="width:'+percent+'%"></i></div>'+
     '</article>';
-  }).join('')+'</div></section>'+skyWeatherPanel(true);
+  }).join('')+'</div></section>';
 }
 function goModePage(){
  const sky=liveGaugeSky(),indicators=derivedMetrics(sky.scores),go=goModes(indicators),r=data!;
