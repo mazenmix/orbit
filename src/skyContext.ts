@@ -40,6 +40,19 @@ export function contextScore(contacts:readonly SkyContact[],skyAdjustment=0):num
  return Math.round(clamp(50+contacts.reduce((value,c)=>value+c.tone*c.strength*20,0)+skyAdjustment));
 }
 function targetPoints(natal:Chart,known:boolean):Point[]{
+ // Invalid natal coordinates must never silently become a zero-weight neutral
+ // reading: the same angular input affects the score and its explanation.
+ const seen=new Set<string>();
+ for(const p of natal.points){
+  if(!major.has(p.id))continue;
+  if(seen.has(p.id)||!Number.isFinite(p.longitude)||p.longitude<0||p.longitude>=360)
+   throw Error('Invalid or repeated natal ephemeris body: '+p.id);
+  seen.add(p.id);
+ }
+ if(natal.asc!==null&&(!Number.isFinite(natal.asc)||natal.asc<0||natal.asc>=360))
+  throw Error('Invalid natal Ascendant longitude');
+ if(natal.mc!==null&&(!Number.isFinite(natal.mc)||natal.mc<0||natal.mc>=360))
+  throw Error('Invalid natal Midheaven longitude');
  const list=natal.points.filter(p=>known||p.id!=='Moon').slice();
  if(known&&natal.asc!==null)list.push({id:'Ascendant',symbol:'ASC',longitude:natal.asc,speed:0});
  if(known&&natal.mc!==null)list.push({id:'MC',symbol:'MC',longitude:natal.mc,speed:0});
@@ -94,12 +107,21 @@ const enAngles:Record<number,string>={0:'conjunct',60:'sextile',90:'square',120:
  * The same selection drives the explanation and its duplicate identity. */
 function gaugeContribution(context:SkyContext,sources:readonly Category[]){
  const rows=[...new Set(sources)].map(c=>context.domains[c]).filter((x):x is SkyDomain=>Boolean(x));
+ const score=Math.round(rows.reduce((sum,row)=>sum+row.score,0)/(rows.length||1));
+ const direction=Math.sign(score-50);
  const ranked=rows.flatMap(row=>row.contributors
   .filter(p=>Number.isFinite(p.strength)&&p.strength>0&&Number.isFinite(p.tone)&&p.tone!==0)
   .map(p=>({row,p,impact:Math.abs(p.tone*p.strength)})))
-  .sort((a,b)=>b.impact-a.impact||a.p.orb-b.p.orb||a.row.category.localeCompare(b.row.category)||
-   a.p.transit.localeCompare(b.p.transit)||a.p.natal.localeCompare(b.p.natal));
- return {rows,leading:ranked[0]??null};
+  // For a negative composite, explain a real negative contributor first
+  // rather than leading with a positive aspect and contradicting the gauge.
+  // Only prefer aligned evidence that genuinely contributes to a source.
+  .sort((a,b)=>{
+   const aligned=(x:typeof a)=>direction===0?0:Number(Math.sign(x.p.tone)===direction);
+   return aligned(b)-aligned(a)||b.impact-a.impact||a.p.orb-b.p.orb||
+    a.row.category.localeCompare(b.row.category)||a.p.transit.localeCompare(b.p.transit)||
+    a.p.natal.localeCompare(b.p.natal);
+  });
+ return {rows,leading:ranked[0]??null,score};
 }
 /** A brief audit trail showing a genuine contributor to a computed index. */
 export function contextGaugeBasis(context:SkyContext,sources:readonly Category[],english=false):string{
@@ -141,10 +163,17 @@ export function contextGaugeNarrative(context:SkyContext,sources:readonly Catego
  const target=english?p.natal:(arNames[p.natal]??p.natal);
  const aspectName=english?enAngles[p.angle]:arAngles[p.angle];
  const specific=skyAspectExplanation(p.transit,p.natal,p.angle,english);
+ const overall=Math.round(rows.reduce((sum,r)=>sum+r.score,0)/rows.length);
+ // If all actual natal contributors oppose the composite direction, say so
+ // explicitly instead of presenting a supportive aspect as an explanation
+ // for a weak GO result (or vice versa).
+ const contrast=Math.sign(overall-50)!==0&&Math.sign(p.tone)!==Math.sign(overall-50)?
+  (english?' This contact does not explain the overall score direction; the other source indices or sky adjustments outweigh it.':
+   ' هذا الاتصال وحده ما يفسّر اتجاه الدرجة؛ بقية المجالات أو تعديلات السماء رجّحت المحصلة.'):'';
  const extra=row.skyAdjustment!==0?(english?
   ' The current-sky adjustment is a separate '+(row.skyAdjustment>0?'+':'')+row.skyAdjustment+'-point term in this category.':
   ' تعديل السماء الحالية بهالمجال مكوّن منفصل: '+(row.skyAdjustment>0?'+':'')+row.skyAdjustment+' نقطة.'):'';
  return english?
-  name+' '+aspectName+' natal '+target+' ('+p.orb.toFixed(1)+'°): '+specific+extra:
-  name+' '+aspectName+' '+target+' بخارطة ميلادك (فارق '+p.orb.toFixed(1)+'°): '+specific+extra;
+  name+' '+aspectName+' natal '+target+' ('+p.orb.toFixed(1)+'°): '+specific+extra+contrast:
+  name+' '+aspectName+' '+target+' بخارطة ميلادك (فارق '+p.orb.toFixed(1)+'°): '+specific+extra+contrast;
 }

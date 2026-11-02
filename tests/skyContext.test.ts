@@ -88,3 +88,32 @@ test('GO context refuses missing, repeated or nonfinite principal planets',()=>{
  assert.throws(()=>skyContext(natal,{...current,points:[...current.points,current.points[0]]},true),/Insufficient/);
  assert.throws(()=>skyContext(natal,{...current,points:current.points.map(p=>p.id==='Venus'?{...p,longitude:NaN}:p)},true),/invalid/);
 });
+
+test('GO negative composite prioritizes a genuine challenging contributor over a stronger positive one',()=>{
+ const seed=skyContext(natal,base({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334}),true);
+ const supportive={transit:'Sun',natal:'Sun',angle:120,orb:0,strength:1,tone:1};
+ const challenging={transit:'Mars',natal:'Uranus',angle:90,orb:1,strength:.85,tone:-1};
+ const career={...seed.domains.career,score:contextScore([supportive]),contacts:1,contributors:[supportive]};
+ const timing={...seed.domains.timing,score:contextScore([challenging]),contacts:1,contributors:[challenging]};
+ const context={...seed,domains:{...seed.domains,career,timing}};
+ assert.ok(Math.round((career.score+timing.score)/2)<50);
+ assert.equal(contextGaugeContactKey(context,['career','timing']),'Mars:Uranus:90');
+ assert.match(contextGaugeBasis(context,['career','timing']),/المريخ تربيع أورانوس/);
+ assert.match(contextGaugeNarrative(context,['career','timing']),/المريخ تربيع أورانوس/);
+});
+test('GO reading explicitly distinguishes a lone positive aspect from a negative sky-adjusted result',()=>{
+ const seed=skyContext(natal,base({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334}),true);
+ const positive={transit:'Sun',natal:'Sun',angle:60,orb:4,strength:.5,tone:1};
+ const score=contextScore([positive],-16);
+ assert.ok(score<50);
+ const career={...seed.domains.career,contributors:[positive],contacts:1,skyAdjustment:-16,score};
+ const context={...seed,domains:{...seed.domains,career}};
+ assert.match(contextGaugeNarrative(context,['career']),/ما يفسّر اتجاه الدرجة/);
+});
+test('GO refuses corrupted natal coordinates and duplicate bodies before scoring',()=>{
+ const current=base({Sun:12,Moon:72,Mercury:46,Venus:194,Mars:137,Jupiter:256,Saturn:200,Uranus:260,Neptune:300,Pluto:334});
+ assert.throws(()=>skyContext({...natal,points:[...natal.points,natal.points[0]]},current,true),/repeated natal/);
+ assert.throws(()=>skyContext({...natal,points:natal.points.map(p=>p.id==='Venus'?{...p,longitude:NaN}:p)},current,true),/natal ephemeris/);
+ assert.throws(()=>skyContext({...natal,asc:Infinity},current,true),/Ascendant/);
+ assert.throws(()=>skyContext({...natal,mc:-10},current,true),/Midheaven/);
+});
