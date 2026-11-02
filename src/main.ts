@@ -815,7 +815,7 @@ function advancedPage(){
   return `<div class="section-title"><div><span class="eyebrow">TIME MACHINE · ADVANCED TECHNIQUES</span><h2>${t('التسيير الثانوي والتوجيه الشمسي والعودة الشمسية','Secondary progressions, Solar Arc & Solar Return')}</h2></div>${tag('TROPICAL','violet')}</div><section class="panel"><h2>${t('أساس الحساب','Calculation basis')}</h2><p>${t('المدخل هو تاريخ آلة الزمن المحدد. اليوم الفلكي الواحد يقابل سنة استوائية (365.2422 يوم) من عمر الشخص. التوجيه الشمسي يضاف إلى درجات الولادة. هذه تقنيات تنجيمية رمزية، مو عبور كواكب حقيقي ولا توقع علمي.','Uses the selected Time Machine instant. One ephemeris day is mapped to a tropical year (365.2422 days) lived. The progressed solar arc is added to natal longitudes. These are symbolic techniques, not live transits or scientific predictions.')}</p><p><b>${t('العمر','Age')}: ${progress.ageYears.toFixed(3)} ${t('سنة','years')}</b> · ${t('تاريخ التسيير','Progressed ephemeris date')}: <b>${dateText(progress.ephemerisTime)}</b></p><p>${t('القوس الشمسي','Solar arc')}: <strong dir="ltr">${arc.toFixed(4)}°</strong></p></section><div class="advanced-grid"><section class="panel"><h2>${t('Secondary Progressions','Secondary Progressions')}</h2><p class="subtle">${t('المواضع محسوبة لوقت التسيير، وليست مواقع اليوم الحقيقي.','Planetary positions for the symbolic progression date, not current transits.')}</p>${progressedMoon?'<p class="mx-advanced-reading"><strong>'+t('القمر بالتسيير في ','Progressed Moon in ')+signName(progressedMoon.longitude)+':</strong> '+esc(progressedMoonMeaning)+' '+t('هذي قراءة للتسيير الرمزي، مو حركة القمر الفعلية هسه.','This concerns symbolic progression, not the current Moon position.')+'</p>':''}${table(progressed.points)}</section><section class="panel"><h2>Solar Arc Directions</h2><p class="subtle">${t('مواضع الولادة بعد إضافة القوس الشمسي المحسوب.','Natal longitudes advanced by the calculated solar arc.')}</p>${table(directed)}</section></div><section class="panel"><h2>${t('موعد العودة الشمسية','Exact Solar Return')}</h2>${ret?`<p><small>${t('عودة الشمس قرب ذكرى الميلاد في السنة المحددة','Solar return near the selected year’s birthday')}</small><br><b>${dateText(ret)}</b></p>${nextRet?`<p><small>${t('العودة الشمسية القادمة بعد اللحظة المختارة','Next solar return after the selected moment')}</small><br><b>${dateText(nextRet)}</b></p>`:''}<p class="subtle">${t('وقت رجوع الشمس العابر لنفس الطول الاستوائي لشمس الولادة خلال هذه السنة؛ جرى البحث عن عبور فعلي وصقله عددياً.','Time when the transiting Sun returns to the natal tropical solar longitude in this year, refined from calculated positions.')}</p>`:`<p class="alert">${t('لم يُعثر على عبور دقيق في نافذة البحث.','No exact crossing in the bounded search window.')}</p>`}<div class="button-row"><button class="secondary" data-go="time">${t('ارجع لآلة الزمن','Return to Time Machine')}</button><button class="secondary" data-go="evidence">${t('الدليل الحسابي','Calculation receipt')}</button></div></section>`;
  }catch(e){return `<section class="panel"><h2>${t('الحساب المتقدم غير متاح لهذا الوقت','Advanced calculations unavailable at this date')}</h2><p class="alert">${esc(String(e))}</p></section>`}
 }
-function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:ContextGoReview){
+function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:ContextGoReview,detail=false){
  // One actionable sentence plus one short, chart-dependent cue; never embed the full signalStory.
  // Go scores are symbolic planning aids, not facts about future events or another person's feelings.
  const actions:Record<GoDomain,Record<'go'|'check'|'hold',[string,string]>>={
@@ -847,11 +847,18 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:ContextGoR
   travel:{none:['ماكو دليل محسوب كافي لتوقيت السفر هسه.','Not enough calculated evidence for travel timing.'],missing:['بعض معطيات السفر ناقصة؛ اعتمد على الحجوزات.','Evidence is incomplete; rely on reservation details.'],sensitive:['الترجيح مو ثابت؛ حضّر خطة بديلة.','The balance is unstable; keep a backup plan.'],mixed:['العوامل متعارضة؛ خلّي خطتك مرنة.','Signals conflict; keep the itinerary flexible.']}
  };
  const pick=(pair:[string,string])=>t(pair[0],pair[1]);
+ if(detail){
+  // Only an expanded score explanation needs these qualifiers. Repeating
+  // a paraphrase of "the score is fragile" inside every GO tile adds noise.
+  if(!memo.strongest)return '';
+  if(!memo.complete)return pick(limits[domain].missing);
+  if(memo.sensitive)return pick(limits[domain].sensitive);
+  if(memo.mixed)return pick(limits[domain].mixed);
+  return '';
+ }
  if(!memo.strongest)return pick(limits[domain].none);
  const first=pick(actions[domain][state]);
- if(!memo.complete)return first+' '+pick(limits[domain].missing);
- if(memo.sensitive)return first+' '+pick(limits[domain].sensitive);
- if(memo.mixed)return first+' '+pick(limits[domain].mixed);
+ if(!memo.complete||memo.sensitive||memo.mixed)return first;
  const cues:Record<GoDomain,Record<string,[string,string]>>={
   work:{
    Mercury:['دقّق المراسلات والتعليمات.','Double-check messages and instructions.'],
@@ -1012,7 +1019,7 @@ function goModePage(){
     relationships:['اسأل عن التوقعات بشكل واضح بدون افتراض مشاعر الطرف الثاني.','Discuss expectations directly without assuming the other person’s feelings.'],
     travel:['راجع الحجز والنقل والوقت قبل ما تثبّت أي قرار.','Verify booking, transport and timing before committing.']
    };
-   const advice=memo.strongest?mxGoNarrative(d.domain,state,memo):t(...contextualAdvice[d.domain]);
+   const advice=mxGoNarrative(d.domain,state,memo);
    const key=contextGaugeContactKey(sky,memo.sourceCategories);
    const alreadySeen=Boolean(key&&seenGoContacts.has(key));
    if(key)seenGoContacts.add(key);
@@ -1020,7 +1027,8 @@ function goModePage(){
    // score arithmetic remain inspectable behind one user-controlled detail.
    const context=alreadySeen?'':contextGaugeNarrative(sky,memo.sourceCategories,lang==='en');
    const basis=contextGoScoreBasis(d,indicators,sky,lang==='en');
-   const explanation=basis+(context?' '+context:'');
+   const qualifier=mxGoNarrative(d.domain,state,memo,true);
+   const explanation=basis+(context?' '+context:'')+(qualifier?' '+qualifier:'');
    return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><p class="go-decision">'+esc(advice)+'</p>'+
     '<details class="go-evidence"><summary>'+t('سبب الدرجة','Why this score')+'</summary><p>'+esc(explanation)+'</p></details></div>'
   }).join('')+'</div>'
