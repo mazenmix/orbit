@@ -1,6 +1,14 @@
 const {test,expect}=require('/tmp/astro-qa/node_modules/@playwright/test');
 const fs=require('node:fs');
 fs.mkdirSync('artifacts/ui-qa',{recursive:true});
+// The page-fixture visual tests below assert the advanced/pro interface
+// (.mx-today-compact, .heatmap-cell, .mx-time-compact). The actual product
+// defaults to focused/simple mode for a fresh browser. Make this test precondition
+// explicit instead of accidentally testing the wrong UI and timing out.
+// Browser.newContext tests below deliberately retain their independent mode.
+test.beforeEach(async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('mx.uiMode','pro'));
+});
 for(const [device,width,height] of [['desktop',1440,900],['iphone',390,844]]){
  test(device+' Soul DNA actual interaction',async({browser},testInfo)=>{
   const ctx=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,isMobile:device==='iphone',hasTouch:device==='iphone'});
