@@ -190,3 +190,13 @@ test('Today removes the duplicate sky-note by astronomical identity, not Arabic/
  assert.equal(sameSkyContact(note,{...hero,kind:'ingress'}),false);
  assert.equal(sameSkyContact({kind:'moon-sign',id:'moon:sign'},hero),false);
 });
+
+test('all five self-planet angles have distinct Iraqi/English meanings',()=>{
+ const planets=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+ for(const p of planets)for(const english of [false,true]){
+  const meanings=[0,60,90,120,180].map(angle=>skyAspectExplanation(p,p,angle,english));
+  assert.equal(new Set(meanings).size,5,
+   p+' '+(english?'English':'Iraqi')+' square/opposition and sextile/trine must not repeat');
+  assert.ok(meanings.every(m=>m.length>=70));
+ }
+});

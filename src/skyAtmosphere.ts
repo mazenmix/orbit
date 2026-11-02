@@ -236,11 +236,21 @@ export function skyAspectExplanation(first:string,second:string,angle:number,eng
   // Two occurrences of the same planet refer to a transit-to-natal contact, not two distinct themes.
   if(first!==second)return describe(first,second,angle)[english?1:0];
   const role=planetTopics[first][english?1:0],step=practicalStep[first][english?1:0];
-  if(angle===90||angle===180)return english?
-   'A tension around '+role+' can make priorities compete. '+step:
-   'شدّ حول '+role+'؛ ممكن تتزاحم الأولويات أو تصعب المرونة. '+step;
-  if(angle===0)return english?'A strong focus on '+role+'. '+step:'تركيز قوي على '+role+'؛ انتبه لا تبالغ بالموضوع. '+step;
-  return english?'A supportive link within '+role+'. '+step:'انسجام نسبي بموضوع '+role+'؛ استثمره بشي عملي. '+step;
+  if(angle===90)return english?
+   'A square puts pressure on competing priorities around '+role+'. '+step:
+   'التربيع يبرز ضغط وتعارض أولويات بموضوع '+role+'؛ لا تستعجل الحسم. '+step;
+  if(angle===180)return english?
+   'An opposition highlights two different demands around '+role+'; consider both before choosing a side. '+step:
+   'المقابلة تبرز موقفين متعاكسين بموضوع '+role+'؛ اسمع الطرفين قبل ما تحسم. '+step;
+  if(angle===0)return english?
+   'A conjunction concentrates attention around '+role+' without guaranteeing a result. '+step:
+   'الاقتران يركز الانتباه على '+role+'؛ لا تعتبر التركيز وحده ضمان نتيجة. '+step;
+  if(angle===60)return english?
+   'A sextile suggests a practical opening around '+role+' that still needs your initiative. '+step:
+   'التسديس يفتح فرصة صغيرة بموضوع '+role+'، بس تحتاج مبادرة منك حتى تستفاد منها. '+step;
+  return english?
+   'A trine describes relative ease coordinating different sides of '+role+'; use it without assuming success. '+step:
+   'التثليث يرمز لسهولة نسبية بموضوع '+role+'؛ استفاد منها بخطوة محسوبة مو بتوقعات مضمونة. '+step;
  }
  return supplementalAspect(first,second,angle,english);
 }
