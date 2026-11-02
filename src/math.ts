@@ -34,7 +34,20 @@ export function applyingToNatal(t:Point,n:Point,angle:number):boolean{
 }
 export function importance(id:string){return ['Ascendant','MC','Sun','Moon'].includes(id)?1:['Mercury','Venus','Mars'].includes(id)?.86:['Jupiter','Saturn'].includes(id)?.78:.64}
 export function aspects(transits:Point[],natal:Point[],at:Date):Evidence[]{
- if(!Number.isFinite(+at)||[...transits,...natal].some(p=>!Number.isFinite(p.longitude)||!Number.isFinite(p.speed)))throw Error('Invalid aspect coordinates or instant');
+ if(!Number.isFinite(+at))throw Error('Invalid aspect instant');
+ // A duplicate ephemeris body multiplies its contribution to the symbolic
+ // score; a non-finite or out-of-range longitude can silently become a
+ // false conjunction. Fail closed before calculating or ranking evidence.
+ for(const [label,points] of [['transit',transits],['natal',natal]] as const){
+  const seen=new Set<string>();
+  for(const point of points){
+   if(typeof point.id!=='string'||!point.id.trim()||!Number.isFinite(point.longitude)||
+    point.longitude<0||point.longitude>=360||!Number.isFinite(point.speed))
+    throw Error('Invalid '+label+' aspect coordinates');
+   if(seen.has(point.id))throw Error('Repeated '+label+' aspect body: '+point.id);
+   seen.add(point.id);
+  }
+ }
  const out:Evidence[]=[];
  for(const t of transits){const spec=bodies.find(b=>b[1]===t.id);if(!spec)continue;const max=spec[5];
   for(const n of natal)for(const angle of angles){const orb=Math.abs(distance(t.longitude,n.longitude)-angle);if(orb>max)continue;

@@ -108,3 +108,15 @@ test('invalid house angles and incomplete cusp vectors cannot produce a chart',(
  }
  assert.throws(()=>chart(at,{...defaultProfile,lat:NaN}),/Invalid chart/);
 });
+
+test('exact-contact scoring rejects duplicate transits, duplicate natal targets and invalid longitude boundaries',()=>{
+ const sun=p('Sun',0),moon=p('Moon',0),mars=p('Mars',120);
+ assert.equal(aspects([sun,moon],[mars],at).length,2);
+ assert.throws(()=>aspects([sun,sun],[mars],at),/Repeated transit aspect body/);
+ assert.throws(()=>aspects([sun],[mars,mars],at),/Repeated natal aspect body/);
+ assert.throws(()=>aspects([p('Sun',-1)],[mars],at),/Invalid transit aspect coordinates/);
+ assert.throws(()=>aspects([sun],[p('Mars',360)],at),/Invalid natal aspect coordinates/);
+ assert.throws(()=>aspects([sun],[p('Mars',Infinity)],at),/Invalid natal aspect coordinates/);
+ // A normal 0° longitude is valid and gives a precise opposition to 180°.
+ assert.equal(aspects([sun],[p('Sun',180)],at)[0].angle,180);
+});
