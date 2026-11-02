@@ -8,5 +8,3 @@
   Cache-Control: no-cache
 /manifest.webmanifest
   Cache-Control: no-cache
-/build-info.json
-  Cache-Control: no-store

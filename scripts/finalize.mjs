@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
-import {sourceCommit} from './buildProvenance.mjs';
 async function files(root){const out=[];for(const e of await fs.readdir(root,{withFileTypes:true})){const p=root+'/'+e.name;if(e.isDirectory())out.push(...await files(p));else out.push(p)}return out}
 const paths=(await files('dist')).filter(p=>!p.endsWith('/_headers')&&!p.endsWith('/sw.js'));
 // Fail the deployment rather than accidentally serving first-party source maps,
@@ -45,8 +44,4 @@ self.addEventListener('notificationclick',e=>{
   if(self.clients.openWindow)await self.clients.openWindow('/'+page);
  }));
 });`);
-// This endpoint is deliberately excluded from the SW cache manifest to
-// let operators verify exactly which source revision production serves.
-const provenance={app:'mxastro',sourceCommit:sourceCommit(process.env),generatedAt:new Date().toISOString()};
-await fs.writeFile('dist/build-info.json',JSON.stringify(provenance)+'\n');
 console.log('Offline shell includes',urls.length,'same-origin assets.');
