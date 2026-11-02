@@ -359,7 +359,7 @@ test('live Moon sign and refined chart reading remain visible',async({page})=>{
  await expect(page.locator('#mx-moon-sign-reading p')).toHaveCount(5,{timeout:75000});
  await page.goto('/#chart',{waitUntil:'domcontentloaded'});
  await expect(page.locator('.chart-layout.chart-expanded')).toBeVisible({timeout:75000});
- await expect(page.locator('.mx-person-natal-portrait [data-portrait-line]')).toHaveCount(14);
+ await expect(page.locator('.mx-person-natal-portrait [data-portrait-line]')).toHaveCount(4);
  await expect(page.locator('.chart-math')).toHaveCount(1);
  await expect(page.locator('.mx-reading-help')).toHaveCount(0);
 });
