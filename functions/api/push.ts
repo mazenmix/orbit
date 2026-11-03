@@ -38,7 +38,12 @@ export async function onRequestPost({request,env}:{request:Request;env:Env}){
   if(input.action==='test'){
    if(!row)return noCache({error:'Subscribe before testing'},404);
    if(!env.MX_VAPID_PRIVATE_JWK)return noCache({error:'Sender private key not provisioned',code:'PUSH_SENDER_NOT_CONFIGURED'},503);
-   if(Date.now()-Date.parse(row.updated_at)<30000)return noCache({error:'Wait 30 seconds before a test'},429);
+   // Claim the cooldown atomically before sending. Checking updated_at alone
+   // left the old timestamp unchanged, allowing unlimited concurrent tests.
+   const now=Date.now(),cutoff=new Date(now-30000).toISOString();
+   const claim=await db.prepare('UPDATE mx_push_v1 SET updated_at=? WHERE device_id=? AND verifier=? AND updated_at<=?')
+    .bind(new Date(now).toISOString(),input.deviceId,verifier,cutoff).run();
+   if(claim.meta.changes!==1)return noCache({error:'Wait 30 seconds before a test'},429);
    const result=await sendWebPush(JSON.parse(row.subscription),{id:'test-'+Date.now(),body:'MX Eye background push test · اختبار إشعار بالخلفية',page:'#today'},env.MX_VAPID_PUBLIC_KEY,env.MX_VAPID_PRIVATE_JWK);
    if(!result.ok)return noCache({error:'Push provider rejected notification',status:result.status},502);
    return noCache({sent:true,providerStatus:result.status});
