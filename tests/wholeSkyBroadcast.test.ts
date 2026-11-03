@@ -2,6 +2,20 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {scanWholeSky,wholeSkyBroadcast,occurrenceLanguage,FULL_SKY_BODIES,type WholeSkyOccurrence} from '../src/wholeSkyBroadcast.ts';
+
+test('upcoming ingresses and stations use future wording without changing past events',()=>{
+ const at=new Date('2026-11-03T08:27:00Z');
+ const moon:WholeSkyOccurrence={kind:'ingress',first:'Moon',sign:5,at};
+ assert.equal(occurrenceLanguage(moon,'ar','future').title,'القمر يدخل العذراء');
+ assert.equal(occurrenceLanguage(moon,'ar','past').title,'القمر دخل العذراء');
+ assert.equal(occurrenceLanguage(moon,'en','future').title,'Moon enters Virgo');
+ const venus:WholeSkyOccurrence={kind:'ingress',first:'Venus',sign:6,at,retrograde:true};
+ assert.match(occurrenceLanguage(venus,'ar','future').title,/ترجع متراجعة/);
+ assert.match(occurrenceLanguage(venus,'en','future').title,/returns retrograde/);
+ const station:WholeSkyOccurrence={kind:'station',first:'Venus',at,retrograde:true};
+ assert.match(occurrenceLanguage(station,'ar','future').title,/تبدأ التراجع/);
+ assert.match(occurrenceLanguage(station,'en','future').title,/begins retrograde/);
+});
 import type {Point} from '../src/math.ts';
 const BASE=Date.parse('2026-10-24T00:00:00Z'),HOUR=3600000;
 const sample=(t:Date):Point[]=>{

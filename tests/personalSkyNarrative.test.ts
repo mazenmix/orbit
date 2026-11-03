@@ -28,6 +28,12 @@ const ingress:WholeSkyOccurrence={kind:'ingress',at:new Date(+NOW-2*3600000),fir
 const make=(event:WholeSkyOccurrence,n:Chart=natal(),knownBirthTime=true,at=NOW)=>
  personalSkyStory({event,at,natal:n,skyAtEvent:sky,knownBirthTime,lang:'ar'});
 
+test('personal sky titles use future tense before ingress and past tense afterward',()=>{
+ const future={...ingress,at:new Date(+NOW+3600000)};
+ assert.match(make(future).title,/تدخل الميزان/);
+ assert.match(make(ingress).title,/دخلت الميزان/);
+});
+
 test('Venus ingress into Libra gives distinct natal partnership vs finances vs travel forecasts',()=>{
  const partnership=make(ingress,natal(0));  // Libra is house seven
  const finance=make(ingress,natal(150));   // Libra is house two
