@@ -524,7 +524,7 @@ function focusedToday(){
  }catch(e){console.warn('Moon timing unavailable',e)}
  const eventCard=(label:string,event:WholeSkyOccurrence|null)=>{
   if(!event)return '<div class="mx-sky-activity-card"><small>'+label+'</small><strong>'+t('ماكو حدث مؤكد ضمن نطاق البحث','No verified event in the search window')+'</strong></div>';
-  const line=occurrenceLanguage(event,lang);
+  const line=occurrenceLanguage(event,lang,+event.at>+selected?'future':'past');
   return '<div class="mx-sky-activity-card"><small>'+label+'</small><strong>'+esc(line.title)+'</strong><time datetime="'+event.at.toISOString()+'">'+time(event.at)+'</time></div>';
  };
  const activity=brief?'<div class="mx-sky-activity">'+

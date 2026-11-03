@@ -154,18 +154,20 @@ const pairDetails:Record<string,{ar:string;en:string;doAr:string;doEn:string}>={
  'Jupiter|Saturn':{ar:'إذا عندك فرصة كبيرة، وازن بين حماسك والوقت المتاح عندك.',en:'Balance ambition with the time you have.',doAr:'جرّب خطوة صغيرة قبل الالتزام.',doEn:'Test one small step before committing.'},
  'Saturn|Uranus':{ar:'إذا تفكر تغير الشغل أو الروتين، لا تلغي كل خطتك دفعة وحدة.',en:'Change work or routine gradually rather than all at once.',doAr:'جرب تعديل بسيط وخلي خيار رجوع.',doEn:'Try a reversible adjustment.'}
 };
-export function occurrenceLanguage(e:WholeSkyOccurrence,lang:SkyLanguage):{title:string;description:string;action:string}{
+export function occurrenceLanguage(e:WholeSkyOccurrence,lang:SkyLanguage,timeForm:'past'|'future'='past'):{title:string;description:string;action:string}{
  const base=dictionary[e.first],human=guides[e.first],arabic=lang==='ar';
  if(e.kind==='ingress'){
   if(e.sign===undefined||e.sign<0||e.sign>11)throw Error('Invalid verified zodiac sign');
   const feminine=e.first==='Venus'||e.first==='Sun';
-  return {title:arabic?base.ar+(e.retrograde?(feminine?' عادت متراجعة إلى ':' عاد متراجعاً إلى '):(feminine?' دخلت ':' دخل '))+signText(e.sign,lang):base.en+(e.retrograde?' returned retrograde to ':' entered ')+signText(e.sign,lang),
+  const verb=timeForm==='future'?(e.retrograde?(feminine?' ترجع متراجعة إلى ':' يرجع متراجعاً إلى '):(feminine?' تدخل ':' يدخل ')):
+   (e.retrograde?(feminine?' عادت متراجعة إلى ':' عاد متراجعاً إلى '):(feminine?' دخلت ':' دخل '));
+  return {title:arabic?base.ar+verb+signText(e.sign,lang):base.en+(timeForm==='future'?(e.retrograde?' returns retrograde to ':' enters '):(e.retrograde?' returned retrograde to ':' entered '))+signText(e.sign,lang),
    description:arabic?(e.retrograde?'العودة التراجعية رمزياً تفتح مجال مراجعة '+signsAdvice[e.sign]+'. ':'الدخول يبرز رمزياً موضوع '+signsAdvice[e.sign]+'. ')+human.ar:
     (e.retrograde?'A retrograde return symbolically revisits ':'The ingress symbolically highlights ')+signText(e.sign,lang)+' themes. '+human.en,
    action:arabic?human.doAr:human.doEn};
  }
  if(e.kind==='station')return {
-  title:arabic?base.ar+(e.first==='Venus'||e.first==='Sun'?(e.retrograde?' بدأت التراجع':' انتهى تراجعها'):(e.retrograde?' بدأ التراجع':' انتهى تراجعه')):base.en+(e.retrograde?' began retrograde':' ended retrograde'),
+  title:arabic?base.ar+(timeForm==='future'?(e.retrograde?(e.first==='Venus'||e.first==='Sun'?' تبدأ التراجع':' يبدأ التراجع'):(e.first==='Venus'||e.first==='Sun'?' ينتهي تراجعها':' ينتهي تراجعه')):(e.first==='Venus'||e.first==='Sun'?(e.retrograde?' بدأت التراجع':' انتهى تراجعها'):(e.retrograde?' بدأ التراجع':' انتهى تراجعه'))):base.en+(timeForm==='future'?(e.retrograde?' begins retrograde':' ends retrograde'):(e.retrograde?' began retrograde':' ended retrograde')),
   description:arabic?(e.retrograde?retro[e.first]:human.ar):
    (e.retrograde?'Take another look at past decisions. ':'It may be useful to move forward carefully. ')+human.en,
   action:arabic?human.doAr:human.doEn
@@ -216,7 +218,7 @@ export function wholeSkyBroadcast(points:readonly Point[],events:readonly WholeS
   meaning=item.description;action=item.action;
   movement=lang==='ar'?'هذا الموضوع صار الأبرز خلال الساعات الأخيرة.':'This theme was prominent in the past few hours.';
  }else if(veryNext){
-  const item=occurrenceLanguage(veryNext,lang);
+  const item=occurrenceLanguage(veryNext,lang,'future');
   title=lang==='ar'?'دا يقترب: '+item.title:'Approaching: '+item.title;
   meaning=item.description;action=item.action;
   movement=lang==='ar'?'الموضوع قريب؛ شوف شنو تگدر تسوي عملياً.':'This theme is approaching; look for a practical next step.';

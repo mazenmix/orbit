@@ -107,7 +107,7 @@ const natalFocus:Record<string,Bi>={
 const txt=(b:Bi,lang:SkyLanguage)=>lang==='ar'?b.ar:b.en;
 export function personalSkyStory({event,at,natal,skyAtEvent,knownBirthTime,lang}:PersonalSkyContext):PersonalSkyStory{
  if(!Number.isFinite(+at)||!Number.isFinite(+event.at))throw Error('Invalid story time');
- const human=occurrenceLanguage(event,lang);
+ const human=occurrenceLanguage(event,lang,+event.at>+at?'future':'past');
  const focusPlanet=skyAtEvent.find(p=>p.id===event.first);
  if(!focusPlanet||!Number.isFinite(focusPlanet.longitude))throw Error('Event body not verified');
  const house=knownBirthTime&&natal.cusps.length===12?houseNumber(focusPlanet.longitude,natal.cusps):0;
