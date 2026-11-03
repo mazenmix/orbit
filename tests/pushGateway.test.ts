@@ -16,3 +16,28 @@ test('D1 schema declares per-device capability and unique sent event key for ded
  assert.match(pushSchema(),/device_id TEXT PRIMARY KEY/);
  assert.match(pushSchema(),/PRIMARY KEY\(device_id,event_id\)/);
 });
+
+test('push test cooldown is claimed atomically even for simultaneous requests',async()=>{
+ const secret='s'.repeat(43),deviceId='d'.repeat(22);
+ const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(secret));
+ const verifier=Array.from(new Uint8Array(bytes)).map(x=>x.toString(16).padStart(2,'0')).join('');
+ const row={device_id:deviceId,verifier,subscription:'{}',updated_at:new Date(Date.now()-60000).toISOString()};
+ let claims=0;
+ const db={exec:async()=>{},prepare:(sql:string)=>({bind:(...args:any[])=>({
+  first:async()=>({...row}),
+  run:async()=>{
+   assert.match(sql,/updated_at<=\?/);
+   const [now,id,hash,cutoff]=args;
+   if(id!==row.device_id||hash!==row.verifier||row.updated_at>cutoff)return {meta:{changes:0}};
+   row.updated_at=now;claims++;return {meta:{changes:1}};
+  }
+ })})};
+ const env={MX_SYNC_DB:db as any,MX_VAPID_PUBLIC_KEY:'public',MX_VAPID_PRIVATE_JWK:'invalid'};
+ const testBody={action:'test',deviceId,secret};
+ const responses=await Promise.all([onRequestPost({request:request(testBody),env}),onRequestPost({request:request(testBody),env})]);
+ assert.equal(claims,1,'Only one request may acquire the cooldown');
+ assert.equal(responses.filter(response=>response.status===429).length,1);
+ // The other attempt reaches the sender and fails on the deliberately invalid key.
+ assert.equal(responses.filter(response=>response.status===503).length,1);
+ assert.equal((await onRequestPost({request:request(testBody),env})).status,429);
+});
