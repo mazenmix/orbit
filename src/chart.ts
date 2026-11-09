@@ -33,7 +33,7 @@ export function layoutWheelLabels(points:readonly Point[],asc:number,minGap=11):
  const placements=order.map((v,i)=>({id:v.p.id,longitude:v.p.longitude,displayAngle:normalize(output[i]-shift),lane:i%2}));
  return placements.sort((a,b)=>points.findIndex(p=>p.id===a.id)-points.findIndex(p=>p.id===b.id));
 }
-export function wheel(chart:Chart,transit?:Chart){
+export function wheel(chart:Chart,transit?:Chart,featuredAsteroids:readonly Point[]=[]){
  const C=440,asc=chart.asc??chart.cusps[0]??0;
  const xy=(lon:number,r:number):[number,number]=>{
   const a=(180+normalize(lon-asc))*Math.PI/180;
@@ -102,6 +102,32 @@ export function wheel(chart:Chart,transit?:Chart){
   svg+='<text x="'+x+'" y="'+(y+5.8)+'" fill="'+(p.speed<0?'#ffcc9c':'#efe7ff')+'" font-size="21" text-anchor="middle" font-weight="850">'+escape(p.symbol)+'</text>';
   svg+='<text x="'+tx+'" y="'+(y-2)+'" text-anchor="'+anchor+'" fill="#eee9fb" font-size="10.5" font-weight="800">'+escape(p.id)+'</text>';
   svg+='<text x="'+tx+'" y="'+(y+11)+'" text-anchor="'+anchor+'" fill="'+(p.speed<0?'#fbc390':'#9fe1db')+'" font-size="9.5" font-weight="650">'+dms(p.longitude)+(p.speed<0?' Rx':'')+'</text></g>';
+ }
+ // Featured numbered asteroids are a separate pink layer. Unlike label positions,
+ // the bright dot is fixed at its REAL Swiss-Ephemeris ecliptic longitude.
+ // Compact labels can shift around the ring to avoid covering main planets.
+ const featuredSeen=new Set<string>();
+ const featured=featuredAsteroids.filter(p=>{
+  if(!p.id||featuredSeen.has(p.id)||!Number.isFinite(p.longitude)||
+   p.longitude<0||p.longitude>=360||!Number.isFinite(p.speed))return false;
+  featuredSeen.add(p.id);return true;
+ });
+ const asteroidLabels=layoutWheelLabels(featured,asc,27);
+ for(const label of asteroidLabels){
+  const p=featured.find(body=>body.id===label.id)!;
+  const [px,py]=xy(p.longitude,317);
+  const [bx,by]=xy(asc+label.displayAngle,256);
+  const bend=xy(p.longitude,291);
+  const number=({Eros:433,Lust:4386,Aphrodite:1388,Lilith:1181,Casanova:7328,Adonis:2101} as Record<string,number>)[p.id];
+  const caption=p.id+(number?' · MPC '+number:'')+' · '+dms(p.longitude)+' '+t(signsAr[Math.floor(p.longitude/30)],signsEn[Math.floor(p.longitude/30)])+(p.speed<0?' Rx':'');
+  svg+='<g class="wheel-featured-asteroid" data-featured-asteroid="'+escape(p.id)+'" data-asteroid-longitude="'+p.longitude.toFixed(4)+'">';
+  svg+='<title>'+escape(caption)+'</title>';
+  svg+='<path d="M'+px+' '+py+' L'+bend.join(' ')+' L'+bx+' '+by+'" stroke="#ff8bc7" stroke-width="1.6" stroke-opacity=".88" fill="none"/>';
+  svg+='<circle cx="'+px+'" cy="'+py+'" r="7" fill="#ff71bf" stroke="#ffe0f1" stroke-width="1.7"/>';
+  svg+='<circle cx="'+px+'" cy="'+py+'" r="2.4" fill="#fff7fc"/>';
+  svg+='<rect x="'+(bx-45)+'" y="'+(by-17)+'" width="90" height="34" rx="11" fill="#3d1c3c" fill-opacity=".97" stroke="#ff9bd7" stroke-width="1.3"/>';
+  svg+='<text x="'+bx+'" y="'+(by-2)+'" text-anchor="middle" font-size="11.5" font-weight="850" fill="#ffd3ee">'+escape(p.id)+'</text>';
+  svg+='<text x="'+bx+'" y="'+(by+11)+'" text-anchor="middle" font-size="10" font-weight="750" fill="#ffa9d8">'+dms(p.longitude)+(p.speed<0?' Rx':'')+'</text></g>';
  }
  if(transit){
   svg+=ring(330,'#69e9d8',1.9,.87);

@@ -22,3 +22,18 @@ test('unavailable Placidus cusps do not falsely label a known polar birth as unk
  assert.match(markup,/غير متاحين/);
  assert.doesNotMatch(markup,/وقت الولادة غير معروف|birth time is unknown/);
 });
+
+test('pink asteroid layer preserves exact Swiss longitudes and excludes absent bodies',()=>{
+ const c={date:new Date('2026-11-09T10:00:00Z'),asc:0,mc:270,cusps:Array.from({length:12},(_,i)=>i*30),points:[],missing:[]};
+ const names=['Eros','Lust','Aphrodite','Lilith','Casanova','Adonis'];
+ const positions=names.map((id,i)=>({id,symbol:'✧',longitude:3.125+i*46.487,speed:.15}));
+ const html=wheel(c,undefined,positions);
+ assert.equal([...html.matchAll(/data-featured-asteroid=/g)].length,6);
+ for(const p of positions){
+  assert.ok(html.includes('data-featured-asteroid="'+p.id+'"'));
+  assert.ok(html.includes('data-asteroid-longitude="'+p.longitude.toFixed(4)+'"'));
+ }
+ assert.ok(html.includes('stroke="#ff9bd7"'));
+ assert.equal([...wheel(c).matchAll(/data-featured-asteroid=/g)].length,0,
+  'Never show invented markers until numbered ephemerides are mounted');
+});
