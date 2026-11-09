@@ -1,5 +1,51 @@
 const {test,expect}=require('/tmp/astro-qa/node_modules/@playwright/test');
 
+test('saved chart uses its owner timezone and wording independently of the active self',async({page})=>{
+ await page.clock.install({time:new Date('2026-11-09T12:00:00Z')});
+ await page.addInitScript(()=>{
+  if(!localStorage.getItem('mx.orbit.profiles.v1')){
+   const self={id:'demo',name:'Demo',date:'2000-01-01',time:'12:00',zone:'Etc/UTC',lat:51.4779,lon:0,city:'Greenwich',known:false,kind:'self',sex:'male'};
+   localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify([self,{...self,id:'owner-fixture',name:'Owner fixture',date:'1994-08-12',time:'23:15',zone:'Asia/Manila',city:'Manila',lat:14.5995,lon:120.9842,known:true,kind:'dating',sex:'female'}]));
+  }
+  localStorage.setItem('mx.language','en');
+ });
+ await page.goto('/#chart',{waitUntil:'domcontentloaded'});
+ await page.locator('#soul-person-select').waitFor({timeout:75000});
+ await page.locator('#soul-person-select').selectOption('owner-fixture');
+ await expect(page.locator('.large-wheel > p')).toContainText('23:15');
+ await expect(page.locator('#live-page-clock')).toContainText('20:00');
+ await expect(page.locator('.demo-notice')).toHaveCount(0);
+ await page.locator('#language').click();
+ await page.locator('[data-chart="transit"]').click();
+ const actions=await page.locator('.chart-transit-summary .trend-item small').allTextContents();
+ expect(actions.length).toBeGreaterThan(0);
+ await page.evaluate(()=>{
+  const profiles=JSON.parse(localStorage.getItem('mx.orbit.profiles.v1'));
+  profiles[0].sex='female';localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify(profiles));
+ });
+ // The owner stays female. Changing only the self must not change her prose.
+ await page.reload();await page.locator('#soul-person-select').waitFor({timeout:75000});
+ await page.locator('#soul-person-select').selectOption('owner-fixture');
+ await page.locator('#language').click();
+ await page.locator('[data-chart="transit"]').click();
+ expect(await page.locator('.chart-transit-summary .trend-item small').allTextContents()).toEqual(actions);
+});
+
+test('daily heatmap shows unique profile dates and real sample times across DST',async({page})=>{
+ await page.clock.install({time:new Date('2026-10-31T06:30:00Z')});
+ await page.addInitScript(()=>{
+  localStorage.setItem('mx.uiMode','pro');localStorage.setItem('mx.language','en');
+  localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify([{id:'dst-self',name:'DST fixture',date:'2000-01-01',time:'12:00',zone:'America/Denver',lat:39.7392,lon:-104.9903,city:'Denver',known:true,kind:'self'}]));
+ });
+ await page.goto('/#time',{waitUntil:'domcontentloaded'});
+ await page.locator('.heatmap-cell').first().waitFor({timeout:75000});
+ const cells=page.locator('.heatmap-cell');
+ const dates=await cells.locator('small:first-child').allTextContents();
+ expect(new Set(dates).size).toBe(30);
+ await expect(cells.nth(2)).toHaveAttribute('title',/02 Nov.*00:30.*Denver/);
+ await expect(page.locator('.mx-heatmap-method')).toContainText('One sample per calendar day');
+});
+
 test('saved-city eclipse visibility works with the actual Swiss WASM instance',async({page})=>{
  await page.goto('/#eclipses',{waitUntil:'domcontentloaded'});
  await page.locator('#check-local-eclipses').waitFor({timeout:75000});

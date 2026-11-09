@@ -1,4 +1,14 @@
 import {categories,type Category} from './math.ts';
+import {Temporal} from '@js-temporal/polyfill';
+/** Calendar-day samples in the selected profile's zone. Each offset starts
+ * from the original clock so a DST gap does not shift every following day. */
+function sampleDay(at:Date,days:number,zone:string):Date{
+ const origin=Temporal.Instant.fromEpochMilliseconds(+at).toZonedDateTimeISO(zone);
+ const sample=origin.add({days});
+ const intended=origin.toPlainDate().add({days});
+ if(!sample.toPlainDate().equals(intended))throw Error('Local date '+intended.toString()+' does not exist in '+zone);
+ return new Date(sample.epochMilliseconds);
+}
 export type HeatmapReading={scores:Record<Category,number>;signals:readonly {category:Category}[]};
 export type HeatCell={instant:Date;indices:Record<Category,number|null>;average:number|null;coverage:{present:number;total:number;missing:Category[]}};
 /** A report's default 50 is not evidence. Keep unavailable domains null and
@@ -18,10 +28,10 @@ function heatCell(instant:Date,reading:HeatmapReading):HeatCell{
  return {instant,indices,average:observed.length?Math.round(observed.reduce((sum,value)=>sum+value,0)/observed.length):null,
   coverage:{present:observed.length,total:categories.length,missing}};
 }
-export function calculateHeatmap(at:Date,days:number,read:(at:Date)=>HeatmapReading):HeatCell[]{
+export function calculateHeatmap(at:Date,days:number,read:(at:Date)=>HeatmapReading,zone='Etc/UTC'):HeatCell[]{
  if(!Number.isFinite(+at)||!Number.isInteger(days)||days<1||days>62)throw Error('Invalid heatmap range');
  return Array.from({length:days},(_,i)=>{
-  const instant=new Date(+at+i*86400000);
+  const instant=sampleDay(at,i,zone);
   return heatCell(instant,read(instant));
  });
 }
@@ -38,11 +48,11 @@ export function heatSummary(cells:readonly HeatCell[],key:Category|'average'){
 /** Real ephemeris samples every 3 days over 90 days, or every 7 days over a year.
  * Does not imply that un-sampled dates were measured or predict future events.
  */
-export function sampledHeatmap(at:Date,spanDays:90|365,read:(at:Date)=>HeatmapReading):HeatCell[]{
+export function sampledHeatmap(at:Date,spanDays:90|365,read:(at:Date)=>HeatmapReading,zone='Etc/UTC'):HeatCell[]{
  if(!Number.isFinite(+at))throw Error('Invalid heatmap date');
  const step=spanDays===90?3:7,items:HeatCell[]=[];
  for(let d=0;d<spanDays;d+=step){
-  const instant=new Date(+at+d*86400000);
+  const instant=sampleDay(at,d,zone);
   items.push(heatCell(instant,read(instant)));
  }
  return items;
