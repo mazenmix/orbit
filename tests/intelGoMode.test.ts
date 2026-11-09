@@ -129,7 +129,7 @@ test('six highlighted asteroid names sit in a separate nonoverlapping responsive
  assert.match(markup,/aria-valuenow/);
  assert.match(styles,/\.mx-sky-asteroid-gauge-fill\.green/);
  assert.match(styles,/\.mx-sky-asteroid-gauge-fill\.orange/);
- assert.match(styles,/\.mx-sky-asteroid-gauge-fill\.red/);
+ assert.doesNotMatch(styles,/\.mx-sky-asteroid-gauge-fill\.red/,'No red tier on these gauges');
  assert.ok(main.includes("wheel(r.current,undefined,featuredSkyPositions(r.at))+'</button>'+featuredSkyLegend(r.at)"));
  assert.match(main,/featuredSkyLegend\(data\.current\.date\)/);
  assert.match(main,/const chips=featuredSkyLegend\(at\)/);
