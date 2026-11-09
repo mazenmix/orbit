@@ -410,3 +410,113 @@
  #detail .mx-expanded-sky .mx-sky-asteroid-info b{font-size:11px}
  #detail .mx-expanded-sky .mx-sky-asteroid-info small{font-size:9px}
 }
+
+/* Six Swiss-calculated sign-stay gauges: elapsed time within the CURRENT sign.
+   0–60% green, 61–90% orange, 91–100% red; no invented ingress values. */
+.mx-sky-asteroid-chip{
+ gap:4px;
+ min-height:58px;
+ padding:6px 5px;
+ overflow:hidden;
+}
+.mx-sky-asteroid-index{
+ width:19px;
+ height:19px;
+ flex-basis:19px;
+ font-size:10px;
+}
+.mx-sky-asteroid-info{flex:1 1 auto;gap:1px}
+.mx-sky-asteroid-info b{font-size:10.5px}
+.mx-sky-asteroid-info small{font-size:8.2px}
+.mx-sky-asteroid-left{color:#b6d8df!important;font-size:8.2px!important;font-weight:750}
+.mx-sky-asteroid-meter{
+ --mx-asteroid-gauge:#7e879e;
+ position:relative;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ width:38px;
+ height:38px;
+ flex:0 0 38px;
+ color:var(--mx-asteroid-gauge);
+ font-variant-numeric:tabular-nums;
+ direction:ltr;
+}
+.mx-sky-asteroid-meter.is-green{--mx-asteroid-gauge:#49e3ab}
+.mx-sky-asteroid-meter.is-orange{--mx-asteroid-gauge:#ffb456}
+.mx-sky-asteroid-meter.is-red{--mx-asteroid-gauge:#ff6978}
+.mx-sky-asteroid-meter svg{display:block;overflow:visible}
+.mx-sky-meter-track{
+ fill:none;
+ stroke:#373448;
+ stroke-width:3.4;
+}
+.mx-sky-meter-fill{
+ fill:none;
+ stroke:var(--mx-asteroid-gauge);
+ stroke-width:3.8;
+ stroke-linecap:round;
+ transition:stroke-dasharray .35s ease,stroke .35s ease;
+}
+.mx-sky-asteroid-meter.is-pending .mx-sky-meter-fill{stroke-dasharray:0 87.96}
+.mx-sky-meter-value{
+ position:absolute;
+ top:50%;
+ left:50%;
+ transform:translate(-50%,-50%);
+ font-size:8.5px;
+ font-weight:850;
+ letter-spacing:-.4px;
+ color:var(--mx-asteroid-gauge);
+ line-height:1;
+ white-space:nowrap;
+ pointer-events:none;
+}
+#detail .mx-expanded-sky .mx-sky-asteroid-chip{
+ gap:3px;
+ min-height:58px;
+ padding:5px 4px;
+}
+#detail .mx-expanded-sky .mx-sky-asteroid-index{
+ width:18px;
+ height:18px;
+ flex-basis:18px;
+ font-size:10px;
+}
+#detail .mx-expanded-sky .mx-sky-asteroid-meter{
+ width:35px;
+ height:35px;
+ flex-basis:35px;
+}
+#detail .mx-expanded-sky .mx-sky-asteroid-meter svg{
+ width:35px;
+ height:35px;
+}
+#detail .mx-expanded-sky .mx-sky-asteroid-info b{font-size:10px}
+#detail .mx-expanded-sky .mx-sky-asteroid-info small{font-size:7.6px}
+#live-view-body .mx-today-sky .mx-sky-asteroid-chip{
+ min-height:53px;
+ gap:3px;
+ padding:5px 4px;
+}
+#live-view-body .mx-today-sky .mx-sky-asteroid-index{
+ width:18px;
+ height:18px;
+ flex-basis:18px;
+ font-size:9px;
+}
+#live-view-body .mx-today-sky .mx-sky-asteroid-meter{
+ width:34px;
+ height:34px;
+ flex-basis:34px;
+}
+#live-view-body .mx-today-sky .mx-sky-asteroid-meter svg{
+ width:34px;
+ height:34px;
+}
+#live-view-body .mx-today-sky .mx-sky-asteroid-info b{font-size:9.5px}
+#live-view-body .mx-today-sky .mx-sky-asteroid-info small{font-size:7.4px}
+@media(max-width:440px){
+ #detail .mx-expanded-sky .mx-sky-asteroid-info b{font-size:11px}
+ #detail .mx-expanded-sky .mx-sky-asteroid-info small{font-size:8.5px}
+}
