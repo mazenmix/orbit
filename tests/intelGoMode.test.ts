@@ -155,7 +155,7 @@ test('asteroid captions and duplicate date are removed; percent gauges fill from
  assert.match(main,/mx-expanded-sky-time/,'Keep expanded wheel header clock');
 });
 
-test('featured asteroid shows a red arrow next to name only when Swiss speed is negative',()=>{
+test('featured asteroid shows an orange arrow next to name only when Swiss speed is negative',()=>{
  const styles=readFileSync('src/observatory.css','utf8');
  const legend=main.slice(main.indexOf('function featuredSkyLegend('),main.indexOf('async function activateFeaturedSkyAsteroids()'));
  assert.ok(legend.includes("p&&p.speed<0?"),'Retrograde indicator uses the actual calculated motion');
@@ -165,6 +165,6 @@ test('featured asteroid shows a red arrow next to name only when Swiss speed is 
  assert.match(legend,/↶/);
  assert.doesNotMatch(legend,/p\.speed<0\?' Rx'/,'Avoid duplicate Rx text beside degree');
  assert.match(styles,/\.mx-sky-asteroid-name\{[\s\S]*?display:flex;[\s\S]*?min-width:0;/);
- assert.match(styles,/\.mx-sky-asteroid-retrograde\{[\s\S]*?color:#ff6173;/);
+ assert.match(styles,/\.mx-sky-asteroid-retrograde\{[\s\S]*?color:#ffb04f;/);
  assert.match(main,/if\(expandedChips\)reconcileLiveHTML\(expandedChips,chips\)/,'Arrow updates in enlarged live chart');
 });
