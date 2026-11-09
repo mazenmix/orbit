@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {calculateHeatmap,heatSummary,sampledHeatmap} from '../src/heatmap.ts';
 import {categories,aspects,signals,scores,type Category} from '../src/math.ts';
+import {zonedInstant,localValue} from '../src/engine.ts';
 const origin=new Date('2026-10-18T12:00:00Z');
 const covered=categories.map(category=>({category}));
 const indices=(value:number)=>Object.fromEntries(categories.map(c=>[c,value])) as Record<Category,number>;
@@ -49,4 +50,25 @@ test('measured neutral scores survive while absent scores and no-evidence days s
  const summary=heatSummary(cells,'career');
  assert.equal(summary.mean,65);assert.equal(summary.considered,2);assert.equal(summary.total,3);
  assert.equal(summary.highest?.indices.career,80);assert.equal(summary.lowest?.indices.career,50);
+});
+test('daily samples retain distinct profile-local dates across the autumn DST reversal',()=>{
+ const zone='America/Denver',at=zonedInstant('2026-10-31T00:30',zone);
+ const cells=calculateHeatmap(at,4,()=>({scores:indices(60),signals:covered}),zone);
+ assert.deepEqual(cells.map(c=>localValue(c.instant,zone)),[
+  '2026-10-31T00:30','2026-11-01T00:30','2026-11-02T00:30','2026-11-03T00:30'
+ ]);
+ assert.equal(+cells[2].instant-+cells[1].instant,25*3600000);
+});
+test('spring gap adjustment affects only that sample, and spaced samples use local calendar days',()=>{
+ const zone='America/Denver',read=()=>({scores:indices(60),signals:covered});
+ const cells=calculateHeatmap(zonedInstant('2026-03-07T02:30',zone),3,read,zone);
+ assert.deepEqual(cells.map(c=>localValue(c.instant,zone)),['2026-03-07T02:30','2026-03-08T03:30','2026-03-09T02:30']);
+ const quarter=sampledHeatmap(zonedInstant('2026-10-30T00:30',zone),90,read,zone);
+ assert.equal(localValue(quarter[1].instant,zone),'2026-11-02T00:30');
+ const annual=sampledHeatmap(zonedInstant('2026-10-30T00:30',zone),365,read,zone);
+ assert.equal(localValue(annual[1].instant,zone),'2026-11-06T00:30');
+});
+test('an entirely skipped local date is not silently replaced by a duplicate date',()=>{
+ const zone='Pacific/Apia',at=zonedInstant('2011-12-29T12:00',zone);
+ assert.throws(()=>calculateHeatmap(at,3,()=>({scores:indices(60),signals:covered}),zone),/Local date 2011-12-30 does not exist/);
 });
