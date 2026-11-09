@@ -40,7 +40,7 @@ import type {FocusReadingInput} from './focusEventReading.ts';
 import {refineNatalTransit} from './precision.ts';
 import {scanLunations,type Lunation} from './eclipse.ts';
 import type {ConfirmedEclipse} from './realEclipses.ts';
-import {namedAsteroids,asteroidSourcePath} from './asteroids.ts';
+import {namedAsteroids,asteroidSourcePath,featuredSkyAsteroidNumbers} from './asteroids.ts';
 import {loadNamedAsteroids,mountedAsteroidCount,namedAsteroidPositions} from './asteroidRuntime.ts';
 import {asteroidReading,currentAsteroidReading,namedAsteroidContacts} from './asteroidInterpretation.ts';
 import {partnerInsights,partnerInsightAvailable,gaugeLevel} from './peopleInsights.ts';
@@ -130,6 +130,8 @@ const calendarSnapshots=new Map<string,CalendarSnapshot>();
 const calendarFailures=new Map<string,string>();
 let asteroidCategory:Category|'all'='all';
 let asteroidLoading=false,asteroidAutoAttempted=false,asteroidProgress='',asteroidFailures:{name:string;reason:string}[]=[];
+let featuredSkyAttempted=false;
+let featuredSkyFailures:{name:string;reason:string}[]=[];
 let heatmapCache:{key:string;cells:HeatCell[]}|null=null;
 let lunationCache:{key:string;items:Lunation[]}|null=null;
 let realEclipseCache:{checked:number;items:ConfirmedEclipse[]}|null=null;
@@ -246,6 +248,7 @@ function render(){
  if(screen==='ai'&&ready)void refreshLiveQwen(false);
  if(screen==='calendar'&&ready)startCalendarWork();
  if(['asteroids','go','travelmode'].includes(screen)&&ready&&!asteroidAutoAttempted&&mountedAsteroidCount()<namedAsteroids.length&&location.hostname.endsWith('.pages.dev')){asteroidAutoAttempted=true;void refreshAsteroidEphemerides();}
+ if(screen==='today'&&ready&&!featuredSkyAttempted){void activateFeaturedSkyAsteroids();}
 }
 function content(){if(!data)return screen==='settings'?settingsPage():screen==='more'?morePage():'<section class="panel"><p>'+t('الحساب غير متاح لهذي البيانات. راجع الملف قبل عرض نتائج جديدة.','Calculation unavailable for these inputs. Review the profile before showing new results.')+'</p><button class="secondary" data-go="settings">'+t('مراجعة بيانات الميلاد','Review birth details')+'</button></section>';let inner:string;switch(screen){case 'today':inner=uiMode==='simple'?focusedToday():today();break;case 'signals':inner=signalsPage();break;case 'chart':inner=chartPage();break;case 'time':inner=uiMode==='simple'?focusedTime():timePage();break;case 'lunar':inner=lunarPage();break;case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage();break;case 'eclipses':inner=eclipsesPage();break;case 'asteroids':inner=asteroidsPage();break;case 'advanced':inner=advancedPage();break;case 'intel':case 'go':inner=goModePage();break;case 'travelmode':inner=travelModePage();break;case 'people':inner=peoplePage();break;case 'now':inner=nowPage();break;case 'evidence':inner=evidencePage();break;case 'ai':inner=aiPage();break;case 'settings':inner=settingsPage();break;case 'more':inner=morePage();break;default:screen='today';inner=today()}return sectionTabs()+(data.current.missing.length&&screen!=='settings'&&screen!=='now'?'<p class="subtle" role="status">'+t('بيانات إضافية غير متاحة وتم استبعادها: ','Unavailable supplementary bodies omitted: ')+data.current.missing.map(id=>esc(planet(id))).join(' · ')+'</p>':'')+inner}
 function tag(text:string,cls=''){return `<span class="tag ${cls}">${text}</span>`}
@@ -355,7 +358,7 @@ function todaySkyWheel(r:Report){
   '<section class="panel large-wheel mx-today-sky" aria-label="'+t('خارطة السماء بهاللحظة','Current sky wheel')+'">'+
   '<div class="mx-today-sky-heading"><h2>'+t('سماء اللحظة حسب مدينة الميلاد','Current sky at birth-city coordinates')+'</h2>'+
   '<button type="button" class="secondary mx-today-sky-expand" id="expand-sky-wheel-link" aria-label="'+t('كبّر دائرة السماء','Expand sky wheel')+'">⤢ '+t('تكبير','Expand')+'</button></div>'+
-  '<button type="button" id="expand-sky-wheel" class="mx-today-sky-open" aria-label="'+t('تكبير خارطة السماء الحالية','Expand current sky wheel')+'">'+wheel(r.current)+'</button>'+
+  '<button type="button" id="expand-sky-wheel" class="mx-today-sky-open" aria-label="'+t('تكبير خارطة السماء الحالية','Expand current sky wheel')+'">'+wheel(r.current,undefined,featuredSkyPositions(r.at))+'</button>'+
   '<time class="mx-today-sky-time" datetime="'+r.at.toISOString()+'">'+dateText(r.at,{dateStyle:'full',timeStyle:'medium'})+'</time>'+
   '</section></div>';
 }
@@ -1053,6 +1056,27 @@ function travelModePage(){
   sharedModeTimeNavigation()+symbolicIndexNote()+sections+liveAsteroidContacts(5)+
   '</div>';
 }
+/** Calculate only the six requested bodies from valid Swiss SE1 files,
+ * using the same time coordinate as the sky wheel; no approximate placeholders.
+ */
+function featuredSkyPositions(at:Date){
+ if(!mountedAsteroidCount())return [];
+ try{return namedAsteroidPositions(asteroidSwissRuntime(),at,featuredSkyAsteroidNumbers)}
+ catch(e){console.warn('Live featured asteroid position unavailable',e);return []}
+}
+async function activateFeaturedSkyAsteroids(){
+ if(!ready||featuredSkyAttempted)return;
+ featuredSkyAttempted=true;
+ try{
+  const result=await loadNamedAsteroids(asteroidSwissRuntime(),undefined,undefined,featuredSkyAsteroidNumbers);
+  featuredSkyFailures=result.failed;
+  if(result.failed.length)console.warn('Some numbered asteroid ephemerides are unavailable',result.failed);
+ }catch(e){console.warn('Featured sky asteroid loading failed',e)}
+ finally{
+  // Refresh SVGs in place; preserve the enlarged modal, clock and scroll.
+  if(screen==='today')updateLiveSkyWheel(Date.now());
+ }
+}
 async function refreshAsteroidEphemerides(){
  if(asteroidLoading)return;
  asteroidAutoAttempted=true;asteroidLoading=true;asteroidFailures=[];
@@ -1079,7 +1103,7 @@ function asteroidsPage(){
  for(const contact of contacts)if(!activated.has(contact.transit.id))activated.set(contact.transit.id,contact);
  return '<div class="section-title"><div><span class="eyebrow">MX ASTRO · ASTEROID STORIES</span><h2>'+t('الكويكبات: شنو تعني إلك؟','Asteroids: what do these themes mean?')+'</h2></div></div>'+
  '<section class="panel asteroid-intro"><h2>'+t('تفسير مختلف لكل كويكب','A unique reading for every asteroid')+'</h2><p>'+t('الموقع والدرجة والحركة محسوبة للوقت المختار. إذا أكو اتصال قريب ويا خارطتك نعرضه بالزاوية والفارق، وإذا ماكو نوضح هذا بدون اختراع تأثير شخصي.','Positions, degrees and motion are calculated for the selected time. Close natal contacts show the angle and orb; without one, no personal effect is invented.')+'</p><div class="button-row"><button class="primary" id="load-named-asteroids" '+(asteroidLoading?'disabled':'')+'>'+(asteroidLoading?t('جار تحميل الحسابات…','Loading calculations…'):count===56?t('حدّث حسابات الكويكبات','Refresh asteroid calculations'):t('فعّل حساباتي للكويكبات الـ56','Calculate my 56 asteroid positions'))+'</button><button class="secondary" data-go="time">'+t('غيّر وقت القراءة','Change reading time')+'</button></div><small id="asteroid-progress" role="status">'+(asteroidProgress?esc(asteroidProgress):count+' / 56 '+t('مواقع فلكية متاحة للحساب','ephemerides currently loaded'))+'</small>'+(asteroidFailures.length?'<details><summary>'+t('بعض البيانات غير متاحة؛ شوف التفاصيل','Some data is unavailable; see details')+'</summary>'+asteroidFailures.map(x=>'<p>'+esc(x.name)+': '+esc(x.reason)+'</p>').join('')+'</details>':'')+'</section>'+
- '<section class="panel"><div class="section-title"><h2>'+t('مواقع الكويكبات واتصالاتها ويا خارطتك','Asteroid positions and natal contacts')+'</h2><label class="heat-label">'+t('اختار المجال','Filter by theme')+' <select id="asteroid-category"><option value="all">'+t('الكل','All')+'</option>'+categories.map(c=>'<option value="'+c+'" '+(asteroidCategory===c?'selected':'')+'>'+cat(c)+'</option>').join('')+'</select></label></div><div class="asteroids-grid reading-asteroids">'+filtered.map(a=>{const point=map.get(a.name),near=activated.get(a.name),r=currentAsteroidReading(a,point,near,lang==='en');return '<article class="asteroid-item meaning-card"><div class="meaning-head"><h3>'+esc(a.name)+'</h3><span class="'+(near?'reading-active':'reading-neutral')+'">'+(point?(near?t('اتصال شخصي محسوب','Calculated natal contact'):t('موضع محسوب · بلا اتصال قريب','Position calculated · no close natal aspect')):t('بانتظار حساب الموقع','Awaiting position calculation'))+'</span></div>'+(point?'<p>'+esc(r.theme)+'</p>':'')+(near&&r.action?'<p class="advice-action">'+esc(r.action)+'</p>':'')+(near?'<p class="mx-asteroid-evidence">'+esc(r.emphasis)+'</p>':'')+(point?'<details><summary>'+t('الموضع المحسوب','Actual ephemeris position')+'</summary><small>MPC '+a.number+' · '+signName(point.longitude)+' · '+(point.longitude%30).toFixed(3)+'°</small></details>':'')+'</article>'}).join('')+'</div></section>'+
+ '<section class="panel"><div class="section-title"><h2>'+t('مواقع الكويكبات واتصالاتها ويا خارطتك','Asteroid positions and natal contacts')+'</h2><label class="heat-label">'+t('اختار المجال','Filter by theme')+' <select id="asteroid-category"><option value="all">'+t('الكل','All')+'</option>'+categories.map(c=>'<option value="'+c+'" '+(asteroidCategory===c?'selected':'')+'>'+cat(c)+'</option>').join('')+'</select></label></div><div class="asteroids-grid reading-asteroids">'+filtered.map(a=>{const point=map.get(a.name),near=activated.get(a.name),r=currentAsteroidReading(a,point,near,lang==='en');return '<article class="asteroid-item meaning-card'+(featuredSkyAsteroidNumbers.some(number=>number===a.number)?' mx-featured-asteroid-card':'')+'"><div class="meaning-head"><h3>'+esc(a.name)+'</h3><span class="'+(near?'reading-active':'reading-neutral')+'">'+(point?(near?t('اتصال شخصي محسوب','Calculated natal contact'):t('موضع محسوب · بلا اتصال قريب','Position calculated · no close natal aspect')):t('بانتظار حساب الموقع','Awaiting position calculation'))+'</span></div>'+(point?'<p>'+esc(r.theme)+'</p>':'')+(near&&r.action?'<p class="advice-action">'+esc(r.action)+'</p>':'')+(near?'<p class="mx-asteroid-evidence">'+esc(r.emphasis)+'</p>':'')+(point?'<details><summary>'+t('الموضع المحسوب','Actual ephemeris position')+'</summary><small>MPC '+a.number+' · '+signName(point.longitude)+' · '+(point.longitude%30).toFixed(3)+'°</small></details>':'')+'</article>'}).join('')+'</div></section>'+
  (contacts.length?'<details class="panel asteroid-technical"><summary>'+t('الاتصالات المحسوبة مع خارطة الميلاد (للتدقيق فقط)','Calculated natal aspects (advanced details)')+' · '+contacts.length+'</summary><div class="eclipse-contacts">'+contacts.slice(0,60).map(e=>'<span><b>'+esc(e.transit.id)+' → '+esc(planet(e.natal.id))+'</b> '+aspect(e.angle)+' · '+e.orb.toFixed(2)+'°</span>').join('')+'</div></details>':'');
 }
 const eclipseCountryNames=new Map<string,string>();
@@ -1574,7 +1598,7 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
 });
  
 
- const expandSky=()=>{if(!data)return;showDialog('<div class="mx-expanded-sky"><time class="mx-expanded-sky-time" datetime="'+new Date().toISOString()+'">'+dateText(new Date(),{dateStyle:'full',timeStyle:'medium'})+'</time><div class="mx-expanded-wheel">'+wheel(data.current)+'</div></div>');liveSkyLastTick=Date.now();updateLiveSkyWheel(liveSkyLastTick);tickLiveClocks(liveSkyLastTick);};
+ const expandSky=()=>{if(!data)return;showDialog('<div class="mx-expanded-sky"><time class="mx-expanded-sky-time" datetime="'+new Date().toISOString()+'">'+dateText(new Date(),{dateStyle:'full',timeStyle:'medium'})+'</time><div class="mx-expanded-wheel">'+wheel(data.current,undefined,featuredSkyPositions(data.current.date))+'</div></div>');liveSkyLastTick=Date.now();updateLiveSkyWheel(liveSkyLastTick);tickLiveClocks(liveSkyLastTick);};
  on('expand-sky-wheel',expandSky);on('expand-sky-wheel-link',expandSky);
  if(screen==='calendar')bindAstroCalendar();
  root.querySelectorAll<HTMLButtonElement>('[data-signal]').forEach(b=>b.onclick=()=>showSignal(Number(b.dataset.signal)));
@@ -1851,7 +1875,7 @@ function updateLiveSkyWheel(now:number){
  try{
   const at=new Date(now),sky=chart(at,active,true);
   if(small||todayWheel||enlarged){
-   const html=wheel(sky);
+   const html=wheel(sky,undefined,featuredSkyPositions(at));
    if(small)reconcileLiveHTML(small,html);
    if(todayWheel)reconcileLiveHTML(todayWheel,html);
    if(enlarged)reconcileLiveHTML(enlarged,html);

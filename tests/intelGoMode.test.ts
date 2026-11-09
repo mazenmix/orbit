@@ -77,7 +77,7 @@ test('Today replaces its top gauges with a professional current-sky wheel in bot
  assert.doesNotMatch(focused,/todayQuickGauges\(r\)/);
  assert.doesNotMatch(classic,/todayQuickGauges\(r\)/);
  assert.match(sky,/chart-layout chart-expanded mx-today-sky-layout/);
- assert.match(sky,/wheel\(r\.current\)/);
+ assert.match(sky,/wheel\(r\.current,undefined,featuredSkyPositions\(r\.at\)\)/);
  assert.match(sky,/id="expand-sky-wheel"/);
  assert.match(live,/if\(todayWheel\)reconcileLiveHTML\(todayWheel,html\)/);
  assert.match(live,/if\(enlarged\)reconcileLiveHTML\(enlarged,html\)/);

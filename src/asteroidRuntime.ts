@@ -48,46 +48,62 @@ async function cachedFetch(body:NamedAsteroid,signal?:AbortSignal){
  if(data.byteLength<1000||data.byteLength>2_000_000)throw Error('Invalid cached ephemeris');
  return data;
 }
-export async function loadNamedAsteroids(swe:AsteroidSwiss,onProgress?:(progress:LoadProgress)=>void,signal?:AbortSignal):Promise<LoadResult>{
- let ready=mounted.size,failed:{name:string;reason:string}[]=[];
- const pending=namedAsteroids.filter(a=>!mounted.has(a.number));let cursor=0;
+/** Share concurrent requests between the Today wheel and full catalogue.
+ * Do not mount the same SE1 in Swiss WASM twice, even across page changes.
+ */
+const inFlight=new Map<number,Promise<void>>();
+function ensureAsteroidMounted(swe:AsteroidSwiss,item:NamedAsteroid,signal?:AbortSignal):Promise<void>{
+ if(mounted.has(item.number))return Promise.resolve();
+ const existing=inFlight.get(item.number);
+ if(existing)return existing;
+ const work=(async()=>{
+  const bytes=await cachedFetch(item,signal);
+  mountAsteroid(swe,item.number,bytes);
+  const value=swe.calc_ut(2451545,item.swissBodyId,2|256);
+  if(!value||!Number.isFinite(value[0])||!Number.isFinite(value[3]))
+   throw Error('Swiss failed to calculate a valid position');
+ })().catch(async e=>{
+  mounted.delete(item.number);
+  try{swe.SweModule.FS_unlink?.('/sweph/'+asteroidSourcePath(item.number))}catch{}
+  if(typeof caches!=='undefined')try{
+   const store=await caches.open('mx-asteroid-se1-v1');
+   await store.delete('/api/asteroid?number='+item.number);
+  }catch{}
+  throw e;
+ }).finally(()=>{inFlight.delete(item.number)});
+ inFlight.set(item.number,work);
+ return work;
+}
+/** Optional selection fetches only requested numbered asteroids for the wheel,
+ * while the #asteroids catalogue continues to fetch all 56 on demand. */
+export async function loadNamedAsteroids(swe:AsteroidSwiss,onProgress?:(progress:LoadProgress)=>void,signal?:AbortSignal,selectedNumbers?:readonly number[]):Promise<LoadResult>{
+ const only=selectedNumbers?new Set(selectedNumbers):null;
+ const catalogue=only?namedAsteroids.filter(item=>only.has(item.number)):namedAsteroids;
+ let ready=catalogue.filter(item=>mounted.has(item.number)).length;
+ const failed:{name:string;reason:string}[]=[];
+ const pending=catalogue.filter(item=>!mounted.has(item.number));let cursor=0;
  async function worker(){
   while(cursor<pending.length){
    if(signal?.aborted)throw new Error('Loading cancelled');
    const item=pending[cursor++];
    try{
-    const bytes=await cachedFetch(item,signal);
-    mountAsteroid(swe,item.number,bytes);
-    // Distinguish binary-file existence from actual position availability:
-    // test a representative epoch well inside the file's stated coverage.
-    const value=swe.calc_ut(2451545,item.swissBodyId,2|256);
-    if(!value||!Number.isFinite(value[0])||!Number.isFinite(value[3]))throw Error('Swiss failed to calculate a valid position');
-    ready++;
-   }catch(e){
-    // A bad upstream SE1 can be cached before Swiss validates its contents.
-    // Without eviction every retry reads the same bad binary. Also unlink a
-    // failed Emscripten FS file or FS_createDataFile rejects the next attempt.
-    mounted.delete(item.number);
-    const file='/sweph/'+asteroidSourcePath(item.number);
-    try{swe.SweModule.FS_unlink?.(file)}catch{}
-    if(typeof caches!=='undefined')try{
-     const store=await caches.open('mx-asteroid-se1-v1');
-     await store.delete('/api/asteroid?number='+item.number);
-    }catch{}
-    failed.push({name:item.name,reason:String(e)});
-   }
-   onProgress?.({ready,total:namedAsteroids.length,failed:failed.length,current:item.name});
+    await ensureAsteroidMounted(swe,item,signal);
+    if(mounted.has(item.number))ready++;
+    else throw Error('Swiss ephemeris not mounted');
+   }catch(e){failed.push({name:item.name,reason:String(e)})}
+   onProgress?.({ready,total:catalogue.length,failed:failed.length,current:item.name});
   }
  }
  await Promise.all(Array.from({length:Math.min(4,pending.length)},()=>worker()));
  return {ready,failed};
 }
-export function namedAsteroidPositions(swe:AsteroidSwiss,at:Date):Point[]{
+export function namedAsteroidPositions(swe:AsteroidSwiss,at:Date,selectedNumbers?:readonly number[]):Point[]{
  if(!Number.isFinite(+at))throw Error('Invalid chart instant');
  const jd=+at/86400000+2440587.5;
  const positions:Point[]=[];
+ const only=selectedNumbers?new Set(selectedNumbers):null;
  for(const asteroid of namedAsteroids){
-  if(!mounted.has(asteroid.number))continue;
+  if(!mounted.has(asteroid.number)||(only&&!only.has(asteroid.number)))continue;
   try{
    const result=swe.calc_ut(jd,asteroid.swissBodyId,2|256);
    if(result&&Number.isFinite(result[0])&&Number.isFinite(result[3]))

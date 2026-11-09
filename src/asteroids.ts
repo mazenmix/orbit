@@ -65,3 +65,9 @@ export function asteroidFile(number:number){if(!Number.isInteger(number)||number
 export function asteroidDirectory(number:number){asteroidFile(number);return `ast${Math.floor(number/1000)}`}
 export function asteroidSourcePath(number:number){return `${asteroidDirectory(number)}/${asteroidFile(number)}`}
 export function asteroidExpectedFiles(){return namedAsteroids.map(body=>({name:body.name,number:body.number,swissBodyId:body.swissBodyId,path:asteroidSourcePath(body.number)}))}
+
+/** The six numbered minor planets requested for the live sky wheel.
+ * Lilith here is (1181) Lilith, NOT the calculated Black Moon Lilith.
+ * All six are already in namedAsteroids; never append duplicate catalogue rows.
+ */
+export const featuredSkyAsteroidNumbers=[433,4386,1388,1181,7328,2101] as const;
