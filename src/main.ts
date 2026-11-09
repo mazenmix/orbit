@@ -41,6 +41,7 @@ import {refineNatalTransit} from './precision.ts';
 import {scanLunations,type Lunation} from './eclipse.ts';
 import type {ConfirmedEclipse} from './realEclipses.ts';
 import {namedAsteroids,asteroidSourcePath,featuredSkyAsteroidNumbers} from './asteroids.ts';
+import {remainingAsteroidSignGauge} from './asteroidSignGauge.ts';
 import {loadNamedAsteroids,mountedAsteroidCount,namedAsteroidPositions} from './asteroidRuntime.ts';
 import {asteroidReading,currentAsteroidReading,namedAsteroidContacts} from './asteroidInterpretation.ts';
 import {partnerInsights,partnerInsightAvailable,gaugeLevel} from './peopleInsights.ts';
@@ -1070,6 +1071,8 @@ function featuredSkyPositions(at:Date){
  * The matching 1–6 markers are anchored on the wheel at real longitudes.
  * Keep a stable wrapper so the existing five-second SVG ticker updates text in place.
  */
+/** Six compact, ordered, collision-free asteroid chips, shared by the
+ * small Today view and enlarged wheel; reconciled on each sky refresh. */
 function featuredSkyLegend(at:Date){
  const positions=new Map(featuredSkyPositions(at).map(p=>[p.id,p]));
  return '<div class="mx-sky-asteroid-legend" role="list" aria-label="'+t('الكويكبات الستة ومواقعها','Six asteroids and actual positions')+'">'+
@@ -1077,9 +1080,16 @@ function featuredSkyLegend(at:Date){
    const asteroid=namedAsteroids.find(a=>a.number===number)!;
    const p=positions.get(asteroid.name);
    const degree=p?signName(p.longitude)+' · '+(p.longitude%30).toFixed(1)+'°'+(p.speed<0?' Rx':''):t('جار حساب الموقع','Calculating position');
+   const gauge=p?remainingAsteroidSignGauge(p.longitude,p.speed):null;
+   const meter=gauge
+    ?'<div class="mx-sky-asteroid-gauge-meta"><small>'+t('باقي بالبرج','Sign remaining')+'</small><strong class="'+gauge.tone+'">'+gauge.percent+'%</strong></div>'+
+     '<div class="mx-sky-asteroid-gauge-track" role="progressbar" aria-label="'+esc(asteroid.name+' · '+t('الباقي بالبرج','Remaining in sign'))+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+gauge.percent+'"><i class="mx-sky-asteroid-gauge-fill '+gauge.tone+'" style="width:'+gauge.percent+'%"></i></div>'
+    :'<div class="mx-sky-asteroid-gauge-meta"><small>'+t('باقي بالبرج','Sign remaining')+'</small><strong>—</strong></div>'+
+     '<div class="mx-sky-asteroid-gauge-track is-pending" aria-hidden="true"></div>';
    return '<div class="mx-sky-asteroid-chip'+(p?'':' mx-pending')+'" role="listitem" data-legend-asteroid="'+esc(asteroid.name)+'">'+
-    '<span class="mx-sky-asteroid-index" aria-hidden="true">'+(index+1)+'</span>'+
-    '<span class="mx-sky-asteroid-info"><b>'+esc(asteroid.name)+'</b><small dir="auto">'+esc(degree)+'</small></span></div>';
+    '<div class="mx-sky-asteroid-top"><span class="mx-sky-asteroid-index" aria-hidden="true">'+(index+1)+'</span>'+
+    '<span class="mx-sky-asteroid-info"><b>'+esc(asteroid.name)+'</b><small dir="auto">'+esc(degree)+'</small></span></div>'+
+    meter+'</div>';
   }).join('')+'</div>';
 }
 async function activateFeaturedSkyAsteroids(){

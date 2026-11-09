@@ -410,3 +410,83 @@
  #detail .mx-expanded-sky .mx-sky-asteroid-info b{font-size:11px}
  #detail .mx-expanded-sky .mx-sky-asteroid-info small{font-size:9px}
 }
+
+/* Live asteroid sign-remaining gauges: one full-width track per pink card.
+ * Compact in the small wheel; no expansion over the circular chart. */
+.mx-sky-asteroid-chip{
+ flex-direction:column;
+ align-items:stretch;
+ justify-content:center;
+ min-height:73px;
+ padding:7px 9px;
+ gap:4px;
+}
+.mx-sky-asteroid-top{
+ display:flex;
+ align-items:center;
+ gap:7px;
+ width:100%;
+ min-width:0;
+}
+.mx-sky-asteroid-top .mx-sky-asteroid-index{flex-shrink:0}
+.mx-sky-asteroid-gauge-meta{
+ width:100%;
+ min-width:0;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:5px;
+ line-height:1.2;
+}
+.mx-sky-asteroid-gauge-meta small{
+ color:#e0c0d5;
+ font-size:8px;
+ white-space:nowrap;
+ overflow:hidden;
+ text-overflow:ellipsis;
+}
+.mx-sky-asteroid-gauge-meta strong{
+ font-size:10px;
+ font-weight:900;
+ font-variant-numeric:tabular-nums;
+ white-space:nowrap;
+ color:#e9f8ee;
+}
+.mx-sky-asteroid-gauge-meta strong.orange{color:#ffc07b}
+.mx-sky-asteroid-gauge-meta strong.red{color:#ff9caa}
+.mx-sky-asteroid-gauge-track{
+ width:100%;
+ height:5px;
+ min-height:5px;
+ overflow:hidden;
+ border-radius:99px;
+ background:rgba(229,213,236,.13);
+ box-shadow:inset 0 1px 2px rgba(0,0,0,.28);
+}
+.mx-sky-asteroid-gauge-fill{
+ display:block;
+ height:100%;
+ border-radius:inherit;
+ transition:width .35s ease,background .35s ease;
+}
+.mx-sky-asteroid-gauge-fill.green{background:#35d89a}
+.mx-sky-asteroid-gauge-fill.orange{background:#f4a64c}
+.mx-sky-asteroid-gauge-fill.red{background:#ef5a68}
+.mx-sky-asteroid-gauge-track.is-pending{background:rgba(229,213,236,.06)}
+#detail .mx-expanded-sky .mx-sky-asteroid-chip{
+ min-height:72px;
+ padding:7px 6px;
+ gap:5px;
+}
+#detail .mx-expanded-sky .mx-sky-asteroid-gauge-meta small{font-size:8px}
+#detail .mx-expanded-sky .mx-sky-asteroid-gauge-meta strong{font-size:9px}
+#live-view-body .mx-today-sky .mx-sky-asteroid-chip{
+ min-height:65px;
+ padding:6px 7px;
+ gap:4px;
+}
+#live-view-body .mx-today-sky .mx-sky-asteroid-gauge-meta small{font-size:8px}
+#live-view-body .mx-today-sky .mx-sky-asteroid-gauge-meta strong{font-size:9px}
+@media(prefers-reduced-motion:reduce){
+ .mx-sky-asteroid-gauge-fill{transition:none}
+}
