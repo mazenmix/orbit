@@ -1078,7 +1078,7 @@ function featuredSkyLegend(at:Date){
   featuredSkyAsteroidNumbers.map((number,index)=>{
    const asteroid=namedAsteroids.find(a=>a.number===number)!;
    const p=positions.get(asteroid.name);
-   const degree=p?signName(p.longitude)+' · '+(p.longitude%30).toFixed(1)+'°'+(p.speed<0?' Rx':''):t('جار حساب الموقع','Calculating position');
+   const degree=p?signName(p.longitude)+' · '+(p.longitude%30).toFixed(1)+'°':t('جار حساب الموقع','Calculating position');
    const gauge=p?remainingAsteroidSignGauge(p.longitude,p.speed):null;
    const meter=gauge
     ?'<div class="mx-sky-asteroid-gauge-meta"><strong class="'+gauge.tone+'">'+gauge.percent+'%</strong></div>'+
@@ -1087,7 +1087,7 @@ function featuredSkyLegend(at:Date){
      '<div class="mx-sky-asteroid-gauge-track is-pending" aria-hidden="true"></div>';
    return '<div class="mx-sky-asteroid-chip'+(p?'':' mx-pending')+'" role="listitem" data-legend-asteroid="'+esc(asteroid.name)+'">'+
     '<div class="mx-sky-asteroid-top"><span class="mx-sky-asteroid-index" aria-hidden="true">'+(index+1)+'</span>'+
-    '<span class="mx-sky-asteroid-info"><b>'+esc(asteroid.name)+'</b><small dir="auto">'+esc(degree)+'</small></span></div>'+
+    '<span class="mx-sky-asteroid-info"><span class="mx-sky-asteroid-name"><b>'+esc(asteroid.name)+'</b>'+(p&&p.speed<0?'<span class="mx-sky-asteroid-retrograde" role="img" aria-label="'+t('متراجع','Retrograde')+'" title="'+t('متراجع','Retrograde')+'">↶</span>':'')+'</span><small dir="auto">'+esc(degree)+'</small></span></div>'+
     meter+'</div>';
   }).join('')+'</div>';
 }
