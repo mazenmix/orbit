@@ -508,11 +508,11 @@
 .mx-sky-asteroid-retrograde{
  display:inline-block;
  flex:0 0 auto;
- color:#ff6173;
+ color:#ffb04f;
  font-size:17px;
  line-height:1;
  font-weight:900;
- text-shadow:0 0 9px rgba(255,66,105,.55);
+ text-shadow:0 0 9px rgba(255,157,57,.6);
 }
 #live-view-body .mx-today-sky .mx-sky-asteroid-retrograde,
 #detail .mx-expanded-sky .mx-sky-asteroid-retrograde{font-size:15px}
