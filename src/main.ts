@@ -42,6 +42,7 @@ import {scanLunations,type Lunation} from './eclipse.ts';
 import type {ConfirmedEclipse} from './realEclipses.ts';
 import {namedAsteroids,asteroidSourcePath,featuredSkyAsteroidNumbers} from './asteroids.ts';
 import {loadNamedAsteroids,mountedAsteroidCount,namedAsteroidPositions} from './asteroidRuntime.ts';
+import {findAsteroidSignWindow,asteroidSignGauge,type AsteroidSignWindow} from './asteroidSignWindow.ts';
 import {asteroidReading,currentAsteroidReading,namedAsteroidContacts} from './asteroidInterpretation.ts';
 import {partnerInsights,partnerInsightAvailable,gaugeLevel} from './peopleInsights.ts';
 import {partnerCardStory} from './partnerCardStory.ts';
@@ -133,6 +134,9 @@ let asteroidCategory:Category|'all'='all';
 let asteroidLoading=false,asteroidAutoAttempted=false,asteroidProgress='',asteroidFailures:{name:string;reason:string}[]=[];
 let featuredSkyAttempted=false;
 let featuredSkyFailures:{name:string;reason:string}[]=[];
+const featuredSignWindows=new Map<number,AsteroidSignWindow>();
+const featuredSignPending=new Set<number>();
+const featuredSignErrors=new Map<number,{when:number;message:string}>();
 let heatmapCache:{key:string;cells:HeatCell[]}|null=null;
 let lunationCache:{key:string;items:Lunation[]}|null=null;
 let realEclipseCache:{checked:number;items:ConfirmedEclipse[]}|null=null;
@@ -1070,6 +1074,48 @@ function featuredSkyPositions(at:Date){
  * The matching 1–6 markers are anchored on the wheel at real longitudes.
  * Keep a stable wrapper so the existing five-second SVG ticker updates text in place.
  */
+/** Run bounded Swiss ingress searches without locking UI during expensive calculations.
+ * Cached boundaries are stable, while the 5-second ticker updates the percentage.
+ */
+function requestFeaturedSignWindow(number:number,at:Date){
+ const current=featuredSignWindows.get(number);
+ if(current&&current.enteredAt<=+at&&+at<current.ingressAt)return;
+ if(featuredSignPending.has(number))return;
+ const failed=featuredSignErrors.get(number);
+ if(failed&&Date.now()-failed.when<5*60_000)return;
+ const body=namedAsteroids.find(a=>a.number===number);
+ if(!body||!ready)return;
+ featuredSignPending.add(number);
+ void findAsteroidSignWindow(asteroidSwissRuntime(),body.swissBodyId,at).then(window=>{
+  featuredSignWindows.set(number,window);featuredSignErrors.delete(number);
+ }).catch(e=>{
+  featuredSignErrors.set(number,{when:Date.now(),message:String(e)});
+  console.warn('Exact zodiac stay unavailable for '+body.name,e);
+ }).finally(()=>{
+  featuredSignPending.delete(number);
+  // Update visible chips even if time travel is pinned or the wheel is expanded.
+  if(screen==='today'&&ready){
+   const showing=liveTimePinned?selected:new Date();
+   const html=featuredSkyLegend(showing);
+   for(const selector of ['.mx-today-sky .mx-sky-asteroid-legend','#detail[open] .mx-expanded-sky .mx-sky-asteroid-legend']){
+    const node=root.querySelector<HTMLElement>(selector);
+    if(node)reconcileLiveHTML(node,html);
+   }
+  }
+ });
+}
+function asteroidTimeLeft(ms:number){
+ const days=Math.floor(ms/86400000);
+ const hours=Math.floor((ms%86400000)/3600000);
+ const minutes=Math.floor((ms%3600000)/60000);
+ return days?lang==='ar'?days+'ي '+hours+'س':days+'d '+hours+'h':
+  hours?lang==='ar'?hours+'س '+minutes+'د':hours+'h '+minutes+'m':
+  lang==='ar'?Math.max(1,minutes)+'د':Math.max(1,minutes)+'m';
+}
+/** Six named rose chips always stay outside the SVG. Their circular gauges
+ * show TIME ELAPSED in the verified sign stay, not longitude/30 or a guess based
+ * on instantaneous speed. Green 0–60, orange 61–90, red 91–100.
+ */
 function featuredSkyLegend(at:Date){
  const positions=new Map(featuredSkyPositions(at).map(p=>[p.id,p]));
  return '<div class="mx-sky-asteroid-legend" role="list" aria-label="'+t('الكويكبات الستة ومواقعها','Six asteroids and actual positions')+'">'+
@@ -1077,9 +1123,24 @@ function featuredSkyLegend(at:Date){
    const asteroid=namedAsteroids.find(a=>a.number===number)!;
    const p=positions.get(asteroid.name);
    const degree=p?signName(p.longitude)+' · '+(p.longitude%30).toFixed(1)+'°'+(p.speed<0?' Rx':''):t('جار حساب الموقع','Calculating position');
-   return '<div class="mx-sky-asteroid-chip'+(p?'':' mx-pending')+'" role="listitem" data-legend-asteroid="'+esc(asteroid.name)+'">'+
+   const stay=featuredSignWindows.get(number);
+   const sameSign=p&&stay&&Math.floor(p.longitude/30)===stay.sign;
+   const gauge=sameSign?asteroidSignGauge(stay,at):null;
+   if(p&&!gauge)queueMicrotask(()=>requestFeaturedSignWindow(number,at));
+   const percent=gauge?.percent??null;
+   const timeLeft=gauge?asteroidTimeLeft(gauge.remainingMs):t('جار حساب الباقي','Calculating remaining');
+   const end=gauge?dateText(new Date(stay!.ingressAt),{dateStyle:'medium',timeStyle:'short'}):'';
+   const gaugeTitle=gauge?t('باقي بالبرج: ','Remaining in sign: ')+timeLeft+' · '+t('الانتقال القادم: ','Next ingress: ')+end:
+    t('بانتظار حساب انتقال البرج الفعلي','Awaiting verified sign transition');
+   const ring=percent===null?0:(percent/100*87.9646);
+   return '<div class="mx-sky-asteroid-chip'+(p?'':' mx-pending')+'" role="listitem" data-legend-asteroid="'+esc(asteroid.name)+'" title="'+esc(gaugeTitle)+'">'+
     '<span class="mx-sky-asteroid-index" aria-hidden="true">'+(index+1)+'</span>'+
-    '<span class="mx-sky-asteroid-info"><b>'+esc(asteroid.name)+'</b><small dir="auto">'+esc(degree)+'</small></span></div>';
+    '<span class="mx-sky-asteroid-info"><b>'+esc(asteroid.name)+'</b><small dir="auto">'+esc(degree)+'</small><small class="mx-sky-asteroid-left">'+(gauge?t('باقي ','Left '):'')+esc(timeLeft)+'</small></span>'+
+    '<span class="mx-sky-asteroid-meter'+(gauge?' is-'+gauge.band:' is-pending')+'" role="meter" aria-valuemin="0" aria-valuemax="100"'+(gauge?' aria-valuenow="'+percent+'"':'')+
+    ' aria-label="'+esc(asteroid.name+' · '+(gauge?percent+'% · '+gaugeTitle:t('الحساب قيد الانتظار','Calculation pending')))+'" data-sign-percent="'+(percent??'')+'">'+
+    '<svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true"><circle class="mx-sky-meter-track" cx="19" cy="19" r="14" />'+
+    '<circle class="mx-sky-meter-fill" cx="19" cy="19" r="14" stroke-dasharray="'+ring.toFixed(2)+' 87.96" transform="rotate(-90 19 19)" /></svg>'+
+    '<b class="mx-sky-meter-value">'+(percent===null?'—':percent+'%')+'</b></span></div>';
   }).join('')+'</div>';
 }
 async function activateFeaturedSkyAsteroids(){
