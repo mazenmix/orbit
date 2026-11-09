@@ -281,3 +281,13 @@
 .mx-go-mode-page .go-card .go-evidence{margin-top:9px;min-width:0}
 .mx-go-mode-page .go-card .go-evidence summary{cursor:pointer;font-size:11px;line-height:1.5;color:#c6d6ef;overflow-wrap:anywhere}
 .mx-go-mode-page .go-card .go-evidence p{margin:7px 0 0;font-size:11px;line-height:1.7;color:#b9c6de;overflow-wrap:anywhere}
+
+/* Live sky: six numbered minor planets (not calculated Black Moon Lilith).
+   Keep their true-longitude dots prominent and visually separate from planets. */
+.chart-wheel .wheel-featured-asteroid{filter:drop-shadow(0 0 3px rgba(255,110,198,.55))}
+.chart-wheel .wheel-featured-asteroid rect{paint-order:stroke fill}
+.asteroid-item.mx-featured-asteroid-card{
+ border-color:rgba(250,133,197,.58);
+ box-shadow:inset 0 1px 0 rgba(255,177,221,.1),0 0 18px rgba(235,98,187,.09);
+}
+.asteroid-item.mx-featured-asteroid-card h3{color:#ffc2e5}

@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {namedAsteroids,asteroidFile,asteroidSourcePath,asteroidExpectedFiles} from '../src/asteroids.ts';
+import {namedAsteroids,asteroidFile,asteroidSourcePath,asteroidExpectedFiles,featuredSkyAsteroidNumbers} from '../src/asteroids.ts';
 test('exact MX Eye source has 56 unique named numbered asteroids with valid Swift-compatible IDs',()=>{
  assert.equal(namedAsteroids.length,56);
  assert.equal(new Set(namedAsteroids.map(x=>x.number)).size,56);
@@ -15,4 +15,13 @@ test('Swiss asteroid data files respect subdirectory and padded short-file namin
 test('missing/invalid file identifiers fail closed',()=>{
  assert.throws(()=>asteroidFile(NaN));
  assert.throws(()=>asteroidFile(-1));
+});
+
+test('six pink sky asteroids already exist exactly once in the 56-item directory',()=>{
+ assert.equal(featuredSkyAsteroidNumbers.length,6);
+ assert.equal(new Set(featuredSkyAsteroidNumbers).size,6);
+ for(const number of featuredSkyAsteroidNumbers)
+  assert.equal(namedAsteroids.filter(row=>row.number===number).length,1);
+ assert.deepEqual(featuredSkyAsteroidNumbers.map(number=>namedAsteroids.find(row=>row.number===number)?.name),
+  ['Eros','Lust','Aphrodite','Lilith','Casanova','Adonis']);
 });
