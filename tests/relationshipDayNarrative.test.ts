@@ -5,7 +5,7 @@ import {relationshipDayReading} from '../src/relationshipDayNarrative.ts';
 import {categories} from '../src/math.ts';
 const d={attraction:75,sexual:65,emotional:62,communication:70,stability:58,conflict:35};
 const scores=(at:Date)=>Object.fromEntries(categories.map(c=>[c,c==='communication'?65+(at.getUTCDate()%4)*5:c==='love'?57+(at.getUTCDate()%3)*6:c==='energy'?65:50])) as any;
-const rows=relationshipWindows(new Date('2026-10-21T12:00:00Z'),d,scores,21);
+const rows=relationshipWindows(new Date('2026-10-21T12:00:00Z'),d,at=>({scores:scores(at),signals:categories.map(category=>({category}))}),21);
 const evidence=(id:string,angle:number)=>({id:id+'-'+angle+'-Mercury',transit:{id,symbol:'?',longitude:0,speed:1},natal:{id:'Mercury',symbol:'?',longitude:0,speed:0},angle,orb:.25,maximumOrb:1.4,applying:true,weight:.8,exact:null});
 test('daily narratives follow actual dated indices and computed transit evidence, not a constant advice string',()=>{
  const days=bestWindows(rows,'message',3),used=new Set<string>();
@@ -47,4 +47,11 @@ test('no weak contact is promoted to sound uniquely important, and neutral conta
  const neutral=evidence('Sun',0);
  const c=relationshipDayReading(days[2],'message',rows,[{category:'communication',allFactors:[neutral],factors:[neutral]}] as any,new Set());
  assert.match(c.ar,/ما يرجّح/);
+});
+
+test('period comparison uses the median of available samples, averaging the two middle values',()=>{
+ const a={...rows[0],message:40},b={...rows[1],message:80},unavailable={...rows[2],message:null};
+ const text=relationshipDayReading(a,'message',[a,b,unavailable],[],new Set());
+ assert.match(text.reasonEn,/20 points below the period midpoint/);
+ assert.throws(()=>relationshipDayReading(unavailable,'message',[a,b,unavailable],[],new Set()),/Unavailable relationship window/);
 });

@@ -249,6 +249,7 @@ function render(){
 }
 function content(){if(!data)return screen==='settings'?settingsPage():screen==='more'?morePage():'<section class="panel"><p>'+t('الحساب غير متاح لهذي البيانات. راجع الملف قبل عرض نتائج جديدة.','Calculation unavailable for these inputs. Review the profile before showing new results.')+'</p><button class="secondary" data-go="settings">'+t('مراجعة بيانات الميلاد','Review birth details')+'</button></section>';let inner:string;switch(screen){case 'today':inner=uiMode==='simple'?focusedToday():today();break;case 'signals':inner=signalsPage();break;case 'chart':inner=chartPage();break;case 'time':inner=uiMode==='simple'?focusedTime():timePage();break;case 'lunar':inner=lunarPage();break;case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage();break;case 'eclipses':inner=eclipsesPage();break;case 'asteroids':inner=asteroidsPage();break;case 'advanced':inner=advancedPage();break;case 'intel':case 'go':inner=goModePage();break;case 'travelmode':inner=travelModePage();break;case 'people':inner=peoplePage();break;case 'now':inner=nowPage();break;case 'evidence':inner=evidencePage();break;case 'ai':inner=aiPage();break;case 'settings':inner=settingsPage();break;case 'more':inner=morePage();break;default:screen='today';inner=today()}return sectionTabs()+(data.current.missing.length&&screen!=='settings'&&screen!=='now'?'<p class="subtle" role="status">'+t('بيانات إضافية غير متاحة وتم استبعادها: ','Unavailable supplementary bodies omitted: ')+data.current.missing.map(id=>esc(planet(id))).join(' · ')+'</p>':'')+inner}
 function tag(text:string,cls=''){return `<span class="tag ${cls}">${text}</span>`}
+function symbolicIndexNote(){return '<p class="mx-symbolic-index-note subtle">'+t('الدرجات ناتج معادلات تنجيمية رمزية؛ ما تقيس الحب أو الرغبة أو النجاح فعلياً، ومو احتمالات مئوية.','Scores summarize symbolic astrology formulas; they do not measure actual love, desire or success, and are not probabilities.')+'</p>'}
 
 /** Restore the four daily gauges from existing calculated symbolic indices.
  * Their values must track the selected person's report, not a hard-coded score. */
@@ -989,7 +990,7 @@ function nowPage(){
   const voc=vocDisplayProgress(+moon.enteredAt,+moon.vocStartsAt,+moon.ingressAt,at);
    rows.push({id:'moon-voc',label:voc.phase==='active'?t('تقدّم خلو المسار · فعّال','VOC progress · active'):t('التقدّم نحو خلو المسار · لم يبدأ','Progress toward VOC · not started'),value:Math.round(voc.percent),tone:'mx-now-void '+(voc.phase==='active'?'is-voc':'is-clear')});
  }catch(e){console.warn('Now Moon timing unavailable',e)}
- return '<section class="mx-now-page" data-section="now" aria-label="Now">'+nowTimeNavigation()+'<div class="mx-now-list">'+
+ return '<section class="mx-now-page" data-section="now" aria-label="Now">'+nowTimeNavigation()+symbolicIndexNote()+'<div class="mx-now-list">'+
   rows.map(({id,label,value,tone})=>{
    const available=value!==null&&Number.isFinite(value);
    const percent=available?Math.max(0,Math.min(100,Math.round(value))):0,style=available?(tone??gaugeLevel(percent)):'mx-unavailable';
@@ -1021,12 +1022,12 @@ function goModePage(){
    const explanation=basis+(context?' '+context:'')+(qualifier?' '+qualifier:'');
    return '<div class="go-card '+state+' '+gaugeLevel(d.value)+'"><small>GO MODE</small><h3>'+t(...names[d.domain])+'</h3><strong>'+d.value+'<em>/100</em></strong><p class="go-decision">'+esc(advice)+'</p>'+
     '<details class="go-evidence"><summary>'+t('سبب الدرجة','Why this score')+'</summary><p>'+esc(explanation)+'</p></details></div>'
-  }).join('')+'</div>'
+  }).join('')+'</div>'+
   '</section>';
  const allIndicators='<section class="panel mx-go-mode-indicators"><div class="metrics-grid">'+
   indicators.map(m=>indicatorGaugeCard(m)).join('')+
   '</div></section>';
- return '<div class="mx-go-mode-page" data-section="go">'+timeNav+gauges+goCards+renderGoLifeGauges(sky.scores,categories)+allIndicators+liveAsteroidContacts()+'</div>';
+ return '<div class="mx-go-mode-page" data-section="go">'+timeNav+symbolicIndexNote()+gauges+goCards+renderGoLifeGauges(sky.scores,categories)+allIndicators+liveAsteroidContacts()+'</div>';
 }
 /** Simple glyphs that correspond to the exact travel domains and keep the
  * same single-icon layout as the four quick Go Mode gauges. */
@@ -1049,7 +1050,7 @@ function travelModePage(){
   '<div class="mx-focus-metrics mx-travel-grid">'+group.rows.map(({id,metric})=>quickGaugeCard(metric,travelSymbol(id),undefined,id,seenTravelContacts)).join('')+'</div></section>'
  ).join('');
  return '<div class="mx-travel-mode-page mx-quick-gauges" data-section="travelmode">'+
-  sharedModeTimeNavigation()+sections+liveAsteroidContacts(5)+
+  sharedModeTimeNavigation()+symbolicIndexNote()+sections+liveAsteroidContacts(5)+
   '</div>';
 }
 async function refreshAsteroidEphemerides(){
@@ -1217,7 +1218,7 @@ function startCalendarWork(){
    }catch(e){const message=String(e);calendarFailures.set(day.iso,message);const cell=root.querySelector<HTMLButtonElement>('[data-calendar-date="'+day.iso+'"]');if(cell){cell.classList.remove('astro-pending');cell.classList.add('astro-unavailable');cell.title=t('حساب غير متاح: ','Calculation unavailable: ')+message;cell.setAttribute('aria-label',day.iso+' · '+cell.title)}console.warn('Daily ephemeris unavailable',day.iso,e)}
   }
   const progress=root.querySelector('#astro-calendar-progress');
-  if(progress)progress.textContent=calendarSnapshots.size+'/'+calendarTargetDays()+' '+t('محسوب فعلياً','verified')+(calendarFailures.size?' · '+calendarFailures.size+' '+t('غير متاح','unavailable'):'');
+  if(progress)progress.textContent=calendarSnapshots.size+'/'+calendarTargetDays()+' '+t('محسوب فعلياً','calculated')+(calendarFailures.size?' · '+calendarFailures.size+' '+t('غير متاح','unavailable'):'');
   if(calendarCursor<calendarTargetDays())setTimeout(tick,20);
   else calendarRunning=false;
  };
@@ -1306,13 +1307,13 @@ function lunarMansionMarkup(){
    '<div class="mx-mansion-identity">'+
 
     '<div class="mx-mansion-name"><h3>'+esc(t(m.arName,m.enName))+'</h3><span class="mx-mansion-english" lang="en">'+esc(m.enName)+'</span></div>'+
-    '<div class="mx-mansion-transition"><span>'+t('المنزل القادم','Next mansion')+'</span><time datetime="'+interval.exitsAt.toISOString()+'">'+esc(arrival)+'</time><strong class="mx-mansion-clock" data-mansion-clock>—</strong></div>'+
+    '<div class="mx-mansion-transition"><span>'+t('المنزلة القادمة','Next mansion')+'</span><time datetime="'+interval.exitsAt.toISOString()+'">'+esc(arrival)+'</time><strong class="mx-mansion-clock" data-mansion-clock>—</strong></div>'+
    '</div>'+
    '<div class="mx-mansion-grid">'+
     '<div class="mx-mansion-line theme"><span>'+t('الطابع التقليدي','Traditional essence')+'</span><strong>'+esc(t(m.arTheme,m.enTheme))+'</strong></div>'+
     '<div class="mx-mansion-line good"><span>✓ '+t('مناسب تقليدياً','Traditionally favorable')+'</span><strong>'+esc(t(m.arGood,m.enGood))+'</strong></div>'+
     '<div class="mx-mansion-line avoid"><span>− '+t('غير مناسب تقليدياً','Traditionally unfavorable')+'</span><strong>'+esc(t(m.arAvoid,m.enAvoid))+'</strong></div>'+
-   '</div>'+
+   '</div><p class="subtle mx-mansion-method">'+t('28 قطاعاً متساوياً من طول القمر الاستوائي، مو مواقع النجوم المسماة نفسها. الارتباطات تراثية؛ ما تثبت نجاح نشاط أو صلاحية توقيت للرعاية الصحية.','28 equal sectors of tropical lunar longitude, not the positions of the named stars. Associations are historical; they do not establish activity outcomes or medical timing.')+'</p>'+
    '</section>';
  }catch(e){
   console.warn('Lunar mansion is temporarily unavailable',e);
@@ -1370,16 +1371,17 @@ function profileForm(p:Profile,isNew=false){
 function relationshipWindowUI(person:Profile){
  try{
   const match=compatibility(active,person);
-   if(!match.overallCovered)return '<section class="panel relationship-calendar mx-people-section"><p>'+t('ماكو اتصالات شخصية كافية حتى نرتّب الأيام حسب التوافق.','Not enough calculated personal contacts to rank relationship dates.')+'</p></section>';
-   const period=relationshipWindows(selected,match.dimensions,at=>getReport(at).scores,21,active.zone);
+   const period=relationshipWindows(selected,match.dimensions,at=>getReport(at),21,active.zone,{romantic:match.romantic,coverage:match.coverage});
   const cards=(kind:'message'|'date')=>{
    const used=new Set<string>();
-   return bestWindows(period,kind,3).map(day=>{
+   const ranked=bestWindows(period,kind,3);
+   if(!ranked.length)return '<p class="mx-window-unavailable">'+t('ماكو عينات بتغطية حسابية كافية لهذا الترتيب؛ ما نعوّض الدليل المفقود بدرجة 50.','No samples have sufficient calculated coverage for this ranking; missing evidence is not replaced with a score of 50.')+'</p>';
+   return ranked.map(day=>{
     const reading=relationshipDayReading(day,kind,period,getReport(day.day).signals,used);
-    return '<article class="relation-window metric-card '+gaugeLevel(day[kind])+'"><div class="relation-heading"><b>'+dateText(day.day,{weekday:'short',day:'numeric',month:'short'})+'</b><strong>'+day[kind]+'</strong></div><p>'+esc(t(reading.ar,reading.en))+'</p><small class="relation-window-reason">'+esc(t(reading.reasonAr,reading.reasonEn))+'</small><div class="button-row"><button class="secondary" data-relationship-time="'+(+day.day)+'">'+t('افتح اليوم','Inspect day')+'</button><button class="text-button" data-relationship-calendar="'+(+day.day)+'" data-relationship-kind="'+kind+'">'+t('تذكير بالتقويم','Calendar reminder')+'</button></div></article>';
+    return '<article class="relation-window metric-card '+gaugeLevel(day[kind]!)+'"><div class="relation-heading"><b>'+dateText(day.day,{weekday:'short',day:'numeric',month:'short'})+'</b><strong>'+day[kind]+'</strong></div><p>'+esc(t(reading.ar,reading.en))+'</p><small class="relation-window-reason">'+esc(t(reading.reasonAr,reading.reasonEn))+'</small><div class="button-row"><button class="secondary" data-relationship-time="'+(+day.day)+'">'+t('افتح اليوم','Inspect day')+'</button><button class="text-button" data-relationship-calendar="'+(+day.day)+'" data-relationship-kind="'+kind+'">'+t('تذكير بالتقويم','Calendar reminder')+'</button></div></article>';
    }).join('');
   };
-  return '<section class="panel relationship-calendar mx-people-section"><h2>'+t('نوافذ التواصل واللقاءات لهذا الشخص','Communication and meeting planning windows')+'</h2><h3>'+t('أيام تراسل بيها','Days to consider a message')+'</h3><div class="relation-window-grid">'+cards('message')+'</div>'+(match.romantic?'<h3>'+t('أيام تقترح موعد','Days to propose a date')+'</h3><div class="relation-window-grid">'+cards('date')+'</div>':'')+'</section>';
+  return '<section class="panel relationship-calendar mx-people-section"><h2>'+t('نوافذ التواصل واللقاءات لهذا الشخص','Communication and meeting planning windows')+'</h2><p>'+t('مقارنة رمزية لعينات الساعة 12 ظهراً بتوقيت الملف خلال 21 يوماً؛ مو تقييم لليوم كله ولا توقع لتجاوب الشخص.','Symbolic comparison of 12:00 noon samples in the profile zone across 21 days; not whole-day ratings or predictions of a response.')+'</p><h3>'+t('عينات التواصل المتاحة','Available communication samples')+'</h3><div class="relation-window-grid">'+cards('message')+'</div>'+(match.romantic?'<h3>'+t('عينات اقتراح اللقاء المتاحة','Available meeting samples')+'</h3><div class="relation-window-grid">'+cards('date')+'</div>':'')+'</section>';
  }catch(e){return '<p class="alert">'+esc(String(e))+'</p>'}
 }
 function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){

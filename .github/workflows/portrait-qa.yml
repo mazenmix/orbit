@@ -22,7 +22,8 @@ permissions:
   contents: read
 jobs:
   compare-saved-profiles:
-    runs-on: ubuntu-latest
+    # Keep the runner compatible with the pinned Playwright 1.58.2 browsers.
+    runs-on: ubuntu-24.04
     timeout-minutes: 9
     steps:
       - uses: actions/checkout@v4

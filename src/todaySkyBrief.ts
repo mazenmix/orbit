@@ -1,4 +1,4 @@
-import type {Point} from './math.ts';
+import {applyingToNatal,type Point} from './math.ts';
 import type {ExactEvent,LunarWindow} from './timing.ts';
 import type {FocusReadingInput} from './focusEventReading.ts';
 
@@ -55,9 +55,10 @@ export function currentSkyContacts(points:readonly Point[]):SkyAspect[]{
   const angle=aspectAngles.reduce<number>((best,x)=>Math.abs(d-x)<Math.abs(d-best)?x:best,0);
   const orb=Math.abs(d-angle),hasMoon=a.id==='Moon'||b.id==='Moon',limit=hasMoon?1.2:0.35;
   if(orb>limit)continue;
-  const dt=1/1440; // one real minute of ephemeris velocity; never displayed
-  const dNext=sep(a.longitude+a.speed*dt,b.longitude+b.speed*dt);
-  found.push({first:a.id,second:b.id,angle,orb,applying:Math.abs(dNext-angle)<orb});
+  // Use relative velocity and a step bounded by the remaining orb. A full
+  // minute can overshoot an exact contact and falsely call it separating.
+  const applying=applyingToNatal({...a,speed:a.speed-b.speed},b,angle);
+  found.push({first:a.id,second:b.id,angle,orb,applying});
  }
  return found.sort((a,b)=>{
   const moonA=a.first==='Moon'||a.second==='Moon',moonB=b.first==='Moon'||b.second==='Moon';

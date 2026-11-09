@@ -36,10 +36,23 @@ test('The 28 → 1 mansion crossing works at tropical Aries zero',()=>{
  assert.equal(lunarMansionWindow(after,read).number,1);
 });
 
+test('every exact mansion boundary belongs to the new sector without advancing points below it',()=>{
+ for(let i=1;i<28;i++){
+  const boundary=i*MANSION_SECTOR_DEGREES;
+  assert.equal(lunarMansionNumber(boundary),i+1,'exact boundary '+i);
+  assert.equal(lunarMansionNumber(boundary-1e-10),i,'before boundary '+i);
+  assert.equal(lunarMansionNumber(boundary+1e-10),i+1,'after boundary '+i);
+ }
+ assert.equal(lunarMansionNumber(-360),1);
+ assert.equal(lunarMansionNumber(720),1);
+});
+
 test('Mansion interpretations do not append editorial parentheticals to unfavorable activities',()=>{
  for(const mansion of LUNAR_MANSIONS){
   assert.doesNotMatch(mansion.arAvoid,/بحسب الموروث فقط|بالموروث التقليدي/);
   assert.doesNotMatch(mansion.enAvoid,/traditional belief(?: only)?/i);
  }
- assert.equal(LUNAR_MANSIONS[27].arAvoid,'الشؤون الصحية.');
+ assert.match(LUNAR_MANSIONS[27].arAvoid,/ماكو تقييد صحي مثبت/);
+ assert.doesNotMatch(LUNAR_MANSIONS[10].enAvoid,/^Women’s health matters/);
+ assert.match(LUNAR_MANSIONS[24].enAvoid,/does not establish fertility/);
 });

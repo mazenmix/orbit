@@ -1,5 +1,31 @@
 const {test,expect}=require('/tmp/astro-qa/node_modules/@playwright/test');
 
+test('symbolic gauges disclose their meaning and GO sections remain siblings',async({page})=>{
+ for(const route of ['now','go','travelmode']){
+  await page.goto('/#'+route,{waitUntil:'domcontentloaded'});
+  await expect(page.locator('.mx-symbolic-index-note')).toBeVisible({timeout:75000});
+  await expect(page.locator('.mx-symbolic-index-note')).toContainText(/مو احتمالات|not probabilities/);
+  if(route==='go'){
+   await expect(page.locator('.mx-go-mode-page > .mx-go-mode-decisions')).toHaveCount(1);
+   await expect(page.locator('.mx-go-mode-page > .mx-go-mode-indicators')).toHaveCount(1);
+  }
+ }
+});
+
+test('friend communication windows do not require romantic dimensions',async({page})=>{
+ await page.addInitScript(()=>{
+  const self={id:'audit-self',name:'Audit self',date:'2000-01-01',time:'12:00',zone:'Etc/UTC',lat:51.4779,lon:0,city:'Greenwich',known:true,kind:'self'};
+  localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify([self,{...self,id:'audit-friend',name:'Audit friend',date:'1994-08-12',kind:'friend'}]));
+ });
+ await page.goto('/#people',{waitUntil:'domcontentloaded'});
+ await page.locator('[data-compare="audit-friend"]').waitFor({timeout:75000});
+ await page.locator('[data-compare="audit-friend"]').click();
+ await expect(page.locator('.relationship-calendar')).toHaveCount(1);
+ await expect(page.locator('#main')).not.toContainText('Invalid relationship');
+ await expect(page.locator('.relationship-calendar')).toContainText(/12 ظهراً|12:00 noon/);
+ await expect(page.locator('.relationship-calendar')).not.toContainText(/عينات اقتراح اللقاء|Available meeting samples/);
+});
+
 test('missing heatmap evidence stays unavailable instead of showing a neutral fifty',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('mx.uiMode','pro'));
  await page.goto('/#time',{waitUntil:'domcontentloaded'});

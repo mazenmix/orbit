@@ -174,6 +174,9 @@ test('Travel explanation acknowledges current-sky adjustments without natal cont
  assert.match(ar.detail,/السماء الحالية غيّرت/);
  assert.match(en.detail,/current-sky conditions still changed/);
  assert.doesNotMatch(ar.detail,/درجات المجالات باقية على خط الأساس/);
+ assert.match(ar.summary,/ماكو اتصال شخصي مؤثر/);
+ assert.match(en.summary,/No contributing personal contact/);
+ assert.doesNotMatch(en.summary,/moderate time|favors|reasonable/);
 });
 
 test('repeated source contact is shown once per Travel view while each card keeps its own numerical basis',()=>{
@@ -229,6 +232,8 @@ test('Travel evidence follows the composite score direction instead of automatic
  assert.notEqual(reading.contactKey,'Neptune:Mercury:90');
  assert.match(reading.detail,/تثليث الزهرة|تسديس الشمس/);
  assert.doesNotMatch(reading.detail,/نبتون تربيع عطارد/);
+ assert.match(reading.summary,/عوامل داعمة ومعاكسة/,'do not hide contrary contributors behind a favorable composite');
+ assert.match(travelMetricReading(metric,sky,true).summary,/Supporting and challenging factors coexist/);
 });
 
 test('Travel composite picks a matching positive source domain over a positive aspect within a negative domain',()=>{
