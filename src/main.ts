@@ -358,7 +358,7 @@ function todaySkyWheel(r:Report){
   '<section class="panel large-wheel mx-today-sky" aria-label="'+t('خارطة السماء بهاللحظة','Current sky wheel')+'">'+
   '<div class="mx-today-sky-heading"><h2>'+t('سماء اللحظة حسب مدينة الميلاد','Current sky at birth-city coordinates')+'</h2>'+
   '<button type="button" class="secondary mx-today-sky-expand" id="expand-sky-wheel-link" aria-label="'+t('كبّر دائرة السماء','Expand sky wheel')+'">⤢ '+t('تكبير','Expand')+'</button></div>'+
-  '<button type="button" id="expand-sky-wheel" class="mx-today-sky-open" aria-label="'+t('تكبير خارطة السماء الحالية','Expand current sky wheel')+'">'+wheel(r.current,undefined,featuredSkyPositions(r.at))+'</button>'+
+  '<button type="button" id="expand-sky-wheel" class="mx-today-sky-open" aria-label="'+t('تكبير خارطة السماء الحالية','Expand current sky wheel')+'">'+wheel(r.current,undefined,featuredSkyPositions(r.at))+'</button>'+featuredSkyLegend(r.at)+
   '<time class="mx-today-sky-time" datetime="'+r.at.toISOString()+'">'+dateText(r.at,{dateStyle:'full',timeStyle:'medium'})+'</time>'+
   '</section></div>';
 }
@@ -1064,6 +1064,22 @@ function featuredSkyPositions(at:Date){
  try{return namedAsteroidPositions(asteroidSwissRuntime(),at,featuredSkyAsteroidNumbers)}
  catch(e){console.warn('Live featured asteroid position unavailable',e);return []}
 }
+/** Compact, ordered, collision-free label rail for the six numbered bodies.
+ * The matching 1–6 markers are anchored on the wheel at real longitudes.
+ * Keep a stable wrapper so the existing five-second SVG ticker updates text in place.
+ */
+function featuredSkyLegend(at:Date){
+ const positions=new Map(featuredSkyPositions(at).map(p=>[p.id,p]));
+ return '<div class="mx-sky-asteroid-legend" role="list" aria-label="'+t('الكويكبات الستة ومواقعها','Six asteroids and actual positions')+'">'+
+  featuredSkyAsteroidNumbers.map((number,index)=>{
+   const asteroid=namedAsteroids.find(a=>a.number===number)!;
+   const p=positions.get(asteroid.name);
+   const degree=p?signName(p.longitude)+' · '+(p.longitude%30).toFixed(1)+'°'+(p.speed<0?' Rx':''):t('جار حساب الموقع','Calculating position');
+   return '<div class="mx-sky-asteroid-chip'+(p?'':' mx-pending')+'" role="listitem" data-legend-asteroid="'+esc(asteroid.name)+'">'+
+    '<span class="mx-sky-asteroid-index" aria-hidden="true">'+(index+1)+'</span>'+
+    '<span class="mx-sky-asteroid-info"><b>'+esc(asteroid.name)+'</b><small dir="auto">'+esc(degree)+'</small></span></div>';
+  }).join('')+'</div>';
+}
 async function activateFeaturedSkyAsteroids(){
  if(!ready||featuredSkyAttempted)return;
  featuredSkyAttempted=true;
@@ -1598,7 +1614,7 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
 });
  
 
- const expandSky=()=>{if(!data)return;showDialog('<div class="mx-expanded-sky"><time class="mx-expanded-sky-time" datetime="'+new Date().toISOString()+'">'+dateText(new Date(),{dateStyle:'full',timeStyle:'medium'})+'</time><div class="mx-expanded-wheel">'+wheel(data.current,undefined,featuredSkyPositions(data.current.date))+'</div></div>');liveSkyLastTick=Date.now();updateLiveSkyWheel(liveSkyLastTick);tickLiveClocks(liveSkyLastTick);};
+ const expandSky=()=>{if(!data)return;showDialog('<div class="mx-expanded-sky"><time class="mx-expanded-sky-time" datetime="'+new Date().toISOString()+'">'+dateText(new Date(),{dateStyle:'full',timeStyle:'medium'})+'</time>'+featuredSkyLegend(data.current.date)+'<div class="mx-expanded-wheel">'+wheel(data.current,undefined,featuredSkyPositions(data.current.date))+'</div></div>');liveSkyLastTick=Date.now();updateLiveSkyWheel(liveSkyLastTick);tickLiveClocks(liveSkyLastTick);};
  on('expand-sky-wheel',expandSky);on('expand-sky-wheel-link',expandSky);
  if(screen==='calendar')bindAstroCalendar();
  root.querySelectorAll<HTMLButtonElement>('[data-signal]').forEach(b=>b.onclick=()=>showSignal(Number(b.dataset.signal)));
@@ -1879,6 +1895,11 @@ function updateLiveSkyWheel(now:number){
    if(small)reconcileLiveHTML(small,html);
    if(todayWheel)reconcileLiveHTML(todayWheel,html);
    if(enlarged)reconcileLiveHTML(enlarged,html);
+   const chips=featuredSkyLegend(at);
+   const smallChips=root.querySelector<HTMLElement>('.mx-today-sky .mx-sky-asteroid-legend');
+   const expandedChips=root.querySelector<HTMLElement>('#detail[open] .mx-expanded-sky .mx-sky-asteroid-legend');
+   if(smallChips)reconcileLiveHTML(smallChips,chips);
+   if(expandedChips)reconcileLiveHTML(expandedChips,chips);
   }
   if(chartWheel){
    const owner=chartOwnerProfile();
