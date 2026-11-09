@@ -34,7 +34,7 @@ test('Go Mode renders timestamp picker and all quick jumps before its gauges',()
  assert.match(nav,/data-go-time-shift="\+hour"/);
  assert.match(nav,/data-now/);
  assert.match(go,/const timeNav=sharedModeTimeNavigation\(\)/);
- assert.match(go,/timeNav\+gauges\+goCards\+renderGoLifeGauges\(sky\.scores,categories\)\+allIndicators/);
+ assert.match(go,/timeNav\+symbolicIndexNote\(\)\+gauges\+goCards\+renderGoLifeGauges\(sky\.scores,categories\)\+allIndicators/);
 });
 
 test('Go Mode time picker recalculates every indicator using selected timezone and pinned moment',()=>{
@@ -59,7 +59,7 @@ test('Travel Mode has identical time selector above its 12 recalculated gauges',
  const travel=source.slice(source.indexOf('function travelModePage(){'),source.indexOf('function asteroidsPage(){'));
  const nav=source.slice(source.indexOf('function sharedModeTimeNavigation(){'),source.indexOf('function goModePage(){'));
  assert.match(go,/const timeNav=sharedModeTimeNavigation\(\)/);
- assert.match(travel,/sharedModeTimeNavigation\(\)\+sections/);
+ assert.match(travel,/sharedModeTimeNavigation\(\)\+symbolicIndexNote\(\)\+sections/);
  assert.match(nav,/id="go-time-form"/);
  assert.match(nav,/data-now/);
  assert.match(nav,/data-go-time-shift="-day"/);

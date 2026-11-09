@@ -18,12 +18,12 @@ const entries: readonly MansionEntry[] = [
  ['الثريا','Al-Thurayya','الوفرة والإبداع والاجتهاد.','Creative effort and abundance.','الفن، الدراسة، المبيعات.','Arts, learning, commerce.','الزواج والسفر بحراً.','Marriage and sea travel.'],
  ['الدبران','Al-Dabaran','التحدي والمواجهة وإزالة العوائق.','Confronting obstacles and disputes.','الحِرف والعمل والتفاوض التجاري.','Crafts, productive work, trade.','الزواج والبناء والرحلات البحرية.','Marriage, construction, sea trips.'],
  ['الهقعة','Al-Haqa','التفكير والتعلم وحل المشكلات.','Insight, study and problem-solving.','التعلم والفنون والسفر.','Education, arts, travel.','المشاريع الجماعية المعقدة.','Complex group ventures.'],
- ['الهنعة','Al-Hana','الانجذاب والاتفاق مع احتمال الاختلاف.','Attraction, alliances and contrasts.','الصداقات والشراكات والتجارة.','Friendships, partnerships, trade.','الزراعة والعلاج.','Gardening and healing.'],
+ ['الهنعة','Al-Hana','الانجذاب والاتفاق مع احتمال الاختلاف.','Attraction, alliances and contrasts.','الصداقات والشراكات والتجارة.','Friendships, partnerships, trade.','الزراعة؛ لا تؤجّل العلاج بسبب المنزلة.','Gardening; do not postpone care because of a mansion.'],
  ['الذراع','Al-Dhira','الثقة والإنجاز والنمو.','Trust and constructive progress.','الأعمال والعلاقات والتعافي.','Business, relationships, recovery.','النزاعات والإجراءات القانونية.','Legal disputes.'],
  ['النثرة','Al-Nathrah','المودة والقوة وتحقيق الهدف.','Affection and determination.','العائلة والحب والسفر البري.','Family, love, land journeys.','تعيين موظفين جدد.','Hiring new staff.'],
  ['الطرف','Al-Tarf','الحذر والدفاع عند الخلاف.','Caution and self-protection.','حماية الحقوق ومواجهة الاعتداء.','Protecting boundaries and responding to threats.','السفر والمواعيد والعناية بالحدائق.','Travel, romance, gardening.'],
  ['الجبهة','Al-Jabhah','التعافي والمساندة وحسن النية.','Support, kindness and recovery.','التواصل والتعلم والبناء.','Socializing, study, construction.','السفر أو التهور بالأدوية.','Travel or medication misuse.'],
- ['الزبرة','Al-Zubrah','التقدم والطموح والاحترام.','Ambition, progress and respect.','العمل والترقية والسفر.','Career progress, travel, requests.','شؤون صحة النساء.','Women’s health matters.'],
+ ['الزبرة','Al-Zubrah','التقدم والطموح والاحترام.','Ambition, progress and respect.','العمل والترقية والسفر.','Career progress, travel, requests.','ماكو تقييد صحي مثبت بسبب هالمنزلة.','No evidence-based health restriction follows from this mansion.'],
  ['الصرفة','Al-Sarfah','تحديات تتطلب صبراً وعملًا.','Challenges and productive effort.','الزراعة والبناء والمراسلات.','Agriculture, building, messages.','الارتباط العاطفي والسفر البحري.','Romantic commitments and sea voyages.'],
  ['العواء','Al-Awwa','الرغبة والنمو والتقارب.','Desire, growth and connection.','الحب والتجارة والبدايات الإبداعية.','Romance, trade, creative starts.','الإفراط في الطعام.','Overeating.'],
  ['السماك','Al-Simak','التغيير والانتقال والتحسن.','Transition and making a change.','العاطفة والانتقال من مكان أو عمل.','Romance, moving home or changing jobs.','الزواج والسفر البري.','Marriage and land travel.'],
@@ -37,10 +37,10 @@ const entries: readonly MansionEntry[] = [
  ['سعد الذابح','Sa’d al-Dhabih','التحرك السريع والخروج من الضيق.','Mobility and release from constraints.','التعافي والسفر وتجاوز العراقيل.','Recovery, travel, finding a way out.','الزواج والصفقات والتوظيف.','Marriage, business deals, hiring.'],
  ['سعد بلع','Sa’d Bula','التحرر وإنهاء ما لا ينفع.','Release and ending a constraint.','التعافي وإنهاء التزامات مرهقة.','Recovery and letting go.','الزواج أو تثبيت علاقة جديدة.','Marriage or formalizing relationships.'],
  ['سعد السعود','Sa’d al-Su’ud','الرعاية والاستقرار والإنتاج.','Nurturing and constructive progress.','المشاريع الجديدة والحب والمال.','Starting projects, romance, finance.','السفر بالماء والصدام مع أصحاب النفوذ.','Sea travel and clashes with authority.'],
- ['سعد الأخبية','Sa’d al-Akhbiyah','النمو والحماية والبحث.','Growth, protection and study.','الزراعة والبحوث والتعلم.','Plant care, research, learning.','الزواج والتخطيط للحمل.','Marriage and conception planning.'],
+ ['سعد الأخبية','Sa’d al-Akhbiyah','النمو والحماية والبحث.','Growth, protection and study.','الزراعة والبحوث والتعلم.','Plant care, research, learning.','الزواج؛ المنزلة ما تحدد الخصوبة أو توقيت الحمل.','Marriage; a mansion does not establish fertility or conception timing.'],
  ['الفرغ الأول','Al Fargh al-Awwal','المحبة والتقارب وتكوين الروابط.','Affection, unions and support.','الحب والصداقة والتجارة والسفر البري.','Love, friendship, commerce, land travel.','البناء والرحلات البحرية.','Construction and sea voyages.'],
  ['الفرغ الثاني','Al Fargh al-Thani','المال والتجارة والتواصل مع بعض المشاغبة.','Income, trade and social connections.','التجارة والزراعة والعناية بالصحة.','Business, gardening, health care.','البناء والسفر بحراً وبدء مشروع جديد.','Construction, sea travel, starting projects.'],
- ['بطن الحوت','Batn al-Hut','اكتمال مرحلة وبداية حصاد النتائج.','Completion, guidance and fruition.','الارتباط والتجارة والزراعة والسفر.','Marriage, commerce, gardening, travel.','الشؤون الصحية.','Health matters.']
+ ['بطن الحوت','Batn al-Hut','اكتمال مرحلة وبداية حصاد النتائج.','Completion, guidance and fruition.','الارتباط والتجارة والزراعة والسفر.','Marriage, commerce, gardening, travel.','ماكو تقييد صحي مثبت بسبب هالمنزلة.','No evidence-based health restriction follows from this mansion.']
 ];
 export type LunarMansion = {
  number:number; arName:string; enName:string; arTheme:string; enTheme:string;
@@ -50,11 +50,16 @@ export const LUNAR_MANSIONS:readonly LunarMansion[] = entries.map((row,i)=>({
  number:i+1, arName:row[0], enName:row[1], arTheme:row[2], enTheme:row[3],
  arGood:row[4], enGood:row[5], arAvoid:row[6], enAvoid:row[7]
 }));
-const normalize=(longitude:number)=>((longitude%360)+360)%360;
+const normalize=(longitude:number)=>{const n=longitude%360;return n<0?n+360:n===0?0:n};
 const angleError=(longitude:number,boundary:number)=>normalize(longitude-boundary+180)-180;
 export function lunarMansionNumber(longitude:number):number {
  if(!Number.isFinite(longitude))throw Error('Invalid Moon longitude');
- return Math.min(28,Math.floor(normalize(longitude)/MANSION_SECTOR_DEGREES)+1);
+ // Compare the same boundaries used by the ingress solver. Division can
+ // round a boundary to 0.9999999999999999; adding 360 during normalization
+ // can also discard precision even for an already-normalized longitude.
+ const value=normalize(longitude);
+ for(let i=27;i>=0;i--)if(value>=i*MANSION_SECTOR_DEGREES)return i+1;
+ return 1;
 }
 export type LunarMansionWindow={number:number;entry:LunarMansion;enteredAt:Date;exitsAt:Date};
 /** Exact crossing timestamps obtained from a geocentric tropical ephemeris reader.

@@ -51,9 +51,11 @@ const thoughts:Record<string,{message:Wording;date:Wording}>={
 const generalMessage={arGood:'الرسالة الواضحة أسهل من التلميحات بهالقراءة؛ إذا عندك موضوع حقيقي افتحه بهدوء.',enGood:'A direct, calm message fits this symbolic signal better than hints.',arHard:'الإشارة الرمزية تحتاج انتباه للّبس بالكلام؛ تأكد من المعنى قبل الإرسال.',enHard:'The symbolic signal calls for clarity: check your wording before sending.'};
 const generalDate={arGood:'التقارب حاضر كموضوع رمزي؛ اختار فكرة موعد بسيطة واسأل إذا تناسب الطرف الثاني.',enGood:'Connection is the symbolic theme; suggest a simple plan and ask whether it works.',arHard:'الأفضل ترتّب طلعة مرنة بدل موعد مليان توقعات؛ راحة الطرفين أهم من الدرجة.',enHard:'Keep a proposed meeting flexible instead of attaching big expectations to a score.'};
 const nearest=(series:readonly RelationshipWindow[],day:RelationshipWindow,mode:Kind)=>{
- const sorted=series.map(d=>d[mode]).slice().sort((a,b)=>a-b);
- const median=sorted[Math.floor(sorted.length/2)];
- return day[mode]-median;
+ const sorted=series.map(d=>d[mode]).filter((v):v is number=>v!==null).sort((a,b)=>a-b);
+ if(!sorted.length||day[mode]===null)throw Error('Unavailable relationship window');
+ const middle=Math.floor(sorted.length/2);
+ const median=sorted.length%2?sorted[middle]:(sorted[middle-1]+sorted[middle])/2;
+ return day[mode]!-median;
 };
 /**
  * Narration is chosen from real transit-to-natal evidence for the specific local day.

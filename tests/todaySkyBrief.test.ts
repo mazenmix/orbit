@@ -43,6 +43,20 @@ test('Headline changes as the exact approaching lunar event becomes active, then
  assert.equal(currentSkyContacts(separating)[0].applying,false);
 });
 
+test('instantaneous relative motion stays applying seconds before exactness',()=>{
+ const p=(id:string,longitude:number,speed:number)=>({id,symbol:'•',longitude,speed});
+ for(const angle of [0,60,90,120,180]){
+  const target=p('Sun',40,1),moving=p('Moon',40+angle-.00001,14);
+  const before=currentSkyContacts([target,moving]).find(c=>c.angle===angle)!;
+  assert.equal(before.applying,true,'approaching '+angle+'°');
+  const after=currentSkyContacts([target,{...moving,longitude:40+angle+.00001}]).find(c=>c.angle===angle)!;
+  assert.equal(after.applying,false,'separating '+angle+'°');
+ }
+ const a=p('Venus',100,1),b=p('Mercury',160.00001,2);
+ assert.equal(currentSkyContacts([a,b])[0].applying,false,'use both moving velocities');
+ assert.equal(currentSkyContacts([a,{...b,longitude:160,speed:1}])[0].applying,false,'exact and co-moving is not applying');
+});
+
 test('Moon sign ingress and void transition change actual message, not random prose',()=>{
  const before=todaySkyBrief(sky(),moonWindow(0,false,[]),at,'ar');
  const changed=todaySkyBrief(sky(38),moonWindow(1,false,[]),at,'ar');

@@ -217,7 +217,18 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
  const sourceLine=(english?'Source indices: ':'المجالات الداخلة بالحساب: ')+basis+'.';
  const conciseDetail=sourceLine+(riskNote?' '+riskNote:'');
  const detail=sourceLine+' '+evidence+(riskNote?' '+riskNote:'');
- const scene=pair[english?1:0];
+ const activeEntries=entries.filter(hasContact);
+ const contacts=activeEntries.flatMap(entry=>entry.contacts.filter(c=>c.strength>0&&c.tone!==0));
+ const mixed=contacts.some(c=>c.tone>0)&&contacts.some(c=>c.tone<0);
+ const qualifier=mixed?(english?'Supporting and challenging factors coexist. ':'أكو عوامل داعمة ومعاكسة بنفس المحصلة. '):'';
+ // A neutral rubric or a general-sky adjustment cannot establish personal
+ // readiness for an activity. State the actual coverage before giving advice.
+ const scene=!activeEntries.length?(english?
+  'No contributing personal contact for this activity; the number reflects the neutral baseline and general-sky adjustments.':
+  'ماكو اتصال شخصي مؤثر لهذا النشاط؛ الرقم من خط الأساس المحايد وتعديلات السماء العامة.'):
+  (activeEntries.length<entries.length?(english?
+   'Personal contact coverage is partial ('+activeEntries.length+'/'+entries.length+'). ':
+   'تغطية الاتصالات الشخصية جزئية ('+activeEntries.length+'/'+entries.length+'). '):'')+qualifier+pair[english?1:0];
  // A travel activity should be described in its own domain. Repeating an
  // unrestricted natal pair scene in the compact body produced irrelevant
  // relationship/sales advice under transport, rest and risk gauges. Keep
