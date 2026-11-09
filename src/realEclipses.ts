@@ -50,7 +50,12 @@ export function calculateEclipses(api:EclipseAPI,from:Date,count=3,location?:{la
     if(fn){
      // Local eclipse maximum might differ from global maximum; search for the
      // next eclipse visible locally then accept ONLY the current global event.
-     const candidate=fn(raw.tret[0]-3,2,[location.lon,location.lat,0],0);
+     // Swiss methods use their instance's WASM memory. Calling a detached
+     // method loses that instance and breaks the real local-visibility path.
+     const candidate=fn.call(api,raw.tret[0]-3,2,[location.lon,location.lat,0],0);
+     if(!candidate||!Number.isFinite(candidate.retFlag)||candidate.retFlag<0||
+        (candidate.retFlag>0&&(!candidate.tret||!Number.isFinite(candidate.tret[0]))))
+      throw Error('Local eclipse calculation unavailable for '+kind);
      const isSame=!!candidate&&candidate.retFlag>0&&Number.isFinite(candidate.tret[0])&&Math.abs(candidate.tret[0]-raw.tret[0])<=1;
      local={visible:isSame,maximum:isSame?jdToDate(candidate!.tret[0]):null,flag:isSame?candidate!.retFlag:0,location};
     }

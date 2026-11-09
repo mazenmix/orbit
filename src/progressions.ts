@@ -1,5 +1,6 @@
 import {normalize,type Point} from './math.ts';
 import {exactCrossings,type SkyReader} from './timing.ts';
+import {Temporal} from '@js-temporal/polyfill';
 const DAY=86400000;
 const TROPICAL_YEAR=365.2422;
 /** Secondary progression convention: 1 ephemeris day after birth per tropical year lived.
@@ -17,6 +18,14 @@ export function solarArcDegrees(natalSun:number,progressedSun:number){
 export function directedNatal(points:readonly Point[],arc:number):Point[]{
  if(!Number.isFinite(arc))throw Error('Invalid solar arc');
  return points.map(p=>({...p,longitude:normalize(p.longitude+arc),speed:0}));
+}
+/** Anniversary in the birth location's civil calendar. Replacing only the UTC
+ * year can shift a Jan 1 / Dec 31 birthday by a whole year across time zones. */
+export function anniversaryInstant(born:Date,year:number,zone:string):Date{
+ if(!Number.isFinite(+born)||!Number.isInteger(year)||year<1800||year>2399)throw Error('Invalid anniversary year');
+ const civil=Temporal.Instant.fromEpochMilliseconds(+born).toZonedDateTimeISO(zone).toPlainDateTime();
+ const anniversary=civil.with({year},{overflow:'constrain'});
+ return new Date(anniversary.toZonedDateTime(zone,{disambiguation:'compatible'}).epochMilliseconds);
 }
 export function solarReturnNear(approx:Date,natalSun:number,read:SkyReader):Date|null{
  if(!Number.isFinite(+approx))throw Error('Invalid anniversary');

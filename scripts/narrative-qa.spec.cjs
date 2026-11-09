@@ -1,5 +1,44 @@
 const {test,expect}=require('/tmp/astro-qa/node_modules/@playwright/test');
 
+test('saved-city eclipse visibility works with the actual Swiss WASM instance',async({page})=>{
+ await page.goto('/#eclipses',{waitUntil:'domcontentloaded'});
+ await page.locator('#check-local-eclipses').waitFor({timeout:75000});
+ await page.locator('#check-local-eclipses').click();
+ await expect(page.locator('#detail')).toBeVisible();
+ await expect(page.locator('.eclipse-local-row')).toHaveCount(2);
+ await expect(page.locator('#dialog-content')).not.toContainText(/undefined|TypeError/);
+});
+
+test('unknown birth time does not produce an exact solar return or progressed Moon interpretation',async({page})=>{
+ await page.addInitScript(()=>{
+  localStorage.setItem('mx.language','en');
+  localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify([{id:'unknown-fixture',name:'Unknown fixture',date:'2000-01-01',time:'00:00',zone:'Etc/UTC',lat:51.4779,lon:0,city:'Greenwich',known:false,kind:'self'}]));
+ });
+ await page.goto('/#advanced',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#main')).toContainText('no minute-precise solar return',{timeout:75000});
+ await expect(page.locator('.mx-advanced-reading')).toHaveCount(0);
+ await expect(page.locator('#main')).not.toContainText('Exact Solar Return');
+});
+
+test('daily partner cards stay unavailable when a compared domain has no calculated contact',async({page})=>{
+ await page.clock.install({time:new Date('2026-01-07T12:00:00Z')});
+ await page.addInitScript(()=>{
+  const self={id:'coverage-self',name:'Coverage self',date:'2000-01-01',time:'12:00',zone:'Etc/UTC',lat:51.4779,lon:0,city:'Greenwich',known:true,kind:'self'};
+  localStorage.setItem('mx.uiMode','pro');
+  localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify([self,{...self,id:'coverage-partner',name:'Coverage partner',date:'1994-08-12',kind:'dating'}]));
+ });
+ await page.goto('/#people',{waitUntil:'domcontentloaded'});
+ await page.locator('[data-compare="coverage-partner"]').waitFor({timeout:75000});
+ await page.locator('[data-compare="coverage-partner"]').click();
+ for(const id of ['date','initiative','contactTiming']){
+  const card=page.locator('[data-partner-insight="'+id+'"]');
+  await expect(card).toHaveClass(/mx-unavailable/);
+  await expect(card.locator('.mx-people-gauge')).toHaveCount(0);
+  await expect(card).toContainText('—');
+ }
+ await expect(page.locator('[data-partner-insight="desire"] .mx-people-gauge')).toHaveCount(1);
+});
+
 test('symbolic gauges disclose their meaning and GO sections remain siblings',async({page})=>{
  for(const route of ['now','go','travelmode']){
   await page.goto('/#'+route,{waitUntil:'domcontentloaded'});

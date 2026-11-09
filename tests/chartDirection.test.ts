@@ -17,3 +17,8 @@ test('counterclockwise projection covers 360 degrees without reversing sign orde
  const left=horoscopeXY(0,0,158),bottom=horoscopeXY(90,0,158),right=horoscopeXY(180,0,158),top=horoscopeXY(270,0,158);
  assert.ok(left[0]<210);assert.ok(bottom[1]>210);assert.ok(right[0]>210);assert.ok(top[1]<210);
 });
+test('unavailable Placidus cusps do not falsely label a known polar birth as unknown',()=>{
+ const markup=wheel({date:new Date(),asc:null,mc:null,cusps:[],points:[],missing:[]});
+ assert.match(markup,/غير متاحين/);
+ assert.doesNotMatch(markup,/وقت الولادة غير معروف|birth time is unknown/);
+});
