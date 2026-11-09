@@ -247,3 +247,86 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 
 .relationship-calendar .relation-window-reason{display:block;font-size:11px;line-height:1.6;color:#b9b5ca;margin-top:7px;min-height:2.2em}
 .relationship-calendar .relation-window p{line-height:1.8}
+
+/* Compact asteroid reading cards — keep actions and actual ephemeris, omit repeated narrative. */
+.asteroids-grid.reading-asteroids{
+ grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));
+ gap:10px;
+ margin:14px 0 8px;
+ align-items:stretch;
+}
+.reading-asteroids .asteroid-item.meaning-card{
+ display:flex;
+ flex-direction:column;
+ min-height:0;
+ min-width:0;
+ gap:8px;
+ padding:12px 13px;
+ border-radius:12px;
+ background:linear-gradient(145deg,#191b31,#131829);
+}
+.reading-asteroids .meaning-card .meaning-head{
+ display:flex;
+ align-items:baseline;
+ justify-content:space-between;
+ flex-wrap:wrap;
+ gap:4px 10px;
+ min-width:0;
+}
+.reading-asteroids .meaning-card .meaning-head h3{
+ margin:0;
+ font-size:16px;
+ font-weight:800;
+ line-height:1.35;
+}
+.reading-asteroids .meaning-head .asteroid-position{
+ font-size:10.5px;
+ line-height:1.5;
+ color:#c6b9dc;
+ white-space:nowrap;
+ font-variant-numeric:tabular-nums;
+}
+.reading-asteroids .meaning-card>p.advice-action{
+ font-size:12.5px;
+ line-height:1.55;
+ margin:0;
+ padding:7px 9px;
+ border-inline-start:2px solid #8ed8c0;
+ border-radius:8px;
+ background:rgba(127,223,212,.065);
+ overflow-wrap:anywhere;
+}
+.reading-asteroids .meaning-card>p.mx-asteroid-evidence{
+ font-size:11px;
+ line-height:1.55;
+ margin:0;
+ padding:0;
+ color:#d4b6ee;
+ overflow-wrap:anywhere;
+}
+.reading-asteroids .meaning-card>p.asteroid-contact-muted{
+ font-size:11px;
+ line-height:1.55;
+ margin:0;
+ color:#aaa4c3;
+}
+.reading-asteroids .meaning-card details{
+ margin-top:auto;
+ padding-top:6px;
+ border-top:1px solid rgba(176,159,218,.16);
+ font-size:11px;
+}
+.reading-asteroids .meaning-card details summary{
+ color:#b9aad2;
+ cursor:pointer;
+}
+.reading-asteroids .meaning-card details small{
+ display:block;
+ padding-top:6px;
+ line-height:1.5;
+ overflow-wrap:anywhere;
+}
+@media(max-width:760px){
+ .asteroids-grid.reading-asteroids{grid-template-columns:1fr;gap:9px}
+ .reading-asteroids .asteroid-item.meaning-card{padding:12px 13px}
+}
