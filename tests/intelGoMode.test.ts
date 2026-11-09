@@ -122,6 +122,14 @@ test('six highlighted asteroid names sit in a separate nonoverlapping responsive
  assert.match(markup,/mx-sky-asteroid-index/);
  assert.match(markup,/mx-sky-asteroid-chip/);
  assert.match(markup,/signName\(p\.longitude\)/);
+ assert.match(markup,/remainingAsteroidSignGauge\(p\.longitude,p\.speed\)/);
+ assert.match(markup,/mx-sky-asteroid-gauge-track/);
+ assert.match(markup,/mx-sky-asteroid-gauge-fill/);
+ assert.match(markup,/role="progressbar"/);
+ assert.match(markup,/aria-valuenow/);
+ assert.match(styles,/\.mx-sky-asteroid-gauge-fill\.green/);
+ assert.match(styles,/\.mx-sky-asteroid-gauge-fill\.orange/);
+ assert.match(styles,/\.mx-sky-asteroid-gauge-fill\.red/);
  assert.ok(main.includes("wheel(r.current,undefined,featuredSkyPositions(r.at))+'</button>'+featuredSkyLegend(r.at)"));
  assert.match(main,/featuredSkyLegend\(data\.current\.date\)/);
  assert.match(main,/const chips=featuredSkyLegend\(at\)/);
