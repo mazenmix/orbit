@@ -41,6 +41,7 @@ import {refineNatalTransit} from './precision.ts';
 import {scanLunations,type Lunation} from './eclipse.ts';
 import type {ConfirmedEclipse} from './realEclipses.ts';
 import {namedAsteroids,asteroidSourcePath,featuredSkyAsteroidNumbers} from './asteroids.ts';
+import {remainingAsteroidSignGauge} from './asteroidSignGauge.ts';
 import {loadNamedAsteroids,mountedAsteroidCount,namedAsteroidPositions} from './asteroidRuntime.ts';
 import {asteroidReading,currentAsteroidReading,namedAsteroidContacts} from './asteroidInterpretation.ts';
 import {partnerInsights,partnerInsightAvailable,gaugeLevel} from './peopleInsights.ts';
@@ -1070,17 +1071,6 @@ function featuredSkyPositions(at:Date){
  * The matching 1–6 markers are anchored on the wheel at real longitudes.
  * Keep a stable wrapper so the existing five-second SVG ticker updates text in place.
  */
-/** Angular share of the *current* sign still to travel in the actual
- * direction of motion. Retrograde asteroids exit towards 0°, direct
- * asteroids towards 30°. This is NOT a forecast of remaining clock time.
- */
-function remainingAsteroidSignGauge(longitude:number,speed:number){
- const inSign=((longitude%30)+30)%30;
- const remainingDegrees=speed<0?inSign:30-inSign;
- const percent=Math.max(0,Math.min(100,Math.round((remainingDegrees/30)*100)));
- const tone=percent>=91?'red':percent>=61?'orange':'green';
- return {percent,tone};
-}
 /** Six compact, ordered, collision-free asteroid chips, shared by the
  * small Today view and enlarged wheel; reconciled on each sky refresh. */
 function featuredSkyLegend(at:Date){
