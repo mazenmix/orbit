@@ -362,7 +362,6 @@ function todaySkyWheel(r:Report){
   '<div class="mx-today-sky-heading"><h2>'+t('سماء اللحظة حسب مدينة الميلاد','Current sky at birth-city coordinates')+'</h2>'+
   '<button type="button" class="secondary mx-today-sky-expand" id="expand-sky-wheel-link" aria-label="'+t('كبّر دائرة السماء','Expand sky wheel')+'">⤢ '+t('تكبير','Expand')+'</button></div>'+
   '<button type="button" id="expand-sky-wheel" class="mx-today-sky-open" aria-label="'+t('تكبير خارطة السماء الحالية','Expand current sky wheel')+'">'+wheel(r.current,undefined,featuredSkyPositions(r.at))+'</button>'+featuredSkyLegend(r.at)+
-  '<time class="mx-today-sky-time" datetime="'+r.at.toISOString()+'">'+dateText(r.at,{dateStyle:'full',timeStyle:'medium'})+'</time>'+
   '</section></div>';
 }
 // Full-sky exact-event scan is expensive; recalc its roots every six minutes.
@@ -1082,9 +1081,9 @@ function featuredSkyLegend(at:Date){
    const degree=p?signName(p.longitude)+' · '+(p.longitude%30).toFixed(1)+'°'+(p.speed<0?' Rx':''):t('جار حساب الموقع','Calculating position');
    const gauge=p?remainingAsteroidSignGauge(p.longitude,p.speed):null;
    const meter=gauge
-    ?'<div class="mx-sky-asteroid-gauge-meta"><small>'+t('باقي بالبرج','Sign remaining')+'</small><strong class="'+gauge.tone+'">'+gauge.percent+'%</strong></div>'+
+    ?'<div class="mx-sky-asteroid-gauge-meta"><strong class="'+gauge.tone+'">'+gauge.percent+'%</strong></div>'+
      '<div class="mx-sky-asteroid-gauge-track" role="progressbar" aria-label="'+esc(asteroid.name+' · '+t('الباقي بالبرج','Remaining in sign'))+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+gauge.percent+'"><i class="mx-sky-asteroid-gauge-fill '+gauge.tone+'" style="width:'+gauge.percent+'%"></i></div>'
-    :'<div class="mx-sky-asteroid-gauge-meta"><small>'+t('باقي بالبرج','Sign remaining')+'</small><strong>—</strong></div>'+
+    :'<div class="mx-sky-asteroid-gauge-meta"><strong>—</strong></div>'+
      '<div class="mx-sky-asteroid-gauge-track is-pending" aria-hidden="true"></div>';
    return '<div class="mx-sky-asteroid-chip'+(p?'':' mx-pending')+'" role="listitem" data-legend-asteroid="'+esc(asteroid.name)+'">'+
     '<div class="mx-sky-asteroid-top"><span class="mx-sky-asteroid-index" aria-hidden="true">'+(index+1)+'</span>'+
@@ -1969,7 +1968,7 @@ function tickLiveClocks(now:number){
  const at=new Date(now),display=dateText(at,{dateStyle:'full',timeStyle:'medium'});
  const header=root.querySelector<HTMLElement>('#live-page-clock');
  if(header&&header.textContent!==display)header.textContent=display;
- for(const el of root.querySelectorAll<HTMLTimeElement>('.mx-today-sky-time,#detail[open] .mx-expanded-sky-time')){
+ for(const el of root.querySelectorAll<HTMLTimeElement>('#detail[open] .mx-expanded-sky-time')){
   if(el.textContent!==display)el.textContent=display;
   const iso=at.toISOString();
   if(el.dateTime!==iso)el.dateTime=iso;
