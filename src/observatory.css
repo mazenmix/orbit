@@ -492,3 +492,27 @@
 @media(prefers-reduced-motion:reduce){
  .mx-sky-asteroid-gauge-fill{transition:none}
 }
+
+/* A genuine negative Swiss-Ephemeris speed adds a small red arrow after
+   the asteroid's name. Reserve its width so it never overlaps the next chip. */
+.mx-sky-asteroid-name{
+ display:flex;
+ align-items:center;
+ justify-content:flex-start;
+ gap:4px;
+ min-width:0;
+ max-width:100%;
+ direction:ltr;
+}
+.mx-sky-asteroid-name b{min-width:0;flex:0 1 auto}
+.mx-sky-asteroid-retrograde{
+ display:inline-block;
+ flex:0 0 auto;
+ color:#ff6173;
+ font-size:17px;
+ line-height:1;
+ font-weight:900;
+ text-shadow:0 0 9px rgba(255,66,105,.55);
+}
+#live-view-body .mx-today-sky .mx-sky-asteroid-retrograde,
+#detail .mx-expanded-sky .mx-sky-asteroid-retrograde{font-size:15px}
