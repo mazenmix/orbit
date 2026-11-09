@@ -454,7 +454,6 @@
  color:#e9f8ee;
 }
 .mx-sky-asteroid-gauge-meta strong.orange{color:#ffc07b}
-.mx-sky-asteroid-gauge-meta strong.red{color:#ff9caa}
 .mx-sky-asteroid-gauge-track{
  display:flex;
  flex-direction:row;
@@ -475,7 +474,6 @@
 }
 .mx-sky-asteroid-gauge-fill.green{background:#35d89a}
 .mx-sky-asteroid-gauge-fill.orange{background:#f4a64c}
-.mx-sky-asteroid-gauge-fill.red{background:#ef5a68}
 .mx-sky-asteroid-gauge-track.is-pending{background:rgba(229,213,236,.06)}
 #detail .mx-expanded-sky .mx-sky-asteroid-chip{
  min-height:61px;
