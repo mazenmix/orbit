@@ -138,3 +138,19 @@ test('six highlighted asteroid names sit in a separate nonoverlapping responsive
  assert.match(styles,/grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/);
  assert.match(styles,/@media\(max-width:440px\)/);
 });
+
+test('asteroid captions and duplicate date are removed; percent gauges fill from right',()=>{
+ const sky=main.slice(main.indexOf('function todaySkyWheel('),main.indexOf('function focusedToday()'));
+ const legend=main.slice(main.indexOf('function featuredSkyLegend('),main.indexOf('async function activateFeaturedSkyAsteroids()'));
+ const styles=readFileSync('src/observatory.css','utf8');
+ assert.ok(!sky.includes('mx-today-sky-time'),'Do not repeat the date beneath the six Today asteroid cards');
+ assert.ok(sky.includes('featuredSkyLegend(r.at)'),'Six cards remain under the small wheel');
+ assert.ok(!legend.includes("t('باقي بالبرج','Sign remaining')"),'No visible remaining-sign captions');
+ assert.ok(legend.includes('gauge.percent'),'Percent display remains in every loaded gauge');
+ assert.ok(legend.includes('aria-valuenow'),'Retain accessible percent value');
+ assert.match(styles,/\.mx-sky-asteroid-gauge-track\{\s*display:flex;\s*flex-direction:row;\s*direction:rtl;/,
+  'Fill begins on the right regardless of the surrounding LTR legend');
+ assert.match(styles,/\.mx-sky-asteroid-gauge-meta\{[\s\S]*?justify-content:flex-end;/,
+  'Percentage stays neatly right aligned');
+ assert.match(main,/mx-expanded-sky-time/,'Keep expanded wheel header clock');
+});
