@@ -34,6 +34,12 @@ test('pink asteroid layer preserves exact Swiss longitudes and excludes absent b
   assert.ok(html.includes('data-asteroid-longitude="'+p.longitude.toFixed(4)+'"'));
  }
  assert.ok(html.includes('stroke="#ff9bd7"'));
+ assert.equal([...html.matchAll(/<rect[^>]*fill="#3d1c3c"/g)].length,0,
+  'Large pink asteroid badges must never cover planet or house labels');
+ const group=[...html.matchAll(/<g class="wheel-featured-asteroid"[^>]*>([\s\S]*?)<\/g>/g)];
+ assert.equal(group.length,6);
+ assert.ok(group.every((match,i)=>!match[1].includes('<rect')&&match[1].includes('font-size="10.5"')),
+  'Markers are compact numbered circles, never rectangular name badges');
  assert.equal([...wheel(c).matchAll(/data-featured-asteroid=/g)].length,0,
   'Never show invented markers until numbered ephemerides are mounted');
 });

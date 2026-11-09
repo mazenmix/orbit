@@ -103,31 +103,24 @@ export function wheel(chart:Chart,transit?:Chart,featuredAsteroids:readonly Poin
   svg+='<text x="'+tx+'" y="'+(y-2)+'" text-anchor="'+anchor+'" fill="#eee9fb" font-size="10.5" font-weight="800">'+escape(p.id)+'</text>';
   svg+='<text x="'+tx+'" y="'+(y+11)+'" text-anchor="'+anchor+'" fill="'+(p.speed<0?'#fbc390':'#9fe1db')+'" font-size="9.5" font-weight="650">'+dms(p.longitude)+(p.speed<0?' Rx':'')+'</text></g>';
  }
- // Featured numbered asteroids are a separate pink layer. Unlike label positions,
- // the bright dot is fixed at its REAL Swiss-Ephemeris ecliptic longitude.
- // Compact labels can shift around the ring to avoid covering main planets.
+ // Named asteroids share the exact Swiss-Ephemeris longitude with the marker.
+ // Their six independent, numbered badges live in a responsive, collision-free
+ // legend outside the SVG: no pink name panel can obscure a planet or house.
  const featuredSeen=new Set<string>();
- const featured=featuredAsteroids.filter(p=>{
-  if(!p.id||featuredSeen.has(p.id)||!Number.isFinite(p.longitude)||
-   p.longitude<0||p.longitude>=360||!Number.isFinite(p.speed))return false;
-  featuredSeen.add(p.id);return true;
- });
- const asteroidLabels=layoutWheelLabels(featured,asc,27);
- for(const label of asteroidLabels){
-  const p=featured.find(body=>body.id===label.id)!;
-  const [px,py]=xy(p.longitude,317);
-  const [bx,by]=xy(asc+label.displayAngle,256);
-  const bend=xy(p.longitude,291);
+ const featuredNames=['Eros','Lust','Aphrodite','Lilith','Casanova','Adonis'];
+ for(const p of featuredAsteroids){
+  if(!featuredNames.includes(p.id)||featuredSeen.has(p.id)||
+   !Number.isFinite(p.longitude)||p.longitude<0||p.longitude>=360||
+   !Number.isFinite(p.speed))continue;
+  featuredSeen.add(p.id);
+  const index=featuredNames.indexOf(p.id)+1;
   const number=({Eros:433,Lust:4386,Aphrodite:1388,Lilith:1181,Casanova:7328,Adonis:2101} as Record<string,number>)[p.id];
-  const caption=p.id+(number?' · MPC '+number:'')+' · '+dms(p.longitude)+' '+t(signsAr[Math.floor(p.longitude/30)],signsEn[Math.floor(p.longitude/30)])+(p.speed<0?' Rx':'');
+  const caption=p.id+' · MPC '+number+' · '+dms(p.longitude)+' '+t(signsAr[Math.floor(p.longitude/30)],signsEn[Math.floor(p.longitude/30)])+(p.speed<0?' Rx':'');
+  const [px,py]=xy(p.longitude,337);
   svg+='<g class="wheel-featured-asteroid" data-featured-asteroid="'+escape(p.id)+'" data-asteroid-longitude="'+p.longitude.toFixed(4)+'">';
   svg+='<title>'+escape(caption)+'</title>';
-  svg+='<path d="M'+px+' '+py+' L'+bend.join(' ')+' L'+bx+' '+by+'" stroke="#ff8bc7" stroke-width="1.6" stroke-opacity=".88" fill="none"/>';
-  svg+='<circle cx="'+px+'" cy="'+py+'" r="7" fill="#ff71bf" stroke="#ffe0f1" stroke-width="1.7"/>';
-  svg+='<circle cx="'+px+'" cy="'+py+'" r="2.4" fill="#fff7fc"/>';
-  svg+='<rect x="'+(bx-45)+'" y="'+(by-17)+'" width="90" height="34" rx="11" fill="#3d1c3c" fill-opacity=".97" stroke="#ff9bd7" stroke-width="1.3"/>';
-  svg+='<text x="'+bx+'" y="'+(by-2)+'" text-anchor="middle" font-size="11.5" font-weight="850" fill="#ffd3ee">'+escape(p.id)+'</text>';
-  svg+='<text x="'+bx+'" y="'+(by+11)+'" text-anchor="middle" font-size="10" font-weight="750" fill="#ffa9d8">'+dms(p.longitude)+(p.speed<0?' Rx':'')+'</text></g>';
+  svg+='<circle cx="'+px+'" cy="'+py+'" r="9.4" fill="#4b2040" stroke="#ff9bd7" stroke-width="2"/>';
+  svg+='<text x="'+px+'" y="'+(py+3.6)+'" text-anchor="middle" font-size="10.5" font-weight="900" fill="#ffe0f1">'+index+'</text></g>';
  }
  if(transit){
   svg+=ring(330,'#69e9d8',1.9,.87);

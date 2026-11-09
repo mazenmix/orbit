@@ -114,3 +114,19 @@ test('Go Mode recommendations stay compact and use actual chart evidence',()=>{
  assert.match(narrative,/memo\.mixed/,'Conflicting evidence must be qualified');
  for(const domain of ['work','social','relationships','travel'])assert.ok(narrative.includes(domain+':{'),domain);
 });
+
+test('six highlighted asteroid names sit in a separate nonoverlapping responsive legend',()=>{
+ const styles=readFileSync('src/observatory.css','utf8');
+ const markup=main.slice(main.indexOf('function featuredSkyLegend('),main.indexOf('async function activateFeaturedSkyAsteroids()'));
+ assert.match(markup,/featuredSkyAsteroidNumbers\.map\(\(number,index\)=>/);
+ assert.match(markup,/mx-sky-asteroid-index/);
+ assert.match(markup,/mx-sky-asteroid-chip/);
+ assert.match(markup,/signName\(p\.longitude\)/);
+ assert.ok(main.includes("wheel(r.current,undefined,featuredSkyPositions(r.at))+'</button>'+featuredSkyLegend(r.at)"));
+ assert.match(main,/featuredSkyLegend\(data\.current\.date\)/);
+ assert.match(main,/const chips=featuredSkyLegend\(at\)/);
+ assert.match(main,/if\(expandedChips\)reconcileLiveHTML\(expandedChips,chips\)/);
+ assert.match(styles,/#detail \.mx-expanded-sky \.mx-sky-asteroid-legend/);
+ assert.match(styles,/grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/);
+ assert.match(styles,/@media\(max-width:440px\)/);
+});
