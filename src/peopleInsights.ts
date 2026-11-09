@@ -1,6 +1,18 @@
-import type {Dimension} from './math.ts';
+import type {Category,Dimension} from './math.ts';
 export type IntimacyTheme='desire'|'chemistry'|'date'|'flirt'|'exploration'|'fantasyTalk'|'trust'|'initiative'|'boundaries'|'consistency'|'intellectual'|'emotionalNeeds'|'conflictRepair'|'closenessPace'|'longTerm'|'contactTiming';
 export type PartnerInsight={id:IntimacyTheme;score:number;arTitle:string;enTitle:string;arText:string;enText:string;arAction:string;enAction:string};
+const timedSources:Partial<Record<IntimacyTheme,readonly Category[]>>={
+ date:['love'],initiative:['energy'],contactTiming:['communication','love']
+};
+/** Includes source domains compared in the narrative, even if they are not
+ * numerical inputs to that card's formula. A neutral default cannot support
+ * either a displayed number or a claim that one current domain leads another. */
+export function partnerInsightAvailable(id:IntimacyTheme,signals:readonly {category:Category}[]):boolean{
+ const required=timedSources[id];
+ if(!required)return true;
+ const observed=new Set(signals.map(s=>s.category));
+ return [...required,...(id==='date'||id==='initiative'?['communication' as const]:[])].every(key=>observed.has(key));
+}
 /** Descriptive astrology-derived prompts about a RELATIONSHIP, never claims
  * about another person's actual private desires, consent or intentions.
  */

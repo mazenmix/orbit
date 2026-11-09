@@ -20,3 +20,20 @@ test('calendar text escapes new lines and delimiters',()=>{
  assert.match(s,/DESCRIPTION:New\\nline\\;go/);
  assert.match(s,/UID:foobar@mxastro.pages.dev/);
 });
+test('Arabic and emoji calendar lines fit 75 UTF-8 octets and unfold without losing text',()=>{
+ const start=new Date('2026-11-09T12:00:00Z'),title='تذكير القمر 🌙 '.repeat(16);
+ const ics=calendarEvent({start,end:new Date(+start+60000),id:'unicode',title,description:title});
+ const lines=ics.split('\r\n');
+ assert.ok(lines.some(line=>line.startsWith(' ')));
+ for(const line of lines)assert.ok(Buffer.byteLength(line,'utf8')<=75,'physical line exceeds 75 octets');
+ const unfolded=ics.replace(/\r\n /g,'');
+ assert.ok(unfolded.includes('SUMMARY:'+title+'\r\n'));
+ assert.ok(unfolded.includes('DESCRIPTION:'+title+'\r\n'));
+ assert.ok(!unfolded.includes('\uFFFD'));
+});
+test('a standalone carriage return stays escaped inside calendar text',()=>{
+ const start=new Date('2026-11-09T12:00:00Z');
+ const ics=calendarEvent({start,end:new Date(+start+60000),id:'cr',title:'one\rtwo',description:'a\r\nb\nc\rd'});
+ assert.match(ics,/SUMMARY:one\\ntwo\r\n/);
+ assert.match(ics,/DESCRIPTION:a\\nb\\nc\\nd\r\n/);
+});

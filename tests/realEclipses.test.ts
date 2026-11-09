@@ -1,4 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
+import SwissEph from 'swisseph-wasm';
 import {calculateEclipses,eclipseType,jdToDate,type EclipseAPI} from '../src/realEclipses.ts';
 const ORIGIN=2440587.5;const jd=(iso:string)=>Date.parse(iso)/86400000+ORIGIN;
 const mock:EclipseAPI={
@@ -26,4 +27,20 @@ test('eclipse flag types and invalid geometries reject',()=>{
  assert.throws(()=>calculateEclipses(mock,new Date('2026-10-18T00:00:00Z'),13));
  assert.throws(()=>calculateEclipses(mock,new Date('2026-10-18T00:00:00Z'),1,{lat:100,lon:0}));
  assert.throws(()=>jdToDate(NaN));
+});
+test('real Swiss WASM local visibility methods retain their owning instance',async()=>{
+ const swiss=new SwissEph();await swiss.initSwissEph();
+ const events=calculateEclipses(swiss as any,new Date('2026-11-09T12:00:00Z'),1,{lat:33.3152,lon:44.3661},true);
+ assert.equal(events.length,2);
+ assert.ok(events.every(e=>e.local!==null&&typeof e.local.visible==='boolean'));
+ for(const e of events){
+  if(e.local!.visible)assert.ok(e.local!.maximum&&Math.abs(+e.local!.maximum-+e.maximum)<86400000);
+  else assert.equal(e.local!.maximum,null);
+ }
+});
+test('failed local ephemeris is not misreported as a non-visible eclipse',()=>{
+ for(const failure of [null,{retFlag:-1,tret:[],attr:[]},{retFlag:8,tret:[NaN],attr:[]}]){
+  const bad={...mock,sol_eclipse_when_loc:()=>failure};
+  assert.throws(()=>calculateEclipses(bad,new Date('2026-11-09T00:00:00Z'),1,{lat:33,lon:44},true),/Local eclipse calculation unavailable/);
+ }
 });

@@ -78,7 +78,7 @@ export function wheel(chart:Chart,transit?:Chart){
    svg+='<rect x="'+(x-21)+'" y="'+(y-11)+'" width="42" height="21" rx="6" fill="#121b30" stroke="'+mark.color+'" stroke-width="1.4"/>';
    svg+='<text x="'+x+'" y="'+(y+3.6)+'" fill="'+mark.color+'" font-size="12" font-weight="900" text-anchor="middle">'+mark.label+'</text>';
   }
- }else svg+='<text x="'+C+'" y="664" fill="#f4c998" text-anchor="middle" font-size="13">'+escape(t('البيوت والطالع مخفيان: وقت الولادة غير معروف','Houses and ASC hidden: birth time is unknown'))+'</text>';
+ }else svg+='<text x="'+C+'" y="664" fill="#f4c998" text-anchor="middle" font-size="13">'+escape(t('البيوت والطالع غير متاحين بهذه الخارطة','Houses and ASC are unavailable for this chart'))+'</text>';
  svg+=ring(184,'#7e8bb5',1.5,.96)+ring(173,'#647496',.8,.66);
  // Real natal aspects inside the innermost circle.
  for(let i=0;i<chart.points.length;i++)for(let j=i+1;j<chart.points.length;j++){

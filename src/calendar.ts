@@ -2,8 +2,18 @@
  * No account, subscription, Web Push or background execution is implied.
  */
 const stamp=(date:Date)=>date.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
-const safe=(s:string)=>s.replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
-const fold=(line:string)=>line.match(/.{1,70}/gu)?.join('\r\n ')??line;
+const safe=(s:string)=>s.replace(/\\/g,'\\\\').replace(/\r\n|\r|\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
+/** RFC 5545 limits physical lines to 75 UTF-8 octets, including the
+ * continuation space. Count code points without splitting UTF-8 sequences. */
+const fold=(line:string)=>{
+ const encoder=new TextEncoder(),lines:string[]=[];let part='',bytes=0;
+ for(const char of line){
+  const size=encoder.encode(char).length;
+  if(bytes+size>75){lines.push(part);part=' ';bytes=1}
+  part+=char;bytes+=size;
+ }
+ lines.push(part);return lines.join('\r\n');
+};
 export type CalendarEvent={start:Date;end:Date;title:string;description:string;id:string};
 export function calendarEvent(event:CalendarEvent,alarmMinutes=15){
  if(!Number.isFinite(+event.start)||!Number.isFinite(+event.end)||+event.start>=+event.end)throw Error('Invalid calendar range');
