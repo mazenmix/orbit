@@ -1105,8 +1105,15 @@ async function activateFeaturedSkyAsteroids(){
   featuredSkyLoading=false;
   // Refresh SVGs in place; preserve the enlarged modal, clock and scroll.
   if(screen==='today'){
-   if(liveTimePinned)render();
-   else updateLiveSkyWheel(Date.now());
+   if(liveTimePinned){
+    const chips=featuredSkyLegend(selected);
+    for(const el of root.querySelectorAll<HTMLElement>('.mx-sky-asteroid-legend'))reconcileLiveHTML(el,chips);
+    const sky=data?.current;
+    if(sky){
+     const graphic=wheel(sky,undefined,featuredSkyPositions(sky.date));
+     for(const el of root.querySelectorAll<SVGElement>('.mx-today-sky svg.chart-wheel, #detail[open] .mx-expanded-wheel svg.chart-wheel'))reconcileLiveHTML(el,graphic);
+    }
+   }else updateLiveSkyWheel(Date.now());
   }
  }
 }

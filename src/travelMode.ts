@@ -63,64 +63,64 @@ type Pair=readonly [string,string];
 type TravelStory={low:Pair;mid:Pair;high:Pair};
 const travelStories:Record<TravelCardId,TravelStory>={
  dating:{
-  low:['المبادرة هسه تقييمها ضعيف؛ إذا تراسل أحد خلي كلامك خفيف وتقبّل عدم التجاوب.','The timing index is low for initiating a date; keep any message light and respect a lack of response.'],
-  mid:['تگدر تبادر بتعارف بسيط، بس لا تعتبر التوقيت دليل على اهتمام الطرف الثاني.','A simple introduction is reasonable; timing does not establish interest from the other person.'],
-  high:['المؤشر داعم للمبادرة اللطيفة؛ اطلب موعداً واضحاً وخلي القرار متبادل.','The index favors a gentle initiative; propose a clear plan and let the other person choose freely.']
+  low:['مو لازم ترتّب موعد اليوم. إذا أحد ببالك، رسالة خفيفة تكفي.','The timing index is low for initiating a date; keep any message light and respect a lack of response.'],
+  mid:['إذا السالفة ماشية بينكم، اسأل عن مكان يحبّه الطرف الثاني وشوف إذا يناسبكم تطلعون.','A simple introduction is reasonable; timing does not establish interest from the other person.'],
+  high:['ببالك لقاء؟ اقترح مكان ووقت واضحين وخلّي مجال للطرف الثاني يختار.','The index favors a gentle initiative; propose a clear plan and let the other person choose freely.']
  },
  newpeople:{
-  low:['لا تضغط على نفسك حتى توسّع معارفك؛ اختار مكان هادئ وتواصل طبيعي.','Do not force new connections; choose an easy setting and keep contact natural.'],
-  mid:['الوقت متوسط للتعرف على ناس جدد؛ نشاط اجتماعي صغير أنسب من توقّعات كبيرة.','A moderate time for meeting new people; prefer a small social activity over high expectations.'],
-  high:['مؤشر الانفتاح الاجتماعي مرتفع؛ شارك بنشاط واترك للمعرفة مجال تتطور.','The social-openness index is high; join an activity and let contacts develop naturally.']
+  low:['إذا اليوم ودّك بهدوء، مو لازم تتعرّف على أحد. اختار مكان ترتاح بيه.','Do not force new connections; choose an easy setting and keep contact natural.'],
+  mid:['نشاط تحبّه يسهّل التعارف. من البداية يصير عندكم شي تحچون عنه.','A moderate time for meeting new people; prefer a small social activity over high expectations.'],
+  high:['إذا صادفت جماعة يشاركونك اهتمام، شارك بالحچي. تعارف بسيط يكفي كبداية.','The social-openness index is high; join an activity and let contacts develop naturally.']
  },
  social:{
-  low:['التواصل مو بأفضل توقيت حسب المؤشر؛ وضّح كلامك ولا تستنتج النيات بسرعة.','The social index is low; communicate clearly and avoid reading intentions into replies.'],
-  mid:['التواصل متوسط؛ سؤال واضح واستماع فعلي أحسن من مراسلات كثيرة.','Social contact is mixed; one clear question and active listening beat excessive messaging.'],
-  high:['المؤشر ملائم للمحادثات؛ بادر، استمع، وخلي التفاعل الحقيقي يحسم.','The index supports conversation; initiate, listen, and follow the actual response.']
+  low:['إذا حسّيت رسالة تنفهم بطريقتين، اسأل شنو المقصود قبل ما ترد.','The social index is low; communicate clearly and avoid reading intentions into replies.'],
+  mid:['افتح سالفة بسؤال واحد يهمّك جوابه، وخذ وقتك تسمع.','Social contact is mixed; one clear question and active listening beat excessive messaging.'],
+  high:['عندك سالفة حلوة؟ افتحها وخلّي للي وياك مجال يشاركك الحچي.','The index supports conversation; initiate, listen, and follow the actual response.']
  },
  attraction:{
-  low:['مؤشر الحضور منخفض؛ لا تعتبره حكماً على شكلك، اهتم براحتك وثقتك.','A low personal-presence index is not a judgment of appearance; focus on comfort and confidence.'],
-  mid:['الحضور متوسط؛ اختار أسلوب ولبس ترتاح بيهن وخلّ الانطباع يتكوّن طبيعياً.','A moderate presence index; dress comfortably and let the impression form naturally.'],
-  high:['المؤشر ملائم لإظهار حضورك؛ الثقة والاحترام أهم من محاولة لفت النظر بالقوة.','The presence index is favorable; confidence and respect matter more than forcing attention.']
+  low:['الرقم ما يحكم على شكلك. البس شي ترتاح بيه واطلع على طبيعتك.','A low personal-presence index is not a judgment of appearance; focus on comfort and confidence.'],
+  mid:['اختار شي يشبه ذوقك. إذا مرتاح بلبسك، تگدر تركّز على الناس اللي وياك.','A moderate presence index; dress comfortably and let the impression form naturally.'],
+  high:['خلّي حضورك يبين بشي تحبّه، سواء بلبسك أو بسالفة تعرف تحچيها زين.','The presence index is favorable; confidence and respect matter more than forcing attention.']
  },
  romance:{
-  low:['التوقيت العاطفي مو قوي؛ لا تستعجل تعبير كبير أو وعد يصعب تنفيذه.','Romantic timing is weak; avoid rushing an emotional declaration or a promise.'],
-  mid:['الرومانسية بمستوى متوسط؛ لفتة صغيرة وصادقة أفضل من التوقعات المبالغ بيها.','Romantic timing is moderate; a small sincere gesture beats oversized expectations.'],
-  high:['القراءة داعمة للتقارب اللطيف؛ عبّر عن اهتمامك بدون ما تفترض مشاعر الثاني.','The index supports gentle affection; express interest without assuming it is mutual.']
+  low:['إذا الكلام الكبير ما يعبّر عن إحساسك هسّه، خليه لوقته.','Romantic timing is weak; avoid rushing an emotional declaration or a promise.'],
+  mid:['تتذكر شغلة صغيرة يحبّها الشخص؟ اسأل عنها. هاي وحدها تلفت الانتباه.','Romantic timing is moderate; a small sincere gesture beats oversized expectations.'],
+  high:['إذا ودّك تعبّر عن اهتمامك، گول شنو عجبك بالتحديد وخلّي الرد يجي براحته.','The index supports gentle affection; express interest without assuming it is mutual.']
  },
  chemistry:{
-  low:['الانسجام بالتواصل يحتاج عناية؛ احچي بصراحة وابتعد عن اختبار ردود الطرف الثاني.','The interaction index is low; be direct and avoid testing another person’s reactions.'],
-  mid:['الانسجام متوسط؛ راقب التفاهم الفعلي، مو مجرد انجذاب أو انطباع أول.','The interaction index is moderate; look for actual understanding, not just first impressions.'],
-  high:['التوقيت يدعم حواراً مريحاً؛ الانسجام الحقيقي يثبت بالاحترام والتجاوب المتبادل.','The index supports easy conversation; actual chemistry depends on reciprocal respect and response.']
+  low:['إذا حسّيت الحچي ثقيل، غيّر الموضوع أو خذ استراحة. ما تحتاج تختبر ردّة فعل أحد.','The interaction index is low; be direct and avoid testing another person’s reactions.'],
+  mid:['وأنت تحچي، انتبه إذا الاثنين مرتاحين بالسوالف. هذا يفيدك أكثر من أول انطباع.','The interaction index is moderate; look for actual understanding, not just first impressions.'],
+  high:['إذا السالفة دا تمشي من الطرفين، خذ راحتك بيها وشوف وين توصلكم.','The index supports easy conversation; actual chemistry depends on reciprocal respect and response.']
  },
  sexuality:{
-  low:['مؤشر توقيت القرب منخفض؛ لا تربطه برغبة شخص آخر أو موافقته.','Intimacy timing is low; it says nothing about another person’s desire or consent.'],
-  mid:['توقيت القرب متوسط؛ خَلّ الوضوح والحدود والقبول المتبادل أساس أي خطوة.','Intimacy timing is moderate; clarity, boundaries and mutual consent remain essential.'],
-  high:['توقيت القرب مرتفع رمزياً؛ التفاهم والرضا المتبادل أهم من أي رقم.','The intimacy timing index is high; mutual understanding and consent matter more than the number.']
+  low:['إذا أحد منكم متردّد، خذوا وقتكم. ودايماً اسأل شنو يريّح الشخص اللي وياك.','Intimacy timing is low; it says nothing about another person’s desire or consent.'],
+  mid:['احچوا بصراحة عن اللي يناسب كل واحد منكم. تگدرون تتمهّلون بأي لحظة.','Intimacy timing is moderate; clarity, boundaries and mutual consent remain essential.'],
+  high:['إذا التقارب ببالك، اسأل شنو يريّح الطرف الثاني. الخطوة الحلوة هي اللي تريدونها اثنينكم.','The intimacy timing index is high; mutual understanding and consent matter more than the number.']
  },
  desire:{
-  low:['مؤشر الاندفاع منخفض؛ لا تضغط على نفسك، واتبع إحساسك الحقيقي بالراحة.','The drive index is low; do not force yourself and follow your actual comfort level.'],
-  mid:['الدافع بمستوى متوسط؛ خَلّ قرارك هادئ وواضح بدون تسرّع.','The drive index is moderate; act thoughtfully rather than impulsively.'],
-  high:['مؤشر الدافع مرتفع؛ وجّه الحماس باختيار واعٍ واحترام الحدود.','The drive index is high; channel enthusiasm into considered choices and clear boundaries.']
+  low:['اسأل نفسك شنو تريده اليوم. إذا ودّك ترتاح، خذ راحتك.','The drive index is low; do not force yourself and follow your actual comfort level.'],
+  mid:['خذ لحظة وشوف إذا هذا فعلاً اللي تريده، أو مجرد حماس اللحظة.','The drive index is moderate; act thoughtfully rather than impulsively.'],
+  high:['إذا عندك حماس، عبّر عنه بوضوح وخلي للطرف الثاني مساحته.','The drive index is high; channel enthusiasm into considered choices and clear boundaries.']
  },
  nightlife:{
-  low:['الطلعة الليلية تقييمها منخفض؛ إذا تطلع اختار مشوار خفيف وخطّة رجعة مضمونة.','Night-out timing is low; if you go out, keep plans simple with a reliable way home.'],
-  mid:['الطلعة الليلية متوسطة؛ تأكد من المكان ووقت الرجعة قبل السهرة.','Night-out timing is moderate; check the venue and your return arrangements.'],
-  high:['المؤشر ملائم لطلعة ليلية؛ استمتع وخلي النقل ووقت الرجعة مرتّبين.','Night-out timing is favorable; enjoy it while keeping transport and return plans in order.']
+  low:['إذا تطلع الليلة، اختار مكان قريب ورتّب الرجعة قبل ما تطوّل السهرة.','Night-out timing is low; if you go out, keep plans simple with a reliable way home.'],
+  mid:['قبل ما تتفقون، تأكد المكان مفتوح بالوقت اللي تريدونه وشوف شلون ترجع.','Night-out timing is moderate; check the venue and your return arrangements.'],
+  high:['إذا ناوي تسهر، رتّب توصيلة الرجعة من هسّه حتى تستمتع بوقتك.','Night-out timing is favorable; enjoy it while keeping transport and return plans in order.']
  },
  travel:{
-  low:['مؤشر التنقّل ضعيف؛ راجع الحجز والطريق وخلي وقت احتياطي أو خطة بديلة.','Travel planning is low; verify bookings and routes, with extra time or a fallback.'],
-  mid:['التنقّل بمستوى متوسط؛ راجع المواعيد والعنوان قبل التحرك.','Travel timing is moderate; double-check schedules and addresses before leaving.'],
-  high:['المؤشر ملائم للتنقّل؛ ثبّت الموعد والطريق واترك هامش بسيط للتأخير.','Travel timing is favorable; confirm the route and allow some delay buffer.']
+  low:['إذا وراك حجز، اترك مجال للزحمة وخزّن العنوان حتى لو انقطع النت.','Travel planning is low; verify bookings and routes, with extra time or a fallback.'],
+  mid:['شيّك نقطة الانطلاق. مرات اسم المكان صحيح بس الفرع غير اللي تقصده.','Travel timing is moderate; double-check schedules and addresses before leaving.'],
+  high:['مشوارك مرتب؟ ثبّت مكان اللقاء وخلّي شوية وقت بين الوصول والموعد.','Travel timing is favorable; confirm the route and allow some delay buffer.']
  },
  risk:{
-  low:['درجة الاستعداد والحذر منخفضة؛ دقّق النقل والمكان وتجنّب القرارات المستعجلة.','Caution readiness is low; verify transport and venue conditions and avoid rushed decisions.'],
-  mid:['الاستعداد والحذر متوسط؛ افحص معلومات المكان والطريق قبل اتخاذ قرار.','Caution readiness is moderate; check actual location and route information first.'],
-  high:['مؤشر الاستعداد والحذر مرتفع؛ حافظ على الاحتياطات العادية بدون افتراض انعدام المخاطر.','Caution readiness is high; keep normal precautions and do not assume any setting is risk-free.']
+  low:['قبل ما تطلع لمكان جديد، شوف آخر معلومات الطريق وخيارات الرجعة.','Caution readiness is low; verify transport and venue conditions and avoid rushed decisions.'],
+  mid:['تأكد من عنوانك ومن وسيلة النقل اللي راح تستخدمها، خصوصاً إذا راجع متأخر.','Caution readiness is moderate; check actual location and route information first.'],
+  high:['حتى ويا درجة عالية، اعتمد على وضع الطريق والمكان هسّه وخذ احتياطاتك المعتادة.','Caution readiness is high; keep normal precautions and do not assume any setting is risk-free.']
  },
  sleep:{
-  low:['مؤشر توقيت الراحة منخفض، بس هذا مو سبب لتأجيل النوم؛ إذا تعبان ارتاح.','The rest-timing index is low, but never a reason to postpone sleep; rest when tired.'],
-  mid:['وقت الراحة تقييمه متوسط؛ خصص وقتاً هادئاً وقلل المنبهات إذا تريد تنام.','Rest timing is moderate; allow a quiet wind-down and limit stimulation before sleep.'],
-  high:['مؤشر توقيت الراحة مرتفع؛ استثمر فرصة الهدوء ونظّم نومك.','Rest timing is high; make use of a quiet window and protect your sleep routine.']
+  low:['إذا تعبان ارتاح، حتى لو درجة التوقيت طالعة واطية.','The rest-timing index is low, but never a reason to postpone sleep; rest when tired.'],
+  mid:['إذا خلص يومك، خلّي آخر شغلة لباجر وخذ شوية هدوء قبل النوم.','Rest timing is moderate; allow a quiet wind-down and limit stimulation before sleep.'],
+  high:['إذا عندك مجال ترتاح هسّه، استغلّه. مو لازم تملأ كل ساعة بمشوار.','Rest timing is high; make use of a quiet window and protect your sleep routine.']
  }
 };
 const activityFocus:Record<TravelCardId,Category>={
