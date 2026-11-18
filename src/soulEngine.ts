@@ -1,5 +1,5 @@
 import type {Chart,Profile} from './engine.ts';
-import {distance,houseNumber,type Point} from './math.ts';
+import {degreesInSign,distance,houseNumber,type Point} from './math.ts';
 import {soulTopics,type SoulTopic} from './soulData.ts';
 import {getSoulTheme} from './soulThemes.ts';
 import {soulDeepFor} from './soulDeep.ts';
@@ -210,7 +210,7 @@ export function soulProfileSummary(chart:Chart,profile:Profile){
 }
 export function soulEvidenceText(basis:NatalBasis[],arabic:boolean){
  if(!basis.length)return arabic?'بيانات الميلاد غير كافية لهذا الموضوع.':'Insufficient natal data for this topic.';
- const places=basis.map(b=>placementText(b,arabic)+' '+(((b.longitude%30)+30)%30).toFixed(2)+'°'+(b.house?(arabic?' · البيت ':' · house ')+b.house:'')+(b.retrograde?(arabic?' · متراجع ظاهرياً':' · apparent retrograde'):''));
+ const places=basis.map(b=>placementText(b,arabic)+' '+degreesInSign(b.longitude,2)+'°'+(b.house?(arabic?' · البيت ':' · house ')+b.house:'')+(b.retrograde?(arabic?' · متراجع ظاهرياً':' · apparent retrograde'):''));
  const pairs=soulAspectPairs(basis).map(p=>name(p.first,arabic)+' '+(arabic?aspectNamesAr:aspectNamesEn)[p.type]+' '+name(p.second,arabic)+(arabic?' · الأورب ':' · orb ')+p.orb.toFixed(2)+'°');
  return places.join(' | ')+(pairs.length?' — '+pairs.join(' | '):'');
 }

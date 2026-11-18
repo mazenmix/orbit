@@ -38,10 +38,10 @@ export function trustworthyPeak(factor:Evidence|null,asOf:Date):Date|null{
 }
 export function decisionExplanation(item:DecisionDetail,arabic:boolean){
  const hasSupport=item.supportFactor!==null,hasChallenge=item.challengeFactor!==null;
- if(item.quality==='none')return arabic?'ماكو اتصال محسوب قوي بهذا المجال؛ راجع المعطيات الواقعية قبل اتخاذ قرار.':'No relevant calculated contact here; rely on real-world information before deciding.';
- if(item.sensitive)return (item.mixed?(arabic?'تجتمع إشارات داعمة ومعاكسة. ':'Supporting and challenging contacts coexist. '):'')+(arabic?'الترجيح يتغير إذا استبعدنا اتصالات جرم واحد؛ اعتبره حساساً للعوامل المختارة وجرّب خطوة صغيرة قابلة للمراجعة.':'Removing one transiting body changes the balance; treat this as a sensitive interpretation and test a small reversible step.');
- if(hasSupport&&hasChallenge)return arabic?'تظهر إشارات داعمة ومعاكسة بنفس المجال. الأفضل تجربة خطوة صغيرة ومراجعة رد الفعل، بدون حكم نهائي.':'Supporting and challenging contacts coexist. Try a small reversible step and observe the actual outcome.';
- if(hasChallenge)return arabic?'تظهر زاوية تحتاج تروّي وتدقيق؛ خفف الاندفاع وراجع التفاصيل قبل أي التزام.':'A challenging contact suggests slowing down, checking details, and avoiding irreversible commitments.';
- if(hasSupport)return arabic?'تظهر زاوية رمزية داعمة؛ استثمرها بخطوة محدودة وخلّ النتيجة الواقعية تحسم.':'A supportive contact can be a prompt for a limited test, with the real outcome deciding what follows.';
- return arabic?'الزوايا موجودة لكن مو كلها واضحة الاتجاه؛ لا تعتمد على الرقم وحده.':'Calculated contacts exist but their direction is unclear; do not rely on the number alone.';
+ if(item.quality==='none')return arabic?'هسّه ماكو اتصال قوي بهالمجال حتى نرجّح اتجاه معيّن. شنو اللي تعرفه عن الموقف نفسه؟':'No relevant calculated contact here; rely on real-world information before deciding.';
+ if(item.sensitive)return (item.mixed?(arabic?'أكو إشارات داعمة ومعاكسة بنفس الوقت. ':'Supporting and challenging contacts coexist. '):'')+(arabic?'إذا نشيل اتصالات كوكب واحد، تتغيّر الخلاصة. إذا ببالك خطوة، جرّب شي تگدر تعدّله بعدين.':'Removing one transiting body changes the balance; treat this as a sensitive interpretation and test a small reversible step.');
+ if(hasSupport&&hasChallenge)return arabic?'بهالموضوع أكو إشارات داعمة ومعاكسة. جرّب خطوة وحدة وشوف شنو يصير قبل ما تكمل.':'Supporting and challenging contacts coexist. Try a small reversible step and observe the actual outcome.';
+ if(hasChallenge)return arabic?'هالاتصال يدعوك تتأنّى. إذا أكو تفصيل بعده مبهم، اسأل عنه قبل ما توعد.':'A challenging contact suggests slowing down, checking details, and avoiding irreversible commitments.';
+ if(hasSupport)return arabic?'القراءة تشجّعك تبدي. اختار شغلة وحدة تگدر تسويها هسّه، ومن تشوف نتيجتها قرّر شنو بعدها.':'A supportive contact can be a prompt for a limited test, with the real outcome deciding what follows.';
+ return arabic?'أكو اتصالات، بس ما يطلع منها اتجاه واضح. شوف شنو يناسب ظروفك اليوم.':'Calculated contacts exist but their direction is unclear; do not rely on the number alone.';
 }

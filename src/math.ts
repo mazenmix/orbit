@@ -3,6 +3,12 @@
  * VERIFICATION.md. These indices are not calibrated probabilities.
  */
 export const normalize=(x:number)=>{const remainder=x%360;return remainder<0?remainder+360:(remainder===0?0:remainder)};
+/** Keep the sign selected from the exact position, even when display rounding reaches its upper boundary. */
+export function degreesInSign(longitude:number,precision:number):string{
+ const degrees=normalize(longitude)%30;
+ const lastDisplayable=30-10**(-precision);
+ return Math.min(degrees,lastDisplayable).toFixed(precision);
+}
 export const distance=(a:number,b:number)=>{const d=Math.abs(normalize(a)-normalize(b));return Math.min(d,360-d)};
 export const clamp=(x:number)=>Math.min(99,Math.max(1,x));
 export const bodies=[

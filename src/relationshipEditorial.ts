@@ -92,8 +92,8 @@ const note=(theme:Theme,e:SynastryEvidence|null,shared=false):RelationshipEditor
  const steps:Record<Theme,TwoLanguage>={
   attraction:bi('راقبوا المبادرة والتجاوب الحقيقي، مو الإشارات وحدها.','Judge by actual initiative and response, not hints alone.'),
   sexual:bi('الحدود والراحة والرغبة المتبادلة تنحچي بصراحة.','Discuss comfort, boundaries and mutual willingness explicitly.'),
-  harmony:bi('اختبروا هالنقطة بموقف يومي بسيط.','Check this strength through an ordinary real-life interaction.'),
-  challenge:bi('اسألوا عن نقطة الاختلاف المحددة بدل التخمين.','Clarify the specific disagreement rather than guessing.')
+  harmony:bi('تذكّر آخر مرة رتّبتوا شغلة سويّة. وين حسّيت التفاهم بينكم أسهل؟','Check this strength through an ordinary real-life interaction.'),
+  challenge:bi('اسأل بهدوء: «شنو بالضبط اللي ضايقك؟» وخلي الجواب يوضّح وين صار الاختلاف.','Clarify the specific disagreement rather than guessing.')
  };
  return {title:titles[theme],body,step:steps[theme],source:label(e),contact:e,sharedSource:shared};
 };

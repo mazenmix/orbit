@@ -48,6 +48,7 @@ export function colorizeAstroDay(evidence:readonly Evidence[]):AstroCalendarRati
   const tone=fortuneContactTone(e);
   if(tone===0)continue;
   const weight=fortuneContactWeight(e);
+  if(weight===0)continue;
   considered++;
   if(tone===1){favorableWeight+=weight;if(weight>highestSupport){strongestSupport=e;highestSupport=weight}}
   else {challengingWeight+=weight;if(weight>highestChallenge){strongestChallenge=e;highestChallenge=weight}}
