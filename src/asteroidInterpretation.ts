@@ -1,4 +1,4 @@
-import {angles,distance,importance,applyingToNatal,type Point,type Evidence} from './math.ts';
+import {degreesInSign,angles,distance,importance,applyingToNatal,type Point,type Evidence} from './math.ts';
 import {namedAsteroids,type NamedAsteroid} from './asteroids.ts';
 export type NamedContact=Evidence;
 /** Optional real-orb measured extra contacts, distinct from eight source scores.
@@ -121,7 +121,7 @@ export function currentAsteroidReading(item:NamedAsteroid,position:Point|undefin
  const namesAr=['الحمل','الثور','الجوزاء','السرطان','الأسد','العذراء','الميزان','العقرب','القوس','الجدي','الدلو','الحوت'];
  const namesEn=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
  const lon=((position.longitude%360)+360)%360;
- const sign=Math.floor(lon/30),degree=(lon%30).toFixed(2);
+ const sign=Math.floor(lon/30),degree=degreesInSign(lon,2);
  const movement=position.speed<-.00001?(english?'retrograde':'متراجع'):
   position.speed>.00001?(english?'direct':'مباشر'):(english?'stationary':'شبه ثابت');
  const sky=english?

@@ -1,4 +1,4 @@
-import {normalize,distance,angles,type Point} from './math.ts';
+import {degreesInSign,normalize,distance,angles,type Point} from './math.ts';
 import {signSymbols,signsAr,signsEn,planet,t} from './i18n.ts';
 import type {Chart} from './engine.ts';
 
@@ -14,7 +14,7 @@ const palette=['#f59c8e','#f1c681','#a7dccd','#92bbf6','#e9b976','#a7dc9c','#d6a
 const aspects:Record<number,string>={0:'#d7b1ff',60:'#7ad7e5',90:'#ed9a81',120:'#83ddb3',180:'#f18ba5'};
 const escape=(x:string)=>x.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const fixed=(n:number)=>Number(n.toFixed(2));
-const dms=(n:number)=>(normalize(n)%30).toFixed(1)+'°';
+const dms=(n:number)=>degreesInSign(n,1)+'°';
 export type WheelLabel={id:string;longitude:number;displayAngle:number;lane:number};
 /** Rotate at the largest gap and distribute labels without changing actual planet longitudes. */
 export function layoutWheelLabels(points:readonly Point[],asc:number,minGap=11):WheelLabel[]{

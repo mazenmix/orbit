@@ -35,3 +35,8 @@ export function vocDisplayProgress(enteredAt:number,vocStartsAt:number,ingressAt
  const percent=phase==='upcoming'?elapsedPercent(enteredAt,vocStartsAt,now):elapsedPercent(vocStartsAt,ingressAt,now);
  return {phase,percent};
 }
+
+/** A countdown can display 100% only after it actually reaches the boundary. */
+export function displayProgressPercent(percent:number):number{
+ return percent>=100?100:Math.min(99,Math.round(percent));
+}

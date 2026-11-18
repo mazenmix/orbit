@@ -1,3 +1,4 @@
+import {degreesInSign} from './math.ts';
 import {soulCategories,soulSearch,soulTopics} from './soulData.ts';
 import {soulReading,soulProfileSummary,soulEvidenceText} from './soulEngine.ts';
 import {humanSoul} from './humanReading.ts';
@@ -56,7 +57,7 @@ export function soulRender(view:SoulView){
  const direct=humanSoul(reading);
  const overview=humanSoul(soulReading(chart,soulTopics[7],{knownTime:profile.known}));
  const link=(id:string)=>'<button class="soul-category '+(current.id===+id?'is-active':'')+'" data-soul-category="'+id+'" style="--soul-color:'+xml(soulCategories[+id-1].color)+'"><span class="soul-category-num">'+String(id).padStart(2,'0')+'</span><span class="soul-category-icon">'+soulIcon(soulCategories[+id-1].icon,soulCategories[+id-1].color,31)+'</span><span class="soul-category-label">'+xml(l(soulCategories[+id-1].ar,soulCategories[+id-1].en))+'</span><small>'+xml(l(soulCategories[+id-1].en,soulCategories[+id-1].ar))+'</small><span class="soul-topic-count">8 '+l('تحليلات','topics')+' <span>›</span></span></button>';
- const planet=(id:string,visual:string,color:string)=>{const longitude=point(chart,id,profile.known);return '<div class="soul-planet-card" style="--planet-color:'+color+'"><span class="soul-planet-symbol">'+visual+'</span><span>'+l(({Sun:'الشمس',Moon:'القمر',Ascendant:'الطالع',MC:'وسط السماء'} as Record<string,string>)[id],id)+'</span><b>'+(longitude===null?l('غير محسوب','Unavailable'):signOf(longitude,ar))+'</b><small>'+(longitude===null?'—':(profile.known?'':'≈ ')+(longitude%30).toFixed(2)+'°')+'</small></div>'};
+ const planet=(id:string,visual:string,color:string)=>{const longitude=point(chart,id,profile.known);return '<div class="soul-planet-card" style="--planet-color:'+color+'"><span class="soul-planet-symbol">'+visual+'</span><span>'+l(({Sun:'الشمس',Moon:'القمر',Ascendant:'الطالع',MC:'وسط السماء'} as Record<string,string>)[id],id)+'</span><b>'+(longitude===null?l('غير محسوب','Unavailable'):signOf(longitude,ar))+'</b><small>'+(longitude===null?'—':(profile.known?'':'≈ ')+degreesInSign(longitude,2)+'°')+'</small></div>'};
  const emphasize=(title:string,body:string,css='')=>!body.trim()?'':'<section class="soul-detail-box '+css+'"><h4>'+title+'</h4>'+body.split(/\n\s*\n/).filter(p=>p.trim()).map(p=>'<p>'+xml(p)+'</p>').join('')+'</section>';
  const list=(title:string,items:string[],cls:string)=>!items.length?'':'<section class="soul-detail-box '+cls+'"><h4>'+title+'</h4><ul>'+items.map(x=>'<li>'+xml(x)+'</li>').join('')+'</ul></section>';
  const activeIndex=current.topics.findIndex(x=>x.id===activeTopic.id),prev=current.topics[(activeIndex+7)%8],next=current.topics[(activeIndex+1)%8];
