@@ -330,3 +330,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
  .asteroids-grid.reading-asteroids{grid-template-columns:1fr;gap:9px}
  .reading-asteroids .asteroid-item.meaning-card{padding:12px 13px}
 }
+.mx-close-score-note{
+ margin:0 0 4px;
+ font-size:12px;
+ line-height:1.25;
+}
