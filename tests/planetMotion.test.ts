@@ -13,6 +13,8 @@ test('Planetary phase percentages are true remaining duration, not transit odds'
  assert.equal(remainingMotionPercent(start,end,start),100);
  assert.equal(remainingMotionPercent(start,end,start+25*DAY),75);
  assert.equal(remainingMotionPercent(start,end,start+50*DAY),50);
+ assert.equal(remainingMotionPercent(start,end,start+1),99);
+ assert.equal(remainingMotionPercent(start,end,end-1),1);
  assert.equal(remainingMotionPercent(start,end,end),0);
  assert.equal(remainingMotionPercent(start,end,end+DAY),0);
  assert.equal(remainingMotionPercent(start,start,start),null);

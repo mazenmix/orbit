@@ -1192,17 +1192,18 @@ function eclipsesPage(){
   const countdown=(e:ConfirmedEclipse)=>{
    const parts=eclipseCountdownParts(reference,+e.maximum);
    const fields=([['months',t('شهر','MONTHS')],['days',t('يوم','DAYS')],['hours',t('ساعة','HOURS')],['minutes',t('دقيقة','MINUTES')],['seconds',t('ثانية','SECONDS')]] as const);
-   return '<div class="eclipse-countdown" data-eclipse-to="'+(+e.maximum)+'" role="timer" aria-label="'+t('المتبقي حتى ذروة الكسوف أو الخسوف','Time until eclipse maximum')+'"><div class="eclipse-countdown-heading"><span class="eclipse-countdown-dot" aria-hidden="true"></span>'+t('المتبقي حتى الذروة','COUNTDOWN TO MAXIMUM')+'</div><div class="eclipse-countdown-grid">'+fields.map(([unit,label])=>'<div class="eclipse-countdown-unit"><span class="eclipse-countdown-number" data-eclipse-unit="'+unit+'">'+String(parts[unit]).padStart(2,'0')+'</span><small>'+label+'</small></div>').join('')+'</div></div>';
+   return '<div class="eclipse-countdown" data-eclipse-to="'+(+e.maximum)+'" role="timer" aria-label="'+(reference>=+e.maximum?t('وصلت الذروة','Maximum reached'):t('المتبقي حتى ذروة الكسوف أو الخسوف','Time until eclipse maximum'))+'"><div class="eclipse-countdown-heading"><span class="eclipse-countdown-dot" aria-hidden="true"></span><span data-eclipse-countdown-label>'+(reference>=+e.maximum?t('الذروة صارت','MAXIMUM REACHED'):t('المتبقي حتى الذروة','COUNTDOWN TO MAXIMUM'))+'</span></div><div class="eclipse-countdown-grid">'+fields.map(([unit,label])=>'<div class="eclipse-countdown-unit"><span class="eclipse-countdown-number" data-eclipse-unit="'+unit+'">'+String(parts[unit]).padStart(2,'0')+'</span><small>'+label+'</small></div>').join('')+'</div></div>';
   };
   return (liveTimePinned?'<p class="panel">'+t('دا تشوف الأحداث من الوقت اللي اخترته.','Events are shown from your selected time.')+' <button type="button" class="text-button" data-now>'+t('ارجع لهسّه','Return to now')+'</button></p>':'')+'<div class="confirmed-eclipses eclipse-premium-grid">'+eclipses.map((e,i)=>{
     const solar=e.kind==='solar';
     const eclipseStory=solar?
-      e.type==='annular'?t('كسوف حلقي: القمر يحجب وسط الشمس وتبقى حلقة ضوئية. دلالته الرمزية مراجعة بداية أو اتجاه جديد: اختار خطوة عملية صغيرة، مو قرار مصيري. لا تباوع للشمس بدون نظارات كسوف معتمدة.','Annular eclipse: the Moon leaves a bright ring around the Sun. Symbolically review a new direction with a small practical step, not a major decision. Use certified solar viewers.'):
-      e.type==='total'?t('كسوف كلي: القمر يغطي قرص الشمس لفترة قصيرة بمناطق الرؤية. رمزياً راجع أولوياتك قبل بداية جديدة، بدون توقع انقلاب بالحياة. استخدم حماية العين المناسبة خلال الكسوف.','Total eclipse: the Moon briefly covers the Sun where visible. Symbolically review your priorities without predicting life changes. Follow eclipse eye-safety instructions.'):
-      t('كسوف الشمس: القمر يغطي جزءاً من قرص الشمس. بالقراءة الرمزية راجع اتجاه واحد وخلي قرارك مبني على واقعك، مو على الكسوف. لا تباوع للشمس بدون حماية معتمدة.','Solar eclipse: the Moon obscures part of the Sun. Symbolically review one direction without treating the eclipse as a prediction. Use certified eye protection.'):
-      e.type==='penumbral'?t('خسوف شبه ظل: القمر يدخل ظل الأرض الخفيف، والتغير بالإضاءة ممكن يكون بسيط. رمزياً راجع سوء فهم أو موقف عاطفي، واسأل عن الحقيقة بدل افتراض نوايا أحد.','Penumbral lunar eclipse: the Moon crosses Earth’s faint outer shadow. Symbolically clarify a misunderstanding rather than assuming intent.'):
-      e.type==='total'?t('خسوف كلي: القمر يدخل ظل الأرض وقد يظهر بلون نحاسي. رمزياً راجع مشاعرك وحدودك بموقف محدد، مو توقع انفصال أو رجوع شخص.','Total lunar eclipse: the Moon enters Earth’s shadow and may appear copper-colored. Symbolically review a feeling or boundary, not predict relationships.'):
-      t('خسوف القمر: يدخل القمر بظل الأرض. رمزياً راجع موضوع عاطفي مؤجل ووضّح موقفك قبل المواجهة، مو تتوقع مصير العلاقة من الخسوف.','Lunar eclipse: the Moon enters Earth’s shadow. Symbolically revisit a postponed emotional issue without predicting the outcome of a relationship.');
+      e.type==='annular'?t('بهالكسوف الحلقي، القمر يغطي وسط الشمس وتبقى حلقة ضوئية بالمناطق اللي تشوفه حلقي. إذا تفكر ببداية جديدة، شنو أول خطوة بسيطة تگدر تسويها؟ وإذا تشوف الكسوف، استخدم نظارات كسوف معتمدة.','Annular eclipse: the Moon leaves a bright ring around the Sun. Symbolically review a new direction with a small practical step, not a major decision. Use certified solar viewers.'):
+      e.type==='total'?t('بهالكسوف الكلي، القمر يغطي الشمس لفترة قصيرة بالمناطق الواقعة بمسار الكلية. إذا عندك شي جديد ببالك، خذ لحظة ورتّب أولوياتك. واتبع إرشادات حماية العين عند مشاهدة الكسوف.','Total eclipse: the Moon briefly covers the Sun where visible. Symbolically review your priorities without predicting life changes. Follow eclipse eye-safety instructions.'):
+      e.type==='hybrid'?t('هذا كسوف هجين. يبين كلي بمناطق وحلقي بمناطق ثانية على مساره. إذا تشوفه، اتبع إرشادات حماية العين للمنطقة اللي أنت بيها.','A hybrid eclipse appears total along some parts of its path and annular along others. Follow local eclipse eye-safety guidance.'):
+      t('القمر يمر بين الأرض والشمس، وتختلف رؤيته حسب موقعك. عندك خطة مشغلتك؟ ارجع لتفاصيلها وشوف الخطوة اللي تگدر ترتّبها هسّه. إذا تشوف الكسوف، استخدم نظارات كسوف معتمدة.','The Moon passes between Earth and the Sun. Visibility varies by location. Use certified solar viewers.'):
+      e.type==='penumbral'?t('القمر يمرّ بمنطقة شبه ظل الأرض، ولهذا التغيّر بضوئه ممكن يكون خفيف. إذا أكو كلام بقى مبهم بينك وبين أحد، سؤال هادئ يگدر يوضّح السالفة.','Penumbral lunar eclipse: the Moon crosses Earth’s faint outer shadow. Symbolically clarify a misunderstanding rather than assuming intent.'):
+      e.type==='total'?t('القمر يدخل ظل الأرض، وممكن تشوفه بلون نحاسي بمناطق الرؤية. إذا موقف شاغل بالك، خذ وقتك تعرف شنو حاسّ وشنو تحتاج توضّحه.','Total lunar eclipse: the Moon enters Earth’s shadow and may appear copper-colored. Symbolically review a feeling or boundary, not predict relationships.'):
+      t('القمر يمرّ بظل الأرض. إذا عندك موضوع مأجّله، فكّر شنو تحب تكول عنه واختار وقت ترتاح تحچي بيه.','Lunar eclipse: the Moon enters Earth’s shadow. Symbolically revisit a postponed emotional issue without predicting the outcome of a relationship.');
     const status=eclipseEventPhase(e,reference),bounds=eclipseEventBounds(e);
     const place=solar
      ?e.globalCoordinates
@@ -1978,6 +1979,11 @@ function tickEclipseCountdowns(now:number){
  root.querySelectorAll<HTMLElement>('.eclipse-countdown[data-eclipse-to]').forEach(tile=>{
   const target=Number(tile.dataset.eclipseTo);
   if(!Number.isFinite(target))return;
+  const passed=now>=target;
+  const label=tile.querySelector<HTMLElement>('[data-eclipse-countdown-label]');
+  const text=passed?t('الذروة صارت','MAXIMUM REACHED'):t('المتبقي حتى الذروة','COUNTDOWN TO MAXIMUM');
+  if(label&&label.textContent!==text)label.textContent=text;
+  tile.setAttribute('aria-label',passed?t('وصلت الذروة','Maximum reached'):t('المتبقي حتى ذروة الكسوف أو الخسوف','Time until eclipse maximum'));
   const parts=eclipseCountdownParts(now,target);
   for(const unit of ['months','days','hours','minutes','seconds'] as const){
    const el=tile.querySelector<HTMLElement>('[data-eclipse-unit="'+unit+'"]');
