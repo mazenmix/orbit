@@ -31,11 +31,11 @@ const topics:Record<string,Topic>={
  MC:{theme:{ar:'الشغل والسمعة المهنية',en:'career and public responsibilities'},step:{ar:'تابع تكليف واضح وحدد موعد تسليمه',en:'Follow up on a concrete work deliverable and deadline'}}
 };
 const aspects:Record<number,Bi>={
- 0:{ar:'اقتران يجمع الموضوعين ويخلي الحاجة للتوازن أوضح',en:'A conjunction merges the themes and makes their balance more noticeable'},
- 60:{ar:'تسديس يرمز لإمكانية تعاون تحتاج منك مبادرة',en:'A sextile represents an opening for cooperation that still takes initiative'},
- 90:{ar:'تربيع يرمز لشدّ بين حاجتين؛ لا تخلي وحدة تلغي الثانية',en:'A square symbolizes competing needs; do not let one cancel the other'},
- 120:{ar:'تثليث يرمز لسهولة نسبية بالتنسيق بين الجانبين',en:'A trine symbolizes relatively smoother coordination between the themes'},
- 180:{ar:'مقابلة تبرز طرفين يحتاجان اتفاق وحدود واضحة',en:'An opposition highlights two sides that need clear agreement and boundaries'}
+ 0:{ar:'الموضوعين متداخلين؛ ركّز على أولويتك',en:'The themes overlap; identify your priority'},
+ 60:{ar:'أكو مجال للتفاهم، وخطوة بسيطة منك تساعد',en:'Cooperation is possible; take one small step'},
+ 90:{ar:'قد تحتاج توازن بين حاجتين؛ لا تستعجل بالحسم',en:'Balance the competing needs before deciding'},
+ 120:{ar:'التنسيق بين الجانبين ممكن يكون أسهل إذا وضحت قصدك',en:'Clear communication can help coordinate both sides'},
+ 180:{ar:'شوف احتياجك واحتياج الطرف الثاني قبل الاتفاق',en:'Consider both sides before agreeing'}
 };
 const signs:readonly {theme:Bi;step:Bi}[]=[
  {theme:{ar:'البداية والمبادرة',en:'new starts and initiative'},step:{ar:'اختار خطوة أولى صغيرة لمشروع مأجّل',en:'Pick one small first step for a delayed project'}},

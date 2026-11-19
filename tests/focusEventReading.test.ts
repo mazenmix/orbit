@@ -22,16 +22,16 @@ test('Real aspect components change the reading, rather than repeating boilerpla
  assert.match(venus.effect,/العلاقات/);
  assert.match(mercury.effect,/الكلام/);
  assert.notEqual(venus.action,mercury.action);
- assert.match(mercury.effect,/تربيع/);
+ assert.match(mercury.effect,/توازن/);
  const personal=read({kind:'personal-aspect',transit:'Mars',target:'Venus',angle:90});
  assert.match(personal.effect,/المبادرة/);
  assert.match(personal.effect,/العلاقات/);
- assert.match(personal.effect,/تربيع/);
+ assert.match(personal.effect,/توازن/);
  assert.notEqual(personal.effect,venus.effect);
  assert.notEqual(read({kind:'personal-aspect',transit:'Saturn',target:'Venus',angle:90}).effect,personal.effect);
 });
 test('English and unsupported input safely cover calculated event types',()=>{
- assert.match(read({kind:'moon-aspect',target:'Saturn',angle:180},'en').effect,/opposition/);
+ assert.match(read({kind:'moon-aspect',target:'Saturn',angle:180},'en').effect,/both sides/);
  assert.match(read({kind:'personal-aspect',transit:'Sun',target:'MC',angle:0},'en').action,/work deliverable/);
  assert.throws(()=>read({kind:'moon-aspect',target:'Foo',angle:90}),/Invalid/);
 });
