@@ -7,7 +7,18 @@ const timedSources:Partial<Record<IntimacyTheme,readonly Category[]>>={
 /** Includes source domains compared in the narrative, even if they are not
  * numerical inputs to that card's formula. A neutral default cannot support
  * either a displayed number or a claim that one current domain leads another. */
-export function partnerInsightAvailable(id:IntimacyTheme,signals:readonly {category:Category}[]):boolean{
+const requiredDimensions:Record<IntimacyTheme,readonly Dimension[]>={
+ desire:['sexual','attraction'],chemistry:['sexual','emotional','conflict'],
+ date:['communication','stability'],flirt:['attraction','communication'],
+ exploration:['sexual','communication','conflict'],fantasyTalk:['emotional','communication','conflict'],
+ trust:['emotional','stability'],initiative:['attraction','communication'],
+ boundaries:['conflict','stability'],consistency:['stability','communication'],
+ intellectual:['communication','conflict','emotional'],emotionalNeeds:['emotional','stability','conflict'],
+ conflictRepair:['conflict','communication','stability'],closenessPace:['attraction','emotional','stability'],
+ longTerm:['stability','conflict','emotional'],contactTiming:['communication']
+};
+export function partnerInsightAvailable(id:IntimacyTheme,signals:readonly {category:Category}[],coverage?:Record<Dimension,boolean>):boolean{
+ if(coverage&&!requiredDimensions[id].every(key=>coverage[key]===true))return false;
  const required=timedSources[id];
  if(!required)return true;
  const observed=new Set(signals.map(s=>s.category));

@@ -1504,7 +1504,7 @@ function peoplePage(){
   const usedEvidence=new Set<string>();
   const extended=insights.map(x=>{
    const title='<h3>'+t(x.arTitle,x.enTitle)+'</h3>';
-   if(!partnerInsightAvailable(x.id,dailyReport.signals))return '<article class="partner-insight metric-card mx-unavailable" data-partner-insight="'+x.id+'">'+title+'<strong>—</strong><p>'+t('ماكو تغطية حسابية كافية لمقارنة مجالات هالوقت؛ درجة 50 الافتراضية مو دليل على ملاءمة موعد أو مبادرة.','Insufficient calculated coverage for this time comparison; a default 50 is not evidence for a meeting or initiative.')+'</p></article>';
+   if(!partnerInsightAvailable(x.id,dailyReport.signals,c.coverage))return '<article class="partner-insight metric-card mx-unavailable" data-partner-insight="'+x.id+'">'+title+'<strong>—</strong><p>'+t('ماكو اتصالات محسوبة كافية لهالمجال، فما أگدر أعطيك درجة موثوقة.','Not enough calculated evidence is available for this score.')+'</p></article>';
    const story=partnerCardStory(x,c.dimensions,{love:indices.love,communication:indices.communication,energy:indices.energy},c.evidence,usedEvidence);
    return '<article class="partner-insight metric-card '+gaugeLevel(x.score)+'" data-partner-insight="'+x.id+'">'+title+gauge(x.score)+'<p class="mx-partner-reading">'+esc(t(story.ar,story.en))+'</p></article>';
   }).join('');

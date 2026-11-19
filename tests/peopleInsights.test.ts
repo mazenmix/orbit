@@ -23,3 +23,12 @@ test('timed partner cards require observed sources for scores AND their narrativ
  assert.equal(partnerInsightAvailable('contactTiming',[{category:'love'},{category:'communication'}]),true);
  assert.equal(partnerInsightAvailable('desire',[]),true,'static synastry does not need timed domains');
 });
+
+test('partner cards require every natal dimension used by the score and explanation',()=>{
+ const coverage={attraction:true,sexual:true,emotional:true,communication:true,stability:true,conflict:true};
+ const signals=[{category:'love' as const},{category:'communication' as const},{category:'energy' as const}];
+ assert.equal(partnerInsightAvailable('desire',signals,{...coverage,sexual:false}),false);
+ assert.equal(partnerInsightAvailable('trust',signals,{...coverage,stability:false}),false);
+ assert.equal(partnerInsightAvailable('date',signals,{...coverage,communication:false}),false);
+ assert.equal(partnerInsightAvailable('initiative',signals,coverage),true);
+});
