@@ -1385,12 +1385,12 @@ function lunarMansionMarkup(){
    '<div class="mx-mansion-identity">'+
 
     '<div class="mx-mansion-name"><h3>'+esc(t(m.arName,m.enName))+'</h3><span class="mx-mansion-english" lang="en">'+esc(m.enName)+'</span></div>'+
-    '<div class="mx-mansion-transition"><span>'+t('المنزلة القادمة','Next mansion')+'</span><time datetime="'+interval.exitsAt.toISOString()+'">'+esc(arrival)+'</time><strong class="mx-mansion-clock" data-mansion-clock>—</strong></div>'+
+    '<div class="mx-mansion-transition"><span>'+t('بداية المنزلة القادمة','Next mansion begins')+'</span><time datetime="'+interval.exitsAt.toISOString()+'">'+esc(arrival)+'</time><strong class="mx-mansion-clock" data-mansion-clock>—</strong></div>'+
    '</div>'+
    '<div class="mx-mansion-grid">'+
     '<div class="mx-mansion-line theme"><span>'+t('الطابع التقليدي','Traditional essence')+'</span><strong>'+esc(t(m.arTheme,m.enTheme))+'</strong></div>'+
     '<div class="mx-mansion-line good"><span>✓ '+t('مناسب تقليدياً','Traditionally favorable')+'</span><strong>'+esc(t(m.arGood,m.enGood))+'</strong></div>'+
-    '<div class="mx-mansion-line avoid"><span>− '+t('غير مناسب تقليدياً','Traditionally unfavorable')+'</span><strong>'+esc(t(m.arAvoid,m.enAvoid))+'</strong></div>'+
+    '<div class="mx-mansion-line avoid"><span>'+(m.number===11||m.number===28?t('ملاحظة','Note'):'− '+t('غير مناسب تقليدياً','Traditionally unfavorable'))+'</span><strong>'+esc(t(m.arAvoid,m.enAvoid))+'</strong></div>'+
    '</div><p class="subtle mx-mansion-method">'+t('28 قطاعاً متساوياً من طول القمر الاستوائي، مو مواقع النجوم المسماة نفسها. الارتباطات تراثية؛ ما تثبت نجاح نشاط أو صلاحية توقيت للرعاية الصحية.','28 equal sectors of tropical lunar longitude, not the positions of the named stars. Associations are historical; they do not establish activity outcomes or medical timing.')+'</p>'+
    '</section>';
  }catch(e){
@@ -1456,7 +1456,8 @@ function relationshipWindowUI(person:Profile){
    if(!ranked.length)return '<p class="mx-window-unavailable">'+t('ما عدنا أيام بيها معلومات كافية حتى نرشّحلك موعد.','No samples have sufficient calculated coverage for this ranking; missing evidence is not replaced with a score of 50.')+'</p>';
    return ranked.map(day=>{
     const reading=relationshipDayReading(day,kind,period,getReport(day.day).signals,used);
-    return '<article class="relation-window metric-card '+gaugeLevel(day[kind]!)+'"><div class="relation-heading"><b>'+dateText(day.day,{weekday:'short',day:'numeric',month:'short'})+'</b><strong>'+day[kind]+'</strong></div><p>'+esc(t(reading.ar,reading.en))+'</p><small class="relation-window-reason">'+esc(t(reading.reasonAr,reading.reasonEn))+'</small><div class="button-row"><button class="secondary" data-relationship-time="'+(+day.day)+'">'+t('افتح اليوم','Inspect day')+'</button><button class="text-button" data-relationship-calendar="'+(+day.day)+'" data-relationship-kind="'+kind+'">'+t('تذكير بالتقويم','Calendar reminder')+'</button></div></article>';
+    const reminder=+day.day>Date.now()?'<button class="text-button" data-relationship-calendar="'+(+day.day)+'" data-relationship-kind="'+kind+'">'+t('تذكير بالـ 12 ظهراً','Reminder at 12 noon')+'</button>':'<small>'+t('وقت تذكير الظهر مضى','The noon reminder time has passed')+'</small>';
+    return '<article class="relation-window metric-card '+gaugeLevel(day[kind]!)+'"><div class="relation-heading"><b>'+dateText(day.day,{weekday:'short',day:'numeric',month:'short'})+'</b><strong>'+day[kind]+'</strong></div><p>'+esc(t(reading.ar,reading.en))+'</p><small class="relation-window-reason">'+esc(t(reading.reasonAr,reading.reasonEn))+'</small><div class="button-row"><button class="secondary" data-relationship-time="'+(+day.day)+'">'+t('افتح اليوم','Inspect day')+'</button>'+reminder+'</div></article>';
    }).join('');
   };
   return '<section class="panel relationship-calendar mx-people-section"><h2>'+t('نوافذ التواصل واللقاءات لهذا الشخص','Communication and meeting planning windows')+'</h2><p>'+t('نحسب كل يوم الساعة 12 ظهراً بتوقيت ملفك، ونقارن النتائج على مدى 21 يوم. إذا عجبك يوم، افتحه وشوف تفاصيله. تجاوب الشخص تعرفه من الحچي وياه.','Symbolic comparison of 12:00 noon samples in the profile zone across 21 days; not whole-day ratings or predictions of a response.')+'</p><h3>'+t('عينات التواصل المتاحة','Available communication samples')+'</h3><div class="relation-window-grid">'+cards('message')+'</div>'+(match.romantic?'<h3>'+t('عينات اقتراح اللقاء المتاحة','Available meeting samples')+'</h3><div class="relation-window-grid">'+cards('date')+'</div>':'')+'</section>';
