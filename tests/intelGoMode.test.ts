@@ -112,6 +112,8 @@ test('Go Mode recommendations stay compact and use actual chart evidence',()=>{
  assert.match(narrative,/memo\.complete/,'Missing evidence must be disclosed');
  assert.match(narrative,/memo\.sensitive/,'Sensitive scores must be qualified');
  assert.match(narrative,/memo\.mixed/,'Conflicting evidence must be qualified');
+ assert.ok(narrative.includes("if(!memo.complete)return pick(limits[domain].missing)+' '+first"),'Incomplete evidence is visible on the main card');
+ assert.ok(narrative.includes("if(memo.mixed)return pick(limits[domain].mixed)+' '+first"),'Mixed evidence is visible on the main card');
  for(const domain of ['work','social','relationships','travel'])assert.ok(narrative.includes(domain+':{'),domain);
 });
 

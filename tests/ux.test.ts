@@ -437,11 +437,12 @@ test('GO decision displays only one practical explanation while keeping source a
  assert.doesNotMatch(section,/const narrative=\(alreadySeen\?'':context\+' '\)\+advice/);
 });
 
-test('GO mode keeps fragile-score qualifications inside evidence instead of duplicating them in compact cards',()=>{
+test('GO mode shows incomplete and mixed context on decision cards',()=>{
  const src=main.slice(main.indexOf('function mxGoNarrative('),main.indexOf('function indicatorGaugeCard('));
  const render=main.slice(main.indexOf('function goModePage(){'),main.indexOf('function travelSymbol('));
  assert.match(src,/if\(detail\)\{/);
- assert.match(src,/if\(!memo.complete\|\|memo.sensitive\|\|memo.mixed\)return first/);
+ assert.match(src,/if\(!memo.complete\)return pick\(limits\[domain\].missing\)/);
+ assert.match(src,/if\(memo.mixed\)return pick\(limits\[domain\].mixed\)/);
  assert.match(render,/const advice=mxGoNarrative\(d.domain,state,memo\)/);
  assert.match(render,/const qualifier=mxGoNarrative\(d.domain,state,memo,true\)/);
  assert.match(render,/const explanation=basis\+\(context\?' '\+context:''\)\+\(qualifier/);
