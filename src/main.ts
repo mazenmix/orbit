@@ -867,7 +867,9 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:ContextGoR
  }
  if(!memo.strongest)return pick(limits[domain].none);
  const first=pick(actions[domain][state]);
- if(!memo.complete||memo.sensitive||memo.mixed)return first;
+ if(!memo.complete)return pick(limits[domain].missing)+' '+first;
+ if(memo.mixed)return pick(limits[domain].mixed)+' '+first;
+ if(memo.sensitive)return first;
  const cues:Record<GoDomain,Record<string,[string,string]>>={
   work:{
    Mercury:['دقّق المراسلات والتعليمات.','Double-check messages and instructions.'],
