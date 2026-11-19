@@ -37,3 +37,15 @@ test('a standalone carriage return stays escaped inside calendar text',()=>{
  assert.match(ics,/SUMMARY:one\\ntwo\r\n/);
  assert.match(ics,/DESCRIPTION:a\\nb\\nc\\nd\r\n/);
 });
+
+test('noon relationship reminder triggers at its event time',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const main=readFileSync(new URL('../src/main.ts',import.meta.url),'utf8');
+ const start=main.indexOf("root.querySelectorAll<HTMLButtonElement>('[data-relationship-calendar]')");
+ const handler=main.slice(start,main.indexOf('\n',start));
+ assert.match(handler,/\},0\);calendarDownload/);
+ const at=new Date('2026-11-19T09:00:00Z');
+ const ics=calendarEvent({start:at,end:new Date(+at+1800000),id:'rel',title:'Reminder',description:''},0);
+ assert.match(ics,/DTSTART:20261119T090000Z/);
+ assert.match(ics,/TRIGGER:-PT0M/);
+});
