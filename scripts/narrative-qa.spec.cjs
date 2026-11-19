@@ -147,3 +147,42 @@ for(const quality of ['grounded-fallback','reviewed-model']){
   expect(await page.locator('[data-ai-quality]').count()).toBe(1);
  });
 }
+
+test('unknown birth time stays unknown in settings, natal wheel and transit legend',async({page})=>{
+ await page.addInitScript(()=>{
+  localStorage.setItem('mx.language','en');
+  localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify([{id:'no-hour',name:'Test',kind:'self',date:'1999-06-01',time:'12:00',zone:'Etc/UTC',lat:0,lon:0,city:'Test city',known:false}]));
+ });
+ await page.goto('/#/settings');
+ const time=page.locator('#profile-form [name=time]');
+ await expect(time).toBeDisabled();
+ await expect(time).toHaveValue('');
+ await page.locator('[name=known]').check();
+ await expect(time).toBeEnabled();
+ await expect(time).toHaveAttribute('required','');
+ await page.locator('[name=known]').uncheck();
+ await page.evaluate(()=>{location.hash='/chart'});
+ await expect(page.locator('.large-wheel > p')).not.toContainText('12:00');
+ await expect(page.locator('.mx-wheel-planet-key b').filter({hasText:/^Moon$/})).toHaveCount(0);
+ await page.locator('[data-chart="transit"]').click();
+ await expect(page.locator('.wheel-guide')).toContainText('Transiting planets');
+ await expect(page.locator('.mx-wheel-planet-key b').filter({hasText:/^Moon$/})).toHaveCount(1);
+});
+
+test('eclipse cards and timers use the date selected in Go Mode',async({page})=>{
+ await page.clock.install({time:new Date('2026-11-18T18:00:00Z')});
+ await page.addInitScript(()=>localStorage.setItem('mx.language','en'));
+ await page.goto('/#/go');
+ await page.locator('#go-time-input').fill('2024-04-08T18:20');
+ await page.locator('#go-time-form button').click();
+ await expect(page.locator('.mx-go-time-status')).toContainText('Selected time');
+ await page.evaluate(()=>{location.hash='/eclipses'});
+ const solar=page.locator('.eclipse-solar');
+ await expect(solar).toHaveClass(/eclipse-live/);
+ await expect(solar.locator('.eclipse-maximum time')).toHaveAttribute('datetime',/^2024-04-08T/);
+ const before=await solar.locator('.eclipse-live-grid').innerText();
+ await page.clock.fastForward(3000);
+ await expect(solar.locator('.eclipse-live-grid')).toHaveText(before,{useInnerText:true});
+ await page.getByRole('button',{name:'Return to now'}).click();
+ await expect(solar.locator('.eclipse-maximum time')).toHaveAttribute('datetime',/^2027-02-06T/);
+});
