@@ -52,6 +52,15 @@ export function replaceVaultJournal(items:JournalEntry[]){
  if(!memory)throw Error('Vault is locked');
  memory.journal=validate({...memory,journal:items}).journal;schedule();
 }
+/** Validate and persist both halves together when replacing an imported backup. */
+export async function replaceVaultContents(profiles:Profile[],journal:JournalEntry[]){
+ if(!memory||!secret)throw Error('Vault is locked');
+ const next=validate({schema:1,profiles,journal});
+ await flushVault();
+ const encrypted=await encryptBackup(next,secret);
+ commitEncrypted(encrypted);
+ memory=next;
+}
 function schedule(){
  if(!memory||!secret)throw Error('Cannot save locked vault');
  const snapshot=clone(memory),password=secret;
