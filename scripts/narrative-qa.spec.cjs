@@ -272,3 +272,21 @@ test('Moon page identifies selected time instead of claiming a live reading',asy
  await expect(page.locator('.lunar-premium-card').first().locator('.lunar-card-heading small')).toHaveText('MOON SIGN · SELECTED TIME');
  await expect(page.locator('.lunar-premium-card').first()).not.toContainText('CURRENT MOON SIGN · LIVE');
 });
+
+for(const uiMode of ['simple','pro']){
+ test('Today identifies selected time in '+uiMode+' mode',async({page})=>{
+  await page.clock.install({time:new Date('2026-11-18T18:00:00Z')});
+  await page.addInitScript(mode=>{localStorage.setItem('mx.language','en');localStorage.setItem('mx.uiMode',mode)},uiMode);
+  await page.goto('/#/go');
+  await page.locator('#go-time-input').waitFor({timeout:75000});
+  await page.locator('#go-time-input').fill('2024-04-08T18:20');
+  await page.locator('#go-time-form button').click();
+  await page.evaluate(()=>{location.hash='/today'});
+  const hero=page.locator(uiMode==='simple'?'.mx-focus-hero':'.hero');
+  await expect(hero).toContainText('SKY · SELECTED TIME',{timeout:75000});
+  await expect(hero).not.toContainText('WHOLE-SKY LIVE');
+  const moon=page.locator(uiMode==='simple'?'.mx-focus-moon':'.mx-today-moon-gauges');
+  await expect(moon).toContainText('Moon at selected time');
+  if(uiMode==='pro')await expect(moon.locator('.mx-today-gauges-live')).toContainText('SELECTED');
+ });
+}
