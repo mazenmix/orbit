@@ -73,14 +73,14 @@ const scenes:Record<string,Bi>={
  MC:['إذا عندك اجتماع أو طلب من مسؤول، قدّم إنجاز محدد واطلب المطلوب منك بصراحة.','For a work meeting, present one concrete result and clarify expectations.']
 };
 const categories:Record<Category,Bi>={
- overview:['سوّي ترتيب بسيط لأولويتين بدل تعالج كل حياتك دفعة وحدة.','Choose two priorities rather than trying to fix everything at once.'],
- career:['خلي الاتفاق مكتوب: شنو المطلوب ومنو مسؤول ومتى التسليم.','Document the deliverable, owner and deadline.'],
- love:['إذا أكو اهتمام متبادل، اقترح خطوة واضحة واترك مساحة لقبول أو رفض الطرف الثاني.','If interest is mutual, make one clear invitation and allow room for either response.'],
- communication:['اسأل سؤال واحد محدد وخلي جواب الشخص الآخر يوضح الصورة.','Ask one specific question and allow the actual answer to clarify things.'],
+ overview:['شنو أهم شغلتين عندك؟ ابدي باللي تحتاجك اليوم.','Choose two priorities rather than trying to fix everything at once.'],
+ career:['قبل ما توافق، اتفق على المطلوب ومنو يسويه وشوكت التسليم.','Document the deliverable, owner and deadline.'],
+ love:['إذا أكو اهتمام متبادل، اقترح لقاء واضح وخلي للشخص حرية الرد.','If interest is mutual, make one clear invitation and allow room for either response.'],
+ communication:['اسأل سؤالك بصراحة، وخلي الجواب يوضحلك الصورة.','Ask one specific question and allow the actual answer to clarify things.'],
  energy:['اختار مهمة أو تمرين بحدود معقولة، وسجّل شنو أنجزت فعلاً.','Choose a manageable task or workout and review what you really completed.'],
- emotions:['راقب شنو صار فعلاً وشنو أضفته من تفسير قبل أي رد.','Distinguish the actual event from your interpretation before responding.'],
- recovery:['احجز وقت راحة محدد ولا تخلّي كل فراغ يتحول لمهمة جديدة.','Protect one real rest window rather than filling every gap with work.'],
- timing:['جهّز بديل واضح لأي موعد يعتمد على ظروف أو موافقة غيرك.','Prepare a fallback for any plan dependent on external circumstances.']
+ emotions:['قبل ما ترد، فرّق بين اللي صار فعلاً واللي استنتجته.','Distinguish the actual event from your interpretation before responding.'],
+ recovery:['خلي إلك وقت ترتاح بيه، حتى لو عندك شغلات بعد ما خلصتها.','Protect one real rest window rather than filling every gap with work.'],
+ timing:['إذا موعدك يعتمد على غيرك، حضّر خطة بديلة.','Prepare a fallback for any plan dependent on external circumstances.']
 };
 const everydayCases:Record<Category,Bi>={
  overview:['بين شغلتين ببالك، اختار أي وحدة تحتاج جواب اليوم وأي وحدة تكدر تأجلها.','When two priorities compete, identify what needs an answer today and what can wait.'],
