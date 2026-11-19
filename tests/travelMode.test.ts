@@ -176,6 +176,8 @@ test('Travel explanation acknowledges current-sky adjustments without natal cont
  assert.doesNotMatch(ar.detail,/درجات المجالات باقية على خط الأساس/);
  assert.match(ar.summary,/ماكو اتصال شخصي مؤثر/);
  assert.match(en.summary,/No contributing personal contact/);
+ assert.match(ar.summary,/إذا ببالك لقاء/,'No-contact dating guidance remains actionable');
+ assert.match(en.summary,/suitable time/);
  assert.doesNotMatch(en.summary,/moderate time|favors|reasonable/);
 });
 

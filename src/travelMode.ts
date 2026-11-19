@@ -123,6 +123,20 @@ const travelStories:Record<TravelCardId,TravelStory>={
   high:['إذا عندك مجال ترتاح هسّه، استغلّه. مو لازم تملأ كل ساعة بمشوار.','Rest timing is high; make use of a quiet window and protect your sleep routine.']
  }
 };
+const travelFallback:Record<TravelCardId,Pair>={
+ dating:['إذا ببالك لقاء، اسأل عن الوقت المناسب وخلي للطرف الثاني حرية الرد.','If you want to meet, ask about a suitable time and leave room for a reply.'],
+ newpeople:['إذا ودّك تتعرف، اختار نشاط تحبه وابدأ بسالفة بسيطة.','If you want to meet people, choose an activity you enjoy and start a simple conversation.'],
+ social:['إذا تريد تحچي ويا أحد، ابعث رسالة واضحة وخليه يرد براحته.','If you want to connect, send a clear message and leave room for a reply.'],
+ attraction:['البس شي ترتاح بيه وخلّي حضورك على طبيعتك.','Wear something comfortable and be yourself.'],
+ romance:['إذا تريد تعبّر عن اهتمامك، احچي بصراحة وخلي الرد على راحته.','If you want to express interest, be clear and leave room for their response.'],
+ chemistry:['شوف إذا السالفة مريحة للطرفين وخذ ردود الشخص بعين الاعتبار.','Notice whether the conversation feels comfortable for both of you.'],
+ sexuality:['إذا التقارب ببالك، احچوا بصراحة عن راحتكم وحدودكم.','If intimacy is on your mind, discuss comfort and boundaries openly.'],
+ desire:['اسأل نفسك شنو تريده فعلاً وخذ راحتك بالقرار.','Consider what you actually want and decide at your own pace.'],
+ nightlife:['إذا ناوي تطلع، تأكد المكان مفتوح ورتّب الرجعة.','If you plan a night out, check the venue and arrange your return.'],
+ travel:['قبل المشوار، أكد الموعد والعنوان وخلي وقت احتياطي.','Before leaving, confirm the time and address and allow a buffer.'],
+ risk:['شيّك وضع المكان والطريق وخيارات الرجعة قبل ما تطلع.','Check current venue, route and return options before leaving.'],
+ sleep:['إذا تعبان، ارتاح حسب حاجة جسمك.','If you are tired, rest according to your body’s needs.']
+};
 const activityFocus:Record<TravelCardId,Category>={
  dating:'love',newpeople:'communication',social:'communication',
  attraction:'energy',romance:'emotions',chemistry:'communication',
@@ -224,11 +238,11 @@ export function travelMetricReading(metric:MetricResult,sky:SkyContext,english=f
  // A neutral rubric or a general-sky adjustment cannot establish personal
  // readiness for an activity. State the actual coverage before giving advice.
  const scene=!activeEntries.length?(english?
-  'No contributing personal contact for this activity; the number reflects the neutral baseline and general-sky adjustments.':
-  'ماكو اتصال شخصي مؤثر لهذا النشاط؛ الرقم من خط الأساس المحايد وتعديلات السماء العامة.'):
+  'No contributing personal contact for this activity. '+travelFallback[metric.id as TravelCardId][1]:
+  'ماكو اتصال شخصي مؤثر لهذا النشاط. '+travelFallback[metric.id as TravelCardId][0]):
   (activeEntries.length<entries.length?(english?
-   'Personal contact coverage is partial ('+activeEntries.length+'/'+entries.length+'). ':
-   'تغطية الاتصالات الشخصية جزئية ('+activeEntries.length+'/'+entries.length+'). '):'')+qualifier+pair[english?1:0];
+   'Some personal contacts are unavailable at this time. ':
+   'بعض الاتصالات الشخصية مو متوفرة بهالوقت. '):'')+qualifier+pair[english?1:0];
  // A travel activity should be described in its own domain. Repeating an
  // unrestricted natal pair scene in the compact body produced irrelevant
  // relationship/sales advice under transport, rest and risk gauges. Keep
