@@ -1341,7 +1341,7 @@ function moonMomentNarrative(window:LunarWindow){
 
 function moonSignLiveHtml(sign:number,r:Report):string{
  const lines=moonHumanReading(sign,r,active.known,lang);
- return lines.map((line,i)=>'<p class="mx-moon-sign-line'+(i===4?' mx-moon-personal':'')+'"><span aria-hidden="true">'+(i===4?'✧':'◦')+'</span>'+esc(line)+'</p>').join('');
+ return lines.slice(3).map((line,i)=>'<p class="mx-moon-sign-line'+(i===1?' mx-moon-personal':'')+'"><span aria-hidden="true">'+(i===1?'✧':'◦')+'</span>'+esc(line)+'</p>').join('');
 }
 function updateLiveMoonSign(now:number){
  if(screen!=='lunar'||liveTimePinned||document.visibilityState==='hidden')return;
