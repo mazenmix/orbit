@@ -5,6 +5,11 @@ import {synastryPlainReading,personalTransitPlainReading} from '../src/relations
 import type {SynastryEvidence,Evidence} from '../src/math.ts';
 const p=(id:string)=>({id,symbol:'·',longitude:100,speed:0});
 const synastry=(first:string,second:string,angle:number):SynastryEvidence=>({first:p(first),second:p(second),angle,orb:.93,influence:.82});
+test('the Mercury-Mercury title requires Mercury in both charts',()=>{
+ assert.equal(synastryPlainReading(synastry('Mercury','Mercury',60),'harmony').title.en,'Your communication styles');
+ assert.equal(synastryPlainReading(synastry('Mercury','Venus',60),'harmony').title.en,'Understanding & communication');
+ assert.equal(synastryPlainReading(synastry('Venus','Mercury',60),'harmony').title.en,'Understanding & communication');
+});
 test('Venus-Mars harmony explains actual symbolic topic, not only a numeric orb',()=>{
  const item=synastryPlainReading(synastry('Venus','Mars',120),'harmony');
  assert.match(item.title.ar,/المودة/);

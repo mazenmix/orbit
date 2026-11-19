@@ -29,7 +29,7 @@ const pairTitle=(a:string,b:string):TwoLanguage=>{
  if(has('Venus','Mars'))return {ar:'المودة والمبادرة',en:'Affection & initiative'};
  if(has('Sun','Moon'))return {ar:'الشخصية والاحتياج العاطفي',en:'Identity & emotional needs'};
  if(has('Venus','Moon'))return {ar:'المشاعر وطريقة التعبير عن الحب',en:'Emotional comfort & affection'};
- if(has('Mercury','Mercury'))return {ar:'لغة الحوار بينكم',en:'Your communication styles'};
+ if(a==='Mercury'&&b==='Mercury')return {ar:'لغة الحوار بينكم',en:'Your communication styles'};
  if(ids.includes('Mercury'))return {ar:'التفاهم وطريقة الكلام',en:'Understanding & communication'};
  if(ids.includes('Saturn'))return {ar:'الالتزام والحدود',en:'Commitment & boundaries'};
  if(ids.includes('Pluto'))return {ar:'العمق ومساحة السيطرة',en:'Intensity & autonomy'};
