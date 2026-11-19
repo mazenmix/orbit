@@ -180,9 +180,22 @@ test('eclipse cards and timers use the date selected in Go Mode',async({page})=>
  const solar=page.locator('.eclipse-solar');
  await expect(solar).toHaveClass(/eclipse-live/);
  await expect(solar.locator('.eclipse-maximum time')).toHaveAttribute('datetime',/^2024-04-08T/);
+ await expect(solar.locator('[data-eclipse-countdown-label]')).toHaveText('MAXIMUM REACHED');
  const before=await solar.locator('.eclipse-live-grid').innerText();
  await page.clock.fastForward(3000);
  await expect(solar.locator('.eclipse-live-grid')).toHaveText(before,{useInnerText:true});
  await page.getByRole('button',{name:'Return to now'}).click();
  await expect(solar.locator('.eclipse-maximum time')).toHaveAttribute('datetime',/^2027-02-06T/);
+});
+
+test('live eclipse countdown changes its message when maximum passes',async({page})=>{
+ await page.clock.install({time:new Date('2024-04-08T18:16:00Z')});
+ await page.addInitScript(()=>localStorage.setItem('mx.language','en'));
+ await page.goto('/#eclipses');
+ const solar=page.locator('.eclipse-solar');
+ await expect(solar).toHaveClass(/eclipse-live/,{timeout:75000});
+ await expect(solar.locator('[data-eclipse-countdown-label]')).toHaveText('COUNTDOWN TO MAXIMUM');
+ await page.clock.fastForward(120000);
+ await expect(solar.locator('[data-eclipse-countdown-label]')).toHaveText('MAXIMUM REACHED');
+ await expect(solar.locator('.eclipse-live-countdown')).toHaveAttribute('aria-hidden','false');
 });

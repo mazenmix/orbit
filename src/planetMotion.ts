@@ -13,7 +13,9 @@ const DAY=86400000,STEP_DAYS=5,MAX_DAYS=1000;
 const clamp=(value:number)=>Math.max(0,Math.min(100,value));
 export function remainingMotionPercent(start:number,end:number,now:number):number|null{
  if(![start,end,now].every(Number.isFinite)||end<=start)return null;
- return Math.round(clamp(100*(end-now)/(end-start)));
+ const percent=clamp(100*(end-now)/(end-start));
+ if(now>start&&now<end)return Math.max(1,Math.min(99,Math.round(percent)));
+ return Math.round(percent);
 }
 /** Calendar-aware years and months (no fixed 30-day month assumption). */
 function addMonthsUTC(date:Date,months:number):Date{
