@@ -19,9 +19,9 @@ test('the career score matches its detail after the annual-house adjustment',asy
  await page.locator('#close-dialog').click();
  await page.evaluate(()=>{location.hash='/chart'});
  await page.locator('[data-chart="transit"]').click();
- await expect(page.locator('.trend-item').filter({hasText:'Career'})).toContainText('49');
+ await expect(page.locator('.trend-item').filter({hasText:'Work & decisions'})).toContainText('49');
  await page.evaluate(()=>{location.hash='/evidence'});
- await expect(page.locator('.narrative-heading').filter({hasText:'Career'})).toContainText('49');
+ await expect(page.locator('.narrative-heading').filter({hasText:'Work & decisions'})).toContainText('49');
 });
 
 test('saved chart uses its owner timezone and wording independently of the active self',async({page})=>{
