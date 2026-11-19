@@ -281,6 +281,7 @@ for(const uiMode of ['simple','pro']){
   await page.locator('#go-time-input').waitFor({timeout:75000});
   await page.locator('#go-time-input').fill('2024-04-08T18:20');
   await page.locator('#go-time-form button').click();
+  await expect(page.locator('.mx-go-time-status')).toContainText('Selected time');
   await page.evaluate(()=>{location.hash='/today'});
   const hero=page.locator(uiMode==='simple'?'.mx-focus-hero':'.hero');
   await expect(hero).toContainText('SKY · SELECTED TIME',{timeout:75000});
