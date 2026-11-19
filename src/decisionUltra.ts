@@ -49,7 +49,7 @@ const domainSteps:Record<Category,{ar:string;en:string}>={
 export function decisionExplanation(item:DecisionDetail,arabic:boolean){
  const hasSupport=item.supportFactor!==null,hasChallenge=item.challengeFactor!==null;
  if(item.quality==='none')return arabic?'هسّه ماكو اتصال قوي بهالمجال حتى نرجّح اتجاه معيّن. شنو اللي تعرفه عن الموقف نفسه؟':'No relevant calculated contact here; rely on real-world information before deciding.';
- if(item.sensitive)return (item.mixed?(arabic?'أكو إشارات داعمة ومعاكسة بنفس الوقت. ':'Supporting and challenging contacts coexist. '):'')+(arabic?'الصورة تتغيّر حسب العوامل الداخلة بالحساب. ':'The balance changes with the factors considered. ')+(arabic?domainSteps[item.category].ar:domainSteps[item.category].en);
+ if(item.sensitive)return (item.mixed?(arabic?'أكو إشارات داعمة ومعاكسة بنفس الوقت. ':'Supporting and challenging contacts coexist. '):'')+(arabic?'إذا نشيل اتصالات كوكب واحد، تتغيّر الخلاصة. ':'Removing one transiting body changes the balance. ')+(arabic?domainSteps[item.category].ar:domainSteps[item.category].en);
  if(hasSupport&&hasChallenge)return (arabic?'بهالموضوع أكو إشارات داعمة ومعاكسة. ':'Supporting and challenging contacts coexist. ')+(arabic?domainSteps[item.category].ar:domainSteps[item.category].en);
  if(hasChallenge)return (arabic?'هنا الأفضل تتأنّى. ':'Take this slowly. ')+(arabic?domainSteps[item.category].ar:domainSteps[item.category].en);
  if(hasSupport)return (arabic?'تگدر تبدي بخطوة بسيطة. ':'A small first step may be useful. ')+(arabic?domainSteps[item.category].ar:domainSteps[item.category].en);
