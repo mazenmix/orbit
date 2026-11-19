@@ -20,3 +20,10 @@ test('review direction is invariant under contradictory ordering and does not fa
  assert.equal(trustworthyPeak({...a,applying:false,exact:'2026-10-20T00:00:00Z'},new Date('2026-10-18T00:00:00Z')),null);
  assert.equal(trustworthyPeak({...a,exact:'2026-10-20T00:00:00Z'},new Date('2026-10-18T00:00:00Z'))?.toISOString(),'2026-10-20T00:00:00.000Z');
 });
+
+test('decision guidance gives different actions for the actual area',()=>{
+ const source=resolveDecisions([factor('Venus','MC',120,.85)],[]).find(d=>d.quality!=='none')!;
+ const work=decisionExplanation({...source,category:'career',sensitive:false},true);
+ const words=decisionExplanation({...source,category:'communication',sensitive:false},true);
+ assert.match(work,/الشغل/);assert.match(words,/الرد/);assert.notEqual(work,words);
+});
