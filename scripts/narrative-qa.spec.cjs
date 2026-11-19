@@ -300,3 +300,12 @@ test('simple relationship reading explains which birth time is unknown',async({p
  await expect(note).toContainText('Your birth time is unknown');
  await expect(note).toContainText('contacts are excluded');
 });
+
+test('calendar explains daily samples and the noon reading opened by a day',async({page})=>{
+ await page.addInitScript(()=>{localStorage.setItem('mx.language','en');localStorage.setItem('mx.uiMode','simple')});
+ await page.goto('/#calendar',{waitUntil:'domcontentloaded'});
+ const note=page.locator('.astro-calendar-method');
+ await expect(note).toBeVisible({timeout:75000});
+ await expect(note).toContainText('04:00, 12:00 and 20:00');
+ await expect(note).toContainText('noon reading');
+});

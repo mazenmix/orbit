@@ -1259,7 +1259,7 @@ function astroCalendarPage(){
    return '<button class="astro-cal-day astro-'+color+(selected?' is-selected':'')+(today?' is-today':'')+'" type="button" data-calendar-date="'+d.iso+'" aria-pressed="'+(selected?'true':'false')+'" style="grid-column:'+position.column+';grid-row:'+position.row+';direction:ltr" aria-label="'+d.iso+' · '+text+(usable?' · '+v!.value+'/100':'')+' · '+t('افتح بآلة الزمن','Open in Time Machine')+'" title="'+t('افتح بآلة الزمن','Open in Time Machine')+' · '+text+'"><span class="astro-cal-number">'+d.day+'</span><small class="astro-cal-index">'+(usable?v!.value:'·')+'</small></button>'
   }).join('')+'</div></section>';
  }).join('');
- return '<div class="astro-cal-months" dir="ltr" style="direction:ltr!important;grid-auto-flow:row">'+groups+'</div>';
+ return '<p class="subtle astro-calendar-method">'+t('درجة اليوم ملخّص حسابات ٤ صباحاً و١٢ ظهراً و٨ مساءً بتوقيت ملفك. الضغط على اليوم يفتح قراءة الظهر، وممكن درجتها تختلف.','Each daily score summarizes 04:00, 12:00 and 20:00 in your profile time zone. Opening a day shows the noon reading, which can have a different score.')+'</p><div class="astro-cal-months" dir="ltr" style="direction:ltr!important;grid-auto-flow:row">'+groups+'</div>';
 }
 /** Incrementally calculate three verified local-time checkpoints per day. DOM cells are patched
  * in place, so chart navigation, scrolling and month positions are not reset. */
