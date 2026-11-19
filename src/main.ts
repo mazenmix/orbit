@@ -65,7 +65,7 @@ import {lunarWindow,type LunarWindow} from './timing.ts';
 import {displayProgressPercent,vocPhase,vocColorState,elapsedPercent,vocDisplayProgress} from './liveVoc.ts';
 import {calendarEvent,calendarDownload} from './calendar.ts';
 import {encryptBackup,decryptBackup} from './secureBackup.ts';
-import {isVaultConfigured,vaultOpened,setupVault,flushVault,vaultPending,unlockVaultWithUI} from './vault.ts';
+import {isVaultConfigured,vaultOpened,setupVault,flushVault,vaultPending,unlockVaultWithUI,replaceVaultContents} from './vault.ts';
 import {createSyncCode,parseSyncCode,uploadEncrypted,downloadEncrypted,syncStatus} from './syncClient.ts';
 import {subscribeBackgroundPush,unsubscribeBackgroundPush,sendBackgroundPushTest,getPushStatus,pushAvailableOnThisDevice,backgroundPushOptedIn,refreshBackgroundPushIfNeeded,type MoonPushEvent} from './pushClient.ts';
 import {secondaryInstant,solarArcDegrees,directedNatal,solarReturnNear,anniversaryInstant} from './progressions.ts';
@@ -135,6 +135,7 @@ let asteroidCategory:Category|'all'='all';
 let asteroidLoading=false,asteroidAutoAttempted=false,asteroidProgress='',asteroidFailures:{name:string;reason:string}[]=[];
 let featuredSkyAttempted=false;
 let featuredSkyLoading=false;
+let featuredSkyRetryAt=0;
 let heatmapCache:{key:string;cells:HeatCell[]}|null=null;
 let lunationCache:{key:string;items:Lunation[]}|null=null;
 let realEclipseCache:{checked:number;items:ConfirmedEclipse[]}|null=null;
@@ -1097,13 +1098,21 @@ function featuredSkyLegend(at:Date){
   }).join('')+'</div>';
 }
 async function activateFeaturedSkyAsteroids(){
- if(!ready||featuredSkyAttempted)return;
+ if(!ready||featuredSkyLoading||featuredSkyAttempted||Date.now()<featuredSkyRetryAt)return;
  featuredSkyAttempted=true;
  featuredSkyLoading=true;
  try{
   const result=await loadNamedAsteroids(asteroidSwissRuntime(),undefined,undefined,featuredSkyAsteroidNumbers);
-  if(result.failed.length)console.warn('Some numbered asteroid ephemerides are unavailable',result.failed);
- }catch(e){console.warn('Featured sky asteroid loading failed',e)}
+  if(result.failed.length){
+   console.warn('Some numbered asteroid ephemerides are unavailable',result.failed);
+   featuredSkyAttempted=false;
+   featuredSkyRetryAt=Date.now()+60000;
+  }
+ }catch(e){
+  console.warn('Featured sky asteroid loading failed',e);
+  featuredSkyAttempted=false;
+  featuredSkyRetryAt=Date.now()+60000;
+ }
  finally{
   featuredSkyLoading=false;
   // Refresh SVGs in place; preserve the enlarged modal, clock and scroll.
@@ -1734,9 +1743,9 @@ function bind(){root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach(b=
   const field=root.querySelector<HTMLInputElement>('#secure-passphrase');const password=field?.value??'';
   const raw=JSON.parse(await file.text());const decrypted=await decryptBackup(raw,password);const restored=parseBackup(JSON.stringify(decrypted));const restoredJournal=parseJournalBackup((decrypted as {journal?:unknown}).journal,new Set(restored.map(p=>p.id)));if(field)field.value='';
   showDialog(`<h2>${t('استيراد نسخة مشفّرة','Import encrypted backup')}</h2><p>${restored.length} ${t('ملف. هل تريد استبدال بياناتك الحالية؟','profiles. Replace existing browser profiles?')}</p><button class="primary" id="confirm-secure-restore">${t('نعم، استبدل','Confirm replacement')}</button>`);
-  root.querySelector<HTMLButtonElement>('#confirm-secure-restore')!.onclick=()=>{saveProfiles(restored);writeJournal(restoredJournal);profiles=restored;active=profiles.find(p=>p.kind==='self')??profiles[0];localStorage.setItem('mx.active',active.id);cache.clear();moonCache=null;selected=new Date();closeDialog();recalculate();render();toast(t('تم استيراد النسخة المشفّرة','Encrypted backup imported'))};
+  root.querySelector<HTMLButtonElement>('#confirm-secure-restore')!.onclick=async(event)=>{const button=event.currentTarget as HTMLButtonElement;if(button.disabled)return;button.disabled=true;try{if(vaultOpened())await replaceVaultContents(restored,restoredJournal);else{saveProfiles(restored);writeJournal(restoredJournal)}profiles=restored;active=profiles.find(p=>p.kind==='self')??profiles[0];localStorage.setItem('mx.active',active.id);cache.clear();moonCache=null;selected=new Date();closeDialog();recalculate();render();toast(t('تم استيراد النسخة المشفّرة','Encrypted backup imported'))}catch(e){toast(t('تعذر حفظ النسخة: ','Could not save backup: ')+String(e))}finally{button.disabled=false}};
  }catch(e){toast(t('فشل فك تشفير النسخة: ','Could not decrypt backup: ')+String(e))}};
- const restore=root.querySelector<HTMLInputElement>('#restore');if(restore)restore.onchange=async()=>{try{const file=restore.files?.[0];if(!file)return;if(file.size>1000000)throw Error('Backup too large');const rawText=await file.text();const restored=parseBackup(rawText);const restoredJournal=parseJournalBackup(JSON.parse(rawText).journal,new Set(restored.map(p=>p.id)));showDialog(`<h2>${t('استيراد النسخة','Import backup')}</h2><p>${restored.length} ${t('ملف. راح نستبدل الملفات الحالية بهالنسخة.','profiles. This replaces your current profiles.')}</p><button class="primary" id="confirm-restore">${t('استبدال الملفات','Replace profiles')}</button>`);document.querySelector<HTMLButtonElement>('#confirm-restore')!.onclick=()=>{saveProfiles(restored);writeJournal(restoredJournal);profiles=restored;active=profiles.find(p=>p.kind==='self')??profiles[0];cache.clear();closeDialog();recalculate();render();toast(t('تم الاستيراد','Backup imported'))}}catch(e){toast(t('النسخة غير صالحة: ','Invalid backup: ')+String(e))}};
+ const restore=root.querySelector<HTMLInputElement>('#restore');if(restore)restore.onchange=async()=>{try{const file=restore.files?.[0];if(!file)return;if(file.size>1000000)throw Error('Backup too large');const rawText=await file.text();const restored=parseBackup(rawText);const restoredJournal=parseJournalBackup(JSON.parse(rawText).journal,new Set(restored.map(p=>p.id)));showDialog(`<h2>${t('استيراد النسخة','Import backup')}</h2><p>${restored.length} ${t('ملف. راح نستبدل الملفات الحالية بهالنسخة.','profiles. This replaces your current profiles.')}</p><button class="primary" id="confirm-restore">${t('استبدال الملفات','Replace profiles')}</button>`);document.querySelector<HTMLButtonElement>('#confirm-restore')!.onclick=async(event)=>{const button=event.currentTarget as HTMLButtonElement;if(button.disabled)return;button.disabled=true;try{if(vaultOpened())await replaceVaultContents(restored,restoredJournal);else{saveProfiles(restored);writeJournal(restoredJournal)}profiles=restored;active=profiles.find(p=>p.kind==='self')??profiles[0];localStorage.setItem('mx.active',active.id);cache.clear();closeDialog();recalculate();render();toast(t('تم الاستيراد','Backup imported'))}catch(e){toast(t('تعذر حفظ النسخة: ','Could not save backup: ')+String(e))}finally{button.disabled=false}}}catch(e){toast(t('النسخة غير صالحة: ','Invalid backup: ')+String(e))}};
  on('delete-profile',()=>{if(profiles.length===1)return toast(t('لازم يبقى ملف واحد على الأقل.','Keep at least one profile.'));showDialog(`<h2>${t('حذف الملف؟','Delete profile?')}</h2><p>${esc(active.name)}</p><button id="confirm-delete" class="primary">${t('حذف من هالمتصفح','Delete from this browser')}</button>`);document.querySelector<HTMLButtonElement>('#confirm-delete')!.onclick=()=>{writeJournal(readJournal().filter(x=>x.personId!==active.id));profiles=profiles.filter(p=>p.id!==active.id);saveProfiles(profiles);active=profiles.find(p=>p.kind==='self')??profiles[0];cache.clear();closeDialog();recalculate();render()}});
  on('export-lunar-calendar',()=>{try{const w=moonWindow();const moment=w.isVoid?w.ingressAt:w.vocStartsAt;if(+moment<Date.now())return toast(t('هذا الموعد مضى. اختار وقت حالي أو مستقبلي.','That event is in the past. Select a current or future moment.'));const ics=calendarEvent({id:'mx-lunar-'+(+moment),start:moment,end:w.isVoid?new Date(+moment+15*60000):w.ingressAt,title:w.isVoid?'MX Astro: Moon enters next sign':'MX Astro: Moon VOC begins',description:'Swiss Ephemeris calculation; classical six-planet convention. Symbolic astrological timing.'});calendarDownload(ics,'mx-astro-moon.ics');toast(t('تم تجهيز ملف التقويم للتنبيه','Calendar reminder file prepared'))}catch(e){toast(String(e))}});
  on('install',async()=>{if(installPrompt){await installPrompt.prompt();installPrompt=null}else toast(t('استخدم قائمة المتصفح ← تثبيت التطبيق، أو مشاركة ← إضافة إلى الشاشة الرئيسية على الآيفون.','Use your browser menu → Install app, or Share → Add to Home Screen on iPhone.'))});
@@ -2025,6 +2034,10 @@ function refreshLiveBody(now:number){
 function refreshLiveView(force=false){
  if(!ready||!data||document.visibilityState==='hidden')return;
  const now=Date.now(),minute=Math.floor(now/60000);
+ if(screen==='today'&&!featuredSkyAttempted&&!featuredSkyLoading&&
+    location.hostname.endsWith('.pages.dev')&&now>=featuredSkyRetryAt&&navigator.onLine){
+  void activateFeaturedSkyAsteroids();
+ }
  // Lightweight seconds ticker always runs first, including with sky enlarged.
  tickLiveClocks(now);
  if(screen==='today')tickPlanetMotionGauges(liveTimePinned?+selected:now);
