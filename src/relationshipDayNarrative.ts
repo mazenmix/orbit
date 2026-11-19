@@ -13,7 +13,7 @@ const thoughts:Record<string,{message:Wording;date:Wording}>={
  },
  Venus:{
   message:{arGood:'الأسلوب اللطيف مناسب لهالقراءة؛ رسالة خفيفة عن شي مشترك بينكم أنسب من فتح خلاف.',enGood:'A warm approach fits this symbolic reading; mention something you both enjoy rather than a dispute.',arHard:'المجاملة الزايدة مو بالضرورة تقرّب؛ احچي بطبيعتك حتى ما توصل رسالة غير اللي تقصده.',enHard:'Too much flattery may obscure your intent; write naturally and directly.'},
-  date:{arGood:'جوّ الألفة هو الأبرز رمزياً؛ اختار مكان هادئ يخلي مجال للسوالف بدل الزحمة.',enGood:'Ease and warmth stand out symbolically; a quiet spot leaves more room for conversation.',arHard:'لا تحاول تصنع جو مثالي بالقوة؛ خلي المكان بسيط وشوف إذا هي أصلاً مرتاحة للفكرة.',enHard:'Do not force an ideal atmosphere; keep the venue simple and check whether the invitation is welcome.'}
+  date:{arGood:'جوّ الألفة هو الأبرز رمزياً؛ اختار مكان هادئ يخلي مجال للسوالف بدل الزحمة.',enGood:'Ease and warmth stand out symbolically; a quiet spot leaves more room for conversation.',arHard:'خلّي المكان بسيط، واسأل إذا الفكرة تناسب الطرف الثاني.',enHard:'Do not force an ideal atmosphere; keep the venue simple and check whether the invitation is welcome.'}
  },
  Mars:{
   message:{arGood:'عندك رمزياً دفعة للمبادرة؛ استغلها بسؤال مباشر واحد، مو سلسلة رسائل ورا بعض.',enGood:'The symbolism favors initiative; use it for one direct question, not a stream of messages.',arHard:'الاندفاع بالكلام هو نقطة الانتباه؛ لا تكتب وأنت متضايق أو مستعجل على رد.',enHard:'Impulsive wording is the concern; avoid writing in frustration or demanding a quick reply.'},
@@ -24,7 +24,7 @@ const thoughts:Record<string,{message:Wording;date:Wording}>={
   date:{arGood:'الراحة أهم من المظاهر بهذا اليوم؛ إذا تتفقون على موعد، خلّوه بمكان هادئ وسهل.',enGood:'Comfort matters more than presentation; choose an easy, relaxed place if you agree to meet.',arHard:'الجانب العاطفي حساس رمزياً؛ خلي الخطة مرنة حتى ما يتحول تعب اليوم إلى سوء فهم.',enHard:'Emotional sensitivity is the symbolic theme; leave room to change plans if needed.'}
  },
  Sun:{
-  message:{arGood:'الوضوح الشخصي بارز؛ احچي عن الشي اللي تريده إنت فعلاً، بدون ما تحاول تتوقع جوابها.',enGood:'Personal clarity stands out; say what you actually want without assuming their answer.',arHard:'لا تخلي إثبات وجهة نظرك أهم من السالفة نفسها؛ حاول تسمع قبل ما تحسم.',enHard:'Do not make proving your point more important than understanding the exchange.'},
+  message:{arGood:'احچي بوضوح عن اللي تريده، وخلي الجواب يجي من الطرف الثاني.',enGood:'Personal clarity stands out; say what you actually want without assuming their answer.',arHard:'لا تخلي إثبات وجهة نظرك أهم من السالفة نفسها؛ حاول تسمع قبل ما تحسم.',enHard:'Do not make proving your point more important than understanding the exchange.'},
   date:{arGood:'الانطباع والصراحة محور اليوم؛ دعوة محددة تعبر عن ذوقك أحسن من خطة مبهمة.',enGood:'Presence and honesty are central; a specific invitation is better than a vague plan.',arHard:'التوقعات العالية ممكن تثقل اللقاء؛ لا تعامل أول طلعة كأنها امتحان للعلاقة.',enHard:'High expectations may weigh on a meeting; do not treat one outing as a relationship test.'}
  },
  Jupiter:{
@@ -78,7 +78,7 @@ export function relationshipDayReading(day:RelationshipWindow,mode:Kind,period:r
  const natural=factor?(undecided?
  {ar:mode==='message'?'الاتصال المحسوب اليوم يركز على الكلام، بس ما يرجّح إذا حوارك راح يكون أسهل أو أصعب؛ خذ القرار من طبيعة السالفة.':'الاتصال المحسوب اليوم يركز على التقارب، بس ما يثبت إن الموعد مناسب أو مقبول؛ خذ القرار حسب اتفاقكم.',en:mode==='message'?'The calculated communication contact is neutral; it does not establish whether a conversation will go well.':'The calculated closeness contact is neutral; it cannot establish that a date would be welcome.'}:
  {ar:hard?script.arHard:script.arGood,en:hard?script.enHard:script.enGood}):mode==='message'?
- {ar:'بهذا اليوم ماكو اتصال تواصل محدد حتى أعطيه قصة خاصة؛ الترتيب جاي من قيمة الأساس المحايدة والتوافق الثابت، فاختار الوقت حسب ظروفكم الفعلية.',en:'No distinct communication contact was calculated for this day; the ranking combines a neutral default with static compatibility, so choose a time that works in real life.'}:
+ {ar:'ماكو تفاصيل اتصال كافية حتى أوضح سبب خاص لهاليوم؛ اختار الوقت حسب ظروفكم.',en:'There is not enough contact detail to explain this sample further; choose a time that works for both of you.'}:
  {ar:'ماكو اتصال تقارب مميز يبرر توقع لقاء بهاليوم؛ الترتيب رمزي، وفكرة الموعد تعتمد على موافقتكم وظروفكم.',en:'No distinct closeness contact justifies predicting a meeting today; the ranking is symbolic, and actual plans depend on mutual agreement.'};
  const delta=nearest(period,day,mode);
  const comparisonAr=Math.abs(delta)<3?'قريب من وسط الفترة':delta>0?'أعلى من وسط الفترة بـ'+delta+' درجات':'أقل من وسط الفترة بـ'+Math.abs(delta)+' درجات';
