@@ -49,3 +49,15 @@ test('noon relationship reminder triggers at its event time',async()=>{
  assert.match(ics,/DTSTART:20261119T090000Z/);
  assert.match(ics,/TRIGGER:-PT0M/);
 });
+
+test('relationship reminders receive distinct calendar event identifiers',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const main=readFileSync(new URL('../src/main.ts',import.meta.url),'utf8');
+ const start=main.indexOf("root.querySelectorAll<HTMLButtonElement>('[data-relationship-calendar]')");
+ const handler=main.slice(start,main.indexOf('\n',start));
+ assert.match(handler,/id:'mx-relationship-'\+crypto\.randomUUID\(\)/);
+ const at=new Date('2026-11-19T09:00:00Z'),event={start:at,end:new Date(+at+1800000),title:'Reminder',description:''};
+ const first=calendarEvent({...event,id:'mx-relationship-'+crypto.randomUUID()},0);
+ const second=calendarEvent({...event,id:'mx-relationship-'+crypto.randomUUID()},0);
+ assert.notEqual(first.match(/UID:([^\r\n]+)/)?.[1],second.match(/UID:([^\r\n]+)/)?.[1]);
+});
