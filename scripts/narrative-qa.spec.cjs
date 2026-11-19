@@ -13,6 +13,7 @@ test('the career score matches its detail after the annual-house adjustment',asy
  await page.goto('/#today');
  const career=page.locator('.score-card[data-category="career"] .score-number');
  await expect(career).toContainText('49',{timeout:75000});
+ await expect(page.locator('.mx-close-score-note')).toContainText('Close-contact scores');
  await page.locator('.score-card[data-category="career"]').click();
  await page.locator('.signal-card').first().click();
  await expect(page.locator('.detail-score')).toContainText('49/100');
@@ -22,6 +23,14 @@ test('the career score matches its detail after the annual-house adjustment',asy
  await expect(page.locator('.trend-item').filter({hasText:'Work & decisions'})).toContainText('49');
  await page.evaluate(()=>{location.hash='/evidence'});
  await expect(page.locator('.narrative-heading').filter({hasText:'Work & decisions'})).toContainText('49');
+ await expect(page.locator('.insight-lead')).toContainText('close-contact scores');
+ await page.evaluate(()=>{location.hash='/go'});
+ await expect(page.locator('[data-today-gauge="career"] strong')).toContainText('3/100');
+ await expect(page.locator('.go-card').filter({hasText:'Work decision'})).toContainText('38/100');
+ await expect(page.locator('.mx-symbolic-index-note')).toContainText('narrower calculation');
+ await page.evaluate(()=>{location.hash='/now'});
+ await expect(page.locator('[data-now-gauge="today-career"] .mx-now-head b')).toContainText('3/100');
+ await expect(page.locator('[data-now-gauge="moon-sign"]')).toContainText('Time elapsed in Moon sign');
 });
 
 test('saved chart uses its owner timezone and wording independently of the active self',async({page})=>{

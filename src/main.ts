@@ -258,7 +258,7 @@ function render(){
 }
 function content(){if(!data)return screen==='settings'?settingsPage():screen==='more'?morePage():'<section class="panel"><p>'+t('الحساب غير متاح لهذي البيانات. راجع الملف قبل عرض نتائج جديدة.','Calculation unavailable for these inputs. Review the profile before showing new results.')+'</p><button class="secondary" data-go="settings">'+t('مراجعة بيانات الميلاد','Review birth details')+'</button></section>';let inner:string;switch(screen){case 'today':inner=uiMode==='simple'?focusedToday():today();break;case 'signals':inner=signalsPage();break;case 'chart':inner=chartPage();break;case 'time':inner=uiMode==='simple'?focusedTime():timePage();break;case 'lunar':inner=lunarPage();break;case 'calendar':inner=uiMode==='simple'?focusedCalendar():astroCalendarPage();break;case 'eclipses':inner=eclipsesPage();break;case 'asteroids':inner=asteroidsPage();break;case 'advanced':inner=advancedPage();break;case 'intel':case 'go':inner=goModePage();break;case 'travelmode':inner=travelModePage();break;case 'people':inner=peoplePage();break;case 'now':inner=nowPage();break;case 'evidence':inner=evidencePage();break;case 'ai':inner=aiPage();break;case 'settings':inner=settingsPage();break;case 'more':inner=morePage();break;default:screen='today';inner=today()}return sectionTabs()+(data.current.missing.length&&screen!=='settings'&&screen!=='now'?'<p class="subtle" role="status">'+t('حسبنا القراءة بالمواضع المتاحة. ما توفّرت بيانات ','Unavailable supplementary bodies omitted: ')+data.current.missing.map(id=>esc(planet(id))).join(' · ')+'</p>':'')+inner}
 function tag(text:string,cls=''){return `<span class="tag ${cls}">${text}</span>`}
-function symbolicIndexNote(){return '<p class="mx-symbolic-index-note subtle">'+t('الدرجات ناتج معادلات تنجيمية رمزية؛ ما تقيس الحب أو الرغبة أو النجاح فعلياً، ومو احتمالات مئوية.','Scores summarize symbolic astrology formulas; they do not measure actual love, desire or success, and are not probabilities.')+'</p>'}
+function symbolicIndexNote(){return '<p class="mx-symbolic-index-note subtle">'+t('مؤشرات السماء تجمع مواقع واتصالات أوسع. قرار Go يجمع عدة مؤشرات، ودرجات الاتصالات القريبة إلها حساب أضيق، فممكن تختلف. كلها درجات رمزية، مو احتمالات.','Sky indices use a wider set of positions and aspects. GO combines several indices, while close-contact scores use a narrower calculation, so values can differ. These scores are symbolic, not probabilities.')+'</p>'}
 
 /** Restore the four daily gauges from existing calculated symbolic indices.
  * Their values must track the selected person's report, not a hard-coded score. */
@@ -528,7 +528,7 @@ function focusedToday(){
   moonIsVoid=w.isVoid;moonVocStart=+w.vocStartsAt;moonVocEnd=+w.ingressAt;
   const percent=(from:Date,to:Date)=>displayProgressPercent(elapsedPercent(+from,+to,now));
   const vocEnd=w.isVoid?w.ingressAt:w.vocStartsAt,vocStart=w.isVoid?w.vocStartsAt:w.enteredAt;
-  moon='<div class="mx-focus-moon"><article><small>☾ '+t('القمر الآن','Current Moon')+'</small><strong>'+signName(w.sign*30)+'</strong><small>'+t('الانتقال القادم','Next ingress')+'</small><time datetime="'+w.ingressAt.toISOString()+'">'+time(w.ingressAt)+'</time><progress max="100" data-moon-progress="sign" data-progress-start="'+(+w.enteredAt)+'" data-progress-end="'+(+w.ingressAt)+'" value="'+percent(w.enteredAt,w.ingressAt)+'"></progress></article>'+
+  moon='<div class="mx-focus-moon"><article><small>☾ '+t('القمر الآن','Current Moon')+'</small><strong>'+signName(w.sign*30)+'</strong><small>'+t('الانتقال القادم','Next ingress')+'</small><time datetime="'+w.ingressAt.toISOString()+'">'+time(w.ingressAt)+'</time><progress max="100" aria-label="'+t('الوقت المنقضي ببرج القمر','Time elapsed in Moon sign')+'" data-moon-progress="sign" data-progress-start="'+(+w.enteredAt)+'" data-progress-end="'+(+w.ingressAt)+'" value="'+percent(w.enteredAt,w.ingressAt)+'"></progress></article>'+
    '<article><small>◌ VOID OF COURSE</small><strong>'+(w.isVoid?t('خالي المسار','VOC active'):t('ماشي عدل','Moon on course'))+'</strong><small>'+(w.isVoid?t('نهاية الفترة','Period ends'):t('بداية الفترة','Period begins'))+'</small><time datetime="'+vocEnd.toISOString()+'">'+time(vocEnd)+'</time><progress max="100" data-moon-progress="voc" data-progress-start="'+(+vocStart)+'" data-progress-end="'+(+vocEnd)+'" value="'+percent(vocStart,vocEnd)+'"></progress></article></div>';
  }catch(e){console.warn('Moon timing unavailable',e)}
  const eventCard=(label:string,event:WholeSkyOccurrence|null)=>{
@@ -674,7 +674,7 @@ function morePage(){
   card('settings','الإعدادات','Settings','بيانات الميلاد والخصوصية والمزامنة','Birth profile, privacy and sync'));
 }
 function scoresHTML(r:Report){
- return '<div class="scores-grid rich-scores">'+categories.map(c=>{
+ return '<p class="subtle mx-close-score-note">'+t('درجات الاتصالات القريبة · حسابها يختلف عن مؤشرات السماء في Go Mode.','Close-contact scores · calculated differently from Go Mode sky indices.')+'</p><div class="scores-grid rich-scores">'+categories.map(c=>{
   const signal=r.signals.find(s=>s.category===c),available=!!signal,v=r.scores[c];
   const line=signal?copy(signal).action:t('ماكو اتصال شخصي محسوب كافي بهالمجال.','Insufficient calculated personal contact in this area.');
   return '<button class="score-card '+(available?gaugeLevel(v):'mx-unavailable')+'" data-category="'+c+'">'+
@@ -997,7 +997,7 @@ function nowPage(){
  ];
  try{
   const moon=moonWindow(),at=+selected;
-  rows.push({id:'moon-sign',label:t('تقدّم القمر بالبرج','Moon sign progress')+' · '+signName(moon.sign*30),value:displayProgressPercent(elapsedPercent(+moon.enteredAt,+moon.ingressAt,at)),tone:'mx-now-moon'});
+  rows.push({id:'moon-sign',label:t('الوقت المنقضي ببرج القمر','Time elapsed in Moon sign')+' · '+signName(moon.sign*30),value:displayProgressPercent(elapsedPercent(+moon.enteredAt,+moon.ingressAt,at)),tone:'mx-now-moon'});
   const voc=vocDisplayProgress(+moon.enteredAt,+moon.vocStartsAt,+moon.ingressAt,at);
    rows.push({id:'moon-voc',label:voc.phase==='active'?t('تقدّم خلو المسار · فعّال','VOC progress · active'):t('التقدّم نحو خلو المسار · لم يبدأ','Progress toward VOC · not started'),value:displayProgressPercent(voc.percent),tone:'mx-now-void '+(voc.phase==='active'?'is-voc':'is-clear')});
  }catch(e){console.warn('Now Moon timing unavailable',e)}
@@ -1014,7 +1014,7 @@ function nowPage(){
 }
 function goModePage(){
  const sky=liveGaugeSky(),indicators=derivedMetrics(sky.scores),go=goModes(indicators),r=data!;
- const names:Record<GoDomain,[string,string]>={work:['العمل','Work'],social:['التواصل الاجتماعي','Social'],relationships:['العلاقات','Relationships'],travel:['السفر','Travel']};
+ const names:Record<GoDomain,[string,string]>={work:['قرار العمل','Work decision'],social:['قرار التواصل','Social decision'],relationships:['قرار العلاقات','Relationship decision'],travel:['قرار السفر','Travel decision']};
  const gauges=todayQuickGauges(r,true);
  const timeNav=sharedModeTimeNavigation();
  const seenGoContacts=new Set<string>();
@@ -1371,7 +1371,7 @@ function lunarUiIcon(type:'moon'|'void'|'entered'|'next'|'voc-start'|'voc-end'){
 
 /** Ring data is derived exclusively from computed Moon timing boundaries. */
 function lunarGaugeMarkup(kind:'moon'|'voc',start:Date,end:Date,signStart:Date=start,vocStart:Date=start){
- const label=kind==='moon'?t('تقدّم القمر بالبرج الحالي','Current sign progress'):t('التقدّم لحد بداية خلو المسار','Progress toward VOC');
+ const label=kind==='moon'?t('الوقت المنقضي ببرج القمر','Time elapsed in Moon sign'):t('التقدّم لحد بداية خلو المسار','Progress toward VOC');
  return '<div class="mx-lunar-gauge '+vocColorState(+vocStart,+end,+selected)+'" data-gauge-voc-start="'+(+vocStart)+'" data-lunar-gauge="'+kind+'" data-gauge-start="'+(+start)+'" data-gauge-end="'+(+end)+'" data-gauge-sign-start="'+(+signStart)+'">'+
   '<div class="mx-lunar-gauge-ring" role="progressbar" aria-label="'+esc(label)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">'+
   '<svg viewBox="0 0 76 76" aria-hidden="true" focusable="false"><circle class="mx-lunar-gauge-track" cx="38" cy="38" r="30"/><circle class="mx-lunar-gauge-progress" cx="38" cy="38" r="30"/></svg><strong data-gauge-percent>—</strong></div>'+
@@ -1427,7 +1427,7 @@ function evidencePage(){
  shownDecisionReasons.add(decisionKey);
  const why=strongest?t('السبب الفلكي: ','Astrological reason: ')+planet(strongest.transit.id)+' '+aspect(strongest.angle)+' '+planet(strongest.natal.id)+'؛ '+(strongest.applying?t('الاتصال يقترب من الاكتمال.','the contact is approaching.'):t('الاتصال يبتعد حالياً عن الدقة.','the contact is currently moving away from exactness.')):t('ماكو اتصال فلكي قوي لهذا المجال.','No strong contact for this area.');
  return '<article class="narrative-evidence"><div class="narrative-heading"><span>'+categoryLabels[s.category][2]+'</span><h3>'+cat(s.category)+'</h3><b class="reading-level '+gaugeLevel(r.scores[s.category])+'">'+r.scores[s.category]+'</b></div><h3>'+esc(c.title)+'</h3><p>'+esc(c.good)+'</p><p class="advice-action"><strong>'+t('شنو تسوي: ','What to do: ')+'</strong>'+esc(c.action)+'</p><p class="advice-caution">'+esc(c.careful)+'</p><small>'+esc(why)+'</small>'+(uniqueDecision?'<p class="decision-line '+(digest.mixed?'decision-mixed':'')+'">'+esc(decision)+'</p>':'')+'</article>'}).join('');
- return '<section class="panel insight-lead"><h2>'+mood+'</h2><p>'+t('إذا لفتت نظرك درجة، هنا تشوف شنو دخل بحسابها. افتح المجال اللي يهمّك واقرأ شنو يرجّح الخطوة وشنو يدعوك تتريّث.','These symbolic readings tie each theme to a calculated contact and a practical action, not an event guarantee or access to another person’s mind.')+'</p><button class="secondary" id="export-report">'+t('نزّل تفاصيل الحساب إذا تحتاجها','Export technical calculation details')+'</button></section>'+
+ return '<section class="panel insight-lead"><h2>'+mood+'</h2><p>'+t('هنا درجات اتصالاتك القريبة. افتح المجال اللي يهمّك وشوف شنو يرجّح الخطوة وشنو يدعوك تتريّث. حسابها يختلف عن مؤشرات السماء الأوسع في Go Mode.','These are close-contact scores. Explore the factors for each area. Go Mode uses a wider sky calculation, so its scores can differ.')+'</p><button class="secondary" id="export-report">'+t('نزّل تفاصيل الحساب إذا تحتاجها','Export technical calculation details')+'</button></section>'+
  '<div class="narrative-grid">'+(narrative||'<section class="panel">'+t('الاتصالات الحالية قليلة؛ اختار لحظة ثانية من آلة الزمن لقراءة مختلفة.','Few current contacts; select another moment in Time Machine.')+'</section>')+'</div>'+
  '<details class="panel evidence-technical"><summary>'+t('للمهتمين: الأرقام والزوايا الفلكية التفصيلية','For advanced users: detailed positions and aspect geometry')+'</summary><div class="eclipse-contacts">'+r.evidence.map(e=>'<span><b>'+esc(technical(e))+'</b></span>').join('')+'</div></details>';
 }
@@ -1821,7 +1821,7 @@ function updateLunarGauge(kind:'moon'|'voc',now:number){
  const a=kind==='voc'&&phase==='upcoming'?signStart:start;
  const b=kind==='voc'&&phase==='upcoming'?start:end;
  const percentage=elapsedPercent(a,b,now),rounded=displayProgressPercent(percentage);
- const label=kind==='moon'?t('تقدّم القمر بالبرج الحالي','Current sign progress'):phase==='active'
+ const label=kind==='moon'?t('الوقت المنقضي ببرج القمر','Time elapsed in Moon sign'):phase==='active'
   ?t('تقدّم مرحلة خلو المسار','Void-of-course progress')
   :phase==='upcoming'?t('التقدّم لحد بداية خلو المسار','Progress toward VOC'):t('اكتمل خلو المسار','VOC complete');
  const remaining=Math.max(0,Math.ceil((b-now)/1000));
