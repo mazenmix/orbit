@@ -1,5 +1,29 @@
 const {test,expect}=require('/tmp/astro-qa/node_modules/@playwright/test');
 
+test('the career score matches its detail after the annual-house adjustment',async({page})=>{
+ await page.clock.install({time:new Date('2026-11-19T10:00:00Z')});
+ await page.addInitScript(()=>{
+  localStorage.setItem('mx.uiMode','pro');
+  localStorage.setItem('mx.language','en');
+  localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify([{
+   id:'score-owner',name:'Score owner',kind:'self',date:'1985-03-29',time:'19:20',
+   zone:'Asia/Baghdad',city:'Baghdad',lat:33.31,lon:44.36,known:true
+  }]));
+ });
+ await page.goto('/#today');
+ const career=page.locator('.score-card[data-category="career"] .score-number');
+ await expect(career).toContainText('49',{timeout:75000});
+ await page.locator('.score-card[data-category="career"]').click();
+ await page.locator('.signal-card').first().click();
+ await expect(page.locator('.detail-score')).toContainText('49/100');
+ await page.locator('#close-dialog').click();
+ await page.evaluate(()=>{location.hash='/chart'});
+ await page.locator('[data-chart="transit"]').click();
+ await expect(page.locator('.trend-item').filter({hasText:'Career'})).toContainText('49');
+ await page.evaluate(()=>{location.hash='/evidence'});
+ await expect(page.locator('.narrative-heading').filter({hasText:'Career'})).toContainText('49');
+});
+
 test('saved chart uses its owner timezone and wording independently of the active self',async({page})=>{
  await page.clock.install({time:new Date('2026-11-09T12:00:00Z')});
  await page.addInitScript(()=>{
