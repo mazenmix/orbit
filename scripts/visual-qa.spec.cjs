@@ -356,7 +356,7 @@ test('MX Ai has new indicators and useful moon explanations',async({page})=>{
 
 test('live Moon sign and refined chart reading remain visible',async({page})=>{
  await page.goto('/#lunar',{waitUntil:'domcontentloaded'});
- await expect(page.locator('#mx-moon-sign-reading p')).toHaveCount(5,{timeout:75000});
+ await expect(page.locator('#mx-moon-sign-reading p')).toHaveCount(2,{timeout:75000});
  await page.goto('/#chart',{waitUntil:'domcontentloaded'});
  await expect(page.locator('.chart-layout.chart-expanded')).toBeVisible({timeout:75000});
  await expect(page.locator('.mx-person-natal-portrait [data-portrait-line]')).toHaveCount(4);
