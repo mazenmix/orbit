@@ -860,9 +860,8 @@ function mxGoNarrative(domain:GoDomain,state:'go'|'check'|'hold',memo:ContextGoR
   // Only an expanded score explanation needs these qualifiers. Repeating
   // a paraphrase of "the score is fragile" inside every GO tile adds noise.
   if(!memo.strongest)return '';
-  if(!memo.complete)return pick(limits[domain].missing);
+  if(!memo.complete||memo.mixed)return '';
   if(memo.sensitive)return pick(limits[domain].sensitive);
-  if(memo.mixed)return pick(limits[domain].mixed);
   return '';
  }
  if(!memo.strongest)return pick(limits[domain].none);
