@@ -248,3 +248,15 @@ test('live eclipse countdown changes its message when maximum passes',async({pag
  await expect(solar.locator('[data-eclipse-countdown-label]')).toHaveText('MAXIMUM REACHED');
  await expect(solar.locator('.eclipse-live-countdown')).toHaveAttribute('aria-hidden','false');
 });
+
+test('damaged local profiles stay intact until a validated backup is chosen',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('mx.orbit.profiles.v1','{broken profile'));
+ await page.goto('/#settings',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#recover-file')).toBeVisible({timeout:75000});
+ expect(await page.evaluate(()=>localStorage.getItem('mx.orbit.profiles.v1'))).toBe('{broken profile');
+ const profile={id:'recovered-self',name:'Recovered',date:'1985-03-29',time:'19:20',zone:'Asia/Baghdad',lat:33.31,lon:44.36,city:'Baghdad',known:true,kind:'self'};
+ page.once('dialog',dialog=>dialog.accept());
+ await page.locator('#recover-file').setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({schema:1,profiles:[profile]}))});
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('mx.orbit.profiles.v1'))[0].id)).toBe('recovered-self');
+ await expect(page.locator('#recover-file')).toHaveCount(0,{timeout:75000});
+});
