@@ -12,11 +12,11 @@ const thoughts:Record<string,{message:Wording;date:Wording}>={
   date:{arGood:'إذا تفكر بطلعة، الاتفاق على الوقت والمكان أسهل من الكلام المفتوح؛ اقترح تفصيلين واضحين.',enGood:'For a meetup, a clear time and place are more useful than open-ended plans.',arHard:'قبل ما ترتب لقاء، تأكد من التفاصيل؛ الغموض بالمكان أو التوقيت ممكن يعقد السالفة.',enHard:'Before planning a meetup, clarify the details so neither time nor place is vague.'}
  },
  Venus:{
-  message:{arGood:'الأسلوب اللطيف مناسب لهالقراءة؛ رسالة خفيفة عن شي مشترك بينكم أنسب من فتح خلاف.',enGood:'A warm approach fits this symbolic reading; mention something you both enjoy rather than a dispute.',arHard:'المجاملة الزايدة مو بالضرورة تقرّب؛ احچي بطبيعتك حتى ما توصل رسالة غير اللي تقصده.',enHard:'Too much flattery may obscure your intent; write naturally and directly.'},
+  message:{arGood:'الأسلوب اللطيف مناسب لهالقراءة؛ رسالة خفيفة عن شي مشترك بينكم أنسب من فتح خلاف.',enGood:'A warm approach fits this symbolic reading; mention something you both enjoy rather than a dispute.',arHard:'احچي بطبيعتك وبوضوح؛ المجاملة الزايدة ممكن تخفي قصدك.',enHard:'Too much flattery may obscure your intent; write naturally and directly.'},
   date:{arGood:'جوّ الألفة هو الأبرز رمزياً؛ اختار مكان هادئ يخلي مجال للسوالف بدل الزحمة.',enGood:'Ease and warmth stand out symbolically; a quiet spot leaves more room for conversation.',arHard:'خلّي المكان بسيط، واسأل إذا الفكرة تناسب الطرف الثاني.',enHard:'Do not force an ideal atmosphere; keep the venue simple and check whether the invitation is welcome.'}
  },
  Mars:{
-  message:{arGood:'عندك رمزياً دفعة للمبادرة؛ استغلها بسؤال مباشر واحد، مو سلسلة رسائل ورا بعض.',enGood:'The symbolism favors initiative; use it for one direct question, not a stream of messages.',arHard:'الاندفاع بالكلام هو نقطة الانتباه؛ لا تكتب وأنت متضايق أو مستعجل على رد.',enHard:'Impulsive wording is the concern; avoid writing in frustration or demanding a quick reply.'},
+  message:{arGood:'إذا تريد تبادر، ابعث سؤال مباشر وخلي مجال للرد.',enGood:'The symbolism favors initiative; use it for one direct question, not a stream of messages.',arHard:'الاندفاع بالكلام هو نقطة الانتباه؛ لا تكتب وأنت متضايق أو مستعجل على رد.',enHard:'Impulsive wording is the concern; avoid writing in frustration or demanding a quick reply.'},
   date:{arGood:'إشارة النشاط أقوى هنا؛ إذا صار اتفاق على طلعة، خلي البرنامج خفيف وبيه حركة.',enGood:'Activity is the stronger theme; if you both agree to meet, keep the plan lively but easy.',arHard:'الحماس ممكن يسبق الراحة؛ لا تحوّل فكرة اللقاء إلى برنامج متعب أو قرار مستعجل.',enHard:'Enthusiasm can outrun comfort; avoid a rushed or exhausting plan.'}
  },
  Moon:{
@@ -33,11 +33,11 @@ const thoughts:Record<string,{message:Wording;date:Wording}>={
  },
  Saturn:{
   message:{arGood:'المسؤولية والحدود هي الفكرة الأوضح؛ إذا عندك موعد أو وعد، أكد التفاصيل بهدوء.',enGood:'Boundaries and follow-through stand out; calmly confirm any arrangement or promise.',arHard:'الكلام الجدي ممكن يطلع ثقيل؛ إذا الموضوع حساس، اختار وقت مناسب مو مجرد يوم درجته عالية.',enHard:'Serious conversation may feel weighty; choose an appropriate moment, not just a high score.'},
-  date:{arGood:'التنظيم مفيد أكثر من المفاجآت؛ رتّب مكان وتوقيت مريحين واحترم ارتباطاتها.',enGood:'Planning is more helpful than surprise; suggest convenient timing and respect commitments.',arHard:'الإحساس بالواجب ممكن يخلي الموعد رسمي زيادة؛ لا تفرض جدول صارم على طلعة بسيطة.',enHard:'Duty may overshadow enjoyment; avoid turning a simple outing into a rigid itinerary.'}
+  date:{arGood:'التنظيم مفيد أكثر من المفاجآت؛ اتفقوا على مكان ووقت يناسبكم.',enGood:'Planning is more helpful than surprise; suggest convenient timing and respect commitments.',arHard:'الإحساس بالواجب ممكن يخلي الموعد رسمي زيادة؛ لا تفرض جدول صارم على طلعة بسيطة.',enHard:'Duty may overshadow enjoyment; avoid turning a simple outing into a rigid itinerary.'}
  },
  Uranus:{
   message:{arGood:'فكرة غير متوقعة ممكن تفتح سوالف؛ شارك شي جديد بوضوح بدل اختبار رد الفعل.',enGood:'An unexpected topic could start a conversation; share it clearly rather than testing a reaction.',arHard:'المفاجأة بالكلام مو دائماً لطيفة؛ ابتعد عن الرسائل المبهمة أو التغييرات المفاجئة.',enHard:'Surprises in communication can misfire; avoid cryptic messages or abrupt changes.'},
-  date:{arGood:'كسر الروتين مناسب كموضوع رمزي؛ اقترح نشاط خفيف مختلف عن المعتاد، مو مغامرة مرهقة.',enGood:'Breaking routine is the symbolic idea; offer a light alternative, not an exhausting adventure.',arHard:'لا تعتمد على المفاجآت الكبيرة؛ خذ رأيها بالمكان حتى تبقى الطلعة مريحة للطرفين.',enHard:'Avoid big surprises; ask about the venue so both people are comfortable.'}
+  date:{arGood:'كسر الروتين مناسب كموضوع رمزي؛ اقترح نشاط خفيف مختلف عن المعتاد، مو مغامرة مرهقة.',enGood:'Breaking routine is the symbolic idea; offer a light alternative, not an exhausting adventure.',arHard:'لا تعتمد على المفاجآت الكبيرة؛ اسأل الطرف الثاني عن المكان حتى تبقى الطلعة مريحة للطرفين.',enHard:'Avoid big surprises; ask about the venue so both people are comfortable.'}
  },
  Neptune:{
   message:{arGood:'الخيال حاضر بس يحتاج توضيح؛ إذا تذكرون حلم أو فكرة، اربط كلامك بشي واضح.',enGood:'Imagination is present but needs clarity; tie an abstract thought to something concrete.',arHard:'أكو قابلية رمزية للالتباس؛ لا تفترض معنى بين السطور، وإذا محتار اسأل مباشرة.',enHard:'Ambiguity is the symbolic concern; ask directly instead of interpreting hidden meanings.'},
