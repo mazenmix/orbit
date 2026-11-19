@@ -142,6 +142,22 @@ test('friend communication windows do not require romantic dimensions',async({pa
  await expect(page.locator('#main')).not.toContainText('Invalid relationship');
  await expect(page.locator('.relationship-calendar')).toContainText(/12 ظهراً|12:00 noon/);
  await expect(page.locator('.relationship-calendar')).not.toContainText(/عينات اقتراح اللقاء|Available meeting samples/);
+ const reminders=page.locator('[data-relationship-calendar]');
+ for(let i=0;i<await reminders.count();i++){
+  expect(Number(await reminders.nth(i).getAttribute('data-relationship-calendar'))).toBeGreaterThan(await page.evaluate(()=>Date.now()));
+  await expect(reminders.nth(i)).toContainText(/12 ظهراً|12 noon/);
+ }
+});
+
+test('lunar mansion transition names the time and health notes have a neutral label',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('mx.language','en'));
+ await page.goto('/#lunar',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.mx-mansion-panel')).toBeVisible({timeout:75000});
+ await expect(page.locator('.mx-mansion-transition')).toContainText('Next mansion begins');
+ const line=page.locator('.mx-mansion-line.avoid');
+ if((await line.textContent()).includes('No evidence-based health restriction'))
+  await expect(line.locator('span')).toHaveText('Note');
+ else await expect(line.locator('span')).toContainText('Traditionally unfavorable');
 });
 
 test('missing heatmap evidence stays unavailable instead of showing a neutral fifty',async({page})=>{
