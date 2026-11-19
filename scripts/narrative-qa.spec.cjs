@@ -285,3 +285,18 @@ test('compatibility warns when the active profile birth time is unknown',async({
  await expect(page.locator('.partner-overview .alert')).toContainText('Your birth time is unknown');
  await expect(page.locator('.partner-overview .alert')).toContainText('contacts are excluded');
 });
+
+test('simple relationship reading explains which birth time is unknown',async({page})=>{
+ await page.addInitScript(()=>{
+  localStorage.setItem('mx.language','en');localStorage.setItem('mx.uiMode','simple');
+  const self={id:'unknown-self',name:'Self',date:'1985-03-29',time:'12:00',zone:'Asia/Baghdad',lat:33.31,lon:44.36,city:'Baghdad',known:false,kind:'self'};
+  localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify([self,{...self,id:'partner-known',name:'Partner',date:'1989-04-29',known:true,kind:'dating'}]));
+ });
+ await page.goto('/#people',{waitUntil:'domcontentloaded'});
+ await page.locator('[data-compare="partner-known"]').waitFor({timeout:75000});
+ await page.locator('[data-compare="partner-known"]').click();
+ const note=page.locator('.mx-partner-focus .mx-brief-footnote');
+ await expect(note).toBeVisible();
+ await expect(note).toContainText('Your birth time is unknown');
+ await expect(note).toContainText('contacts are excluded');
+});

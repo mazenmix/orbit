@@ -1487,7 +1487,7 @@ function relationshipFocus(person:Profile,c:ReturnType<typeof compatibility>){
  return '<section class="panel mx-partner-focus mx-relationship-brief"><div class="mx-brief-head"><h2>'+t('خلاصة العلاقة','Relationship snapshot')+'</h2>'+
   '<small>'+esc(active.name)+' × '+esc(person.name)+'</small></div>'+
   '<div class="mx-brief-grid'+(romantic?'':' mx-brief-nonromantic')+'">'+attraction+harmony+challenge+'</div>'+
-  (!active.known||!person.known?'<p class="mx-brief-footnote">'+t('وقت الولادة ناقص لبعض الحسابات.','Some birth-time details are unavailable.')+'</p>':'')+'</section>';
+  (!active.known||!person.known?'<p class="mx-brief-footnote">'+(active.known?t('وقت ميلاد الشخص الثاني مو معروف.','The other person’s birth time is unknown.'):person.known?t('وقت ميلادك مو معروف.','Your birth time is unknown.'):t('وقت الميلاد مو معروف للملفين.','Both birth times are unknown.'))+' '+t('بعض اتصالات القمر والطالع مستبعدة من الحساب.','Some lunar and angle contacts are excluded.')+'</p>':'')+'</section>';
 }
 function peoplePage(){
  const others=profiles.filter(p=>p.id!==active.id),partner=others.find(p=>p.id===compareId);
