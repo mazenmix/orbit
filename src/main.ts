@@ -80,14 +80,15 @@ import {degreesInSign,supportive,difficult} from './math.ts';
 import {initEngine,report,defaultProfile,compatibility,chart,sunMoonState,confirmedEclipses,asteroidSwissRuntime,birthInstant,targets,localValue,zonedInstant,validateProfile,type Profile,type Report,type Chart} from './engine.ts';
 import {categories,category as evidenceCategory,aspects,angles,aspectNames,type Category,type Signal,type Evidence,type Dimension} from './math.ts';
 import {lang,setLang,t,cat,categoryLabels,planet,signSymbols,signsAr,signsEn,signName,copy as sourceCopy,tone,notice,technical,aspect} from './i18n.ts';
-import {loadProfiles,saveProfiles,download,parseBackup} from './storage.ts';
+import {loadProfiles,saveProfiles,download,parseBackup,StoredProfilesError,recoverStoredProfiles} from './storage.ts';
 import {wheel} from './chart.ts';
 import {chartStories,profileAddress,transitOverview,actionForGender,partnerArabic} from './chartNarrative.ts';
 import {timezoneCityLabel,placeCityLabel} from './placeDisplay.ts';
 const root=document.querySelector<HTMLDivElement>('#app')!;
 await unlockVaultWithUI(root);
 window.addEventListener('beforeunload',ev=>{if(vaultPending()){ev.preventDefault();ev.returnValue='Encrypted vault save is still in progress.'}});
-let profiles=loadProfiles();
+let profiles:Profile[];
+try{profiles=loadProfiles()}catch(e){if(!(e instanceof StoredProfilesError))throw e;profiles=await recoverStoredProfiles(root)}
 try{
  const oneTime=decodePrivateSetup(location.hash);
  if(oneTime){
