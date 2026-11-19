@@ -260,3 +260,15 @@ test('damaged local profiles stay intact until a validated backup is chosen',asy
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('mx.orbit.profiles.v1'))[0].id)).toBe('recovered-self');
  await expect(page.locator('#recover-file')).toHaveCount(0,{timeout:75000});
 });
+
+test('Moon page identifies selected time instead of claiming a live reading',async({page})=>{
+ await page.clock.install({time:new Date('2026-11-18T18:00:00Z')});
+ await page.addInitScript(()=>localStorage.setItem('mx.language','en'));
+ await page.goto('/#/go');
+ await page.locator('#go-time-input').waitFor({timeout:75000});
+ await page.locator('#go-time-input').fill('2024-04-08T18:20');
+ await page.locator('#go-time-form button').click();
+ await page.evaluate(()=>{location.hash='/lunar'});
+ await expect(page.locator('.lunar-premium-card').first().locator('.lunar-card-heading small')).toHaveText('MOON SIGN · SELECTED TIME');
+ await expect(page.locator('.lunar-premium-card').first()).not.toContainText('CURRENT MOON SIGN · LIVE');
+});
