@@ -272,3 +272,16 @@ test('Moon page identifies selected time instead of claiming a live reading',asy
  await expect(page.locator('.lunar-premium-card').first().locator('.lunar-card-heading small')).toHaveText('MOON SIGN · SELECTED TIME');
  await expect(page.locator('.lunar-premium-card').first()).not.toContainText('CURRENT MOON SIGN · LIVE');
 });
+
+test('compatibility warns when the active profile birth time is unknown',async({page})=>{
+ await page.addInitScript(()=>{
+  localStorage.setItem('mx.language','en');localStorage.setItem('mx.uiMode','pro');
+  const base={id:'self-unknown',name:'Self',date:'1985-03-29',time:'12:00',zone:'Asia/Baghdad',lat:33.31,lon:44.36,city:'Baghdad',known:false,kind:'self'};
+  localStorage.setItem('mx.orbit.profiles.v1',JSON.stringify([base,{...base,id:'known-partner',name:'Partner',date:'1989-04-29',known:true,kind:'dating'}]));
+ });
+ await page.goto('/#people',{waitUntil:'domcontentloaded'});
+ await page.locator('[data-compare="known-partner"]').waitFor({timeout:75000});
+ await page.locator('[data-compare="known-partner"]').click();
+ await expect(page.locator('.partner-overview .alert')).toContainText('Your birth time is unknown');
+ await expect(page.locator('.partner-overview .alert')).toContainText('contacts are excluded');
+});
