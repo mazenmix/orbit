@@ -36,12 +36,22 @@ export function trustworthyPeak(factor:Evidence|null,asOf:Date):Date|null{
  if(!Number.isFinite(+parsed)||+parsed<+asOf||+parsed>+asOf+31*86400000)return null;
  return parsed;
 }
+const domainSteps:Record<Category,{ar:string;en:string}>={
+ overview:{ar:'اختار أهم شغلة اليوم وحدد أول خطوة إلها.',en:'Choose today’s main priority and its first step.'},
+ career:{ar:'حدد المطلوب بالشغل وموعده قبل ما تلتزم.',en:'Clarify the work, owner and deadline before committing.'},
+ love:{ar:'إذا ببالك شخص، احچي بوضوح وخلي له مجال يرد.',en:'If someone is on your mind, speak clearly and leave room for their response.'},
+ communication:{ar:'اسأل عن النقطة الغامضة قبل ما تفسّر الرد.',en:'Ask about what is unclear before interpreting the reply.'},
+ energy:{ar:'ابدأ بمهمة واحدة تگدر تكملها حسب طاقتك الفعلية.',en:'Start one manageable task that fits your actual energy.'},
+ emotions:{ar:'سمّ اللي مضايقك وخذ وقتك قبل ما ترد.',en:'Name what is bothering you and take time before responding.'},
+ recovery:{ar:'خصص وقت للراحة وخفف مهمة مو مستعجلة.',en:'Make time for rest and postpone one non-urgent task.'},
+ timing:{ar:'أكد الموعد وجهّز بديل إذا يعتمد على غيرك.',en:'Confirm the time and prepare a backup if it depends on someone else.'}
+};
 export function decisionExplanation(item:DecisionDetail,arabic:boolean){
  const hasSupport=item.supportFactor!==null,hasChallenge=item.challengeFactor!==null;
  if(item.quality==='none')return arabic?'هسّه ماكو اتصال قوي بهالمجال حتى نرجّح اتجاه معيّن. شنو اللي تعرفه عن الموقف نفسه؟':'No relevant calculated contact here; rely on real-world information before deciding.';
- if(item.sensitive)return (item.mixed?(arabic?'أكو إشارات داعمة ومعاكسة بنفس الوقت. ':'Supporting and challenging contacts coexist. '):'')+(arabic?'إذا نشيل اتصالات كوكب واحد، تتغيّر الخلاصة. إذا ببالك خطوة، جرّب شي تگدر تعدّله بعدين.':'Removing one transiting body changes the balance; treat this as a sensitive interpretation and test a small reversible step.');
- if(hasSupport&&hasChallenge)return arabic?'بهالموضوع أكو إشارات داعمة ومعاكسة. جرّب خطوة وحدة وشوف شنو يصير قبل ما تكمل.':'Supporting and challenging contacts coexist. Try a small reversible step and observe the actual outcome.';
- if(hasChallenge)return arabic?'هالاتصال يدعوك تتأنّى. إذا أكو تفصيل بعده مبهم، اسأل عنه قبل ما توعد.':'A challenging contact suggests slowing down, checking details, and avoiding irreversible commitments.';
- if(hasSupport)return arabic?'القراءة تشجّعك تبدي. اختار شغلة وحدة تگدر تسويها هسّه، ومن تشوف نتيجتها قرّر شنو بعدها.':'A supportive contact can be a prompt for a limited test, with the real outcome deciding what follows.';
+ if(item.sensitive)return (item.mixed?(arabic?'أكو إشارات داعمة ومعاكسة بنفس الوقت. ':'Supporting and challenging contacts coexist. '):'')+(arabic?'إذا نشيل اتصالات كوكب واحد، تتغيّر الخلاصة. ':'Removing one transiting body changes the balance. ')+(arabic?domainSteps[item.category].ar:domainSteps[item.category].en);
+ if(hasSupport&&hasChallenge)return (arabic?'بهالموضوع أكو إشارات داعمة ومعاكسة. ':'Supporting and challenging contacts coexist. ')+(arabic?domainSteps[item.category].ar:domainSteps[item.category].en);
+ if(hasChallenge)return (arabic?'هنا الأفضل تتأنّى. ':'Take this slowly. ')+(arabic?domainSteps[item.category].ar:domainSteps[item.category].en);
+ if(hasSupport)return (arabic?'تگدر تبدي بخطوة بسيطة. ':'A small first step may be useful. ')+(arabic?domainSteps[item.category].ar:domainSteps[item.category].en);
  return arabic?'أكو اتصالات، بس ما يطلع منها اتجاه واضح. شوف شنو يناسب ظروفك اليوم.':'Calculated contacts exist but their direction is unclear; do not rely on the number alone.';
 }
