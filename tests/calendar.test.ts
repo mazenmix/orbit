@@ -61,3 +61,16 @@ test('relationship reminders receive distinct calendar event identifiers',async(
  const second=calendarEvent({...event,id:'mx-relationship-'+crypto.randomUUID()},0);
  assert.notEqual(first.match(/UID:([^\r\n]+)/)?.[1],second.match(/UID:([^\r\n]+)/)?.[1]);
 });
+
+test('relationship reminder titles identify the selected person',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const main=readFileSync(new URL('../src/main.ts',import.meta.url),'utf8');
+ const start=main.indexOf("root.querySelectorAll<HTMLButtonElement>('[data-relationship-calendar]')");
+ const handler=main.slice(start,main.indexOf('\n',start));
+ assert.match(handler,/profiles\.find\(p=>p\.id===compareId\)/);
+ assert.match(handler,/\+person\.name;const ics=calendarEvent/);
+ assert.match(handler,/if\(!person\|\|/);
+ const at=new Date('2026-11-19T09:00:00Z');
+ const ics=calendarEvent({id:'named',start:at,end:new Date(+at+1800000),title:'فكرة رسالة إلى سارة',description:''},0);
+ assert.match(ics,/SUMMARY:فكرة رسالة إلى سارة/);
+});
