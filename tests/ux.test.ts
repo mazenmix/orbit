@@ -359,7 +359,7 @@ test('People timeline card advice is computed per local day, not identical canne
  const section=main.slice(main.indexOf('function relationshipWindowUI('),main.indexOf('function relationshipFocus('));
  assert.ok(section.includes('relationshipDayReading(day,kind,period,getReport(day.day).signals,used)'));
  assert.ok(section.includes("21,active.zone"));
- assert.ok(section.includes('relation-window-reason'));
+ assert.ok(!section.includes('relation-window-reason'),'the card keeps its explanation conversational');
  assert.ok(!section.includes('جرب رسالة واحدة واضحة، وراقب الرد الحقيقي بدون إلحاح'));
  assert.ok(!section.includes('اقترح لقاء بسيط بمكان مناسب، وخلي الموافقة متبادلة.'));
 });
